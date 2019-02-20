@@ -274,7 +274,7 @@ void mode_decision_update_neighbor_arrays(
         NEIGHBOR_ARRAY_UNIT_TOP_AND_LEFT_ONLY_MASK);
 
 #if CHROMA_BLIND
-    if (context_ptr->blk_geom->has_uv && context_ptr->chroma_level == CHROMA_LEVEL_0) {
+    if (context_ptr->blk_geom->has_uv && context_ptr->chroma_level == CHROMA_MODE_0) {
 #else
     if (context_ptr->blk_geom->has_uv) {
 #endif
@@ -363,7 +363,7 @@ void mode_decision_update_neighbor_arrays(
 
     if (intraMdOpenLoop == EB_FALSE) {
 #if CHROMA_BLIND
-        if (context_ptr->blk_geom->has_uv && context_ptr->chroma_level == CHROMA_LEVEL_0) {
+        if (context_ptr->blk_geom->has_uv && context_ptr->chroma_level == CHROMA_MODE_0) {
 #else
         if (context_ptr->blk_geom->has_uv) {
 #endif
@@ -478,7 +478,7 @@ void copy_neighbour_arrays(
         NEIGHBOR_ARRAY_UNIT_FULL_MASK);
 
 #if CHROMA_BLIND
-    if (blk_geom->has_uv && context_ptr->chroma_level == CHROMA_LEVEL_0) {
+    if (blk_geom->has_uv && context_ptr->chroma_level == CHROMA_MODE_0) {
 #else
     if (blk_geom->has_uv) {
 #endif
@@ -967,7 +967,7 @@ void AV1PerformInverseTransformRecon(
                     asm_type);
             }
 #if CHROMA_BLIND
-            if (context_ptr->chroma_level == CHROMA_LEVEL_0) 
+            if (context_ptr->chroma_level == CHROMA_MODE_0) 
             {
 #endif
                 //CHROMA
@@ -1388,7 +1388,7 @@ void ProductPerformFastLoop(
                         bwidth)) << candidateBuffer->sub_sampled_pred;
                 }
 #if CHROMA_BLIND
-                if (context_ptr->blk_geom->has_uv && context_ptr->chroma_level == CHROMA_LEVEL_0) {
+                if (context_ptr->blk_geom->has_uv && context_ptr->chroma_level == CHROMA_MODE_0) {
 #else
                 // Cb
                 if (context_ptr->blk_geom->has_uv) {
@@ -1766,7 +1766,7 @@ void AV1CostCalcCfl(
 #define PLANE_SIGN_TO_JOINT_SIGN(plane, a, b) \
   (plane == CFL_PRED_U ? a * CFL_SIGNS + b - 1 : b * CFL_SIGNS + a - 1)
 /*************************Pick the best alpha for cfl mode  or Choose DC******************************************************/
-#if CFL_EP 
+#if CHROMA_BLIND 
 void cfl_rd_pick_alpha(
 #else
 static void cfl_rd_pick_alpha(
@@ -1916,7 +1916,7 @@ static void cfl_rd_pick_alpha(
         candidateBuffer->candidate_ptr->cfl_alpha_signs = 0;
     }
     else {
-#if CFL_EP
+#if CHROMA_BLIND
         candidateBuffer->candidate_ptr->intra_chroma_mode = UV_CFL_PRED;
 #endif
         int32_t ind = 0;
@@ -2093,11 +2093,8 @@ void AV1PerformFullLoop(
 #endif
     EbAsm                    asm_type)
 {
-#if FULL_LOOP_ESCAPE
-    uint32_t       best_inter_luma_zero_coeff;
-#else
+
     //uint32_t      prevRootCbf;
-#endif
     uint64_t      bestfullCost;
     uint32_t      fullLoopCandidateIndex;
     uint8_t       candidateIndex;
@@ -2112,9 +2109,6 @@ void AV1PerformFullLoop(
     uint64_t        cb_coeff_bits = 0;
     uint64_t        cr_coeff_bits = 0;
 
-#if FULL_LOOP_ESCAPE
-    best_inter_luma_zero_coeff = 1;
-#endif
     bestfullCost = 0xFFFFFFFFull;
 
     ModeDecisionCandidateBuffer_t         **candidateBufferPtrArrayBase = context_ptr->candidate_buffer_ptr_array;
@@ -2138,13 +2132,6 @@ void AV1PerformFullLoop(
         candidateBuffer = candidate_buffer_ptr_array[candidateIndex];
         candidate_ptr = candidateBuffer->candidate_ptr;//this is the FastCandidateStruct
 
-#if FULL_LOOP_ESCAPE
-        if (picture_control_set_ptr->slice_type != I_SLICE) {
-            if (candidate_ptr->type == INTRA_MODE && best_inter_luma_zero_coeff == 0) {
-                continue;
-            }
-        }
-#endif
         candidate_ptr->full_distortion = 0;
 
         memset(candidate_ptr->eob[0], 0, sizeof(uint16_t));
@@ -2209,7 +2196,7 @@ void AV1PerformFullLoop(
         //TOADD
         //Cb Residual
 #if CHROMA_BLIND
-        if (context_ptr->blk_geom->has_uv && context_ptr->chroma_level == CHROMA_LEVEL_0) {
+        if (context_ptr->blk_geom->has_uv && context_ptr->chroma_level == CHROMA_MODE_0) {
 #else
         if (context_ptr->blk_geom->has_uv) {
 #endif
@@ -2325,7 +2312,7 @@ void AV1PerformFullLoop(
         uint8_t crQp = context_ptr->qp;
 
 #if CHROMA_BLIND
-        if (context_ptr->blk_geom->has_uv && context_ptr->chroma_level == CHROMA_LEVEL_0) {
+        if (context_ptr->blk_geom->has_uv && context_ptr->chroma_level == CHROMA_MODE_0) {
 #else
         if (context_ptr->blk_geom->has_uv) {
 #endif
@@ -2429,20 +2416,6 @@ void AV1PerformFullLoop(
         candidate_ptr->full_distortion = (uint32_t)(y_full_distortion[0]);
 
 
-#if FULL_LOOP_ESCAPE
-        // Hsan to add as a multi-mode signal if (context_ptr->full_loop_escape) 
-        {
-            if (picture_control_set_ptr->slice_type != I_SLICE) {
-                if (candidate_ptr->type == INTER_MODE) {
-                    if (*candidateBuffer->full_cost_ptr < bestfullCost) {
-                        best_inter_luma_zero_coeff = candidate_ptr->y_has_coeff;
-                        bestfullCost = *candidateBuffer->full_cost_ptr;
-                    }
-                }
-
-            }
-        }
-#else
 #if SHUT_CBF_FL_SKIP
 #if ENCODER_MODE_CLEANUP
         if(0)
@@ -2458,7 +2431,7 @@ void AV1PerformFullLoop(
                     }
                 }
             }
-#endif
+
     }//end for( full loop)
 }
 
@@ -3135,7 +3108,7 @@ void md_encode_block(
 
             memcpy(cu_ptr->neigh_top_recon[0], reconPtr->bufferY + recLumaOffset + (context_ptr->blk_geom->bheight - 1)*reconPtr->strideY, context_ptr->blk_geom->bwidth);
 #if CHROMA_BLIND
-            if (context_ptr->chroma_level == CHROMA_LEVEL_0 && context_ptr->blk_geom->has_uv)
+            if (context_ptr->chroma_level == CHROMA_MODE_0 && context_ptr->blk_geom->has_uv)
 #else
             if (context_ptr->blk_geom->has_uv)
 #endif
@@ -3147,7 +3120,7 @@ void md_encode_block(
             for (j = 0; j < context_ptr->blk_geom->bheight; ++j)
                 cu_ptr->neigh_left_recon[0][j] = reconPtr->bufferY[recLumaOffset + context_ptr->blk_geom->bwidth - 1 + j * reconPtr->strideY];
 #if CHROMA_BLIND
-            if (context_ptr->chroma_level == CHROMA_LEVEL_0 && context_ptr->blk_geom->has_uv) {
+            if (context_ptr->chroma_level == CHROMA_MODE_0 && context_ptr->blk_geom->has_uv) {
 #else
             if (context_ptr->blk_geom->has_uv)
             {

@@ -8313,7 +8313,7 @@ void generate_intra_reference_samples(
     uint32_t bl_org_x_pict = md_context_ptr->cu_origin_x;
     uint32_t bl_org_y_pict = md_context_ptr->cu_origin_y;
 #if CHROMA_BLIND
-    uint8_t end_plane = (md_context_ptr->blk_geom->has_uv && md_context_ptr->chroma_level == CHROMA_LEVEL_0) ? (int) MAX_MB_PLANE : 1;
+    uint8_t end_plane = (md_context_ptr->blk_geom->has_uv && md_context_ptr->chroma_level == CHROMA_MODE_0) ? (int) MAX_MB_PLANE : 1;
 #else
     uint8_t end_plane = /*(int)MAX_MB_PLANE;*/ md_context_ptr->blk_geom->has_uv ? (int)MAX_MB_PLANE : 1;
 #endif
@@ -9866,7 +9866,7 @@ EbErrorType AV1IntraPredictionCL(
     uint8_t    leftNeighArray[64 * 2 + 1];
     PredictionMode mode;
 #if CHROMA_BLIND
-    uint8_t end_plane = (md_context_ptr->blk_geom->has_uv && md_context_ptr->chroma_level == CHROMA_LEVEL_0) ? (int) MAX_MB_PLANE : 1;
+    uint8_t end_plane = (md_context_ptr->blk_geom->has_uv && md_context_ptr->chroma_level == CHROMA_MODE_0) ? (int) MAX_MB_PLANE : 1;
     for (int32_t plane = 0; plane < end_plane; ++plane) {
 #else
     uint8_t end_plane = md_context_ptr->blk_geom->has_uv ? 2 : 0;

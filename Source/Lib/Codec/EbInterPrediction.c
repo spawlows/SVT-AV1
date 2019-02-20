@@ -3572,7 +3572,7 @@ static const int32_t filter_sets[DUAL_FILTER_SET_SIZE][2] = {
         md_context_ptr->blk_geom->origin_x,
         md_context_ptr->blk_geom->origin_y,
 #if CHROMA_BLIND
-        md_context_ptr->chroma_level == CHROMA_LEVEL_0,
+        md_context_ptr->chroma_level == CHROMA_MODE_0,
 #endif
         asm_type);
 
@@ -3653,7 +3653,7 @@ static const int32_t filter_sets[DUAL_FILTER_SET_SIZE][2] = {
                         md_context_ptr->blk_geom->origin_x,
                         md_context_ptr->blk_geom->origin_y,
 #if CHROMA_BLIND
-                        md_context_ptr->chroma_level == CHROMA_LEVEL_0,
+                        md_context_ptr->chroma_level == CHROMA_MODE_0,
 #endif
                         asm_type);
 
@@ -3727,7 +3727,7 @@ static const int32_t filter_sets[DUAL_FILTER_SET_SIZE][2] = {
                         md_context_ptr->blk_geom->origin_x,
                         md_context_ptr->blk_geom->origin_y,
 #if CHROMA_BLIND
-                        md_context_ptr->chroma_level == CHROMA_LEVEL_0,
+                        md_context_ptr->chroma_level == CHROMA_MODE_0,
 #endif
                         asm_type);
 
@@ -3804,7 +3804,7 @@ static const int32_t filter_sets[DUAL_FILTER_SET_SIZE][2] = {
                         md_context_ptr->blk_geom->origin_x,
                         md_context_ptr->blk_geom->origin_y,
 #if CHROMA_BLIND
-                        md_context_ptr->chroma_level == CHROMA_LEVEL_0,
+                        md_context_ptr->chroma_level == CHROMA_MODE_0,
 #endif
                         asm_type);
 
@@ -3922,7 +3922,7 @@ static const int32_t filter_sets[DUAL_FILTER_SET_SIZE][2] = {
         md_context_ptr->blk_geom->origin_x,
         md_context_ptr->blk_geom->origin_y,
 #if CHROMA_BLIND
-        md_context_ptr->chroma_level == CHROMA_LEVEL_0,
+        md_context_ptr->chroma_level == CHROMA_MODE_0,
 #endif
         asm_type);
 
@@ -4002,7 +4002,7 @@ static const int32_t filter_sets[DUAL_FILTER_SET_SIZE][2] = {
                         md_context_ptr->blk_geom->origin_x,
                         md_context_ptr->blk_geom->origin_y,
 #if CHROMA_BLIND
-                        md_context_ptr->chroma_level == CHROMA_LEVEL_0,
+                        md_context_ptr->chroma_level == CHROMA_MODE_0,
 #endif
                         asm_type);
 
@@ -4077,7 +4077,7 @@ static const int32_t filter_sets[DUAL_FILTER_SET_SIZE][2] = {
                         md_context_ptr->blk_geom->origin_x,
                         md_context_ptr->blk_geom->origin_y,
 #if CHROMA_BLIND
-                        md_context_ptr->chroma_level == CHROMA_LEVEL_0,
+                        md_context_ptr->chroma_level == CHROMA_MODE_0,
 #endif
                         asm_type);
 
@@ -4155,7 +4155,7 @@ static const int32_t filter_sets[DUAL_FILTER_SET_SIZE][2] = {
                         md_context_ptr->blk_geom->origin_x,
                         md_context_ptr->blk_geom->origin_y,
 #if CHROMA_BLIND
-                        md_context_ptr->chroma_level == CHROMA_LEVEL_0,
+                        md_context_ptr->chroma_level == CHROMA_MODE_0,
 #endif
                         asm_type);
 
@@ -4344,7 +4344,7 @@ EbErrorType inter_pu_prediction_av1(
             md_context_ptr->blk_geom->origin_x,
             md_context_ptr->blk_geom->origin_y,
 #if CHROMA_BLIND
-            md_context_ptr->chroma_level == CHROMA_LEVEL_0,
+            md_context_ptr->chroma_level == CHROMA_MODE_0,
 #endif
             asm_type);
     }
@@ -4394,7 +4394,7 @@ EbErrorType inter_pu_prediction_av1(
             md_context_ptr->blk_geom->origin_x,
             md_context_ptr->blk_geom->origin_y,
 #if CHROMA_BLIND
-            md_context_ptr->chroma_level == CHROMA_LEVEL_0,
+            md_context_ptr->chroma_level == CHROMA_MODE_0,
 #endif
             asm_type);
 

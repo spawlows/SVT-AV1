@@ -1356,14 +1356,15 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
         context_ptr->nfl_level = 3;
 
 #if CHROMA_BLIND
-    // Set Chroma Level
-    // Level            Settings
-    // CHROMA_LEVEL_0   CHROMA ON @ MD 
-    // CHROMA_LEVEL_1   CHROMA OFF @ MD
+    // Set Chroma Mode
+    // Level                Settings
+    // CHROMA_MODE_0  0     Chroma @ MD
+    // CHROMA_MODE_1  1     Chroma blind @ MD + CFL @ EP
+    // CHROMA_MODE_2  2     Chroma blind @ MD + no CFL @ EP
     if (picture_control_set_ptr->slice_type == I_SLICE)
-        context_ptr->chroma_level = CHROMA_LEVEL_1;
+        context_ptr->chroma_level = CHROMA_MODE_1;
     else 
-        context_ptr->chroma_level = CHROMA_LEVEL_1;
+        context_ptr->chroma_level = CHROMA_MODE_1;
 #endif
 
     return return_error;

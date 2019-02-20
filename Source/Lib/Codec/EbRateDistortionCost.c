@@ -1913,7 +1913,7 @@ void CodingLoopContextGeneration(
 
 
 #if CHROMA_BLIND
-        if (context_ptr->blk_geom->has_uv && context_ptr->chroma_level == CHROMA_LEVEL_0) {
+        if (context_ptr->blk_geom->has_uv && context_ptr->chroma_level == CHROMA_MODE_0) {
 #else
         if (context_ptr->blk_geom->has_uv) {
 #endif

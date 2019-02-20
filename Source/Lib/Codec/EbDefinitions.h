@@ -35,15 +35,6 @@
 extern "C" {
 #endif
 
-
-#define SIMULATE_PF_N2          0
-#define FULL_LOOP_ESCAPE        0
-#define SHUT_CHROMA_FROM_LUMA   0
-#define CHROMA_BLIND            1
-#if CHROMA_BLIND
-#define CFL_EP                  1
-#endif
-
      //Mode definition : Only one mode should be ON at a time
 
 #define MR_MODE                                         0
@@ -154,6 +145,9 @@ extern "C" {
 #define TX_SEARCH_LEVELS                                1 
 #define INTERPOLATION_SEARCH_LEVELS                     1 
 #define NSQ_SEARCH_LEVELS                               1
+
+#define CHROMA_BLIND                                    1 // Added the ability to switch between three chroma modes: 1. chroma @ MD, 2. chroma blind @ MD + CFL @ EP. 3. chroma blind @ MD + no CFL @ EP
+
 /********************************************************/
 /****************** Pre-defined Values ******************/
 /********************************************************/
@@ -2957,10 +2951,11 @@ static const uint8_t INTRA_AREA_TH_CLASS_1[MAX_HIERARCHICAL_LEVEL][MAX_TEMPORAL_
 #define N4_SHAPE      2
 #define ONLY_DC_SHAPE 3
 
-#if CHROMA_BLIND
+#if CHROMA_BLIND 
 #define EB_CHROMA_LEVEL uint8_t
-#define CHROMA_LEVEL_0  0 // CHROMA ON @ MD 
-#define CHROMA_LEVEL_1  1 // CHROMA OFF @ MD
+#define CHROMA_MODE_0  0 // Chroma @ MD
+#define CHROMA_MODE_1  1 // Chroma blind @ MD + CFL @ EP
+#define CHROMA_MODE_2  2 // Chroma blind @ MD + no CFL @ EP
 #else
 typedef enum EbChromaMode {
     CHROMA_MODE_FULL = 1,

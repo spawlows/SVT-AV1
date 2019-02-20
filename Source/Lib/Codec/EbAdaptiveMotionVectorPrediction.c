@@ -1474,7 +1474,7 @@ void update_mi_map(
                 miPtr[miX + miY * mi_stride].mbmi.partition = from_shape_to_part[blk_geom->shape];// cu_ptr->part;
             }
 #if CHROMA_BLIND
-            if (blk_geom->has_uv && context_ptr->chroma_level == CHROMA_LEVEL_0)
+            if (blk_geom->has_uv && context_ptr->chroma_level == CHROMA_MODE_0)
 #else
             if (blk_geom->has_uv)
 #endif

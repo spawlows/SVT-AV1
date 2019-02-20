@@ -1806,10 +1806,6 @@ void  inject_intra_candidates(
                                                     context_ptr->blk_geom->bwidth == 4  ||   
                                                     context_ptr->blk_geom->bheight == 4)    ? EB_TRUE : EB_FALSE;
 
-#if SHUT_CHROMA_FROM_LUMA
-    EbBool                      disable_cfl_flag = EB_TRUE;
-#endif
-
     uint8_t                     disable_z2_prediction;
     uint8_t                     disable_angle_refinement;
     uint8_t                     disable_angle_prediction;
@@ -1874,7 +1870,7 @@ void  inject_intra_candidates(
 #if CHROMA_BLIND 
                         candidateArray[canTotalCnt].intra_chroma_mode = disable_cfl_flag ? 
                             intra_luma_to_chroma[openLoopIntraCandidate] : 
-                            (context_ptr->chroma_level == CHROMA_LEVEL_0) ?
+                            (context_ptr->chroma_level == CHROMA_MODE_0) ?
                                 UV_CFL_PRED :
                                 UV_DC_PRED;
 #else
@@ -1924,7 +1920,7 @@ void  inject_intra_candidates(
 #if CHROMA_BLIND
             candidateArray[canTotalCnt].intra_chroma_mode = disable_cfl_flag ? 
                 intra_luma_to_chroma[openLoopIntraCandidate] : 
-                (context_ptr->chroma_level == CHROMA_LEVEL_0) ?
+                (context_ptr->chroma_level == CHROMA_MODE_0) ?
                     UV_CFL_PRED :
                     UV_DC_PRED;
 

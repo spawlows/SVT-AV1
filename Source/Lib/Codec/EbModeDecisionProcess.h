@@ -304,7 +304,7 @@ extern "C" {
         uint8_t                  sb_qp);
 
 
-#if CFL_EP 
+#if CHROMA_BLIND 
     extern void cfl_rd_pick_alpha(
         PictureControlSet_t             *picture_control_set_ptr,
         ModeDecisionCandidateBuffer_t   *candidateBuffer,
