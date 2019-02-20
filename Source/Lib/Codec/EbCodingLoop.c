@@ -783,9 +783,7 @@ static void Av1EncodeLoop(
             if (context_ptr->evaluate_cfl_ep)
             {
                 // 3: Loop over alphas and find the best or choose DC
-                // Use the 1st spot of the candidate buffer to hold cfl settings to keep using: (1) same kernel cfl_rd_pick_alpha() (toward unification), (2) no dedicated buffers for CFL evaluation @ EP (toward less memory)
-                // Howver there extra mecopy(s) from EP buffer(s) to MD buffer(s) that could be avoided after restructuring of cfl_rd_pick_alpha() (expose pred buffer(s)). 
-
+                // Use the 1st spot of the candidate buffer to hold cfl settings: (1) to use same kernel as MD for CFL evaluation: cfl_rd_pick_alpha() (toward unification), (2) to avoid dedicated buffers for CFL evaluation @ EP (toward less memory)
                 ModeDecisionCandidateBuffer_t  *candidateBuffer = &(context_ptr->md_context->candidate_buffer_ptr_array[0][0]);
 
                 // Input(s)
@@ -3783,6 +3781,9 @@ EB_EXTERN void AV1EncodePass(
                                             context_ptr->cu_origin_y,
                                             &cu_ptr->prediction_unit_array[0].wm_params,
                                             (uint8_t) sequence_control_set_ptr->static_config.encoder_bit_depth,
+#if CHROMA_BLIND
+                                            EB_TRUE,
+#endif
                                             asm_type);
                                     } else {
                                         warped_motion_prediction(
@@ -3797,6 +3798,9 @@ EB_EXTERN void AV1EncodePass(
                                             context_ptr->cu_origin_y,
                                             &cu_ptr->prediction_unit_array[0].wm_params,
                                             (uint8_t) sequence_control_set_ptr->static_config.encoder_bit_depth,
+#if CHROMA_BLIND
+                                            EB_TRUE,
+#endif
                                             asm_type);
                                     }
                                 } else

@@ -240,6 +240,7 @@ void mode_decision_update_neighbor_arrays(
 
     }
 
+    // Hsan: chroma mode rate estimation is kept even for chroma blind 
     if (context_ptr->blk_geom->has_uv) {
 
         // Intra Chroma Mode Update
@@ -524,9 +525,11 @@ void copy_neighbour_arrays(
         blk_geom->bheight,
         NEIGHBOR_ARRAY_UNIT_TOP_AND_LEFT_ONLY_MASK);
 
-
+#if CHROMA_BLIND
+    if (blk_geom->has_uv && context_ptr->chroma_level == CHROMA_MODE_0) {
+#else
     if (blk_geom->has_uv) {
-
+#endif
         copy_neigh_arr(
             picture_control_set_ptr->md_cb_dc_sign_level_coeff_neighbor_array[src_idx],
             picture_control_set_ptr->md_cb_dc_sign_level_coeff_neighbor_array[dst_idx],
@@ -2666,8 +2669,11 @@ void inter_depth_tx_search(
         // FullLoop and TU search
         uint8_t cbQp = context_ptr->qp;
         uint8_t crQp = context_ptr->qp;
-
+#if CHROMA_BLIND
+        if (context_ptr->blk_geom->has_uv && context_ptr->chroma_level == CHROMA_MODE_0) {
+#else
         if (context_ptr->blk_geom->has_uv) {
+#endif
             FullLoop_R(
                 context_ptr->sb_ptr,
                 candidateBuffer,
@@ -3108,7 +3114,7 @@ void md_encode_block(
 
             memcpy(cu_ptr->neigh_top_recon[0], reconPtr->bufferY + recLumaOffset + (context_ptr->blk_geom->bheight - 1)*reconPtr->strideY, context_ptr->blk_geom->bwidth);
 #if CHROMA_BLIND
-            if (context_ptr->chroma_level == CHROMA_MODE_0 && context_ptr->blk_geom->has_uv)
+            if (context_ptr->blk_geom->has_uv && context_ptr->chroma_level == CHROMA_MODE_0)
 #else
             if (context_ptr->blk_geom->has_uv)
 #endif
@@ -3120,7 +3126,7 @@ void md_encode_block(
             for (j = 0; j < context_ptr->blk_geom->bheight; ++j)
                 cu_ptr->neigh_left_recon[0][j] = reconPtr->bufferY[recLumaOffset + context_ptr->blk_geom->bwidth - 1 + j * reconPtr->strideY];
 #if CHROMA_BLIND
-            if (context_ptr->chroma_level == CHROMA_MODE_0 && context_ptr->blk_geom->has_uv) {
+            if (context_ptr->blk_geom->has_uv && context_ptr->chroma_level == CHROMA_MODE_0) {
 #else
             if (context_ptr->blk_geom->has_uv)
             {

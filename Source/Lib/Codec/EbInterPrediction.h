@@ -116,6 +116,9 @@ extern "C" {
         uint16_t                                dst_origin_y,
         EbWarpedMotionParams                   *wm_params,
         uint8_t                                 bit_depth,
+#if CHROMA_BLIND
+        EbBool                                  perform_chroma,
+#endif
         EbAsm                                   asm_type);
 
 #ifdef __cplusplus
