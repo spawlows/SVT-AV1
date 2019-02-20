@@ -2752,14 +2752,14 @@ void inter_depth_tx_search(
 
 
         candidateBuffer->y_coeff_bits = y_coeff_bits;
-
+#if !CHROMA_BLIND
         if (picture_control_set_ptr->parent_pcs_ptr->chroma_mode == CHROMA_MODE_BEST)
         {
             candidateBuffer->y_coeff_bits = y_coeff_bits;
             candidateBuffer->y_full_distortion[DIST_CALC_RESIDUAL] = y_full_distortion[DIST_CALC_RESIDUAL];
             candidateBuffer->y_full_distortion[DIST_CALC_PREDICTION] = y_full_distortion[DIST_CALC_PREDICTION];
         }
-
+#endif
         candidate_ptr->full_distortion = (uint32_t)(y_full_distortion[0]);
         //Update tx
         context_ptr->md_local_cu_unit[cu_ptr->mds_idx].cost = *(candidateBuffer->full_cost_ptr);
@@ -3072,14 +3072,20 @@ void md_encode_block(
             if (candidateBuffer->candidate_ptr->type != INTRA_MODE && candidateBuffer->candidate_ptr->motion_mode == SIMPLE_TRANSLATION) {
 
                 context_ptr->skip_interpolation_search = 0;
-
+#if CHROMA_BLIND
+                ProductPredictionFunTable[candidateBuffer->candidate_ptr->type](
+                    context_ptr,
+                    picture_control_set_ptr,
+                    candidateBuffer,
+                    asm_type);
+#else
                 ProductPredictionFunTableCL[2][candidateBuffer->candidate_ptr->type](
                     context_ptr,
                     context_ptr->blk_geom->has_uv ? PICTURE_BUFFER_DESC_FULL_MASK : PICTURE_BUFFER_DESC_LUMA_MASK,
                     picture_control_set_ptr,
                     candidateBuffer,
                     asm_type);
-
+#endif
                 cu_ptr->interp_filters = candidateBuffer->candidate_ptr->interp_filters;
             }
         }
