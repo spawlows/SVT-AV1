@@ -1144,6 +1144,9 @@ static INLINE IntMv gm_get_motion_vector(
 }
 
 void generate_av1_mvp_table(
+#if TILES
+    TileInfo                         *tile,
+#endif
     ModeDecisionContext_t            *context_ptr,
     CodingUnit_t                     *cu_ptr,
     const BlockGeom                  *blk_geom,
@@ -1173,8 +1176,13 @@ void generate_av1_mvp_table(
     memset(xd->ref_mv_count, 0, sizeof(xd->ref_mv_count));
     memset(context_ptr->md_local_cu_unit[blk_geom->blkidx_mds].ed_ref_mv_stack, 0, sizeof(context_ptr->md_local_cu_unit[blk_geom->blkidx_mds].ed_ref_mv_stack));
 
+#if TILES
+    xd->up_available = (mi_row > tile->mi_row_start);
+    xd->left_available = (mi_col > tile->mi_col_start);
+#else
     xd->up_available = (mi_row > 0);
     xd->left_available = (mi_col > 0);
+#endif
 
     xd->n8_h = bh;
     xd->n8_w = bw;
@@ -1189,12 +1197,17 @@ void generate_av1_mvp_table(
     if (xd->n8_w > xd->n8_h)
         if (mi_row & (xd->n8_w - 1)) xd->is_sec_rect = 1;
 
-
+#if  TILES
+    xd->tile.mi_col_start = tile->mi_col_start;
+    xd->tile.mi_col_end = tile->mi_col_end;
+    xd->tile.mi_row_start = tile->mi_row_start;
+    xd->tile.mi_row_end = tile->mi_row_end;
+#else
     xd->tile.mi_col_start = 0;
     xd->tile.mi_col_end = cm->mi_cols;
     xd->tile.mi_row_start = 0;
     xd->tile.mi_row_end = cm->mi_rows;
-
+#endif
     //these could be done at init time
     xd->mi_stride = picture_control_set_ptr->parent_pcs_ptr->sequence_control_set_ptr->picture_width_in_sb*(BLOCK_SIZE_64 / 4);
     const int32_t offset = mi_row * xd->mi_stride + mi_col;
@@ -1307,6 +1320,9 @@ void get_av1_mv_pred_drl(
 }
 
 void enc_pass_av1_mv_pred(
+#if TILES
+    TileInfo                         *tile,
+#endif
     ModeDecisionContext_t            *md_context_ptr,
     CodingUnit_t                     *cu_ptr,
     const BlockGeom                  *blk_geom,
@@ -1322,6 +1338,9 @@ void enc_pass_av1_mv_pred(
     IntMv    nearestmv[2], nearmv[2];
 
     generate_av1_mvp_table(
+#if TILES
+        tile,
+#endif
         md_context_ptr,
         cu_ptr,
         blk_geom,
@@ -1411,6 +1430,9 @@ void update_av1_mi_map(
 
 
 void update_mi_map(
+#if CHROMA_BLIND
+    struct ModeDecisionContext_s   *context_ptr,
+#endif
     CodingUnit_t                   *cu_ptr,
     uint32_t                        cu_origin_x,
     uint32_t                        cu_origin_y,
@@ -1470,8 +1492,11 @@ void update_mi_map(
 
                 miPtr[miX + miY * mi_stride].mbmi.partition = from_shape_to_part[blk_geom->shape];// cu_ptr->part;
             }
-
+#if CHROMA_BLIND
+            if (blk_geom->has_uv && context_ptr->chroma_level == CHROMA_MODE_0)
+#else
             if (blk_geom->has_uv)
+#endif
                 miPtr[miX + miY * mi_stride].mbmi.skip = (cu_ptr->transform_unit_array[0].y_has_coeff == 0 && cu_ptr->transform_unit_array[0].v_has_coeff == 0 && cu_ptr->transform_unit_array[0].u_has_coeff == 0) ? EB_TRUE : EB_FALSE;
             else
                 miPtr[miX + miY * mi_stride].mbmi.skip = (cu_ptr->transform_unit_array[0].y_has_coeff == 0) ? EB_TRUE : EB_FALSE;

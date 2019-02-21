@@ -47,7 +47,10 @@ extern "C" {
         uint32_t                   tbSize);
 
     void generate_av1_mvp_table(
-        struct ModeDecisionContext_s            *context_ptr,
+#if TILES
+        TileInfo                              *tile,
+#endif
+      struct ModeDecisionContext_s            *context_ptr,
         CodingUnit_t                     *cu_ptr,
         const BlockGeom                   * blk_geom,
         uint16_t                            cu_origin_x,
@@ -68,7 +71,10 @@ extern "C" {
         IntMv             ref_mv[2]);
 
     void enc_pass_av1_mv_pred(
-        struct ModeDecisionContext_s            *md_context_ptr,
+#if TILES
+        TileInfo                               *tile,
+#endif
+         struct ModeDecisionContext_s            *md_context_ptr,
         CodingUnit_t                     *cu_ptr,
         const BlockGeom                   * blk_geom,
         uint16_t                            cu_origin_x,
@@ -81,6 +87,9 @@ extern "C" {
     );
 
     void update_mi_map(
+#if CHROMA_BLIND
+        struct ModeDecisionContext_s   *context_ptr,
+#endif
         CodingUnit_t                   *cu_ptr,
         uint32_t                          cu_origin_x,
         uint32_t                          cu_origin_y,
