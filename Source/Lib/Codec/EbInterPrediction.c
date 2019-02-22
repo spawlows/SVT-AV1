@@ -3121,33 +3121,26 @@ int32_t av1_get_switchable_rate(
 
 void highbd_variance64_c(const uint8_t *a8, int32_t a_stride,
     const uint8_t *b8, int32_t b_stride, int32_t w, int32_t h,
-    uint64_t *sse, int64_t *sum) {
+    uint64_t *sse) {
     const uint8_t *a = a8;//CONVERT_TO_SHORTPTR(a8);
     const uint8_t *b = b8;//CONVERT_TO_SHORTPTR(b8);
-    int64_t tsum = 0;
     uint64_t tsse = 0;
     for (int32_t i = 0; i < h; ++i) {
-        int32_t lsum = 0;
         for (int32_t j = 0; j < w; ++j) {
             const int32_t diff = a[j] - b[j];
-            lsum += diff;
             tsse += (uint32_t)(diff * diff);
         }
-        tsum += lsum;
         a += a_stride;
         b += b_stride;
     }
-    *sum = tsum;
     *sse = tsse;
 }
 void highbd_8_variance(const uint8_t *a8, int32_t a_stride,
     const uint8_t *b8, int32_t b_stride, int32_t w, int32_t h,
-    uint32_t *sse, int32_t *sum) {
+    uint32_t *sse) {
     uint64_t sse_long = 0;
-    int64_t sum_long = 0;
-    highbd_variance64(a8, a_stride, b8, b_stride, w, h, &sse_long, &sum_long);
+    highbd_variance64(a8, a_stride, b8, b_stride, w, h, &sse_long);
     *sse = (uint32_t)sse_long;
-    *sum = (int32_t)sum_long;
 }
 /*static*/ /*INLINE*/ void variance4x4_64_sse4_1(uint8_t *a8, int32_t a_stride,
     uint8_t *b8, int32_t b_stride,
@@ -3389,7 +3382,6 @@ void av1_model_rd_from_var_lapndz(int64_t var, uint32_t n_log2,
             offset = (prediction_ptr->origin_x + md_context_ptr->blk_geom->origin_x + (prediction_ptr->origin_y + md_context_ptr->blk_geom->origin_y) * prediction_ptr->strideCb) / 2;
         else
             offset = prediction_ptr->origin_x + md_context_ptr->blk_geom->origin_x + (prediction_ptr->origin_y + md_context_ptr->blk_geom->origin_y) * prediction_ptr->strideY;
-        int32_t sum;
         highbd_8_variance(
             plane == 0 ? (&(inputPicturePtr->bufferY[inputOriginIndex])) : plane == 1 ? (&(inputPicturePtr->bufferCb[inputChromaOriginIndex])) : (&(inputPicturePtr->bufferCr[inputChromaOriginIndex])),
             plane == 0 ? inputPicturePtr->strideY : plane == 1 ? inputPicturePtr->strideCb : inputPicturePtr->strideCr,
@@ -3397,8 +3389,7 @@ void av1_model_rd_from_var_lapndz(int64_t var, uint32_t n_log2,
             plane == 0 ? prediction_ptr->strideY : plane == 1 ? prediction_ptr->strideCb : prediction_ptr->strideCr,
             plane == 0 ? md_context_ptr->blk_geom->bwidth : md_context_ptr->blk_geom->bwidth_uv,
             plane == 0 ? md_context_ptr->blk_geom->bheight : md_context_ptr->blk_geom->bheight_uv,
-            &sse,
-            &sum
+            &sse
         );
 
 
