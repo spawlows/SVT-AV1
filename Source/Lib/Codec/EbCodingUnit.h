@@ -220,7 +220,7 @@ extern "C" {
     typedef struct MacroBlockD {
         // block dimension in the unit of mode_info.
         uint8_t n8_w, n8_h;
-        uint8_t n4_w, n4_h;  // TODO: this is for warped motion, for now
+        uint8_t n4_w, n4_h;  // for warped motion
         uint8_t ref_mv_count[MODE_CTX_REF_FRAMES];
         CandidateMv final_ref_mv_stack[MAX_REF_MV_STACK_SIZE];       
         uint8_t is_sec_rect;
@@ -352,8 +352,6 @@ extern "C" {
 #if !ADD_DELTA_QP_SUPPORT
         unsigned                        qp                      : 8;
 #endif                                                          
-        unsigned                        size                    : 8;
-        unsigned                        size_log2               : 3;
         unsigned                        picture_left_edge_flag  : 1;
         unsigned                        picture_top_edge_flag   : 1;
         unsigned                        picture_right_edge_flag : 1;
@@ -381,8 +379,6 @@ extern "C" {
     extern EbErrorType largest_coding_unit_ctor(
         LargestCodingUnit_t          **larget_coding_unit_dbl_ptr,
         uint8_t                        sb_sz,
-        uint32_t                       picture_width,
-        uint32_t                       picture_height,
         uint16_t                       sb_origin_x,
         uint16_t                       sb_origin_y,
         uint16_t                       sb_index,
