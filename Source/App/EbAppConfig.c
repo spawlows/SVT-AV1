@@ -521,10 +521,11 @@ void EbConfigCtor(EbConfig_t *config_ptr)
     config_ptr->processedFrameCount                  = 0;
     config_ptr->processedByteCount                   = 0;
 #if TILES
-    config_ptr->tile_rows = 0;
-    config_ptr->tile_columns = 0;
+    config_ptr->tile_rows                            = 0;
+    config_ptr->tile_columns                         = 0;
 #endif
-
+    config_ptr->byte_count_since_ivf                 = 0;
+    config_ptr->ivf_count                            = 0;
     return;
 }
 
@@ -970,9 +971,14 @@ int32_t ComputeFramesToBeEncoded(
     uint64_t fileSize = 0;
     int32_t frameCount = 0;
     uint32_t frameSize;
+    long currLoc;
+
+    currLoc = ftello64(config->inputFile); // get current fp location
+
     if (config->inputFile) {
         fseeko64(config->inputFile, 0L, SEEK_END);
         fileSize = ftello64(config->inputFile);
+        fseeko64(config->inputFile, currLoc, SEEK_SET); // seek back to that location
     }
 
     frameSize = SIZE_OF_ONE_FRAME_IN_BYTES(config->inputPaddedWidth, config->inputPaddedHeight, (uint8_t)((config->encoderBitDepth == 10) ? 1 : 0));
