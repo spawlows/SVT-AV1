@@ -33,7 +33,9 @@ extern "C" {
     **************************************/
     typedef EbErrorType(*EB_PREDICTION_FUNC)(
         struct ModeDecisionContext_s           *context_ptr,
+#if !CHROMA_BLIND
         uint32_t                                component_mask,
+#endif
         PictureControlSet_t                    *picture_control_set_ptr,
         struct ModeDecisionCandidateBuffer_s   *candidate_buffer_ptr,
         EbAsm                                   asm_type);
@@ -79,7 +81,7 @@ extern "C" {
         uint64_t                               *y_coeff_bits,
         uint64_t                               *cb_coeff_bits,
         uint64_t                               *cr_coeff_bits,
-        BlockSize                               bsize);
+        block_size                               bsize);
 
     typedef EbErrorType(*EB_FULL_LUMA_COST_FUNC)(
         CodingUnit_t                           *cu_ptr,
@@ -220,8 +222,8 @@ extern "C" {
         EbPictureBufferDesc_t                  *reconCoeffPtr;
         EbPictureBufferDesc_t                  *residual_ptr;
 
-        // *Note - We should be able to combine the reconCoeffPtr & reconPtr pictures (they aren't needed at the same time)
-        EbPictureBufferDesc_t                  *reconPtr;
+        // *Note - We should be able to combine the reconCoeffPtr & recon_ptr pictures (they aren't needed at the same time)
+        EbPictureBufferDesc_t                  *recon_ptr;
 
         // Distortion (SAD)
         uint64_t                                residual_luma_sad;

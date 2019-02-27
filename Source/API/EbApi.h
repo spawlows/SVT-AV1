@@ -12,6 +12,8 @@ extern "C" {
 
 #include "stdint.h"
 
+#define TILES                   1
+
     // API Version
 #define SVT_VERSION_MAJOR       0
 #define SVT_VERSION_MINOR       4
@@ -21,7 +23,7 @@ extern "C" {
 #define EB_HME_SEARCH_AREA_COLUMN_MAX_COUNT         2
 #define EB_HME_SEARCH_AREA_ROW_MAX_COUNT            2
 
-#define MAX_ENC_PRESET                              3
+#define MAX_ENC_PRESET                              4
 
 #ifdef _WIN32
 #define EB_API __declspec(dllexport)
@@ -101,7 +103,11 @@ EbBool is a 32 bit quantity and is aligned on a 32 bit word boundary.
 
 #define EB_BUFFERFLAG_EOS           0x00000001  // signals the last packet of the stream
 #define EB_BUFFERFLAG_SHOW_EXT      0x00000002  // signals that the packet contains a show existing frame at the end
+#define EB_BUFFERFLAG_HAS_TD        0x00000004  // signals that the packet contains a show existing frame at the end
 
+#if TILES
+#define EB_BUFFERFLAG_TG            0x00000004  // signals that the packet contains Tile Group header
+#endif
     // For 8-bit and 10-bit packed inputs, the luma, cb, and cr fields should be used
     //   for the three input picture planes.  However, for 10-bit unpacked planes the
     //   lumaExt, cbExt, and crExt fields should be used hold the extra 2-bits of
@@ -169,7 +175,7 @@ typedef struct EbSvtAv1EncConfiguration
      * encoded pictures in display order. In other words, pictures with display
      * order N can only be referenced by pictures with display order greater than
      * N, and it can only refer pictures with picture order lower than N. The Low
-     * Delay structure can be flat structured (e.g. IPPPPPPP…) or hierarchically
+     * Delay structure can be flat structured (e.g. IPPPPPPPâ€¦) or hierarchically
      * structured. B/b pictures can be used instead of P/p pictures. However, the
      * reference picture list 0 and the reference picture list 1 will contain the
      * same reference picture.
@@ -204,12 +210,12 @@ typedef struct EbSvtAv1EncConfiguration
      *
      * Default is 25. */
     uint32_t                 frame_rate;
-    /* Frame rate numerator. When zero, the encoder will use –fps if
+    /* Frame rate numerator. When zero, the encoder will use â€“fps if
      * FrameRateDenominator is also zero, otherwise an error is returned.
      *
      * Default is 0. */
     uint32_t                 frame_rate_numerator;
-    /* Frame rate denominator. When zero, the encoder will use –fps if
+    /* Frame rate denominator. When zero, the encoder will use â€“fps if
      * FrameRateNumerator is also zero, otherwise an error is returned.
      *
      * Default is 0. */
@@ -472,7 +478,7 @@ typedef struct EbSvtAv1EncConfiguration
     /* Flag to enable the Speed Control functionality to achieve the real-time
     * encoding speed defined by dynamically changing the encoding preset to meet
     * the average speed defined in injectorFrameRate. When this parameter is set
-    * to 1 it forces –inj to be 1 -inj-frm-rt to be set to the –fps.
+    * to 1 it forces â€“inj to be 1 -inj-frm-rt to be set to the â€“fps.
     *
     * Default is 0. */
     uint32_t                 speed_control_flag;
@@ -490,6 +496,13 @@ typedef struct EbSvtAv1EncConfiguration
      *
      * Default is 0. */
     uint32_t                 recon_enabled;
+#if TILES
+    /* Log 2 Tile Rows and colums . 0 means no tiling,1 means that we split the dimension
+        * into 2
+        * Default is 0. */
+    int32_t                  tile_columns;
+    int32_t                  tile_rows;
+#endif
 
 } EbSvtAv1EncConfiguration;
 
@@ -500,7 +513,7 @@ typedef struct EbSvtAv1EncConfiguration
      * @ **p_handle      Handle to be called in the future for manipulating the
      *                  component.
      * @ *p_app_data      Callback data.
-     * @ *config_ptr     Pointer passed back to the client during callbacks, it will be
+     * @ *config_ptr     pointer passed back to the client during callbacks, it will be
      *                  loaded with default params from the library. */
     EB_API EbErrorType eb_init_handle(
         EbComponentType** p_handle,

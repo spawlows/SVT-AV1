@@ -43,14 +43,14 @@ extern "C" {
 #define SEGMENT_MAX_COUNT   64
 #define SEGMENT_COMPLETION_MASK_SET(mask, index)        MULTI_LINE_MACRO_BEGIN (mask) |= (((uint64_t) 1) << (index)); MULTI_LINE_MACRO_END
 #define SEGMENT_COMPLETION_MASK_TEST(mask, total_count)  ((mask) == ((((uint64_t) 1) << (total_count)) - 1))
-#define SEGMENT_ROW_COMPLETION_TEST(mask, rowIndex, width) ((((mask) >> ((rowIndex) * (width))) & ((1ull << (width))-1)) == ((1ull << (width))-1))
-#define SEGMENT_CONVERT_IDX_TO_XY(index, x, y, picWidthInLcu) \
+#define SEGMENT_ROW_COMPLETION_TEST(mask, row_index, width) ((((mask) >> ((row_index) * (width))) & ((1ull << (width))-1)) == ((1ull << (width))-1))
+#define SEGMENT_CONVERT_IDX_TO_XY(index, x, y, pic_width_in_lcu) \
                                                         MULTI_LINE_MACRO_BEGIN \
-                                                            (y) = (index) / (picWidthInLcu); \
-                                                            (x) = (index) - (y) * (picWidthInLcu); \
+                                                            (y) = (index) / (pic_width_in_lcu); \
+                                                            (x) = (index) - (y) * (pic_width_in_lcu); \
                                                         MULTI_LINE_MACRO_END
-#define SEGMENT_START_IDX(index, picSizeInLcu, numOfSeg) (((index) * (picSizeInLcu)) / (numOfSeg))
-#define SEGMENT_END_IDX(index, picSizeInLcu, numOfSeg)   ((((index)+1) * (picSizeInLcu)) / (numOfSeg))
+#define SEGMENT_START_IDX(index, pic_size_in_lcu, num_of_seg) (((index) * (pic_size_in_lcu)) / (num_of_seg))
+#define SEGMENT_END_IDX(index, pic_size_in_lcu, num_of_seg)   ((((index)+1) * (pic_size_in_lcu)) / (num_of_seg))
 
 // BDP OFF
 #define MD_NEIGHBOR_ARRAY_INDEX                0
@@ -13591,7 +13591,7 @@ extern "C" {
         int32_t rst_end_stripe[MAX_TILE_ROWS];
         // Output of loop restoration
         Yv12BufferConfig rst_frame;
-        // Pointer to a scratch buffer used by self-guided restoration
+        // pointer to a scratch buffer used by self-guided restoration
         int32_t *rst_tmpbuf;
         Yv12BufferConfig *frame_to_show;
         int32_t byte_alignment;
@@ -13643,7 +13643,7 @@ extern "C" {
         // ME Results
         uint64_t          treeblock_variance;
         uint32_t          leaf_count;
-        EbMdcLeafData_t   leaf_data_array[BLOCK_MAX_COUNT];
+        EbMdcLeafData_t   leaf_data_array[BLOCK_MAX_COUNT_SB_128];
 
     } MdcLcuData_t;
 
@@ -13653,13 +13653,13 @@ extern "C" {
      **************************************/
     typedef struct MdSegmentCtrl_s
     {
-        uint64_t                                completion_mask;
-        EbHandle                                write_lock_mutex;
-        uint32_t                                total_count;
-        uint32_t                                column_count;
-        uint32_t                                row_count;
-        EbBool                                  in_progress;
-        uint32_t                                current_row_idx;
+        uint64_t completion_mask;
+        EbHandle write_lock_mutex;
+        uint32_t total_count;
+        uint32_t column_count;
+        uint32_t row_count;
+        EbBool   in_progress;
+        uint32_t current_row_idx;
 
     } MdSegmentCtrl_t;
 
@@ -13864,7 +13864,7 @@ extern "C" {
         uint8_t   height;
         uint8_t   is_complete_sb;
         EbBool    raster_scan_cu_validity[CU_MAX_COUNT];
-        EbBool    block_is_inside_md_scan[BLOCK_MAX_COUNT];
+        EbBool    block_is_inside_md_scan[BLOCK_MAX_COUNT_SB_128];
         uint8_t   potential_logo_sb;
         uint8_t   is_edge_sb;
     } SbParams_t;
@@ -13878,7 +13878,7 @@ extern "C" {
         uint8_t    width;
         uint8_t    height;
         uint8_t    is_complete_sb;
-        EbBool     block_is_inside_md_scan[BLOCK_MAX_COUNT];
+        EbBool     block_is_inside_md_scan[BLOCK_MAX_COUNT_SB_128];
     } SbGeom_t;
 
     typedef struct CuStat_s {
@@ -13925,7 +13925,7 @@ extern "C" {
         // Data attached to the picture. This includes data passed from the application, or other data the encoder attaches
         // to the picture.
         EbLinkedListNode                     *data_ll_head_ptr;
-        // Pointer to data to be passed back to the application when picture encoding is done
+        // pointer to data to be passed back to the application when picture encoding is done
         EbLinkedListNode                     *app_out_data_ll_head_ptr;
 
         EbBufferHeaderType                   *input_ptr;            // input picture buffer 
@@ -14117,7 +14117,9 @@ extern "C" {
         EbEncMode                             enc_mode;
 
         EbLcuDepthMode                       *sb_md_mode_array;
+#if !CHROMA_BLIND
         EbChromaMode                          chroma_mode;
+#endif
         EbSbComplexityStatus                 *complex_sb_array;
         EbCu8x8Mode                           cu8x8_mode;
         EbBool                                use_src_ref;
@@ -14555,13 +14557,13 @@ extern "C" {
     /**************************************
      * Extern Function Declarations
      **************************************/
-    extern EbErrorType PictureControlSetCtor(
+    extern EbErrorType picture_control_set_ctor(
         EbPtr *object_dbl_ptr,
         EbPtr  object_init_data_ptr);
 
-    extern EbErrorType PictureParentControlSetCtor(
+    extern EbErrorType picture_parent_control_set_ctor(
         EbPtr *object_dbl_ptr,
-        EbPtr object_init_data_ptr);
+        EbPtr  object_init_data_ptr);
 
 
 #ifdef __cplusplus

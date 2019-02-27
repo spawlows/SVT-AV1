@@ -69,7 +69,7 @@ extern "C" {
         EbPictureBufferDesc_t                 *trial_frame_rst;
 #endif
         // temporary buffers for decision making of LF (LPF_PICK_FROM_FULL_IMAGE).
-        // Since recon switches between reconPtr and referencePtr, the temporary buffers sizes used the referencePtr's which has padding,...
+        // Since recon switches between recon_ptr and referencePtr, the temporary buffers sizes used the referencePtr's which has padding,...
 #if !FILT_PROC
         EbPictureBufferDesc_t                 *temp_lf_recon_picture_ptr;
         EbPictureBufferDesc_t                 *temp_lf_recon_picture16bit_ptr;
@@ -127,8 +127,10 @@ extern "C" {
         uint8_t                                upsample_left;
         uint8_t                                upsample_above;
         uint8_t                                upsample_left_chroma;
-        uint8_t                                upsample_above_chroma;
+        uint8_t                                upsample_above_chroma; 
+#if !CHROMA_BLIND
         int16_t                                pred_buf_q3[CFL_BUF_SQUARE];
+#endif
         uint16_t                               coded_area_sb;
         uint16_t                               coded_area_sb_uv;
 
@@ -136,7 +138,9 @@ extern "C" {
         uint8_t                                is_inter;
         uint8_t                                reduced_tx_set_used;
 #endif
-
+#if CHROMA_BLIND
+        EbBool                                 evaluate_cfl_ep; // 0: CFL is evaluated @ mode decision, 1: CFL is evaluated @ encode pass
+#endif
     } EncDecContext_t;
 
     /**************************************
