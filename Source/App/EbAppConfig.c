@@ -98,8 +98,8 @@
 #define INJECTOR_FRAMERATE_TOKEN        "-inj-frm-rt" // no Eval
 #define SPEED_CONTROL_TOKEN             "-speed-ctrl"
 #define ASM_TYPE_TOKEN                  "-asm"
-#define RR_THREAD_MGMNT                    "-rr"
-#define TARGET_SOCKET                    "-ss"
+#define THREAD_MGMNT                    "-lp"
+#define TARGET_SOCKET                   "-ss"
 #define CONFIG_FILE_COMMENT_CHAR    '#'
 #define CONFIG_FILE_NEWLINE_CHAR    '\n'
 #define CONFIG_FILE_RETURN_CHAR     '\r'
@@ -250,7 +250,8 @@ static void SetInjectorFrameRate                (const char *value, EbConfig_t *
     }
 }
 static void SetLatencyMode                      (const char *value, EbConfig_t *cfg)  {cfg->latencyMode               = (uint8_t)strtol(value, NULL, 0);};
-static void SetAsmType                          (const char *value, EbConfig_t *cfg)  {cfg->asmType                  = (uint32_t)strtoul(value, NULL, 0);};
+static void SetAsmType                          (const char *value, EbConfig_t *cfg)  {cfg->asmType                   = (uint32_t)strtoul(value, NULL, 0);};
+static void SetLogicalProcessors                (const char *value, EbConfig_t *cfg)  {cfg->logicalProcessors         = (uint32_t)strtoul(value, NULL, 0);};
 static void SetTargetSocket                     (const char *value, EbConfig_t *cfg)  {cfg->targetSocket              = (int32_t)strtol(value, NULL, 0);};
 
 enum cfg_type{
@@ -346,7 +347,7 @@ config_entry_t config_entry[] = {
     { SINGLE_INPUT, CONSTRAINED_INTRA_ENABLE_TOKEN, "ConstrainedIntra", SetEnableConstrainedIntra},
 
     // Thread Management
-//    { SINGLE_INPUT, THREAD_MGMNT, "logicalProcessors", SetLogicalProcessors },
+    { SINGLE_INPUT, THREAD_MGMNT, "logicalProcessors", SetLogicalProcessors },
     { SINGLE_INPUT, TARGET_SOCKET, "TargetSocket", SetTargetSocket },
 
     // Optional Features
@@ -517,14 +518,16 @@ void EbConfigCtor(EbConfig_t *config_ptr)
     config_ptr->asmType                              = 1;
 
     config_ptr->stopEncoder                          = 0;
-    config_ptr->targetSocket                         = 1;
+    config_ptr->logicalProcessors                    = 0;
+    config_ptr->targetSocket                         = -1;
     config_ptr->processedFrameCount                  = 0;
     config_ptr->processedByteCount                   = 0;
 #if TILES
-    config_ptr->tile_rows = 0;
-    config_ptr->tile_columns = 0;
+    config_ptr->tile_rows                            = 0;
+    config_ptr->tile_columns                         = 0;
 #endif
-
+    config_ptr->byte_count_since_ivf                 = 0;
+    config_ptr->ivf_count                            = 0;
     return;
 }
 
@@ -632,7 +635,7 @@ static void lineSplit(
 
 
 /**********************************
-* Set Config Value
+* Set Config value
 **********************************/
 static void SetConfigValue(
     EbConfig_t *config,
@@ -970,9 +973,14 @@ int32_t ComputeFramesToBeEncoded(
     uint64_t fileSize = 0;
     int32_t frameCount = 0;
     uint32_t frameSize;
+    long currLoc;
+
+    currLoc = ftello64(config->inputFile); // get current fp location
+
     if (config->inputFile) {
         fseeko64(config->inputFile, 0L, SEEK_END);
         fileSize = ftello64(config->inputFile);
+        fseeko64(config->inputFile, currLoc, SEEK_SET); // seek back to that location
     }
 
     frameSize = SIZE_OF_ONE_FRAME_IN_BYTES(config->inputPaddedWidth, config->inputPaddedHeight, (uint8_t)((config->encoderBitDepth == 10) ? 1 : 0));

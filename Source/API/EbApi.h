@@ -12,9 +12,7 @@ extern "C" {
 
 #include "stdint.h"
 
-
-#define  TILES    1
-
+#define TILES                   1
 
     // API Version
 #define SVT_VERSION_MAJOR       0
@@ -105,6 +103,7 @@ EbBool is a 32 bit quantity and is aligned on a 32 bit word boundary.
 
 #define EB_BUFFERFLAG_EOS           0x00000001  // signals the last packet of the stream
 #define EB_BUFFERFLAG_SHOW_EXT      0x00000002  // signals that the packet contains a show existing frame at the end
+#define EB_BUFFERFLAG_HAS_TD        0x00000004  // signals that the packet contains a show existing frame at the end
 
 #if TILES
 #define EB_BUFFERFLAG_TG            0x00000004  // signals that the packet contains Tile Group header
@@ -176,7 +175,7 @@ typedef struct EbSvtAv1EncConfiguration
      * encoded pictures in display order. In other words, pictures with display
      * order N can only be referenced by pictures with display order greater than
      * N, and it can only refer pictures with picture order lower than N. The Low
-     * Delay structure can be flat structured (e.g. IPPPPPPP…) or hierarchically
+     * Delay structure can be flat structured (e.g. IPPPPPPPâ€¦) or hierarchically
      * structured. B/b pictures can be used instead of P/p pictures. However, the
      * reference picture list 0 and the reference picture list 1 will contain the
      * same reference picture.
@@ -211,12 +210,12 @@ typedef struct EbSvtAv1EncConfiguration
      *
      * Default is 25. */
     uint32_t                 frame_rate;
-    /* Frame rate numerator. When zero, the encoder will use –fps if
+    /* Frame rate numerator. When zero, the encoder will use â€“fps if
      * FrameRateDenominator is also zero, otherwise an error is returned.
      *
      * Default is 0. */
     uint32_t                 frame_rate_numerator;
-    /* Frame rate denominator. When zero, the encoder will use –fps if
+    /* Frame rate denominator. When zero, the encoder will use â€“fps if
      * FrameRateNumerator is also zero, otherwise an error is returned.
      *
      * Default is 0. */
@@ -479,7 +478,7 @@ typedef struct EbSvtAv1EncConfiguration
     /* Flag to enable the Speed Control functionality to achieve the real-time
     * encoding speed defined by dynamically changing the encoding preset to meet
     * the average speed defined in injectorFrameRate. When this parameter is set
-    * to 1 it forces –inj to be 1 -inj-frm-rt to be set to the –fps.
+    * to 1 it forces â€“inj to be 1 -inj-frm-rt to be set to the â€“fps.
     *
     * Default is 0. */
     uint32_t                 speed_control_flag;
@@ -488,7 +487,23 @@ typedef struct EbSvtAv1EncConfiguration
     *
     * Default is 60. */
     int32_t                  injector_frame_rate;
-    EbBool                   use_round_robin_thread_assignment;
+
+    // Threads management
+
+    /* The number of logical processor which encoder threads run on. If
+     * LogicalProcessorNumber and TargetSocket are not set, threads are managed by
+     * OS thread scheduler. */
+    uint32_t                logical_processors;
+
+    /* Target socket to run on. For dual socket systems, this can specify which
+     * socket the encoder runs on.
+     *
+     * -1 = Both Sockets.
+     *  0 = Socket 0.
+     *  1 = Socket 1.
+     *
+     * Default is -1. */
+    int32_t                 target_socket;
 
     // Debug tools
 
@@ -514,7 +529,7 @@ typedef struct EbSvtAv1EncConfiguration
      * @ **p_handle      Handle to be called in the future for manipulating the
      *                  component.
      * @ *p_app_data      Callback data.
-     * @ *config_ptr     Pointer passed back to the client during callbacks, it will be
+     * @ *config_ptr     pointer passed back to the client during callbacks, it will be
      *                  loaded with default params from the library. */
     EB_API EbErrorType eb_init_handle(
         EbComponentType** p_handle,
