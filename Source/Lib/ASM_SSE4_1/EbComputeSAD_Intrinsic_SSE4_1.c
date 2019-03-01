@@ -18,96 +18,7 @@
     yBest = i; \
   }
 
-void ExtSadCalculation_8x8_16x16_SSE4_INTRIN(
-    uint8_t   *src,
-    uint32_t   src_stride,
-    uint8_t   *ref,
-    uint32_t   refStride,
-    uint32_t  *p_best_sad8x8,
-    uint32_t  *p_best_sad16x16,
-    uint32_t  *p_best_mv8x8,
-    uint32_t  *p_best_mv16x16,
-    uint32_t   mv,
-    uint32_t  *p_sad16x16,
-    uint32_t  *p_sad8x8)
-{
-    __m128i xmm_sad16x16, xmm_sad8x8_0_1, xmm_sad8x8_2_3, xmm_sad16x16_total, sad8x8_0_3, sad8x8_less_than_bitmask, xmm_N1;
-    __m128i sad8x8_greater_or_eq_bitmask, BestMV8x8, BestSad8x8, xmm_pBestSad8x8, xmm_pBestMV8x8, xmm_mv;
-
-    uint32_t sad8x8_0, sad8x8_1, sad8x8_2, sad8x8_3;
-    uint32_t sad16x16;
-
-    (void)sad8x8_0;
-    (void)sad8x8_1;
-    (void)sad8x8_2;
-    (void)sad8x8_3;
-
-
-
-    src_stride <<= 1;
-    refStride <<= 1;
-
-    //sad8x8_0, sad8x8_1
-
-    xmm_sad8x8_0_1 = _mm_add_epi32(_mm_sad_epu8(_mm_loadu_si128((__m128i*)src), _mm_loadu_si128((__m128i*)ref)),
-        _mm_sad_epu8(_mm_loadu_si128((__m128i*)(src + src_stride)), _mm_loadu_si128((__m128i*)(ref + refStride))));
-    xmm_sad8x8_0_1 = _mm_add_epi32(_mm_sad_epu8(_mm_loadu_si128((__m128i*)(src + (2 * src_stride))), _mm_loadu_si128((__m128i*)(ref + (2 * refStride)))), xmm_sad8x8_0_1);
-    xmm_sad8x8_0_1 = _mm_add_epi32(_mm_sad_epu8(_mm_loadu_si128((__m128i*)(src + (3 * src_stride))), _mm_loadu_si128((__m128i*)(ref + (3 * refStride)))), xmm_sad8x8_0_1);
-
-    src += src_stride << 2;
-    ref += refStride << 2;
-
-    p_sad8x8[0] = _mm_extract_epi32(xmm_sad8x8_0_1, 0) << 1;
-    p_sad8x8[1] = _mm_extract_epi32(xmm_sad8x8_0_1, 2) << 1;
-
-    //sad8x8_2, sad8x8_3
-
-    xmm_sad8x8_2_3 = _mm_add_epi32(_mm_sad_epu8(_mm_loadu_si128((__m128i*)src), _mm_loadu_si128((__m128i*)ref)),
-        _mm_sad_epu8(_mm_loadu_si128((__m128i*)(src + src_stride)), _mm_loadu_si128((__m128i*)(ref + refStride))));
-    xmm_sad8x8_2_3 = _mm_add_epi32(_mm_sad_epu8(_mm_loadu_si128((__m128i*)(src + (2 * src_stride))), _mm_loadu_si128((__m128i*)(ref + (2 * refStride)))), xmm_sad8x8_2_3);
-    xmm_sad8x8_2_3 = _mm_add_epi32(_mm_sad_epu8(_mm_loadu_si128((__m128i*)(src + (3 * src_stride))), _mm_loadu_si128((__m128i*)(ref + (3 * refStride)))), xmm_sad8x8_2_3);
-
-
-    p_sad8x8[2] = _mm_extract_epi32(xmm_sad8x8_2_3, 0) << 1;
-    p_sad8x8[3] = _mm_extract_epi32(xmm_sad8x8_2_3, 2) << 1;
-
-
-    sad8x8_0_3 = _mm_slli_epi32(_mm_packs_epi32(xmm_sad8x8_0_1, xmm_sad8x8_2_3), 1);
-    xmm_pBestSad8x8 = _mm_loadu_si128((__m128i*)p_best_sad8x8);
-    xmm_pBestMV8x8 = _mm_loadu_si128((__m128i*)p_best_mv8x8);
-
-
-    xmm_mv = _mm_cvtsi64_si128(mv);
-    xmm_mv = _mm_unpacklo_epi32(xmm_mv, xmm_mv);
-    xmm_mv = _mm_unpacklo_epi64(xmm_mv, xmm_mv);
-
-    // sad8x8_0 < p_best_sad8x8[0] for 0 to 3
-    sad8x8_less_than_bitmask = _mm_cmplt_epi32(sad8x8_0_3, xmm_pBestSad8x8);
-
-    xmm_N1 = _mm_cmpeq_epi8(xmm_sad8x8_0_1, xmm_sad8x8_0_1);
-
-    sad8x8_greater_or_eq_bitmask = _mm_sub_epi32(xmm_N1, sad8x8_less_than_bitmask);
-
-    BestSad8x8 = _mm_or_si128(_mm_and_si128(xmm_pBestSad8x8, sad8x8_greater_or_eq_bitmask), _mm_and_si128(sad8x8_less_than_bitmask, sad8x8_0_3));
-    BestMV8x8 = _mm_or_si128(_mm_and_si128(xmm_pBestMV8x8, sad8x8_greater_or_eq_bitmask), _mm_and_si128(sad8x8_less_than_bitmask, xmm_mv));
-
-    _mm_storeu_si128((__m128i*)p_best_sad8x8, BestSad8x8);
-    _mm_storeu_si128((__m128i*)p_best_mv8x8, BestMV8x8);
-
-    xmm_sad16x16 = _mm_add_epi32(xmm_sad8x8_0_1, xmm_sad8x8_2_3);
-
-    xmm_sad16x16_total = _mm_slli_epi32(_mm_add_epi32(_mm_srli_si128(xmm_sad16x16, 8), xmm_sad16x16), 1);
-
-    *p_sad16x16 = sad16x16 = _mm_cvtsi128_si32(xmm_sad16x16_total);
-
-    if (sad16x16 < p_best_sad16x16[0]) {
-        p_best_sad16x16[0] = (uint32_t)sad16x16;
-        p_best_mv16x16[0] = mv;
-    }
-
-}
-
-void ExtSadCalculation_32x32_64x64_SSE4_INTRIN(
+void ext_sad_calculation_32x32_64x64_sse4_intrin(
     uint32_t  *p_sad16x16,
     uint32_t  *p_best_sad32x32,
     uint32_t  *p_best_sad64x64,
@@ -167,21 +78,21 @@ void ExtSadCalculation_32x32_64x64_SSE4_INTRIN(
  * Requirement: height <= 64
  * Requirement: height % 2 = 0 when width = 4 or 8
 *******************************************************************************/
-void SadLoopKernel_SSE4_1_INTRIN(
+void sad_loop_kernel_sse4_1_intrin(
     uint8_t  *src,                            // input parameter, source samples Ptr
     uint32_t  src_stride,                      // input parameter, source stride
     uint8_t  *ref,                            // input parameter, reference samples Ptr
-    uint32_t  refStride,                      // input parameter, reference stride
+    uint32_t  ref_stride,                      // input parameter, reference stride
     uint32_t  height,                         // input parameter, block height (M)
     uint32_t  width,                          // input parameter, block width (N)
-    uint64_t *bestSad,
-    int16_t *xSearchCenter,
-    int16_t *ySearchCenter,
-    uint32_t  srcStrideRaw,                   // input parameter, source stride (no line skipping)
+    uint64_t *best_sad,
+    int16_t *x_search_center,
+    int16_t *y_search_center,
+    uint32_t  src_stride_raw,                   // input parameter, source stride (no line skipping)
     int16_t search_area_width,
     int16_t search_area_height)
 {
-    int16_t xBest = *xSearchCenter, yBest = *ySearchCenter;
+    int16_t xBest = *x_search_center, yBest = *y_search_center;
     uint32_t lowSum = 0xffffff;
     uint32_t temSum = 0;
     int16_t i, j;
@@ -205,13 +116,13 @@ void SadLoopKernel_SSE4_1_INTRIN(
                 s3 = _mm_setzero_si128();
                 for (k = 0; k < height; k += 2) {
                     s0 = _mm_loadu_si128((__m128i*)pRef);
-                    s1 = _mm_loadu_si128((__m128i*)(pRef + refStride));
+                    s1 = _mm_loadu_si128((__m128i*)(pRef + ref_stride));
                     s2 = _mm_cvtsi32_si128(*(uint32_t *)pSrc);
                     s5 = _mm_cvtsi32_si128(*(uint32_t *)(pSrc + src_stride));
                     s3 = _mm_adds_epu16(s3, _mm_mpsadbw_epu8(s0, s2, 0));
                     s3 = _mm_adds_epu16(s3, _mm_mpsadbw_epu8(s1, s5, 0));
                     pSrc += src_stride << 1;
-                    pRef += refStride << 1;
+                    pRef += ref_stride << 1;
                 }
                 s3 = _mm_minpos_epu16(s3);
                 temSum = _mm_extract_epi16(s3, 0);
@@ -228,13 +139,13 @@ void SadLoopKernel_SSE4_1_INTRIN(
                 s3 = _mm_setzero_si128();
                 for (k = 0; k < height; k += 2) {
                     s0 = _mm_loadu_si128((__m128i*)pRef);
-                    s1 = _mm_loadu_si128((__m128i*)(pRef + refStride));
+                    s1 = _mm_loadu_si128((__m128i*)(pRef + ref_stride));
                     s2 = _mm_cvtsi32_si128(*(uint32_t *)pSrc);
                     s5 = _mm_cvtsi32_si128(*(uint32_t *)(pSrc + src_stride));
                     s3 = _mm_adds_epu16(s3, _mm_mpsadbw_epu8(s0, s2, 0));
                     s3 = _mm_adds_epu16(s3, _mm_mpsadbw_epu8(s1, s5, 0));
                     pSrc += src_stride << 1;
-                    pRef += refStride << 1;
+                    pRef += ref_stride << 1;
                 }
                 s3 = _mm_or_si128(s3, s8);
                 s3 = _mm_minpos_epu16(s3);
@@ -245,7 +156,7 @@ void SadLoopKernel_SSE4_1_INTRIN(
                     yBest = i;
                 }
             }
-            ref += srcStrideRaw;
+            ref += src_stride_raw;
         }
         break;
 
@@ -257,7 +168,7 @@ void SadLoopKernel_SSE4_1_INTRIN(
                 s3 = s4 = _mm_setzero_si128();
                 for (k = 0; k < height; k += 2) {
                     s0 = _mm_loadu_si128((__m128i*)pRef);
-                    s1 = _mm_loadu_si128((__m128i*)(pRef + refStride));
+                    s1 = _mm_loadu_si128((__m128i*)(pRef + ref_stride));
                     s2 = _mm_loadl_epi64((__m128i*)pSrc);
                     s5 = _mm_loadl_epi64((__m128i*)(pSrc + src_stride));
                     s3 = _mm_adds_epu16(s3, _mm_mpsadbw_epu8(s0, s2, 0));
@@ -265,7 +176,7 @@ void SadLoopKernel_SSE4_1_INTRIN(
                     s3 = _mm_adds_epu16(s3, _mm_mpsadbw_epu8(s1, s5, 0));
                     s4 = _mm_adds_epu16(s4, _mm_mpsadbw_epu8(s1, s5, 5));
                     pSrc += src_stride << 1;
-                    pRef += refStride << 1;
+                    pRef += ref_stride << 1;
                 }
                 s3 = _mm_adds_epu16(s3, s4);
                 s3 = _mm_minpos_epu16(s3);
@@ -283,7 +194,7 @@ void SadLoopKernel_SSE4_1_INTRIN(
                 s3 = s4 = _mm_setzero_si128();
                 for (k = 0; k < height; k += 2) {
                     s0 = _mm_loadu_si128((__m128i*)pRef);
-                    s1 = _mm_loadu_si128((__m128i*)(pRef + refStride));
+                    s1 = _mm_loadu_si128((__m128i*)(pRef + ref_stride));
                     s2 = _mm_loadl_epi64((__m128i*)pSrc);
                     s5 = _mm_loadl_epi64((__m128i*)(pSrc + src_stride));
                     s3 = _mm_adds_epu16(s3, _mm_mpsadbw_epu8(s0, s2, 0));
@@ -291,7 +202,7 @@ void SadLoopKernel_SSE4_1_INTRIN(
                     s3 = _mm_adds_epu16(s3, _mm_mpsadbw_epu8(s1, s5, 0));
                     s4 = _mm_adds_epu16(s4, _mm_mpsadbw_epu8(s1, s5, 5));
                     pSrc += src_stride << 1;
-                    pRef += refStride << 1;
+                    pRef += ref_stride << 1;
                 }
                 s3 = _mm_adds_epu16(s3, s4);
                 s3 = _mm_or_si128(s3, s8);
@@ -303,7 +214,7 @@ void SadLoopKernel_SSE4_1_INTRIN(
                     yBest = i;
                 }
             }
-            ref += srcStrideRaw;
+            ref += src_stride_raw;
         }
         break;
 
@@ -323,7 +234,7 @@ void SadLoopKernel_SSE4_1_INTRIN(
                         s5 = _mm_adds_epu16(s5, _mm_mpsadbw_epu8(s1, s2, 2));
                         s6 = _mm_adds_epu16(s6, _mm_mpsadbw_epu8(s1, s2, 7));
                         pSrc += src_stride;
-                        pRef += refStride;
+                        pRef += ref_stride;
                     }
                     s3 = _mm_adds_epu16(_mm_adds_epu16(s3, s4), _mm_adds_epu16(s5, s6));
                     s3 = _mm_minpos_epu16(s3);
@@ -348,7 +259,7 @@ void SadLoopKernel_SSE4_1_INTRIN(
                         s5 = _mm_adds_epu16(s5, _mm_mpsadbw_epu8(s1, s2, 2));
                         s6 = _mm_adds_epu16(s6, _mm_mpsadbw_epu8(s1, s2, 7));
                         pSrc += src_stride;
-                        pRef += refStride;
+                        pRef += ref_stride;
                     }
                     s3 = _mm_adds_epu16(_mm_adds_epu16(s3, s4), _mm_adds_epu16(s5, s6));
                     s3 = _mm_or_si128(s3, s8);
@@ -360,7 +271,7 @@ void SadLoopKernel_SSE4_1_INTRIN(
                         yBest = i;
                     }
                 }
-                ref += srcStrideRaw;
+                ref += src_stride_raw;
             }
         }
         else if (height <= 32) {
@@ -378,7 +289,7 @@ void SadLoopKernel_SSE4_1_INTRIN(
                         s5 = _mm_adds_epu16(s5, _mm_mpsadbw_epu8(s1, s2, 2));
                         s6 = _mm_adds_epu16(s6, _mm_mpsadbw_epu8(s1, s2, 7));
                         pSrc += src_stride;
-                        pRef += refStride;
+                        pRef += ref_stride;
                     }
                     s3 = _mm_adds_epu16(s3, s4);
                     s5 = _mm_adds_epu16(s5, s6);
@@ -417,7 +328,7 @@ void SadLoopKernel_SSE4_1_INTRIN(
                         s5 = _mm_adds_epu16(s5, _mm_mpsadbw_epu8(s1, s2, 2));
                         s6 = _mm_adds_epu16(s6, _mm_mpsadbw_epu8(s1, s2, 7));
                         pSrc += src_stride;
-                        pRef += refStride;
+                        pRef += ref_stride;
                     }
                     s3 = _mm_adds_epu16(s3, s4);
                     s5 = _mm_adds_epu16(s5, s6);
@@ -444,7 +355,7 @@ void SadLoopKernel_SSE4_1_INTRIN(
                         yBest = i;
                     }
                 }
-                ref += srcStrideRaw;
+                ref += src_stride_raw;
             }
         }
         else {
@@ -462,7 +373,7 @@ void SadLoopKernel_SSE4_1_INTRIN(
                         s5 = _mm_adds_epu16(s5, _mm_mpsadbw_epu8(s1, s2, 2));
                         s6 = _mm_adds_epu16(s6, _mm_mpsadbw_epu8(s1, s2, 7));
                         pSrc += src_stride;
-                        pRef += refStride;
+                        pRef += ref_stride;
                     }
                     s0 = _mm_adds_epu16(_mm_adds_epu16(s3, s4), _mm_adds_epu16(s5, s6));
                     s0 = _mm_minpos_epu16(s0);
@@ -509,7 +420,7 @@ void SadLoopKernel_SSE4_1_INTRIN(
                         s5 = _mm_adds_epu16(s5, _mm_mpsadbw_epu8(s1, s2, 2));
                         s6 = _mm_adds_epu16(s6, _mm_mpsadbw_epu8(s1, s2, 7));
                         pSrc += src_stride;
-                        pRef += refStride;
+                        pRef += ref_stride;
                     }
                     s0 = _mm_adds_epu16(_mm_adds_epu16(s3, s4), _mm_adds_epu16(s5, s6));
                     s0 = _mm_or_si128(s0, s8);
@@ -548,7 +459,7 @@ void SadLoopKernel_SSE4_1_INTRIN(
                         }
                     }
                 }
-                ref += srcStrideRaw;
+                ref += src_stride_raw;
             }
         }
         break;
@@ -573,7 +484,7 @@ void SadLoopKernel_SSE4_1_INTRIN(
                         s3 = _mm_adds_epu16(s3, _mm_mpsadbw_epu8(s0, s2, 0));
                         s4 = _mm_adds_epu16(s4, _mm_mpsadbw_epu8(s0, s2, 5));
                         pSrc += src_stride;
-                        pRef += refStride;
+                        pRef += ref_stride;
                     }
                     s3 = _mm_adds_epu16(s3, s4);
                     s5 = _mm_adds_epu16(s5, s6);
@@ -616,7 +527,7 @@ void SadLoopKernel_SSE4_1_INTRIN(
                         s3 = _mm_adds_epu16(s3, _mm_mpsadbw_epu8(s0, s2, 0));
                         s4 = _mm_adds_epu16(s4, _mm_mpsadbw_epu8(s0, s2, 5));
                         pSrc += src_stride;
-                        pRef += refStride;
+                        pRef += ref_stride;
                     }
                     s3 = _mm_adds_epu16(s3, s4);
                     s5 = _mm_adds_epu16(s5, s6);
@@ -643,7 +554,7 @@ void SadLoopKernel_SSE4_1_INTRIN(
                         yBest = i;
                     }
                 }
-                ref += srcStrideRaw;
+                ref += src_stride_raw;
             }
         }
         else {
@@ -665,7 +576,7 @@ void SadLoopKernel_SSE4_1_INTRIN(
                         s3 = _mm_adds_epu16(s3, _mm_mpsadbw_epu8(s0, s2, 0));
                         s4 = _mm_adds_epu16(s4, _mm_mpsadbw_epu8(s0, s2, 5));
                         pSrc += src_stride;
-                        pRef += refStride;
+                        pRef += ref_stride;
                     }
                     s0 = _mm_adds_epu16(_mm_adds_epu16(s3, s4), _mm_adds_epu16(s5, s6));
                     s0 = _mm_minpos_epu16(s0);
@@ -716,7 +627,7 @@ void SadLoopKernel_SSE4_1_INTRIN(
                         s3 = _mm_adds_epu16(s3, _mm_mpsadbw_epu8(s0, s2, 0));
                         s4 = _mm_adds_epu16(s4, _mm_mpsadbw_epu8(s0, s2, 5));
                         pSrc += src_stride;
-                        pRef += refStride;
+                        pRef += ref_stride;
                     }
                     s0 = _mm_adds_epu16(_mm_adds_epu16(s3, s4), _mm_adds_epu16(s5, s6));
                     s0 = _mm_or_si128(s0, s8);
@@ -755,7 +666,7 @@ void SadLoopKernel_SSE4_1_INTRIN(
                         }
                     }
                 }
-                ref += srcStrideRaw;
+                ref += src_stride_raw;
             }
         }
         break;
@@ -783,7 +694,7 @@ void SadLoopKernel_SSE4_1_INTRIN(
                         s5 = _mm_adds_epu16(s5, _mm_mpsadbw_epu8(s1, s2, 2));
                         s6 = _mm_adds_epu16(s6, _mm_mpsadbw_epu8(s1, s2, 7));
                         pSrc += src_stride;
-                        pRef += refStride;
+                        pRef += ref_stride;
                     }
                     s0 = _mm_adds_epu16(_mm_adds_epu16(s3, s4), _mm_adds_epu16(s5, s6));
                     s0 = _mm_minpos_epu16(s0);
@@ -838,7 +749,7 @@ void SadLoopKernel_SSE4_1_INTRIN(
                         s5 = _mm_adds_epu16(s5, _mm_mpsadbw_epu8(s1, s2, 2));
                         s6 = _mm_adds_epu16(s6, _mm_mpsadbw_epu8(s1, s2, 7));
                         pSrc += src_stride;
-                        pRef += refStride;
+                        pRef += ref_stride;
                     }
                     s0 = _mm_adds_epu16(_mm_adds_epu16(s3, s4), _mm_adds_epu16(s5, s6));
                     s0 = _mm_or_si128(s0, s8);
@@ -878,7 +789,7 @@ void SadLoopKernel_SSE4_1_INTRIN(
                         }
                     }
                 }
-                ref += srcStrideRaw;
+                ref += src_stride_raw;
             }
         }
         else {
@@ -904,7 +815,7 @@ void SadLoopKernel_SSE4_1_INTRIN(
                         s5 = _mm_adds_epu16(s5, _mm_mpsadbw_epu8(s1, s2, 2));
                         s6 = _mm_adds_epu16(s6, _mm_mpsadbw_epu8(s1, s2, 7));
                         pSrc += src_stride;
-                        pRef += refStride;
+                        pRef += ref_stride;
                     }
                     s9 = s10 = s11 = s12 = _mm_setzero_si128();
                     for (; k < height; k++) {
@@ -923,7 +834,7 @@ void SadLoopKernel_SSE4_1_INTRIN(
                         s11 = _mm_adds_epu16(s11, _mm_mpsadbw_epu8(s1, s2, 2));
                         s12 = _mm_adds_epu16(s12, _mm_mpsadbw_epu8(s1, s2, 7));
                         pSrc += src_stride;
-                        pRef += refStride;
+                        pRef += ref_stride;
                     }
                     s0 = _mm_adds_epu16(_mm_adds_epu16(s3, s4), _mm_adds_epu16(s5, s6));
                     s0 = _mm_adds_epu16(s0, _mm_adds_epu16(_mm_adds_epu16(s9, s10), _mm_adds_epu16(s11, s12)));
@@ -989,7 +900,7 @@ void SadLoopKernel_SSE4_1_INTRIN(
                         s5 = _mm_adds_epu16(s5, _mm_mpsadbw_epu8(s1, s2, 2));
                         s6 = _mm_adds_epu16(s6, _mm_mpsadbw_epu8(s1, s2, 7));
                         pSrc += src_stride;
-                        pRef += refStride;
+                        pRef += ref_stride;
                     }
                     s9 = s10 = s11 = s12 = _mm_setzero_si128();
                     for (; k < height; k++) {
@@ -1008,7 +919,7 @@ void SadLoopKernel_SSE4_1_INTRIN(
                         s11 = _mm_adds_epu16(s11, _mm_mpsadbw_epu8(s1, s2, 2));
                         s12 = _mm_adds_epu16(s12, _mm_mpsadbw_epu8(s1, s2, 7));
                         pSrc += src_stride;
-                        pRef += refStride;
+                        pRef += ref_stride;
                     }
                     s0 = _mm_adds_epu16(_mm_adds_epu16(s3, s4), _mm_adds_epu16(s5, s6));
                     s0 = _mm_adds_epu16(s0, _mm_adds_epu16(_mm_adds_epu16(s9, s10), _mm_adds_epu16(s11, s12)));
@@ -1059,7 +970,7 @@ void SadLoopKernel_SSE4_1_INTRIN(
                         }
                     }
                 }
-                ref += srcStrideRaw;
+                ref += src_stride_raw;
             }
         }
         break;
@@ -1095,7 +1006,7 @@ void SadLoopKernel_SSE4_1_INTRIN(
                         s5 = _mm_adds_epu16(s5, _mm_mpsadbw_epu8(s1, s2, 2));
                         s6 = _mm_adds_epu16(s6, _mm_mpsadbw_epu8(s1, s2, 7));
                         pSrc += src_stride;
-                        pRef += refStride;
+                        pRef += ref_stride;
                     }
                     s9 = s10 = s11 = s12 = _mm_setzero_si128();
                     for (; k < height; k++) {
@@ -1121,7 +1032,7 @@ void SadLoopKernel_SSE4_1_INTRIN(
                         s11 = _mm_adds_epu16(s11, _mm_mpsadbw_epu8(s1, s2, 2));
                         s12 = _mm_adds_epu16(s12, _mm_mpsadbw_epu8(s1, s2, 7));
                         pSrc += src_stride;
-                        pRef += refStride;
+                        pRef += ref_stride;
                     }
                     s0 = _mm_adds_epu16(_mm_adds_epu16(s3, s4), _mm_adds_epu16(s5, s6));
                     s0 = _mm_adds_epu16(s0, _mm_adds_epu16(_mm_adds_epu16(s9, s10), _mm_adds_epu16(s11, s12)));
@@ -1194,7 +1105,7 @@ void SadLoopKernel_SSE4_1_INTRIN(
                         s5 = _mm_adds_epu16(s5, _mm_mpsadbw_epu8(s1, s2, 2));
                         s6 = _mm_adds_epu16(s6, _mm_mpsadbw_epu8(s1, s2, 7));
                         pSrc += src_stride;
-                        pRef += refStride;
+                        pRef += ref_stride;
                     }
                     s9 = s10 = s11 = s12 = _mm_setzero_si128();
                     for (; k < height; k++) {
@@ -1220,7 +1131,7 @@ void SadLoopKernel_SSE4_1_INTRIN(
                         s11 = _mm_adds_epu16(s11, _mm_mpsadbw_epu8(s1, s2, 2));
                         s12 = _mm_adds_epu16(s12, _mm_mpsadbw_epu8(s1, s2, 7));
                         pSrc += src_stride;
-                        pRef += refStride;
+                        pRef += ref_stride;
                     }
                     s0 = _mm_adds_epu16(_mm_adds_epu16(s3, s4), _mm_adds_epu16(s5, s6));
                     s0 = _mm_adds_epu16(s0, _mm_adds_epu16(_mm_adds_epu16(s9, s10), _mm_adds_epu16(s11, s12)));
@@ -1271,7 +1182,7 @@ void SadLoopKernel_SSE4_1_INTRIN(
                         }
                     }
                 }
-                ref += srcStrideRaw;
+                ref += src_stride_raw;
             }
         }
         else {
@@ -1307,7 +1218,7 @@ void SadLoopKernel_SSE4_1_INTRIN(
                             s5 = _mm_adds_epu16(s5, _mm_mpsadbw_epu8(s1, s2, 2));
                             s6 = _mm_adds_epu16(s6, _mm_mpsadbw_epu8(s1, s2, 7));
                             pSrc += src_stride;
-                            pRef += refStride;
+                            pRef += ref_stride;
                         }
                         s0 = _mm_unpacklo_epi16(s3, _mm_setzero_si128());
                         s3 = _mm_unpackhi_epi16(s3, _mm_setzero_si128());
@@ -1373,7 +1284,7 @@ void SadLoopKernel_SSE4_1_INTRIN(
                             s5 = _mm_adds_epu16(s5, _mm_mpsadbw_epu8(s1, s2, 2));
                             s6 = _mm_adds_epu16(s6, _mm_mpsadbw_epu8(s1, s2, 7));
                             pSrc += src_stride;
-                            pRef += refStride;
+                            pRef += ref_stride;
                         }
                         s0 = _mm_unpacklo_epi16(s3, _mm_setzero_si128());
                         s3 = _mm_unpackhi_epi16(s3, _mm_setzero_si128());
@@ -1414,7 +1325,7 @@ void SadLoopKernel_SSE4_1_INTRIN(
                         }
                     }
                 }
-                ref += srcStrideRaw;
+                ref += src_stride_raw;
             }
         }
         break;
@@ -1457,7 +1368,7 @@ void SadLoopKernel_SSE4_1_INTRIN(
                         s5 = _mm_adds_epu16(s5, _mm_mpsadbw_epu8(s1, s2, 2));
                         s6 = _mm_adds_epu16(s6, _mm_mpsadbw_epu8(s1, s2, 7));
                         pSrc += src_stride;
-                        pRef += refStride;
+                        pRef += ref_stride;
                     }
                     s9 = s10 = s11 = s12 = _mm_setzero_si128();
                     for (; k < height; k++) {
@@ -1490,7 +1401,7 @@ void SadLoopKernel_SSE4_1_INTRIN(
                         s11 = _mm_adds_epu16(s11, _mm_mpsadbw_epu8(s1, s2, 2));
                         s12 = _mm_adds_epu16(s12, _mm_mpsadbw_epu8(s1, s2, 7));
                         pSrc += src_stride;
-                        pRef += refStride;
+                        pRef += ref_stride;
                     }
                     s0 = _mm_adds_epu16(_mm_adds_epu16(s3, s4), _mm_adds_epu16(s5, s6));
                     s0 = _mm_adds_epu16(s0, _mm_adds_epu16(_mm_adds_epu16(s9, s10), _mm_adds_epu16(s11, s12)));
@@ -1570,7 +1481,7 @@ void SadLoopKernel_SSE4_1_INTRIN(
                         s5 = _mm_adds_epu16(s5, _mm_mpsadbw_epu8(s1, s2, 2));
                         s6 = _mm_adds_epu16(s6, _mm_mpsadbw_epu8(s1, s2, 7));
                         pSrc += src_stride;
-                        pRef += refStride;
+                        pRef += ref_stride;
                     }
                     s9 = s10 = s11 = s12 = _mm_setzero_si128();
                     for (; k < height; k++) {
@@ -1603,7 +1514,7 @@ void SadLoopKernel_SSE4_1_INTRIN(
                         s11 = _mm_adds_epu16(s11, _mm_mpsadbw_epu8(s1, s2, 2));
                         s12 = _mm_adds_epu16(s12, _mm_mpsadbw_epu8(s1, s2, 7));
                         pSrc += src_stride;
-                        pRef += refStride;
+                        pRef += ref_stride;
                     }
                     s0 = _mm_adds_epu16(_mm_adds_epu16(s3, s4), _mm_adds_epu16(s5, s6));
                     s0 = _mm_adds_epu16(s0, _mm_adds_epu16(_mm_adds_epu16(s9, s10), _mm_adds_epu16(s11, s12)));
@@ -1654,7 +1565,7 @@ void SadLoopKernel_SSE4_1_INTRIN(
                         }
                     }
                 }
-                ref += srcStrideRaw;
+                ref += src_stride_raw;
             }
         }
         else {
@@ -1697,7 +1608,7 @@ void SadLoopKernel_SSE4_1_INTRIN(
                             s5 = _mm_adds_epu16(s5, _mm_mpsadbw_epu8(s1, s2, 2));
                             s6 = _mm_adds_epu16(s6, _mm_mpsadbw_epu8(s1, s2, 7));
                             pSrc += src_stride;
-                            pRef += refStride;
+                            pRef += ref_stride;
                         }
                         s0 = _mm_unpacklo_epi16(s3, _mm_setzero_si128());
                         s3 = _mm_unpackhi_epi16(s3, _mm_setzero_si128());
@@ -1770,7 +1681,7 @@ void SadLoopKernel_SSE4_1_INTRIN(
                             s5 = _mm_adds_epu16(s5, _mm_mpsadbw_epu8(s1, s2, 2));
                             s6 = _mm_adds_epu16(s6, _mm_mpsadbw_epu8(s1, s2, 7));
                             pSrc += src_stride;
-                            pRef += refStride;
+                            pRef += ref_stride;
                         }
                         s0 = _mm_unpacklo_epi16(s3, _mm_setzero_si128());
                         s3 = _mm_unpackhi_epi16(s3, _mm_setzero_si128());
@@ -1811,7 +1722,7 @@ void SadLoopKernel_SSE4_1_INTRIN(
                         }
                     }
                 }
-                ref += srcStrideRaw;
+                ref += src_stride_raw;
             }
         }
         break;
@@ -1821,26 +1732,26 @@ void SadLoopKernel_SSE4_1_INTRIN(
         break;
     }
 
-    *bestSad = lowSum;
-    *xSearchCenter = xBest;
-    *ySearchCenter = yBest;
+    *best_sad = lowSum;
+    *x_search_center = xBest;
+    *y_search_center = yBest;
 }
 
-void SadLoopKernelSparse_SSE4_1_INTRIN(
+void sad_loop_kernel_sparse_sse4_1_intrin(
     uint8_t  *src,                            // input parameter, source samples Ptr
     uint32_t  src_stride,                      // input parameter, source stride
     uint8_t  *ref,                            // input parameter, reference samples Ptr
-    uint32_t  refStride,                      // input parameter, reference stride
+    uint32_t  ref_stride,                      // input parameter, reference stride
     uint32_t  height,                         // input parameter, block height (M)
     uint32_t  width,                          // input parameter, block width (N)
-    uint64_t *bestSad,
-    int16_t *xSearchCenter,
-    int16_t *ySearchCenter,
-    uint32_t  srcStrideRaw,                   // input parameter, source stride (no line skipping)
+    uint64_t *best_sad,
+    int16_t *x_search_center,
+    int16_t *y_search_center,
+    uint32_t  src_stride_raw,                   // input parameter, source stride (no line skipping)
     int16_t search_area_width,
     int16_t search_area_height)
 {
-    int16_t xBest = *xSearchCenter, yBest = *ySearchCenter;
+    int16_t xBest = *x_search_center, yBest = *y_search_center;
     uint32_t lowSum = 0xffffff;
     uint32_t temSum = 0;
     int16_t i, j;
@@ -1864,13 +1775,13 @@ void SadLoopKernelSparse_SSE4_1_INTRIN(
                 s3 = _mm_setzero_si128();
                 for (k = 0; k < height; k += 2) {
                     s0 = _mm_loadu_si128((__m128i*)pRef);
-                    s1 = _mm_loadu_si128((__m128i*)(pRef + refStride));
+                    s1 = _mm_loadu_si128((__m128i*)(pRef + ref_stride));
                     s2 = _mm_cvtsi32_si128(*(uint32_t *)pSrc);
                     s5 = _mm_cvtsi32_si128(*(uint32_t *)(pSrc + src_stride));
                     s3 = _mm_adds_epu16(s3, _mm_mpsadbw_epu8(s0, s2, 0));
                     s3 = _mm_adds_epu16(s3, _mm_mpsadbw_epu8(s1, s5, 0));
                     pSrc += src_stride << 1;
-                    pRef += refStride << 1;
+                    pRef += ref_stride << 1;
                 }
                 s3 = _mm_minpos_epu16(s3);
                 temSum = _mm_extract_epi16(s3, 0);
@@ -1887,13 +1798,13 @@ void SadLoopKernelSparse_SSE4_1_INTRIN(
                 s3 = _mm_setzero_si128();
                 for (k = 0; k < height; k += 2) {
                     s0 = _mm_loadu_si128((__m128i*)pRef);
-                    s1 = _mm_loadu_si128((__m128i*)(pRef + refStride));
+                    s1 = _mm_loadu_si128((__m128i*)(pRef + ref_stride));
                     s2 = _mm_cvtsi32_si128(*(uint32_t *)pSrc);
                     s5 = _mm_cvtsi32_si128(*(uint32_t *)(pSrc + src_stride));
                     s3 = _mm_adds_epu16(s3, _mm_mpsadbw_epu8(s0, s2, 0));
                     s3 = _mm_adds_epu16(s3, _mm_mpsadbw_epu8(s1, s5, 0));
                     pSrc += src_stride << 1;
-                    pRef += refStride << 1;
+                    pRef += ref_stride << 1;
                 }
                 s3 = _mm_or_si128(s3, s8);
                 s3 = _mm_minpos_epu16(s3);
@@ -1904,7 +1815,7 @@ void SadLoopKernelSparse_SSE4_1_INTRIN(
                     yBest = i;
                 }
             }
-            ref += srcStrideRaw;
+            ref += src_stride_raw;
         }
         break;
 
@@ -1916,7 +1827,7 @@ void SadLoopKernelSparse_SSE4_1_INTRIN(
                 s3 = s4 = _mm_setzero_si128();
                 for (k = 0; k < height; k += 2) {
                     s0 = _mm_loadu_si128((__m128i*)pRef);
-                    s1 = _mm_loadu_si128((__m128i*)(pRef + refStride));
+                    s1 = _mm_loadu_si128((__m128i*)(pRef + ref_stride));
                     s2 = _mm_loadl_epi64((__m128i*)pSrc);
                     s5 = _mm_loadl_epi64((__m128i*)(pSrc + src_stride));
                     s3 = _mm_adds_epu16(s3, _mm_mpsadbw_epu8(s0, s2, 0));
@@ -1924,7 +1835,7 @@ void SadLoopKernelSparse_SSE4_1_INTRIN(
                     s3 = _mm_adds_epu16(s3, _mm_mpsadbw_epu8(s1, s5, 0));
                     s4 = _mm_adds_epu16(s4, _mm_mpsadbw_epu8(s1, s5, 5));
                     pSrc += src_stride << 1;
-                    pRef += refStride << 1;
+                    pRef += ref_stride << 1;
                 }
                 s3 = _mm_adds_epu16(s3, s4);
                 s3 = _mm_minpos_epu16(s3);
@@ -1942,7 +1853,7 @@ void SadLoopKernelSparse_SSE4_1_INTRIN(
                 s3 = s4 = _mm_setzero_si128();
                 for (k = 0; k < height; k += 2) {
                     s0 = _mm_loadu_si128((__m128i*)pRef);
-                    s1 = _mm_loadu_si128((__m128i*)(pRef + refStride));
+                    s1 = _mm_loadu_si128((__m128i*)(pRef + ref_stride));
                     s2 = _mm_loadl_epi64((__m128i*)pSrc);
                     s5 = _mm_loadl_epi64((__m128i*)(pSrc + src_stride));
                     s3 = _mm_adds_epu16(s3, _mm_mpsadbw_epu8(s0, s2, 0));
@@ -1950,7 +1861,7 @@ void SadLoopKernelSparse_SSE4_1_INTRIN(
                     s3 = _mm_adds_epu16(s3, _mm_mpsadbw_epu8(s1, s5, 0));
                     s4 = _mm_adds_epu16(s4, _mm_mpsadbw_epu8(s1, s5, 5));
                     pSrc += src_stride << 1;
-                    pRef += refStride << 1;
+                    pRef += ref_stride << 1;
                 }
                 s3 = _mm_adds_epu16(s3, s4);
                 s3 = _mm_or_si128(s3, s8);
@@ -1962,7 +1873,7 @@ void SadLoopKernelSparse_SSE4_1_INTRIN(
                     yBest = i;
                 }
             }
-            ref += srcStrideRaw;
+            ref += src_stride_raw;
         }
         break;
 
@@ -1983,7 +1894,7 @@ void SadLoopKernelSparse_SSE4_1_INTRIN(
                         s5 = _mm_adds_epu16(s5, _mm_mpsadbw_epu8(s1, s2, 2));
                         s6 = _mm_adds_epu16(s6, _mm_mpsadbw_epu8(s1, s2, 7));
                         pSrc += src_stride;
-                        pRef += refStride;
+                        pRef += ref_stride;
                     }
                     s3 = _mm_adds_epu16(_mm_adds_epu16(s3, s4), _mm_adds_epu16(s5, s6));
                     s3 = _mm_minpos_epu16(s3);
@@ -2008,7 +1919,7 @@ void SadLoopKernelSparse_SSE4_1_INTRIN(
                         s5 = _mm_adds_epu16(s5, _mm_mpsadbw_epu8(s1, s2, 2));
                         s6 = _mm_adds_epu16(s6, _mm_mpsadbw_epu8(s1, s2, 7));
                         pSrc += src_stride;
-                        pRef += refStride;
+                        pRef += ref_stride;
                     }
                     s3 = _mm_adds_epu16(_mm_adds_epu16(s3, s4), _mm_adds_epu16(s5, s6));
                     s3 = _mm_or_si128(s3, s8);
@@ -2020,7 +1931,7 @@ void SadLoopKernelSparse_SSE4_1_INTRIN(
                         yBest = i;
                     }
                 }
-                ref += srcStrideRaw;
+                ref += src_stride_raw;
             }
         }
         else if (height <= 32) {
@@ -2038,7 +1949,7 @@ void SadLoopKernelSparse_SSE4_1_INTRIN(
                         s5 = _mm_adds_epu16(s5, _mm_mpsadbw_epu8(s1, s2, 2));
                         s6 = _mm_adds_epu16(s6, _mm_mpsadbw_epu8(s1, s2, 7));
                         pSrc += src_stride;
-                        pRef += refStride;
+                        pRef += ref_stride;
                     }
                     s3 = _mm_adds_epu16(s3, s4);
                     s5 = _mm_adds_epu16(s5, s6);
@@ -2077,7 +1988,7 @@ void SadLoopKernelSparse_SSE4_1_INTRIN(
                         s5 = _mm_adds_epu16(s5, _mm_mpsadbw_epu8(s1, s2, 2));
                         s6 = _mm_adds_epu16(s6, _mm_mpsadbw_epu8(s1, s2, 7));
                         pSrc += src_stride;
-                        pRef += refStride;
+                        pRef += ref_stride;
                     }
                     s3 = _mm_adds_epu16(s3, s4);
                     s5 = _mm_adds_epu16(s5, s6);
@@ -2104,7 +2015,7 @@ void SadLoopKernelSparse_SSE4_1_INTRIN(
                         yBest = i;
                     }
                 }
-                ref += srcStrideRaw;
+                ref += src_stride_raw;
             }
         }
         else {
@@ -2122,7 +2033,7 @@ void SadLoopKernelSparse_SSE4_1_INTRIN(
                         s5 = _mm_adds_epu16(s5, _mm_mpsadbw_epu8(s1, s2, 2));
                         s6 = _mm_adds_epu16(s6, _mm_mpsadbw_epu8(s1, s2, 7));
                         pSrc += src_stride;
-                        pRef += refStride;
+                        pRef += ref_stride;
                     }
                     s0 = _mm_adds_epu16(_mm_adds_epu16(s3, s4), _mm_adds_epu16(s5, s6));
                     s0 = _mm_minpos_epu16(s0);
@@ -2169,7 +2080,7 @@ void SadLoopKernelSparse_SSE4_1_INTRIN(
                         s5 = _mm_adds_epu16(s5, _mm_mpsadbw_epu8(s1, s2, 2));
                         s6 = _mm_adds_epu16(s6, _mm_mpsadbw_epu8(s1, s2, 7));
                         pSrc += src_stride;
-                        pRef += refStride;
+                        pRef += ref_stride;
                     }
                     s0 = _mm_adds_epu16(_mm_adds_epu16(s3, s4), _mm_adds_epu16(s5, s6));
                     s0 = _mm_or_si128(s0, s8);
@@ -2208,7 +2119,7 @@ void SadLoopKernelSparse_SSE4_1_INTRIN(
                         }
                     }
                 }
-                ref += srcStrideRaw;
+                ref += src_stride_raw;
             }
         }
         break;
@@ -2233,7 +2144,7 @@ void SadLoopKernelSparse_SSE4_1_INTRIN(
                         s3 = _mm_adds_epu16(s3, _mm_mpsadbw_epu8(s0, s2, 0));
                         s4 = _mm_adds_epu16(s4, _mm_mpsadbw_epu8(s0, s2, 5));
                         pSrc += src_stride;
-                        pRef += refStride;
+                        pRef += ref_stride;
                     }
                     s3 = _mm_adds_epu16(s3, s4);
                     s5 = _mm_adds_epu16(s5, s6);
@@ -2276,7 +2187,7 @@ void SadLoopKernelSparse_SSE4_1_INTRIN(
                         s3 = _mm_adds_epu16(s3, _mm_mpsadbw_epu8(s0, s2, 0));
                         s4 = _mm_adds_epu16(s4, _mm_mpsadbw_epu8(s0, s2, 5));
                         pSrc += src_stride;
-                        pRef += refStride;
+                        pRef += ref_stride;
                     }
                     s3 = _mm_adds_epu16(s3, s4);
                     s5 = _mm_adds_epu16(s5, s6);
@@ -2303,7 +2214,7 @@ void SadLoopKernelSparse_SSE4_1_INTRIN(
                         yBest = i;
                     }
                 }
-                ref += srcStrideRaw;
+                ref += src_stride_raw;
             }
         }
         else {
@@ -2325,7 +2236,7 @@ void SadLoopKernelSparse_SSE4_1_INTRIN(
                         s3 = _mm_adds_epu16(s3, _mm_mpsadbw_epu8(s0, s2, 0));
                         s4 = _mm_adds_epu16(s4, _mm_mpsadbw_epu8(s0, s2, 5));
                         pSrc += src_stride;
-                        pRef += refStride;
+                        pRef += ref_stride;
                     }
                     s0 = _mm_adds_epu16(_mm_adds_epu16(s3, s4), _mm_adds_epu16(s5, s6));
                     s0 = _mm_minpos_epu16(s0);
@@ -2376,7 +2287,7 @@ void SadLoopKernelSparse_SSE4_1_INTRIN(
                         s3 = _mm_adds_epu16(s3, _mm_mpsadbw_epu8(s0, s2, 0));
                         s4 = _mm_adds_epu16(s4, _mm_mpsadbw_epu8(s0, s2, 5));
                         pSrc += src_stride;
-                        pRef += refStride;
+                        pRef += ref_stride;
                     }
                     s0 = _mm_adds_epu16(_mm_adds_epu16(s3, s4), _mm_adds_epu16(s5, s6));
                     s0 = _mm_or_si128(s0, s8);
@@ -2415,7 +2326,7 @@ void SadLoopKernelSparse_SSE4_1_INTRIN(
                         }
                     }
                 }
-                ref += srcStrideRaw;
+                ref += src_stride_raw;
             }
         }
         break;
@@ -2443,7 +2354,7 @@ void SadLoopKernelSparse_SSE4_1_INTRIN(
                         s5 = _mm_adds_epu16(s5, _mm_mpsadbw_epu8(s1, s2, 2));
                         s6 = _mm_adds_epu16(s6, _mm_mpsadbw_epu8(s1, s2, 7));
                         pSrc += src_stride;
-                        pRef += refStride;
+                        pRef += ref_stride;
                     }
                     s0 = _mm_adds_epu16(_mm_adds_epu16(s3, s4), _mm_adds_epu16(s5, s6));
                     s0 = _mm_minpos_epu16(s0);
@@ -2498,7 +2409,7 @@ void SadLoopKernelSparse_SSE4_1_INTRIN(
                         s5 = _mm_adds_epu16(s5, _mm_mpsadbw_epu8(s1, s2, 2));
                         s6 = _mm_adds_epu16(s6, _mm_mpsadbw_epu8(s1, s2, 7));
                         pSrc += src_stride;
-                        pRef += refStride;
+                        pRef += ref_stride;
                     }
                     s0 = _mm_adds_epu16(_mm_adds_epu16(s3, s4), _mm_adds_epu16(s5, s6));
                     s0 = _mm_or_si128(s0, s8);
@@ -2538,7 +2449,7 @@ void SadLoopKernelSparse_SSE4_1_INTRIN(
                         }
                     }
                 }
-                ref += srcStrideRaw;
+                ref += src_stride_raw;
             }
         }
         else {
@@ -2564,7 +2475,7 @@ void SadLoopKernelSparse_SSE4_1_INTRIN(
                         s5 = _mm_adds_epu16(s5, _mm_mpsadbw_epu8(s1, s2, 2));
                         s6 = _mm_adds_epu16(s6, _mm_mpsadbw_epu8(s1, s2, 7));
                         pSrc += src_stride;
-                        pRef += refStride;
+                        pRef += ref_stride;
                     }
                     s9 = s10 = s11 = s12 = _mm_setzero_si128();
                     for (; k < height; k++) {
@@ -2583,7 +2494,7 @@ void SadLoopKernelSparse_SSE4_1_INTRIN(
                         s11 = _mm_adds_epu16(s11, _mm_mpsadbw_epu8(s1, s2, 2));
                         s12 = _mm_adds_epu16(s12, _mm_mpsadbw_epu8(s1, s2, 7));
                         pSrc += src_stride;
-                        pRef += refStride;
+                        pRef += ref_stride;
                     }
                     s0 = _mm_adds_epu16(_mm_adds_epu16(s3, s4), _mm_adds_epu16(s5, s6));
                     s0 = _mm_adds_epu16(s0, _mm_adds_epu16(_mm_adds_epu16(s9, s10), _mm_adds_epu16(s11, s12)));
@@ -2649,7 +2560,7 @@ void SadLoopKernelSparse_SSE4_1_INTRIN(
                         s5 = _mm_adds_epu16(s5, _mm_mpsadbw_epu8(s1, s2, 2));
                         s6 = _mm_adds_epu16(s6, _mm_mpsadbw_epu8(s1, s2, 7));
                         pSrc += src_stride;
-                        pRef += refStride;
+                        pRef += ref_stride;
                     }
                     s9 = s10 = s11 = s12 = _mm_setzero_si128();
                     for (; k < height; k++) {
@@ -2668,7 +2579,7 @@ void SadLoopKernelSparse_SSE4_1_INTRIN(
                         s11 = _mm_adds_epu16(s11, _mm_mpsadbw_epu8(s1, s2, 2));
                         s12 = _mm_adds_epu16(s12, _mm_mpsadbw_epu8(s1, s2, 7));
                         pSrc += src_stride;
-                        pRef += refStride;
+                        pRef += ref_stride;
                     }
                     s0 = _mm_adds_epu16(_mm_adds_epu16(s3, s4), _mm_adds_epu16(s5, s6));
                     s0 = _mm_adds_epu16(s0, _mm_adds_epu16(_mm_adds_epu16(s9, s10), _mm_adds_epu16(s11, s12)));
@@ -2719,7 +2630,7 @@ void SadLoopKernelSparse_SSE4_1_INTRIN(
                         }
                     }
                 }
-                ref += srcStrideRaw;
+                ref += src_stride_raw;
             }
         }
         break;
@@ -2755,7 +2666,7 @@ void SadLoopKernelSparse_SSE4_1_INTRIN(
                         s5 = _mm_adds_epu16(s5, _mm_mpsadbw_epu8(s1, s2, 2));
                         s6 = _mm_adds_epu16(s6, _mm_mpsadbw_epu8(s1, s2, 7));
                         pSrc += src_stride;
-                        pRef += refStride;
+                        pRef += ref_stride;
                     }
                     s9 = s10 = s11 = s12 = _mm_setzero_si128();
                     for (; k < height; k++) {
@@ -2781,7 +2692,7 @@ void SadLoopKernelSparse_SSE4_1_INTRIN(
                         s11 = _mm_adds_epu16(s11, _mm_mpsadbw_epu8(s1, s2, 2));
                         s12 = _mm_adds_epu16(s12, _mm_mpsadbw_epu8(s1, s2, 7));
                         pSrc += src_stride;
-                        pRef += refStride;
+                        pRef += ref_stride;
                     }
                     s0 = _mm_adds_epu16(_mm_adds_epu16(s3, s4), _mm_adds_epu16(s5, s6));
                     s0 = _mm_adds_epu16(s0, _mm_adds_epu16(_mm_adds_epu16(s9, s10), _mm_adds_epu16(s11, s12)));
@@ -2854,7 +2765,7 @@ void SadLoopKernelSparse_SSE4_1_INTRIN(
                         s5 = _mm_adds_epu16(s5, _mm_mpsadbw_epu8(s1, s2, 2));
                         s6 = _mm_adds_epu16(s6, _mm_mpsadbw_epu8(s1, s2, 7));
                         pSrc += src_stride;
-                        pRef += refStride;
+                        pRef += ref_stride;
                     }
                     s9 = s10 = s11 = s12 = _mm_setzero_si128();
                     for (; k < height; k++) {
@@ -2880,7 +2791,7 @@ void SadLoopKernelSparse_SSE4_1_INTRIN(
                         s11 = _mm_adds_epu16(s11, _mm_mpsadbw_epu8(s1, s2, 2));
                         s12 = _mm_adds_epu16(s12, _mm_mpsadbw_epu8(s1, s2, 7));
                         pSrc += src_stride;
-                        pRef += refStride;
+                        pRef += ref_stride;
                     }
                     s0 = _mm_adds_epu16(_mm_adds_epu16(s3, s4), _mm_adds_epu16(s5, s6));
                     s0 = _mm_adds_epu16(s0, _mm_adds_epu16(_mm_adds_epu16(s9, s10), _mm_adds_epu16(s11, s12)));
@@ -2931,7 +2842,7 @@ void SadLoopKernelSparse_SSE4_1_INTRIN(
                         }
                     }
                 }
-                ref += srcStrideRaw;
+                ref += src_stride_raw;
             }
         }
         else {
@@ -2967,7 +2878,7 @@ void SadLoopKernelSparse_SSE4_1_INTRIN(
                             s5 = _mm_adds_epu16(s5, _mm_mpsadbw_epu8(s1, s2, 2));
                             s6 = _mm_adds_epu16(s6, _mm_mpsadbw_epu8(s1, s2, 7));
                             pSrc += src_stride;
-                            pRef += refStride;
+                            pRef += ref_stride;
                         }
                         s0 = _mm_unpacklo_epi16(s3, _mm_setzero_si128());
                         s3 = _mm_unpackhi_epi16(s3, _mm_setzero_si128());
@@ -3033,7 +2944,7 @@ void SadLoopKernelSparse_SSE4_1_INTRIN(
                             s5 = _mm_adds_epu16(s5, _mm_mpsadbw_epu8(s1, s2, 2));
                             s6 = _mm_adds_epu16(s6, _mm_mpsadbw_epu8(s1, s2, 7));
                             pSrc += src_stride;
-                            pRef += refStride;
+                            pRef += ref_stride;
                         }
                         s0 = _mm_unpacklo_epi16(s3, _mm_setzero_si128());
                         s3 = _mm_unpackhi_epi16(s3, _mm_setzero_si128());
@@ -3074,7 +2985,7 @@ void SadLoopKernelSparse_SSE4_1_INTRIN(
                         }
                     }
                 }
-                ref += srcStrideRaw;
+                ref += src_stride_raw;
             }
         }
         break;
@@ -3117,7 +3028,7 @@ void SadLoopKernelSparse_SSE4_1_INTRIN(
                         s5 = _mm_adds_epu16(s5, _mm_mpsadbw_epu8(s1, s2, 2));
                         s6 = _mm_adds_epu16(s6, _mm_mpsadbw_epu8(s1, s2, 7));
                         pSrc += src_stride;
-                        pRef += refStride;
+                        pRef += ref_stride;
                     }
                     s9 = s10 = s11 = s12 = _mm_setzero_si128();
                     for (; k < height; k++) {
@@ -3150,7 +3061,7 @@ void SadLoopKernelSparse_SSE4_1_INTRIN(
                         s11 = _mm_adds_epu16(s11, _mm_mpsadbw_epu8(s1, s2, 2));
                         s12 = _mm_adds_epu16(s12, _mm_mpsadbw_epu8(s1, s2, 7));
                         pSrc += src_stride;
-                        pRef += refStride;
+                        pRef += ref_stride;
                     }
                     s0 = _mm_adds_epu16(_mm_adds_epu16(s3, s4), _mm_adds_epu16(s5, s6));
                     s0 = _mm_adds_epu16(s0, _mm_adds_epu16(_mm_adds_epu16(s9, s10), _mm_adds_epu16(s11, s12)));
@@ -3230,7 +3141,7 @@ void SadLoopKernelSparse_SSE4_1_INTRIN(
                         s5 = _mm_adds_epu16(s5, _mm_mpsadbw_epu8(s1, s2, 2));
                         s6 = _mm_adds_epu16(s6, _mm_mpsadbw_epu8(s1, s2, 7));
                         pSrc += src_stride;
-                        pRef += refStride;
+                        pRef += ref_stride;
                     }
                     s9 = s10 = s11 = s12 = _mm_setzero_si128();
                     for (; k < height; k++) {
@@ -3263,7 +3174,7 @@ void SadLoopKernelSparse_SSE4_1_INTRIN(
                         s11 = _mm_adds_epu16(s11, _mm_mpsadbw_epu8(s1, s2, 2));
                         s12 = _mm_adds_epu16(s12, _mm_mpsadbw_epu8(s1, s2, 7));
                         pSrc += src_stride;
-                        pRef += refStride;
+                        pRef += ref_stride;
                     }
                     s0 = _mm_adds_epu16(_mm_adds_epu16(s3, s4), _mm_adds_epu16(s5, s6));
                     s0 = _mm_adds_epu16(s0, _mm_adds_epu16(_mm_adds_epu16(s9, s10), _mm_adds_epu16(s11, s12)));
@@ -3314,7 +3225,7 @@ void SadLoopKernelSparse_SSE4_1_INTRIN(
                         }
                     }
                 }
-                ref += srcStrideRaw;
+                ref += src_stride_raw;
             }
         }
         else {
@@ -3357,7 +3268,7 @@ void SadLoopKernelSparse_SSE4_1_INTRIN(
                             s5 = _mm_adds_epu16(s5, _mm_mpsadbw_epu8(s1, s2, 2));
                             s6 = _mm_adds_epu16(s6, _mm_mpsadbw_epu8(s1, s2, 7));
                             pSrc += src_stride;
-                            pRef += refStride;
+                            pRef += ref_stride;
                         }
                         s0 = _mm_unpacklo_epi16(s3, _mm_setzero_si128());
                         s3 = _mm_unpackhi_epi16(s3, _mm_setzero_si128());
@@ -3430,7 +3341,7 @@ void SadLoopKernelSparse_SSE4_1_INTRIN(
                             s5 = _mm_adds_epu16(s5, _mm_mpsadbw_epu8(s1, s2, 2));
                             s6 = _mm_adds_epu16(s6, _mm_mpsadbw_epu8(s1, s2, 7));
                             pSrc += src_stride;
-                            pRef += refStride;
+                            pRef += ref_stride;
                         }
                         s0 = _mm_unpacklo_epi16(s3, _mm_setzero_si128());
                         s3 = _mm_unpackhi_epi16(s3, _mm_setzero_si128());
@@ -3471,7 +3382,7 @@ void SadLoopKernelSparse_SSE4_1_INTRIN(
                         }
                     }
                 }
-                ref += srcStrideRaw;
+                ref += src_stride_raw;
             }
         }
         break;
@@ -3481,9 +3392,9 @@ void SadLoopKernelSparse_SSE4_1_INTRIN(
         break;
     }
 
-    *bestSad = lowSum;
-    *xSearchCenter = xBest;
-    *ySearchCenter = yBest;
+    *best_sad = lowSum;
+    *x_search_center = xBest;
+    *y_search_center = yBest;
 }
 
 /*******************************************************************************
@@ -3491,21 +3402,21 @@ void SadLoopKernelSparse_SSE4_1_INTRIN(
 * Requirement: height <= 64
 * Requirement: height % 2 = 0 when width = 4 or 8
 *******************************************************************************/
-void SadLoopKernel_SSE4_1_HmeL0_INTRIN(
+void sad_loop_kernel_sse4_1_hme_l0_intrin(
     uint8_t  *src,                            // input parameter, source samples Ptr
     uint32_t  src_stride,                      // input parameter, source stride
     uint8_t  *ref,                            // input parameter, reference samples Ptr
-    uint32_t  refStride,                      // input parameter, reference stride
+    uint32_t  ref_stride,                      // input parameter, reference stride
     uint32_t  height,                         // input parameter, block height (M)
     uint32_t  width,                          // input parameter, block width (N)
-    uint64_t *bestSad,
-    int16_t *xSearchCenter,
-    int16_t *ySearchCenter,
-    uint32_t  srcStrideRaw,                   // input parameter, source stride (no line skipping)
+    uint64_t *best_sad,
+    int16_t *x_search_center,
+    int16_t *y_search_center,
+    uint32_t  src_stride_raw,                   // input parameter, source stride (no line skipping)
     int16_t search_area_width,
     int16_t search_area_height)
 {
-    int16_t xBest = *xSearchCenter, yBest = *ySearchCenter;
+    int16_t xBest = *x_search_center, yBest = *y_search_center;
     uint32_t lowSum = 0xffffff;
     uint32_t temSum = 0;
     int16_t i, j;
@@ -3523,13 +3434,13 @@ void SadLoopKernel_SSE4_1_HmeL0_INTRIN(
                 s3 = _mm_setzero_si128();
                 for (k = 0; k < height; k += 2) {
                     s0 = _mm_loadu_si128((__m128i*)pRef);
-                    s1 = _mm_loadu_si128((__m128i*)(pRef + refStride));
+                    s1 = _mm_loadu_si128((__m128i*)(pRef + ref_stride));
                     s2 = _mm_cvtsi32_si128(*(uint32_t *)pSrc);
                     s5 = _mm_cvtsi32_si128(*(uint32_t *)(pSrc + src_stride));
                     s3 = _mm_adds_epu16(s3, _mm_mpsadbw_epu8(s0, s2, 0));
                     s3 = _mm_adds_epu16(s3, _mm_mpsadbw_epu8(s1, s5, 0));
                     pSrc += src_stride << 1;
-                    pRef += refStride << 1;
+                    pRef += ref_stride << 1;
                 }
                 s3 = _mm_minpos_epu16(s3);
                 temSum = _mm_extract_epi16(s3, 0);
@@ -3539,7 +3450,7 @@ void SadLoopKernel_SSE4_1_HmeL0_INTRIN(
                     yBest = i;
                 }
             }
-            ref += srcStrideRaw;
+            ref += src_stride_raw;
         }
         break;
 
@@ -3551,7 +3462,7 @@ void SadLoopKernel_SSE4_1_HmeL0_INTRIN(
                 s3 = s4 = _mm_setzero_si128();
                 for (k = 0; k < height; k += 2) {
                     s0 = _mm_loadu_si128((__m128i*)pRef);
-                    s1 = _mm_loadu_si128((__m128i*)(pRef + refStride));
+                    s1 = _mm_loadu_si128((__m128i*)(pRef + ref_stride));
                     s2 = _mm_loadl_epi64((__m128i*)pSrc);
                     s5 = _mm_loadl_epi64((__m128i*)(pSrc + src_stride));
                     s3 = _mm_adds_epu16(s3, _mm_mpsadbw_epu8(s0, s2, 0));
@@ -3559,7 +3470,7 @@ void SadLoopKernel_SSE4_1_HmeL0_INTRIN(
                     s3 = _mm_adds_epu16(s3, _mm_mpsadbw_epu8(s1, s5, 0));
                     s4 = _mm_adds_epu16(s4, _mm_mpsadbw_epu8(s1, s5, 5));
                     pSrc += src_stride << 1;
-                    pRef += refStride << 1;
+                    pRef += ref_stride << 1;
                 }
                 s3 = _mm_adds_epu16(s3, s4);
                 s3 = _mm_minpos_epu16(s3);
@@ -3571,7 +3482,7 @@ void SadLoopKernel_SSE4_1_HmeL0_INTRIN(
                 }
             }
 
-            ref += srcStrideRaw;
+            ref += src_stride_raw;
         }
         break;
 
@@ -3597,7 +3508,7 @@ void SadLoopKernel_SSE4_1_HmeL0_INTRIN(
                         s9 = _mm_adds_epu16(s9, _mm_mpsadbw_epu8(s0, s2, 2));
                         s10 = _mm_adds_epu16(s10, _mm_mpsadbw_epu8(s0, s2, 7));
                         pSrc += src_stride;
-                        pRef += refStride;
+                        pRef += ref_stride;
                     }
                     s3 = _mm_adds_epu16(_mm_adds_epu16(s3, s4), _mm_adds_epu16(s5, s6));
                     s3 = _mm_minpos_epu16(s3);
@@ -3618,7 +3529,7 @@ void SadLoopKernel_SSE4_1_HmeL0_INTRIN(
                     }
                 }
 
-                ref += srcStrideRaw;
+                ref += src_stride_raw;
             }
         }
         else if (height <= 32) {
@@ -3636,7 +3547,7 @@ void SadLoopKernel_SSE4_1_HmeL0_INTRIN(
                         s5 = _mm_adds_epu16(s5, _mm_mpsadbw_epu8(s1, s2, 2));
                         s6 = _mm_adds_epu16(s6, _mm_mpsadbw_epu8(s1, s2, 7));
                         pSrc += src_stride;
-                        pRef += refStride;
+                        pRef += ref_stride;
                     }
                     s3 = _mm_adds_epu16(s3, s4);
                     s5 = _mm_adds_epu16(s5, s6);
@@ -3662,7 +3573,7 @@ void SadLoopKernel_SSE4_1_HmeL0_INTRIN(
                     }
                 }
 
-                ref += srcStrideRaw;
+                ref += src_stride_raw;
             }
         }
         else {
@@ -3680,7 +3591,7 @@ void SadLoopKernel_SSE4_1_HmeL0_INTRIN(
                         s5 = _mm_adds_epu16(s5, _mm_mpsadbw_epu8(s1, s2, 2));
                         s6 = _mm_adds_epu16(s6, _mm_mpsadbw_epu8(s1, s2, 7));
                         pSrc += src_stride;
-                        pRef += refStride;
+                        pRef += ref_stride;
                     }
                     s0 = _mm_adds_epu16(_mm_adds_epu16(s3, s4), _mm_adds_epu16(s5, s6));
                     s0 = _mm_minpos_epu16(s0);
@@ -3713,7 +3624,7 @@ void SadLoopKernel_SSE4_1_HmeL0_INTRIN(
                         }
                     }
                 }
-                ref += srcStrideRaw;
+                ref += src_stride_raw;
             }
         }
         break;
@@ -3738,7 +3649,7 @@ void SadLoopKernel_SSE4_1_HmeL0_INTRIN(
                         s3 = _mm_adds_epu16(s3, _mm_mpsadbw_epu8(s0, s2, 0));
                         s4 = _mm_adds_epu16(s4, _mm_mpsadbw_epu8(s0, s2, 5));
                         pSrc += src_stride;
-                        pRef += refStride;
+                        pRef += ref_stride;
                     }
                     s3 = _mm_adds_epu16(s3, s4);
                     s5 = _mm_adds_epu16(s5, s6);
@@ -3763,7 +3674,7 @@ void SadLoopKernel_SSE4_1_HmeL0_INTRIN(
                         yBest = i;
                     }
                 }
-                ref += srcStrideRaw;
+                ref += src_stride_raw;
             }
         }
         else {
@@ -3785,7 +3696,7 @@ void SadLoopKernel_SSE4_1_HmeL0_INTRIN(
                         s3 = _mm_adds_epu16(s3, _mm_mpsadbw_epu8(s0, s2, 0));
                         s4 = _mm_adds_epu16(s4, _mm_mpsadbw_epu8(s0, s2, 5));
                         pSrc += src_stride;
-                        pRef += refStride;
+                        pRef += ref_stride;
                     }
                     s0 = _mm_adds_epu16(_mm_adds_epu16(s3, s4), _mm_adds_epu16(s5, s6));
                     s0 = _mm_minpos_epu16(s0);
@@ -3819,7 +3730,7 @@ void SadLoopKernel_SSE4_1_HmeL0_INTRIN(
                     }
                 }
 
-                ref += srcStrideRaw;
+                ref += src_stride_raw;
             }
         }
         break;
@@ -3847,7 +3758,7 @@ void SadLoopKernel_SSE4_1_HmeL0_INTRIN(
                         s5 = _mm_adds_epu16(s5, _mm_mpsadbw_epu8(s1, s2, 2));
                         s6 = _mm_adds_epu16(s6, _mm_mpsadbw_epu8(s1, s2, 7));
                         pSrc += src_stride;
-                        pRef += refStride;
+                        pRef += ref_stride;
                     }
                     s3 = _mm_adds_epu16(s3, s4);
                     s5 = _mm_adds_epu16(s5, s6);
@@ -3874,7 +3785,7 @@ void SadLoopKernel_SSE4_1_HmeL0_INTRIN(
                     }
                 }
 
-                ref += srcStrideRaw;
+                ref += src_stride_raw;
             }
         }
         else if (height <= 32) {
@@ -3899,7 +3810,7 @@ void SadLoopKernel_SSE4_1_HmeL0_INTRIN(
                         s5 = _mm_adds_epu16(s5, _mm_mpsadbw_epu8(s1, s2, 2));
                         s6 = _mm_adds_epu16(s6, _mm_mpsadbw_epu8(s1, s2, 7));
                         pSrc += src_stride;
-                        pRef += refStride;
+                        pRef += ref_stride;
                     }
                     s0 = _mm_adds_epu16(_mm_adds_epu16(s3, s4), _mm_adds_epu16(s5, s6));
                     s0 = _mm_minpos_epu16(s0);
@@ -3933,7 +3844,7 @@ void SadLoopKernel_SSE4_1_HmeL0_INTRIN(
                         }
                     }
                 }
-                ref += srcStrideRaw;
+                ref += src_stride_raw;
             }
         }
         else {
@@ -3959,7 +3870,7 @@ void SadLoopKernel_SSE4_1_HmeL0_INTRIN(
                         s5 = _mm_adds_epu16(s5, _mm_mpsadbw_epu8(s1, s2, 2));
                         s6 = _mm_adds_epu16(s6, _mm_mpsadbw_epu8(s1, s2, 7));
                         pSrc += src_stride;
-                        pRef += refStride;
+                        pRef += ref_stride;
                     }
                     s9 = s10 = s11 = s12 = _mm_setzero_si128();
                     for (; k < height; k++) {
@@ -3978,7 +3889,7 @@ void SadLoopKernel_SSE4_1_HmeL0_INTRIN(
                         s11 = _mm_adds_epu16(s11, _mm_mpsadbw_epu8(s1, s2, 2));
                         s12 = _mm_adds_epu16(s12, _mm_mpsadbw_epu8(s1, s2, 7));
                         pSrc += src_stride;
-                        pRef += refStride;
+                        pRef += ref_stride;
                     }
                     s0 = _mm_adds_epu16(_mm_adds_epu16(s3, s4), _mm_adds_epu16(s5, s6));
                     s0 = _mm_adds_epu16(s0, _mm_adds_epu16(_mm_adds_epu16(s9, s10), _mm_adds_epu16(s11, s12)));
@@ -4024,7 +3935,7 @@ void SadLoopKernel_SSE4_1_HmeL0_INTRIN(
                     }
                 }
 
-                ref += srcStrideRaw;
+                ref += src_stride_raw;
             }
         }
         break;
@@ -4060,7 +3971,7 @@ void SadLoopKernel_SSE4_1_HmeL0_INTRIN(
                         s5 = _mm_adds_epu16(s5, _mm_mpsadbw_epu8(s1, s2, 2));
                         s6 = _mm_adds_epu16(s6, _mm_mpsadbw_epu8(s1, s2, 7));
                         pSrc += src_stride;
-                        pRef += refStride;
+                        pRef += ref_stride;
                     }
                     s9 = s10 = s11 = s12 = _mm_setzero_si128();
                     for (; k < height; k++) {
@@ -4086,7 +3997,7 @@ void SadLoopKernel_SSE4_1_HmeL0_INTRIN(
                         s11 = _mm_adds_epu16(s11, _mm_mpsadbw_epu8(s1, s2, 2));
                         s12 = _mm_adds_epu16(s12, _mm_mpsadbw_epu8(s1, s2, 7));
                         pSrc += src_stride;
-                        pRef += refStride;
+                        pRef += ref_stride;
                     }
                     s0 = _mm_adds_epu16(_mm_adds_epu16(s3, s4), _mm_adds_epu16(s5, s6));
                     s0 = _mm_adds_epu16(s0, _mm_adds_epu16(_mm_adds_epu16(s9, s10), _mm_adds_epu16(s11, s12)));
@@ -4132,7 +4043,7 @@ void SadLoopKernel_SSE4_1_HmeL0_INTRIN(
                     }
                 }
 
-                ref += srcStrideRaw;
+                ref += src_stride_raw;
             }
         }
         else {
@@ -4168,7 +4079,7 @@ void SadLoopKernel_SSE4_1_HmeL0_INTRIN(
                             s5 = _mm_adds_epu16(s5, _mm_mpsadbw_epu8(s1, s2, 2));
                             s6 = _mm_adds_epu16(s6, _mm_mpsadbw_epu8(s1, s2, 7));
                             pSrc += src_stride;
-                            pRef += refStride;
+                            pRef += ref_stride;
                         }
                         s0 = _mm_unpacklo_epi16(s3, _mm_setzero_si128());
                         s3 = _mm_unpackhi_epi16(s3, _mm_setzero_si128());
@@ -4204,7 +4115,7 @@ void SadLoopKernel_SSE4_1_HmeL0_INTRIN(
                     }
                 }
 
-                ref += srcStrideRaw;
+                ref += src_stride_raw;
             }
         }
         break;
@@ -4247,7 +4158,7 @@ void SadLoopKernel_SSE4_1_HmeL0_INTRIN(
                         s5 = _mm_adds_epu16(s5, _mm_mpsadbw_epu8(s1, s2, 2));
                         s6 = _mm_adds_epu16(s6, _mm_mpsadbw_epu8(s1, s2, 7));
                         pSrc += src_stride;
-                        pRef += refStride;
+                        pRef += ref_stride;
                     }
                     s9 = s10 = s11 = s12 = _mm_setzero_si128();
                     for (; k < height; k++) {
@@ -4280,7 +4191,7 @@ void SadLoopKernel_SSE4_1_HmeL0_INTRIN(
                         s11 = _mm_adds_epu16(s11, _mm_mpsadbw_epu8(s1, s2, 2));
                         s12 = _mm_adds_epu16(s12, _mm_mpsadbw_epu8(s1, s2, 7));
                         pSrc += src_stride;
-                        pRef += refStride;
+                        pRef += ref_stride;
                     }
                     s0 = _mm_adds_epu16(_mm_adds_epu16(s3, s4), _mm_adds_epu16(s5, s6));
                     s0 = _mm_adds_epu16(s0, _mm_adds_epu16(_mm_adds_epu16(s9, s10), _mm_adds_epu16(s11, s12)));
@@ -4326,7 +4237,7 @@ void SadLoopKernel_SSE4_1_HmeL0_INTRIN(
                     }
                 }
 
-                ref += srcStrideRaw;
+                ref += src_stride_raw;
             }
         }
         else {
@@ -4369,7 +4280,7 @@ void SadLoopKernel_SSE4_1_HmeL0_INTRIN(
                             s5 = _mm_adds_epu16(s5, _mm_mpsadbw_epu8(s1, s2, 2));
                             s6 = _mm_adds_epu16(s6, _mm_mpsadbw_epu8(s1, s2, 7));
                             pSrc += src_stride;
-                            pRef += refStride;
+                            pRef += ref_stride;
                         }
                         s0 = _mm_unpacklo_epi16(s3, _mm_setzero_si128());
                         s3 = _mm_unpackhi_epi16(s3, _mm_setzero_si128());
@@ -4405,7 +4316,7 @@ void SadLoopKernel_SSE4_1_HmeL0_INTRIN(
                     }
                 }
 
-                ref += srcStrideRaw;
+                ref += src_stride_raw;
             }
         }
         break;
@@ -4415,19 +4326,19 @@ void SadLoopKernel_SSE4_1_HmeL0_INTRIN(
         break;
     }
 
-    *bestSad = lowSum;
-    *xSearchCenter = xBest;
-    *ySearchCenter = yBest;
+    *best_sad = lowSum;
+    *x_search_center = xBest;
+    *y_search_center = yBest;
 }
 
 /*******************************************
  * GetEightHorizontalSearchPointResults_8x8_16x16_PU
  *******************************************/
-void GetEightHorizontalSearchPointResults_8x8_16x16_PU_SSE41_INTRIN(
+void get_eight_horizontal_search_point_results_8x8_16x16_pu_sse41_intrin(
     uint8_t   *src,
     uint32_t   src_stride,
     uint8_t   *ref,
-    uint32_t   refStride,
+    uint32_t   ref_stride,
     uint32_t  *p_best_sad8x8,
     uint32_t  *p_best_mv8x8,
     uint32_t  *p_best_sad16x16,
@@ -4485,7 +4396,7 @@ void GetEightHorizontalSearchPointResults_8x8_16x16_PU_SSE41_INTRIN(
         s3 = s4 = _mm_setzero_si128();
 
         s0 = _mm_loadu_si128((__m128i*)pRef);
-        s1 = _mm_loadu_si128((__m128i*)(pRef + refStride * 2));
+        s1 = _mm_loadu_si128((__m128i*)(pRef + ref_stride * 2));
         s2 = _mm_loadl_epi64((__m128i*)pSrc);
         s5 = _mm_loadl_epi64((__m128i*)(pSrc + src_stride * 2));
         s3 = _mm_adds_epu16(s3, _mm_mpsadbw_epu8(s0, s2, 0));
@@ -4494,10 +4405,10 @@ void GetEightHorizontalSearchPointResults_8x8_16x16_PU_SSE41_INTRIN(
         s4 = _mm_adds_epu16(s4, _mm_mpsadbw_epu8(s1, s5, 5));
 
         pSrc += src_stride * 4;
-        pRef += refStride * 4;
+        pRef += ref_stride * 4;
 
         s0 = _mm_loadu_si128((__m128i*)pRef);
-        s1 = _mm_loadu_si128((__m128i*)(pRef + refStride * 2));
+        s1 = _mm_loadu_si128((__m128i*)(pRef + ref_stride * 2));
         s2 = _mm_loadl_epi64((__m128i*)pSrc);
         s5 = _mm_loadl_epi64((__m128i*)(pSrc + src_stride * 2));
         s3 = _mm_adds_epu16(s3, _mm_mpsadbw_epu8(s0, s2, 0));
@@ -4526,7 +4437,7 @@ void GetEightHorizontalSearchPointResults_8x8_16x16_PU_SSE41_INTRIN(
         s3 = s4 = _mm_setzero_si128();
 
         s0 = _mm_loadu_si128((__m128i*)pRef);
-        s1 = _mm_loadu_si128((__m128i*)(pRef + refStride * 2));
+        s1 = _mm_loadu_si128((__m128i*)(pRef + ref_stride * 2));
         s2 = _mm_loadl_epi64((__m128i*)pSrc);
         s5 = _mm_loadl_epi64((__m128i*)(pSrc + src_stride * 2));
         s3 = _mm_adds_epu16(s3, _mm_mpsadbw_epu8(s0, s2, 0));
@@ -4535,10 +4446,10 @@ void GetEightHorizontalSearchPointResults_8x8_16x16_PU_SSE41_INTRIN(
         s4 = _mm_adds_epu16(s4, _mm_mpsadbw_epu8(s1, s5, 5));
 
         pSrc += src_stride * 4;
-        pRef += refStride * 4;
+        pRef += ref_stride * 4;
 
         s0 = _mm_loadu_si128((__m128i*)pRef);
-        s1 = _mm_loadu_si128((__m128i*)(pRef + refStride * 2));
+        s1 = _mm_loadu_si128((__m128i*)(pRef + ref_stride * 2));
         s2 = _mm_loadl_epi64((__m128i*)pSrc);
         s5 = _mm_loadl_epi64((__m128i*)(pSrc + src_stride * 2));
         s3 = _mm_adds_epu16(s3, _mm_mpsadbw_epu8(s0, s2, 0));
@@ -4563,11 +4474,11 @@ void GetEightHorizontalSearchPointResults_8x8_16x16_PU_SSE41_INTRIN(
     //8x8_2
     {
         pSrc = src + 8 * src_stride;
-        pRef = ref + 8 * refStride;
+        pRef = ref + 8 * ref_stride;
         s3 = s4 = _mm_setzero_si128();
 
         s0 = _mm_loadu_si128((__m128i*)pRef);
-        s1 = _mm_loadu_si128((__m128i*)(pRef + refStride * 2));
+        s1 = _mm_loadu_si128((__m128i*)(pRef + ref_stride * 2));
         s2 = _mm_loadl_epi64((__m128i*)pSrc);
         s5 = _mm_loadl_epi64((__m128i*)(pSrc + src_stride * 2));
         s3 = _mm_adds_epu16(s3, _mm_mpsadbw_epu8(s0, s2, 0));
@@ -4576,10 +4487,10 @@ void GetEightHorizontalSearchPointResults_8x8_16x16_PU_SSE41_INTRIN(
         s4 = _mm_adds_epu16(s4, _mm_mpsadbw_epu8(s1, s5, 5));
 
         pSrc += src_stride * 4;
-        pRef += refStride * 4;
+        pRef += ref_stride * 4;
 
         s0 = _mm_loadu_si128((__m128i*)pRef);
-        s1 = _mm_loadu_si128((__m128i*)(pRef + refStride * 2));
+        s1 = _mm_loadu_si128((__m128i*)(pRef + ref_stride * 2));
         s2 = _mm_loadl_epi64((__m128i*)pSrc);
         s5 = _mm_loadl_epi64((__m128i*)(pSrc + src_stride * 2));
         s3 = _mm_adds_epu16(s3, _mm_mpsadbw_epu8(s0, s2, 0));
@@ -4604,11 +4515,11 @@ void GetEightHorizontalSearchPointResults_8x8_16x16_PU_SSE41_INTRIN(
     //8x8_3
     {
         pSrc = src + 8 + 8 * src_stride;
-        pRef = ref + 8 + 8 * refStride;
+        pRef = ref + 8 + 8 * ref_stride;
         s3 = s4 = _mm_setzero_si128();
 
         s0 = _mm_loadu_si128((__m128i*)pRef);
-        s1 = _mm_loadu_si128((__m128i*)(pRef + refStride * 2));
+        s1 = _mm_loadu_si128((__m128i*)(pRef + ref_stride * 2));
         s2 = _mm_loadl_epi64((__m128i*)pSrc);
         s5 = _mm_loadl_epi64((__m128i*)(pSrc + src_stride * 2));
         s3 = _mm_adds_epu16(s3, _mm_mpsadbw_epu8(s0, s2, 0));
@@ -4617,10 +4528,10 @@ void GetEightHorizontalSearchPointResults_8x8_16x16_PU_SSE41_INTRIN(
         s4 = _mm_adds_epu16(s4, _mm_mpsadbw_epu8(s1, s5, 5));
 
         pSrc += src_stride * 4;
-        pRef += refStride * 4;
+        pRef += ref_stride * 4;
 
         s0 = _mm_loadu_si128((__m128i*)pRef);
-        s1 = _mm_loadu_si128((__m128i*)(pRef + refStride * 2));
+        s1 = _mm_loadu_si128((__m128i*)(pRef + ref_stride * 2));
         s2 = _mm_loadl_epi64((__m128i*)pSrc);
         s5 = _mm_loadl_epi64((__m128i*)(pSrc + src_stride * 2));
         s3 = _mm_adds_epu16(s3, _mm_mpsadbw_epu8(s0, s2, 0));
@@ -4668,7 +4579,7 @@ void GetEightHorizontalSearchPointResults_8x8_16x16_PU_SSE41_INTRIN(
  and check if there is improvement, if yes keep
  the best SAD+MV
  *******************************************/
-void GetEightHorizontalSearchPointResults_32x32_64x64_PU_SSE41_INTRIN(
+void get_eight_horizontal_search_point_results_32x32_64x64_pu_sse41_intrin(
     uint16_t  *p_sad16x16,
     uint32_t  *p_best_sad32x32,
     uint32_t  *p_best_sad64x64,
