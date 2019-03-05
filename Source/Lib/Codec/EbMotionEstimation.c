@@ -1059,15 +1059,1747 @@ static EB_EXTSADCALCULATION_TYPE ExtSadCalculation_funcPtrArray[ASM_TYPE_TOTAL] 
     ExtSadCalculation
 };
 
+#if NSQ_ME_OPT
+
+/****************************************************
+Calcualte SAD for Rect H, V and H4, V4 partitions
+
+and update its Motion info if the result SAD is better
+****************************************************/
+void ext_eigth_sad_calculation_nsq(
+    uint32_t   p_sad8x8[64][8],
+    uint32_t   p_sad16x16[16][8],
+    uint32_t   p_sad32x32[4][8],
+    uint32_t  *p_best_sad64x32,
+    uint32_t  *p_best_mv64x32,
+    uint32_t  *p_best_sad32x16,
+    uint32_t  *p_best_mv32x16,
+    uint32_t  *p_best_sad16x8,
+    uint32_t  *p_best_mv16x8,
+    uint32_t  *p_best_sad32x64,
+    uint32_t  *p_best_mv32x64,
+    uint32_t  *p_best_sad16x32,
+    uint32_t  *p_best_mv16x32,
+    uint32_t  *p_best_sad8x16,
+    uint32_t  *p_best_mv8x16,
+    uint32_t  *p_best_sad32x8,
+    uint32_t  *p_best_mv32x8,
+    uint32_t  *p_best_sad8x32,
+    uint32_t  *p_best_mv8x32,
+    uint32_t  *p_best_sad64x16,
+    uint32_t  *p_best_mv64x16,
+    uint32_t  *p_best_sad16x64,
+    uint32_t  *p_best_mv16x64,
+    uint32_t   mv)
+{
+    uint8_t search_index;
+    uint32_t sad;
+    uint32_t sad_16x8[32];
+    uint32_t sad_8x16[32];
+    uint32_t sad_32x16[8];
+    uint32_t sad_16x32[8];
+
+    int16_t x_mv, y_mv;
+
+    for (search_index = 0; search_index < 8; search_index++)
+    {
+        // 64x32
+        sad = p_sad32x32[0][search_index] + p_sad32x32[1][search_index];
+        if (sad < p_best_sad64x32[0]) {
+            p_best_sad64x32[0] = sad;
+            x_mv = _MVXT(mv) + (int16_t)search_index * 4;
+            y_mv = _MVYT(mv);
+            p_best_mv64x32[0] = ((uint16_t)y_mv << 16) | ((uint16_t)x_mv);
+        }
+
+        sad = p_sad32x32[2][search_index] + p_sad32x32[3][search_index];
+        if (sad < p_best_sad64x32[1]) {
+            p_best_sad64x32[1] = sad;
+            x_mv = _MVXT(mv) + (int16_t)search_index * 4;
+            y_mv = _MVYT(mv);
+            p_best_mv64x32[1] = ((uint16_t)y_mv << 16) | ((uint16_t)x_mv);
+        }
+
+        // 32x16
+        sad_32x16[0] = p_sad16x16[0][search_index] + p_sad16x16[1][search_index];
+        if (sad_32x16[0] < p_best_sad32x16[0]) {
+            p_best_sad32x16[0] = sad_32x16[0];
+            x_mv = _MVXT(mv) + (int16_t)search_index * 4;
+            y_mv = _MVYT(mv);
+            p_best_mv32x16[0] = ((uint16_t)y_mv << 16) | ((uint16_t)x_mv);
+        }
+
+        sad_32x16[1] = p_sad16x16[2][search_index] + p_sad16x16[3][search_index];
+        if (sad_32x16[1] < p_best_sad32x16[1]) {
+            p_best_sad32x16[1] = sad_32x16[1];
+            x_mv = _MVXT(mv) + (int16_t)search_index * 4;
+            y_mv = _MVYT(mv);
+            p_best_mv32x16[1] = ((uint16_t)y_mv << 16) | ((uint16_t)x_mv);
+        }
+
+        sad_32x16[2] = p_sad16x16[4][search_index] + p_sad16x16[5][search_index];
+        if (sad_32x16[2] < p_best_sad32x16[2]) {
+            p_best_sad32x16[2] = sad_32x16[2];
+            x_mv = _MVXT(mv) + (int16_t)search_index * 4;
+            y_mv = _MVYT(mv);
+            p_best_mv32x16[2] = ((uint16_t)y_mv << 16) | ((uint16_t)x_mv);
+        }
+
+        sad_32x16[3] = p_sad16x16[6][search_index] + p_sad16x16[7][search_index];
+        if (sad_32x16[3] < p_best_sad32x16[3]) {
+            p_best_sad32x16[3] = sad_32x16[3];
+            x_mv = _MVXT(mv) + (int16_t)search_index * 4;
+            y_mv = _MVYT(mv);
+            p_best_mv32x16[3] = ((uint16_t)y_mv << 16) | ((uint16_t)x_mv);
+        }
+
+        sad_32x16[4] = p_sad16x16[8][search_index] + p_sad16x16[9][search_index];
+        if (sad_32x16[4] < p_best_sad32x16[4]) {
+            p_best_sad32x16[4] = sad_32x16[4];
+            x_mv = _MVXT(mv) + (int16_t)search_index * 4;
+            y_mv = _MVYT(mv);
+            p_best_mv32x16[4] = ((uint16_t)y_mv << 16) | ((uint16_t)x_mv);
+        }
+
+        sad_32x16[5] = p_sad16x16[10][search_index] + p_sad16x16[11][search_index];
+        if (sad < p_best_sad32x16[5]) {
+            p_best_sad32x16[5] = sad_32x16[5];
+            x_mv = _MVXT(mv) + (int16_t)search_index * 4;
+            y_mv = _MVYT(mv);
+            p_best_mv32x16[5] = ((uint16_t)y_mv << 16) | ((uint16_t)x_mv);
+        }
+
+        sad_32x16[6] = p_sad16x16[12][search_index] + p_sad16x16[13][search_index];
+        if (sad_32x16[6] < p_best_sad32x16[6]) {
+            p_best_sad32x16[6] = sad_32x16[6];
+            x_mv = _MVXT(mv) + (int16_t)search_index * 4;
+            y_mv = _MVYT(mv);
+            p_best_mv32x16[6] = ((uint16_t)y_mv << 16) | ((uint16_t)x_mv);
+        }
+
+        sad_32x16[7] = p_sad16x16[14][search_index] + p_sad16x16[15][search_index];
+        if (sad_32x16[7] < p_best_sad32x16[7]) {
+            p_best_sad32x16[7] = sad_32x16[7];
+            x_mv = _MVXT(mv) + (int16_t)search_index * 4;
+            y_mv = _MVYT(mv);
+            p_best_mv32x16[7] = ((uint16_t)y_mv << 16) | ((uint16_t)x_mv);
+        }
+
+        // 64x16
+        sad = sad_32x16[0] + sad_32x16[2];
+        if (sad < p_best_sad64x16[0]) {
+            p_best_sad64x16[0] = sad;
+            x_mv = _MVXT(mv) + (int16_t)search_index * 4;
+            y_mv = _MVYT(mv);
+            p_best_mv64x16[0] = ((uint16_t)y_mv << 16) | ((uint16_t)x_mv);
+        }
+        sad = sad_32x16[1] + sad_32x16[3];
+        if (sad < p_best_sad64x16[1]) {
+            p_best_sad64x16[1] = sad;
+            x_mv = _MVXT(mv) + (int16_t)search_index * 4;
+            y_mv = _MVYT(mv);
+            p_best_mv64x16[1] = ((uint16_t)y_mv << 16) | ((uint16_t)x_mv);
+        }
+
+        sad = sad_32x16[4] + sad_32x16[6];
+        if (sad < p_best_sad64x16[2]) {
+            p_best_sad64x16[2] = sad;
+            x_mv = _MVXT(mv) + (int16_t)search_index * 4;
+            y_mv = _MVYT(mv);
+            p_best_mv64x16[2] = ((uint16_t)y_mv << 16) | ((uint16_t)x_mv);
+        }
+        sad = sad_32x16[5] + sad_32x16[7];
+        if (sad < p_best_sad64x16[3]) {
+            p_best_sad64x16[3] = sad;
+            x_mv = _MVXT(mv) + (int16_t)search_index * 4;
+            y_mv = _MVYT(mv);
+            p_best_mv64x16[3] = ((uint16_t)y_mv << 16) | ((uint16_t)x_mv);
+        }
+        // 16x8
+        sad_16x8[0] = p_sad8x8[0][search_index] + p_sad8x8[1][search_index];
+        if (sad_16x8[0] < p_best_sad16x8[0]) {
+            p_best_sad16x8[0] = sad_16x8[0];
+            x_mv = _MVXT(mv) + (int16_t)search_index * 4;
+            y_mv = _MVYT(mv);
+            p_best_mv16x8[0] = ((uint16_t)y_mv << 16) | ((uint16_t)x_mv);
+        }
+
+        sad_16x8[1] = p_sad8x8[2][search_index] + p_sad8x8[3][search_index];
+        if (sad_16x8[1] < p_best_sad16x8[1]) {
+            p_best_sad16x8[1] = sad_16x8[1];
+            x_mv = _MVXT(mv) + (int16_t)search_index * 4;
+            y_mv = _MVYT(mv);
+            p_best_mv16x8[1] = ((uint16_t)y_mv << 16) | ((uint16_t)x_mv);
+        }
+
+        sad_16x8[2] = p_sad8x8[4][search_index] + p_sad8x8[5][search_index];
+        if (sad_16x8[2] < p_best_sad16x8[2]) {
+            p_best_sad16x8[2] = sad_16x8[2];
+            x_mv = _MVXT(mv) + (int16_t)search_index * 4;
+            y_mv = _MVYT(mv);
+            p_best_mv16x8[2] = ((uint16_t)y_mv << 16) | ((uint16_t)x_mv);
+        }
+
+        sad_16x8[3] = p_sad8x8[6][search_index] + p_sad8x8[7][search_index];
+        if (sad_16x8[3] < p_best_sad16x8[3]) {
+            p_best_sad16x8[3] = sad_16x8[3];
+            x_mv = _MVXT(mv) + (int16_t)search_index * 4;
+            y_mv = _MVYT(mv);
+            p_best_mv16x8[3] = ((uint16_t)y_mv << 16) | ((uint16_t)x_mv);
+        }
+
+        sad_16x8[4] = p_sad8x8[8][search_index] + p_sad8x8[9][search_index];
+        if (sad_16x8[4] < p_best_sad16x8[4]) {
+            p_best_sad16x8[4] = sad_16x8[4];
+            x_mv = _MVXT(mv) + (int16_t)search_index * 4;
+            y_mv = _MVYT(mv);
+            p_best_mv16x8[4] = ((uint16_t)y_mv << 16) | ((uint16_t)x_mv);
+        }
+
+        sad_16x8[5] = p_sad8x8[10][search_index] + p_sad8x8[11][search_index];
+        if (sad_16x8[5] < p_best_sad16x8[5]) {
+            p_best_sad16x8[5] = sad_16x8[5];
+            x_mv = _MVXT(mv) + (int16_t)search_index * 4;
+            y_mv = _MVYT(mv);
+            p_best_mv16x8[5] = ((uint16_t)y_mv << 16) | ((uint16_t)x_mv);
+        }
+
+        sad_16x8[6] = p_sad8x8[12][search_index] + p_sad8x8[13][search_index];
+        if (sad_16x8[6] < p_best_sad16x8[6]) {
+            p_best_sad16x8[6] = sad_16x8[6];
+            x_mv = _MVXT(mv) + (int16_t)search_index * 4;
+            y_mv = _MVYT(mv);
+            p_best_mv16x8[6] = ((uint16_t)y_mv << 16) | ((uint16_t)x_mv);
+        }
+
+        sad_16x8[7] = p_sad8x8[14][search_index] + p_sad8x8[15][search_index];
+        if (sad_16x8[7] < p_best_sad16x8[7]) {
+            p_best_sad16x8[7] = sad_16x8[7];
+            x_mv = _MVXT(mv) + (int16_t)search_index * 4;
+            y_mv = _MVYT(mv);
+            p_best_mv16x8[7] = ((uint16_t)y_mv << 16) | ((uint16_t)x_mv);
+        }
+
+        sad_16x8[8] = p_sad8x8[16][search_index] + p_sad8x8[17][search_index];
+        if (sad_16x8[8] < p_best_sad16x8[8]) {
+            p_best_sad16x8[8] = sad_16x8[8];
+            x_mv = _MVXT(mv) + (int16_t)search_index * 4;
+            y_mv = _MVYT(mv);
+            p_best_mv16x8[8] = ((uint16_t)y_mv << 16) | ((uint16_t)x_mv);
+        }
+
+        sad_16x8[9] = p_sad8x8[18][search_index] + p_sad8x8[19][search_index];
+        if (sad_16x8[9] < p_best_sad16x8[9]) {
+            p_best_sad16x8[9] = sad_16x8[9];
+            x_mv = _MVXT(mv) + (int16_t)search_index * 4;
+            y_mv = _MVYT(mv);
+            p_best_mv16x8[9] = ((uint16_t)y_mv << 16) | ((uint16_t)x_mv);
+        }
+
+        sad_16x8[10] = p_sad8x8[20][search_index] + p_sad8x8[21][search_index];
+        if (sad_16x8[10] < p_best_sad16x8[10]) {
+            p_best_sad16x8[10] = sad_16x8[10];
+            x_mv = _MVXT(mv) + (int16_t)search_index * 4;
+            y_mv = _MVYT(mv);
+            p_best_mv16x8[10] = ((uint16_t)y_mv << 16) | ((uint16_t)x_mv);
+        }
+
+        sad_16x8[11] = p_sad8x8[22][search_index] + p_sad8x8[23][search_index];
+        if (sad_16x8[11] < p_best_sad16x8[11]) {
+            p_best_sad16x8[11] = sad_16x8[11];
+            x_mv = _MVXT(mv) + (int16_t)search_index * 4;
+            y_mv = _MVYT(mv);
+            p_best_mv16x8[11] = ((uint16_t)y_mv << 16) | ((uint16_t)x_mv);
+        }
+
+        sad_16x8[12] = p_sad8x8[24][search_index] + p_sad8x8[25][search_index];
+        if (sad_16x8[12] < p_best_sad16x8[12]) {
+            p_best_sad16x8[12] = sad_16x8[12];
+            x_mv = _MVXT(mv) + (int16_t)search_index * 4;
+            y_mv = _MVYT(mv);
+            p_best_mv16x8[12] = ((uint16_t)y_mv << 16) | ((uint16_t)x_mv);
+        }
+
+        sad_16x8[13] = p_sad8x8[26][search_index] + p_sad8x8[27][search_index];
+        if (sad_16x8[13] < p_best_sad16x8[13]) {
+            p_best_sad16x8[13] = sad_16x8[13];
+            x_mv = _MVXT(mv) + (int16_t)search_index * 4;
+            y_mv = _MVYT(mv);
+            p_best_mv16x8[13] = ((uint16_t)y_mv << 16) | ((uint16_t)x_mv);
+        }
+
+        sad_16x8[14] = p_sad8x8[28][search_index] + p_sad8x8[29][search_index];
+        if (sad_16x8[14] < p_best_sad16x8[14]) {
+            p_best_sad16x8[14] = sad_16x8[14];
+            x_mv = _MVXT(mv) + (int16_t)search_index * 4;
+            y_mv = _MVYT(mv);
+            p_best_mv16x8[14] = ((uint16_t)y_mv << 16) | ((uint16_t)x_mv);
+        }
+
+        sad_16x8[15] = p_sad8x8[30][search_index] + p_sad8x8[31][search_index];
+        if (sad_16x8[15] < p_best_sad16x8[15]) {
+            p_best_sad16x8[15] = sad_16x8[15];
+            x_mv = _MVXT(mv) + (int16_t)search_index * 4;
+            y_mv = _MVYT(mv);
+            p_best_mv16x8[15] = ((uint16_t)y_mv << 16) | ((uint16_t)x_mv);
+        }
+
+        sad_16x8[16] = p_sad8x8[32][search_index] + p_sad8x8[33][search_index];
+        if (sad_16x8[16] < p_best_sad16x8[16]) {
+            p_best_sad16x8[16] = sad_16x8[16];
+            x_mv = _MVXT(mv) + (int16_t)search_index * 4;
+            y_mv = _MVYT(mv);
+            p_best_mv16x8[16] = ((uint16_t)y_mv << 16) | ((uint16_t)x_mv);
+        }
+
+        sad_16x8[17] = p_sad8x8[34][search_index] + p_sad8x8[35][search_index];
+        if (sad_16x8[17] < p_best_sad16x8[17]) {
+            p_best_sad16x8[17] = sad_16x8[17];
+            x_mv = _MVXT(mv) + (int16_t)search_index * 4;
+            y_mv = _MVYT(mv);
+            p_best_mv16x8[17] = ((uint16_t)y_mv << 16) | ((uint16_t)x_mv);
+        }
+
+        sad_16x8[18] = p_sad8x8[36][search_index] + p_sad8x8[37][search_index];
+        if (sad_16x8[18] < p_best_sad16x8[18]) {
+            p_best_sad16x8[18] = sad_16x8[18];
+            x_mv = _MVXT(mv) + (int16_t)search_index * 4;
+            y_mv = _MVYT(mv);
+            p_best_mv16x8[18] = ((uint16_t)y_mv << 16) | ((uint16_t)x_mv);
+        }
+
+        sad_16x8[19] = p_sad8x8[38][search_index] + p_sad8x8[39][search_index];
+        if (sad_16x8[19] < p_best_sad16x8[19]) {
+            p_best_sad16x8[19] = sad_16x8[19];
+            x_mv = _MVXT(mv) + (int16_t)search_index * 4;
+            y_mv = _MVYT(mv);
+            p_best_mv16x8[19] = ((uint16_t)y_mv << 16) | ((uint16_t)x_mv);
+        }
+
+        sad_16x8[20] = p_sad8x8[40][search_index] + p_sad8x8[41][search_index];
+        if (sad_16x8[20] < p_best_sad16x8[20]) {
+            p_best_sad16x8[20] = sad_16x8[20];
+            x_mv = _MVXT(mv) + (int16_t)search_index * 4;
+            y_mv = _MVYT(mv);
+            p_best_mv16x8[20] = ((uint16_t)y_mv << 16) | ((uint16_t)x_mv);
+        }
+
+        sad_16x8[21] = p_sad8x8[42][search_index] + p_sad8x8[43][search_index];
+        if (sad_16x8[21] < p_best_sad16x8[21]) {
+            p_best_sad16x8[21] = sad_16x8[21];
+            x_mv = _MVXT(mv) + (int16_t)search_index * 4;
+            y_mv = _MVYT(mv);
+            p_best_mv16x8[21] = ((uint16_t)y_mv << 16) | ((uint16_t)x_mv);
+        }
+
+        sad_16x8[22] = p_sad8x8[44][search_index] + p_sad8x8[45][search_index];
+        if (sad_16x8[22] < p_best_sad16x8[22]) {
+            p_best_sad16x8[22] = sad_16x8[22];
+            x_mv = _MVXT(mv) + (int16_t)search_index * 4;
+            y_mv = _MVYT(mv);
+            p_best_mv16x8[22] = ((uint16_t)y_mv << 16) | ((uint16_t)x_mv);
+        }
+
+        sad_16x8[23] = p_sad8x8[46][search_index] + p_sad8x8[47][search_index];
+        if (sad_16x8[23] < p_best_sad16x8[23]) {
+            p_best_sad16x8[23] = sad_16x8[23];
+            x_mv = _MVXT(mv) + (int16_t)search_index * 4;
+            y_mv = _MVYT(mv);
+            p_best_mv16x8[23] = ((uint16_t)y_mv << 16) | ((uint16_t)x_mv);
+        }
+
+        sad_16x8[24] = p_sad8x8[48][search_index] + p_sad8x8[49][search_index];
+        if (sad_16x8[24] < p_best_sad16x8[24]) {
+            p_best_sad16x8[24] = sad_16x8[24];
+            x_mv = _MVXT(mv) + (int16_t)search_index * 4;
+            y_mv = _MVYT(mv);
+            p_best_mv16x8[24] = ((uint16_t)y_mv << 16) | ((uint16_t)x_mv);
+        }
+
+        sad_16x8[25] = p_sad8x8[50][search_index] + p_sad8x8[51][search_index];
+        if (sad_16x8[25] < p_best_sad16x8[25]) {
+            p_best_sad16x8[25] = sad_16x8[25];
+            x_mv = _MVXT(mv) + (int16_t)search_index * 4;
+            y_mv = _MVYT(mv);
+            p_best_mv16x8[25] = ((uint16_t)y_mv << 16) | ((uint16_t)x_mv);
+        }
+
+        sad_16x8[26] = p_sad8x8[52][search_index] + p_sad8x8[53][search_index];
+        if (sad_16x8[26] < p_best_sad16x8[26]) {
+            p_best_sad16x8[26] = sad_16x8[26];
+            x_mv = _MVXT(mv) + (int16_t)search_index * 4;
+            y_mv = _MVYT(mv);
+            p_best_mv16x8[26] = ((uint16_t)y_mv << 16) | ((uint16_t)x_mv);
+        }
+
+        sad_16x8[27] = p_sad8x8[54][search_index] + p_sad8x8[55][search_index];
+        if (sad_16x8[27] < p_best_sad16x8[27]) {
+            p_best_sad16x8[27] = sad_16x8[27];
+            x_mv = _MVXT(mv) + (int16_t)search_index * 4;
+            y_mv = _MVYT(mv);
+            p_best_mv16x8[27] = ((uint16_t)y_mv << 16) | ((uint16_t)x_mv);
+        }
+
+        sad_16x8[28] = p_sad8x8[56][search_index] + p_sad8x8[57][search_index];
+        if (sad_16x8[28] < p_best_sad16x8[28]) {
+            p_best_sad16x8[28] = sad_16x8[28];
+            x_mv = _MVXT(mv) + (int16_t)search_index * 4;
+            y_mv = _MVYT(mv);
+            p_best_mv16x8[28] = ((uint16_t)y_mv << 16) | ((uint16_t)x_mv);
+        }
+
+        sad_16x8[29] = p_sad8x8[58][search_index] + p_sad8x8[59][search_index];
+        if (sad_16x8[29] < p_best_sad16x8[29]) {
+            p_best_sad16x8[29] = sad_16x8[29];
+            x_mv = _MVXT(mv) + (int16_t)search_index * 4;
+            y_mv = _MVYT(mv);
+            p_best_mv16x8[29] = ((uint16_t)y_mv << 16) | ((uint16_t)x_mv);
+        }
+
+        sad_16x8[30] = p_sad8x8[60][search_index] + p_sad8x8[61][search_index];
+        if (sad_16x8[30] < p_best_sad16x8[30]) {
+            p_best_sad16x8[30] = sad_16x8[30];
+            x_mv = _MVXT(mv) + (int16_t)search_index * 4;
+            y_mv = _MVYT(mv);
+            p_best_mv16x8[30] = ((uint16_t)y_mv << 16) | ((uint16_t)x_mv);
+        }
+
+        sad_16x8[31] = p_sad8x8[62][search_index] + p_sad8x8[63][search_index];
+        if (sad_16x8[31] < p_best_sad16x8[31]) {
+            p_best_sad16x8[31] = sad_16x8[31];
+            x_mv = _MVXT(mv) + (int16_t)search_index * 4;
+            y_mv = _MVYT(mv);
+            p_best_mv16x8[31] = ((uint16_t)y_mv << 16) | ((uint16_t)x_mv);
+        }
+
+        // 32x64
+        sad = p_sad32x32[0][search_index] + p_sad32x32[2][search_index];
+        if (sad < p_best_sad32x64[0]) {
+            p_best_sad32x64[0] = sad;
+            x_mv = _MVXT(mv) + (int16_t)search_index * 4;
+            y_mv = _MVYT(mv);
+            p_best_mv32x64[0] = ((uint16_t)y_mv << 16) | ((uint16_t)x_mv);
+        }
+
+        sad = p_sad32x32[1][search_index] + p_sad32x32[3][search_index];
+        if (sad < p_best_sad32x64[1]) {
+            p_best_sad32x64[1] = sad;
+            x_mv = _MVXT(mv) + (int16_t)search_index * 4;
+            y_mv = _MVYT(mv);
+            p_best_mv32x64[1] = ((uint16_t)y_mv << 16) | ((uint16_t)x_mv);
+        }
+
+        // 16x32
+        sad_16x32[0] = p_sad16x16[0][search_index] + p_sad16x16[2][search_index];
+        if (sad_16x32[0] < p_best_sad16x32[0]) {
+            p_best_sad16x32[0] = sad_16x32[0];
+            x_mv = _MVXT(mv) + (int16_t)search_index * 4;
+            y_mv = _MVYT(mv);
+            p_best_mv16x32[0] = ((uint16_t)y_mv << 16) | ((uint16_t)x_mv);
+        }
+
+        sad_16x32[1] = p_sad16x16[1][search_index] + p_sad16x16[3][search_index];
+        if (sad_16x32[1] < p_best_sad16x32[1]) {
+            p_best_sad16x32[1] = sad_16x32[1];
+            x_mv = _MVXT(mv) + (int16_t)search_index * 4;
+            y_mv = _MVYT(mv);
+            p_best_mv16x32[1] = ((uint16_t)y_mv << 16) | ((uint16_t)x_mv);
+        }
+
+        sad_16x32[2] = p_sad16x16[4][search_index] + p_sad16x16[6][search_index];
+        if (sad_16x32[2] < p_best_sad16x32[2]) {
+            p_best_sad16x32[2] = sad_16x32[2];
+            x_mv = _MVXT(mv) + (int16_t)search_index * 4;
+            y_mv = _MVYT(mv);
+            p_best_mv16x32[2] = ((uint16_t)y_mv << 16) | ((uint16_t)x_mv);
+        }
+
+        sad_16x32[3] = p_sad16x16[5][search_index] + p_sad16x16[7][search_index];
+        if (sad_16x32[3] < p_best_sad16x32[3]) {
+            p_best_sad16x32[3] = sad_16x32[3];
+            x_mv = _MVXT(mv) + (int16_t)search_index * 4;
+            y_mv = _MVYT(mv);
+            p_best_mv16x32[3] = ((uint16_t)y_mv << 16) | ((uint16_t)x_mv);
+        }
+
+        sad_16x32[4] = p_sad16x16[8][search_index] + p_sad16x16[10][search_index];
+        if (sad_16x32[4] < p_best_sad16x32[4]) {
+            p_best_sad16x32[4] = sad_16x32[4];
+            x_mv = _MVXT(mv) + (int16_t)search_index * 4;
+            y_mv = _MVYT(mv);
+            p_best_mv16x32[4] = ((uint16_t)y_mv << 16) | ((uint16_t)x_mv);
+        }
+
+        sad_16x32[5] = p_sad16x16[9][search_index] + p_sad16x16[11][search_index];
+        if (sad_16x32[5] < p_best_sad16x32[5]) {
+            p_best_sad16x32[5] = sad_16x32[5];
+            x_mv = _MVXT(mv) + (int16_t)search_index * 4;
+            y_mv = _MVYT(mv);
+            p_best_mv16x32[5] = ((uint16_t)y_mv << 16) | ((uint16_t)x_mv);
+        }
+
+        sad_16x32[6] = p_sad16x16[12][search_index] + p_sad16x16[14][search_index];
+        if (sad_16x32[6] < p_best_sad16x32[6]) {
+            p_best_sad16x32[6] = sad_16x32[6];
+            x_mv = _MVXT(mv) + (int16_t)search_index * 4;
+            y_mv = _MVYT(mv);
+            p_best_mv16x32[6] = ((uint16_t)y_mv << 16) | ((uint16_t)x_mv);
+        }
+
+        sad_16x32[7] = p_sad16x16[13][search_index] + p_sad16x16[15][search_index];
+        if (sad_16x32[7] < p_best_sad16x32[7]) {
+            p_best_sad16x32[7] = sad_16x32[7];
+            x_mv = _MVXT(mv) + (int16_t)search_index * 4;
+            y_mv = _MVYT(mv);
+            p_best_mv16x32[7] = ((uint16_t)y_mv << 16) | ((uint16_t)x_mv);
+        }
+
+        sad = sad_16x32[0] + sad_16x32[4];
+        if (sad < p_best_sad16x64[0]) {
+            p_best_sad16x64[0] = sad;
+            x_mv = _MVXT(mv) + (int16_t)search_index * 4;
+            y_mv = _MVYT(mv);
+            p_best_mv16x64[0] = ((uint16_t)y_mv << 16) | ((uint16_t)x_mv);
+        }
+        sad = sad_16x32[1] + sad_16x32[5];
+        if (sad < p_best_sad16x64[1]) {
+            p_best_sad16x64[1] = sad;
+            x_mv = _MVXT(mv) + (int16_t)search_index * 4;
+            y_mv = _MVYT(mv);
+            p_best_mv16x64[1] = ((uint16_t)y_mv << 16) | ((uint16_t)x_mv);
+        }
+
+        sad = sad_16x32[2] + sad_16x32[6];
+        if (sad < p_best_sad16x64[2]) {
+            p_best_sad16x64[2] = sad;
+            x_mv = _MVXT(mv) + (int16_t)search_index * 4;
+            y_mv = _MVYT(mv);
+            p_best_mv16x64[2] = ((uint16_t)y_mv << 16) | ((uint16_t)x_mv);
+        }
+
+        sad = sad_16x32[3] + sad_16x32[7];
+        if (sad < p_best_sad16x64[3]) {
+            p_best_sad16x64[3] = sad;
+            x_mv = _MVXT(mv) + (int16_t)search_index * 4;
+            y_mv = _MVYT(mv);
+            p_best_mv16x64[3] = ((uint16_t)y_mv << 16) | ((uint16_t)x_mv);
+        }
+        // 8x16
+        sad_8x16[0] = p_sad8x8[0][search_index] + p_sad8x8[2][search_index];
+        if (sad_8x16[0] < p_best_sad8x16[0]) {
+            p_best_sad8x16[0] = sad_8x16[0];
+            x_mv = _MVXT(mv) + (int16_t)search_index * 4;
+            y_mv = _MVYT(mv);
+            p_best_mv8x16[0] = ((uint16_t)y_mv << 16) | ((uint16_t)x_mv);
+        }
+
+        sad_8x16[1] = p_sad8x8[1][search_index] + p_sad8x8[3][search_index];
+        if (sad_8x16[1] < p_best_sad8x16[1]) {
+            p_best_sad8x16[1] = sad_8x16[1];
+            x_mv = _MVXT(mv) + (int16_t)search_index * 4;
+            y_mv = _MVYT(mv);
+            p_best_mv8x16[1] = ((uint16_t)y_mv << 16) | ((uint16_t)x_mv);
+        }
+
+        sad_8x16[2] = p_sad8x8[4][search_index] + p_sad8x8[6][search_index];
+        if (sad_8x16[2] < p_best_sad8x16[2]) {
+            p_best_sad8x16[2] = sad_8x16[2];
+            x_mv = _MVXT(mv) + (int16_t)search_index * 4;
+            y_mv = _MVYT(mv);
+            p_best_mv8x16[2] = ((uint16_t)y_mv << 16) | ((uint16_t)x_mv);
+        }
+
+        sad_8x16[3] = p_sad8x8[5][search_index] + p_sad8x8[7][search_index];
+        if (sad_8x16[3] < p_best_sad8x16[3]) {
+            p_best_sad8x16[3] = sad_8x16[3];
+            x_mv = _MVXT(mv) + (int16_t)search_index * 4;
+            y_mv = _MVYT(mv);
+            p_best_mv8x16[3] = ((uint16_t)y_mv << 16) | ((uint16_t)x_mv);
+        }
+
+        sad_8x16[4] = p_sad8x8[8][search_index] + p_sad8x8[10][search_index];
+        if (sad_8x16[4] < p_best_sad8x16[4]) {
+            p_best_sad8x16[4] = sad_8x16[4];
+            x_mv = _MVXT(mv) + (int16_t)search_index * 4;
+            y_mv = _MVYT(mv);
+            p_best_mv8x16[4] = ((uint16_t)y_mv << 16) | ((uint16_t)x_mv);
+        }
+
+        sad_8x16[5] = p_sad8x8[9][search_index] + p_sad8x8[11][search_index];
+        if (sad_8x16[5] < p_best_sad8x16[5]) {
+            p_best_sad8x16[5] = sad_8x16[5];
+            x_mv = _MVXT(mv) + (int16_t)search_index * 4;
+            y_mv = _MVYT(mv);
+            p_best_mv8x16[5] = ((uint16_t)y_mv << 16) | ((uint16_t)x_mv);
+        }
+
+        sad_8x16[6] = p_sad8x8[12][search_index] + p_sad8x8[14][search_index];
+        if (sad_8x16[6] < p_best_sad8x16[6]) {
+            p_best_sad8x16[6] = sad_8x16[6];
+            x_mv = _MVXT(mv) + (int16_t)search_index * 4;
+            y_mv = _MVYT(mv);
+            p_best_mv8x16[6] = ((uint16_t)y_mv << 16) | ((uint16_t)x_mv);
+        }
+
+        sad_8x16[7] = p_sad8x8[13][search_index] + p_sad8x8[15][search_index];
+        if (sad_8x16[7] < p_best_sad8x16[7]) {
+            p_best_sad8x16[7] = sad_8x16[7];
+            x_mv = _MVXT(mv) + (int16_t)search_index * 4;
+            y_mv = _MVYT(mv);
+            p_best_mv8x16[7] = ((uint16_t)y_mv << 16) | ((uint16_t)x_mv);
+        }
+
+        sad_8x16[8] = p_sad8x8[16][search_index] + p_sad8x8[18][search_index];
+        if (sad_8x16[8] < p_best_sad8x16[8]) {
+            p_best_sad8x16[8] = sad_8x16[8];
+            x_mv = _MVXT(mv) + (int16_t)search_index * 4;
+            y_mv = _MVYT(mv);
+            p_best_mv8x16[8] = ((uint16_t)y_mv << 16) | ((uint16_t)x_mv);
+        }
+
+        sad_8x16[9] = p_sad8x8[17][search_index] + p_sad8x8[19][search_index];
+        if (sad_8x16[9] < p_best_sad8x16[9]) {
+            p_best_sad8x16[9] = sad_8x16[9];
+            x_mv = _MVXT(mv) + (int16_t)search_index * 4;
+            y_mv = _MVYT(mv);
+            p_best_mv8x16[9] = ((uint16_t)y_mv << 16) | ((uint16_t)x_mv);
+        }
+
+        sad_8x16[10] = p_sad8x8[20][search_index] + p_sad8x8[22][search_index];
+        if (sad_8x16[10] < p_best_sad8x16[10]) {
+            p_best_sad8x16[10] = sad_8x16[10];
+            x_mv = _MVXT(mv) + (int16_t)search_index * 4;
+            y_mv = _MVYT(mv);
+            p_best_mv8x16[10] = ((uint16_t)y_mv << 16) | ((uint16_t)x_mv);
+        }
+
+        sad_8x16[11] = p_sad8x8[21][search_index] + p_sad8x8[23][search_index];
+        if (sad_8x16[11] < p_best_sad8x16[11]) {
+            p_best_sad8x16[11] = sad_8x16[11];
+            x_mv = _MVXT(mv) + (int16_t)search_index * 4;
+            y_mv = _MVYT(mv);
+            p_best_mv8x16[11] = ((uint16_t)y_mv << 16) | ((uint16_t)x_mv);
+        }
+
+        sad_8x16[12] = p_sad8x8[24][search_index] + p_sad8x8[26][search_index];
+        if (sad_8x16[12] < p_best_sad8x16[12]) {
+            p_best_sad8x16[12] = sad_8x16[12];
+            x_mv = _MVXT(mv) + (int16_t)search_index * 4;
+            y_mv = _MVYT(mv);
+            p_best_mv8x16[12] = ((uint16_t)y_mv << 16) | ((uint16_t)x_mv);
+        }
+
+        sad_8x16[13] = p_sad8x8[25][search_index] + p_sad8x8[27][search_index];
+        if (sad_8x16[13] < p_best_sad8x16[13]) {
+            p_best_sad8x16[13] = sad_8x16[13];
+            x_mv = _MVXT(mv) + (int16_t)search_index * 4;
+            y_mv = _MVYT(mv);
+            p_best_mv8x16[13] = ((uint16_t)y_mv << 16) | ((uint16_t)x_mv);
+        }
+
+        sad_8x16[14] = p_sad8x8[28][search_index] + p_sad8x8[30][search_index];
+        if (sad_8x16[14] < p_best_sad8x16[14]) {
+            p_best_sad8x16[14] = sad_8x16[14];
+            x_mv = _MVXT(mv) + (int16_t)search_index * 4;
+            y_mv = _MVYT(mv);
+            p_best_mv8x16[14] = ((uint16_t)y_mv << 16) | ((uint16_t)x_mv);
+        }
+
+        sad_8x16[15] = p_sad8x8[29][search_index] + p_sad8x8[31][search_index];
+        if (sad_8x16[15] < p_best_sad8x16[15]) {
+            p_best_sad8x16[15] = sad_8x16[15];
+            x_mv = _MVXT(mv) + (int16_t)search_index * 4;
+            y_mv = _MVYT(mv);
+            p_best_mv8x16[15] = ((uint16_t)y_mv << 16) | ((uint16_t)x_mv);
+        }
+
+        sad_8x16[16] = p_sad8x8[32][search_index] + p_sad8x8[34][search_index];
+        if (sad_8x16[16] < p_best_sad8x16[16]) {
+            p_best_sad8x16[16] = sad_8x16[16];
+            x_mv = _MVXT(mv) + (int16_t)search_index * 4;
+            y_mv = _MVYT(mv);
+            p_best_mv8x16[16] = ((uint16_t)y_mv << 16) | ((uint16_t)x_mv);
+        }
+
+        sad_8x16[17] = p_sad8x8[33][search_index] + p_sad8x8[35][search_index];
+        if (sad_8x16[17] < p_best_sad8x16[17]) {
+            p_best_sad8x16[17] = sad_8x16[17];
+            x_mv = _MVXT(mv) + (int16_t)search_index * 4;
+            y_mv = _MVYT(mv);
+            p_best_mv8x16[17] = ((uint16_t)y_mv << 16) | ((uint16_t)x_mv);
+        }
+
+        sad_8x16[18] = p_sad8x8[36][search_index] + p_sad8x8[38][search_index];
+        if (sad_8x16[18] < p_best_sad8x16[18]) {
+            p_best_sad8x16[18] = sad_8x16[18];
+            x_mv = _MVXT(mv) + (int16_t)search_index * 4;
+            y_mv = _MVYT(mv);
+            p_best_mv8x16[18] = ((uint16_t)y_mv << 16) | ((uint16_t)x_mv);
+        }
+
+        sad_8x16[19] = p_sad8x8[37][search_index] + p_sad8x8[39][search_index];
+        if (sad_8x16[19] < p_best_sad8x16[19]) {
+            p_best_sad8x16[19] = sad_8x16[19];
+            x_mv = _MVXT(mv) + (int16_t)search_index * 4;
+            y_mv = _MVYT(mv);
+            p_best_mv8x16[19] = ((uint16_t)y_mv << 16) | ((uint16_t)x_mv);
+        }
+
+        sad_8x16[20] = p_sad8x8[40][search_index] + p_sad8x8[42][search_index];
+        if (sad_8x16[20] < p_best_sad8x16[20]) {
+            p_best_sad8x16[20] = sad_8x16[20];
+            x_mv = _MVXT(mv) + (int16_t)search_index * 4;
+            y_mv = _MVYT(mv);
+            p_best_mv8x16[20] = ((uint16_t)y_mv << 16) | ((uint16_t)x_mv);
+        }
+
+        sad_8x16[21] = p_sad8x8[41][search_index] + p_sad8x8[43][search_index];
+        if (sad_8x16[21] < p_best_sad8x16[21]) {
+            p_best_sad8x16[21] = sad_8x16[21];
+            x_mv = _MVXT(mv) + (int16_t)search_index * 4;
+            y_mv = _MVYT(mv);
+            p_best_mv8x16[21] = ((uint16_t)y_mv << 16) | ((uint16_t)x_mv);
+        }
+
+        sad_8x16[22] = p_sad8x8[44][search_index] + p_sad8x8[46][search_index];
+        if (sad_8x16[22] < p_best_sad8x16[22]) {
+            p_best_sad8x16[22] = sad_8x16[22];
+            x_mv = _MVXT(mv) + (int16_t)search_index * 4;
+            y_mv = _MVYT(mv);
+            p_best_mv8x16[22] = ((uint16_t)y_mv << 16) | ((uint16_t)x_mv);
+        }
+
+        sad_8x16[23] = p_sad8x8[45][search_index] + p_sad8x8[47][search_index];
+        if (sad_8x16[23] < p_best_sad8x16[23]) {
+            p_best_sad8x16[23] = sad_8x16[23];
+            x_mv = _MVXT(mv) + (int16_t)search_index * 4;
+            y_mv = _MVYT(mv);
+            p_best_mv8x16[23] = ((uint16_t)y_mv << 16) | ((uint16_t)x_mv);
+        }
+
+        sad_8x16[24] = p_sad8x8[48][search_index] + p_sad8x8[50][search_index];
+        if (sad_8x16[24] < p_best_sad8x16[24]) {
+            p_best_sad8x16[24] = sad_8x16[24];
+            x_mv = _MVXT(mv) + (int16_t)search_index * 4;
+            y_mv = _MVYT(mv);
+            p_best_mv8x16[24] = ((uint16_t)y_mv << 16) | ((uint16_t)x_mv);
+        }
+
+        sad_8x16[25] = p_sad8x8[49][search_index] + p_sad8x8[51][search_index];
+        if (sad_8x16[25] < p_best_sad8x16[25]) {
+            p_best_sad8x16[25] = sad_8x16[25];
+            x_mv = _MVXT(mv) + (int16_t)search_index * 4;
+            y_mv = _MVYT(mv);
+            p_best_mv8x16[25] = ((uint16_t)y_mv << 16) | ((uint16_t)x_mv);
+        }
+
+        sad_8x16[26] = p_sad8x8[52][search_index] + p_sad8x8[54][search_index];
+        if (sad_8x16[26] < p_best_sad8x16[26]) {
+            p_best_sad8x16[26] = sad_8x16[26];
+            x_mv = _MVXT(mv) + (int16_t)search_index * 4;
+            y_mv = _MVYT(mv);
+            p_best_mv8x16[26] = ((uint16_t)y_mv << 16) | ((uint16_t)x_mv);
+        }
+
+        sad_8x16[27] = p_sad8x8[53][search_index] + p_sad8x8[55][search_index];
+        if (sad_8x16[27] < p_best_sad8x16[27]) {
+            p_best_sad8x16[27] = sad_8x16[27];
+            x_mv = _MVXT(mv) + (int16_t)search_index * 4;
+            y_mv = _MVYT(mv);
+            p_best_mv8x16[27] = ((uint16_t)y_mv << 16) | ((uint16_t)x_mv);
+        }
+
+        sad_8x16[28] = p_sad8x8[56][search_index] + p_sad8x8[58][search_index];
+        if (sad_8x16[28] < p_best_sad8x16[28]) {
+            p_best_sad8x16[28] = sad_8x16[28];
+            x_mv = _MVXT(mv) + (int16_t)search_index * 4;
+            y_mv = _MVYT(mv);
+            p_best_mv8x16[28] = ((uint16_t)y_mv << 16) | ((uint16_t)x_mv);
+        }
+
+        sad_8x16[29] = p_sad8x8[57][search_index] + p_sad8x8[59][search_index];
+        if (sad_8x16[29] < p_best_sad8x16[29]) {
+            p_best_sad8x16[29] = sad_8x16[29];
+            x_mv = _MVXT(mv) + (int16_t)search_index * 4;
+            y_mv = _MVYT(mv);
+            p_best_mv8x16[29] = ((uint16_t)y_mv << 16) | ((uint16_t)x_mv);
+        }
+
+        sad_8x16[30] = p_sad8x8[60][search_index] + p_sad8x8[62][search_index];
+        if (sad_8x16[30] < p_best_sad8x16[30]) {
+            p_best_sad8x16[30] = sad_8x16[30];
+            x_mv = _MVXT(mv) + (int16_t)search_index * 4;
+            y_mv = _MVYT(mv);
+            p_best_mv8x16[30] = ((uint16_t)y_mv << 16) | ((uint16_t)x_mv);
+        }
+
+        sad_8x16[31] = p_sad8x8[61][search_index] + p_sad8x8[63][search_index];
+        if (sad_8x16[31] < p_best_sad8x16[31]) {
+            p_best_sad8x16[31] = sad_8x16[31];
+            x_mv = _MVXT(mv) + (int16_t)search_index * 4;
+            y_mv = _MVYT(mv);
+            p_best_mv8x16[31] = ((uint16_t)y_mv << 16) | ((uint16_t)x_mv);
+        }
+
+        // 32x8
+        sad = sad_16x8[0] + sad_16x8[2];
+        if (sad < p_best_sad32x8[0]) {
+            p_best_sad32x8[0] = sad;
+            x_mv = _MVXT(mv) + (int16_t)search_index * 4;
+            y_mv = _MVYT(mv);
+            p_best_mv32x8[0] = ((uint16_t)y_mv << 16) | ((uint16_t)x_mv);
+        }
+
+        sad = sad_16x8[1] + sad_16x8[3];
+        if (sad < p_best_sad32x8[1]) {
+            p_best_sad32x8[1] = sad;
+            x_mv = _MVXT(mv) + (int16_t)search_index * 4;
+            y_mv = _MVYT(mv);
+            p_best_mv32x8[1] = ((uint16_t)y_mv << 16) | ((uint16_t)x_mv);
+        }
+
+        sad = sad_16x8[4] + sad_16x8[6];
+        if (sad < p_best_sad32x8[2]) {
+            p_best_sad32x8[2] = sad;
+            x_mv = _MVXT(mv) + (int16_t)search_index * 4;
+            y_mv = _MVYT(mv);
+            p_best_mv32x8[2] = ((uint16_t)y_mv << 16) | ((uint16_t)x_mv);
+        }
+
+        sad = sad_16x8[5] + sad_16x8[7];
+        if (sad < p_best_sad32x8[3]) {
+            p_best_sad32x8[3] = sad;
+            x_mv = _MVXT(mv) + (int16_t)search_index * 4;
+            y_mv = _MVYT(mv);
+            p_best_mv32x8[3] = ((uint16_t)y_mv << 16) | ((uint16_t)x_mv);
+        }
+
+        sad = sad_16x8[8] + sad_16x8[10];
+        if (sad < p_best_sad32x8[4]) {
+            p_best_sad32x8[4] = sad;
+            x_mv = _MVXT(mv) + (int16_t)search_index * 4;
+            y_mv = _MVYT(mv);
+            p_best_mv32x8[4] = ((uint16_t)y_mv << 16) | ((uint16_t)x_mv);
+        }
+
+        sad = sad_16x8[9] + sad_16x8[11];
+        if (sad < p_best_sad32x8[5]) {
+            p_best_sad32x8[5] = sad;
+            x_mv = _MVXT(mv) + (int16_t)search_index * 4;
+            y_mv = _MVYT(mv);
+            p_best_mv32x8[5] = ((uint16_t)y_mv << 16) | ((uint16_t)x_mv);
+        }
+
+        sad = sad_16x8[12] + sad_16x8[14];
+        if (sad < p_best_sad32x8[6]) {
+            p_best_sad32x8[6] = sad;
+            x_mv = _MVXT(mv) + (int16_t)search_index * 4;
+            y_mv = _MVYT(mv);
+            p_best_mv32x8[6] = ((uint16_t)y_mv << 16) | ((uint16_t)x_mv);
+        }
+
+        sad = sad_16x8[13] + sad_16x8[15];
+        if (sad < p_best_sad32x8[7]) {
+            p_best_sad32x8[7] = sad;
+            x_mv = _MVXT(mv) + (int16_t)search_index * 4;
+            y_mv = _MVYT(mv);
+            p_best_mv32x8[7] = ((uint16_t)y_mv << 16) | ((uint16_t)x_mv);
+        }
+
+        sad = sad_16x8[16] + sad_16x8[18];
+        if (sad < p_best_sad32x8[8]) {
+            p_best_sad32x8[8] = sad;
+            x_mv = _MVXT(mv) + (int16_t)search_index * 4;
+            y_mv = _MVYT(mv);
+            p_best_mv32x8[8] = ((uint16_t)y_mv << 16) | ((uint16_t)x_mv);
+        }
+
+        sad = sad_16x8[17] + sad_16x8[19];
+        if (sad < p_best_sad32x8[9]) {
+            p_best_sad32x8[9] = sad;
+            x_mv = _MVXT(mv) + (int16_t)search_index * 4;
+            y_mv = _MVYT(mv);
+            p_best_mv32x8[9] = ((uint16_t)y_mv << 16) | ((uint16_t)x_mv);
+        }
+
+        sad = sad_16x8[20] + sad_16x8[22];
+        if (sad < p_best_sad32x8[10]) {
+            p_best_sad32x8[10] = sad;
+            x_mv = _MVXT(mv) + (int16_t)search_index * 4;
+            y_mv = _MVYT(mv);
+            p_best_mv32x8[10] = ((uint16_t)y_mv << 16) | ((uint16_t)x_mv);
+        }
+
+        sad = sad_16x8[21] + sad_16x8[23];
+        if (sad < p_best_sad32x8[11]) {
+            p_best_sad32x8[11] = sad;
+            x_mv = _MVXT(mv) + (int16_t)search_index * 4;
+            y_mv = _MVYT(mv);
+            p_best_mv32x8[11] = ((uint16_t)y_mv << 16) | ((uint16_t)x_mv);
+        }
+
+        sad = sad_16x8[24] + sad_16x8[26];
+        if (sad < p_best_sad32x8[12]) {
+            p_best_sad32x8[12] = sad;
+            x_mv = _MVXT(mv) + (int16_t)search_index * 4;
+            y_mv = _MVYT(mv);
+            p_best_mv32x8[12] = ((uint16_t)y_mv << 16) | ((uint16_t)x_mv);
+        }
+
+        sad = sad_16x8[25] + sad_16x8[27];
+        if (sad < p_best_sad32x8[13]) {
+            p_best_sad32x8[13] = sad;
+            x_mv = _MVXT(mv) + (int16_t)search_index * 4;
+            y_mv = _MVYT(mv);
+            p_best_mv32x8[13] = ((uint16_t)y_mv << 16) | ((uint16_t)x_mv);
+        }
+
+        sad = sad_16x8[28] + sad_16x8[30];
+        if (sad < p_best_sad32x8[14]) {
+            p_best_sad32x8[14] = sad;
+            x_mv = _MVXT(mv) + (int16_t)search_index * 4;
+            y_mv = _MVYT(mv);
+            p_best_mv32x8[14] = ((uint16_t)y_mv << 16) | ((uint16_t)x_mv);
+        }
+
+        sad = sad_16x8[29] + sad_16x8[31];
+        if (sad < p_best_sad32x8[15]) {
+            p_best_sad32x8[15] = sad;
+            x_mv = _MVXT(mv) + (int16_t)search_index * 4;
+            y_mv = _MVYT(mv);
+            p_best_mv32x8[15] = ((uint16_t)y_mv << 16) | ((uint16_t)x_mv);
+        }
+        // 8x32
+        sad = sad_8x16[0] + sad_8x16[4];
+        if (sad < p_best_sad8x32[0]) {
+            p_best_sad8x32[0] = sad;
+            x_mv = _MVXT(mv) + (int16_t)search_index * 4;
+            y_mv = _MVYT(mv);
+            p_best_mv8x32[0] = ((uint16_t)y_mv << 16) | ((uint16_t)x_mv);
+        }
+
+        sad = sad_8x16[1] + sad_8x16[5];
+        if (sad < p_best_sad8x32[1]) {
+            p_best_sad8x32[1] = sad;
+            x_mv = _MVXT(mv) + (int16_t)search_index * 4;
+            y_mv = _MVYT(mv);
+            p_best_mv8x32[1] = ((uint16_t)y_mv << 16) | ((uint16_t)x_mv);
+        }
+
+        sad = sad_8x16[2] + sad_8x16[6];
+        if (sad < p_best_sad8x32[2]) {
+            p_best_sad8x32[2] = sad;
+            x_mv = _MVXT(mv) + (int16_t)search_index * 4;
+            y_mv = _MVYT(mv);
+            p_best_mv8x32[2] = ((uint16_t)y_mv << 16) | ((uint16_t)x_mv);
+        }
+
+        sad = sad_8x16[3] + sad_8x16[7];
+        if (sad < p_best_sad8x32[3]) {
+            p_best_sad8x32[3] = sad;
+            x_mv = _MVXT(mv) + (int16_t)search_index * 4;
+            y_mv = _MVYT(mv);
+            p_best_mv8x32[3] = ((uint16_t)y_mv << 16) | ((uint16_t)x_mv);
+        }
+
+        sad = sad_8x16[8] + sad_8x16[12];
+        if (sad < p_best_sad8x32[4]) {
+            p_best_sad8x32[4] = sad;
+            x_mv = _MVXT(mv) + (int16_t)search_index * 4;
+            y_mv = _MVYT(mv);
+            p_best_mv8x32[4] = ((uint16_t)y_mv << 16) | ((uint16_t)x_mv);
+        }
+
+        sad = sad_8x16[9] + sad_8x16[13];
+        if (sad < p_best_sad8x32[5]) {
+            p_best_sad8x32[5] = sad;
+            x_mv = _MVXT(mv) + (int16_t)search_index * 4;
+            y_mv = _MVYT(mv);
+            p_best_mv8x32[5] = ((uint16_t)y_mv << 16) | ((uint16_t)x_mv);
+        }
+
+        sad = sad_8x16[10] + sad_8x16[14];
+        if (sad < p_best_sad8x32[6]) {
+            p_best_sad8x32[6] = sad;
+            x_mv = _MVXT(mv) + (int16_t)search_index * 4;
+            y_mv = _MVYT(mv);
+            p_best_mv8x32[6] = ((uint16_t)y_mv << 16) | ((uint16_t)x_mv);
+        }
+
+        sad = sad_8x16[11] + sad_8x16[15];
+        if (sad < p_best_sad8x32[7]) {
+            p_best_sad8x32[7] = sad;
+            x_mv = _MVXT(mv) + (int16_t)search_index * 4;
+            y_mv = _MVYT(mv);
+            p_best_mv8x32[7] = ((uint16_t)y_mv << 16) | ((uint16_t)x_mv);
+        }
+
+        sad = sad_8x16[16] + sad_8x16[20];
+        if (sad < p_best_sad8x32[8]) {
+            p_best_sad8x32[8] = sad;
+            x_mv = _MVXT(mv) + (int16_t)search_index * 4;
+            y_mv = _MVYT(mv);
+            p_best_mv8x32[8] = ((uint16_t)y_mv << 16) | ((uint16_t)x_mv);
+        }
+
+        sad = sad_8x16[17] + sad_8x16[21];
+        if (sad < p_best_sad8x32[9]) {
+            p_best_sad8x32[9] = sad;
+            x_mv = _MVXT(mv) + (int16_t)search_index * 4;
+            y_mv = _MVYT(mv);
+            p_best_mv8x32[9] = ((uint16_t)y_mv << 16) | ((uint16_t)x_mv);
+        }
+
+        sad = sad_8x16[18] + sad_8x16[22];
+        if (sad < p_best_sad8x32[10]) {
+            p_best_sad8x32[10] = sad;
+            x_mv = _MVXT(mv) + (int16_t)search_index * 4;
+            y_mv = _MVYT(mv);
+            p_best_mv8x32[10] = ((uint16_t)y_mv << 16) | ((uint16_t)x_mv);
+        }
+
+        sad = sad_8x16[19] + sad_8x16[23];
+        if (sad < p_best_sad8x32[11]) {
+            p_best_sad8x32[11] = sad;
+            x_mv = _MVXT(mv) + (int16_t)search_index * 4;
+            y_mv = _MVYT(mv);
+            p_best_mv8x32[11] = ((uint16_t)y_mv << 16) | ((uint16_t)x_mv);
+        }
+
+        sad = sad_8x16[24] + sad_8x16[28];
+        if (sad < p_best_sad8x32[12]) {
+            p_best_sad8x32[12] = sad;
+            x_mv = _MVXT(mv) + (int16_t)search_index * 4;
+            y_mv = _MVYT(mv);
+            p_best_mv8x32[12] = ((uint16_t)y_mv << 16) | ((uint16_t)x_mv);
+        }
+
+        sad = sad_8x16[25] + sad_8x16[29];
+        if (sad < p_best_sad8x32[13]) {
+            p_best_sad8x32[13] = sad;
+            x_mv = _MVXT(mv) + (int16_t)search_index * 4;
+            y_mv = _MVYT(mv);
+            p_best_mv8x32[13] = ((uint16_t)y_mv << 16) | ((uint16_t)x_mv);
+        }
+
+        sad = sad_8x16[26] + sad_8x16[30];
+        if (sad < p_best_sad8x32[14]) {
+            p_best_sad8x32[14] = sad;
+            x_mv = _MVXT(mv) + (int16_t)search_index * 4;
+            y_mv = _MVYT(mv);
+            p_best_mv8x32[14] = ((uint16_t)y_mv << 16) | ((uint16_t)x_mv);
+        }
+
+        sad = sad_8x16[27] + sad_8x16[31];
+        if (sad < p_best_sad8x32[15]) {
+            p_best_sad8x32[15] = sad;
+            x_mv = _MVXT(mv) + (int16_t)search_index * 4;
+            y_mv = _MVYT(mv);
+            p_best_mv8x32[15] = ((uint16_t)y_mv << 16) | ((uint16_t)x_mv);
+        }
+    }
+}
+
+
+/*******************************************
+* ext_eight_sad_calculation_8x8_16x16
+*******************************************/
+#if 0
+void ext_eight_sad_calculation_8x8_16x16(
+    uint8_t   *src,
+    uint32_t   src_stride,
+    uint8_t   *ref,
+    uint32_t   ref_stride,
+    uint32_t  *pBestSad8x8,
+    uint32_t  *pBestMV8x8,
+    uint32_t  *pBestSad16x16,
+    uint32_t  *pBestMV16x16,
+    uint32_t   mv,
+    uint16_t   pSad16x16[16][8],
+    uint16_t   start_16x16_pos,
+    uint16_t   pSad8x8[64][8],
+    uint16_t   start_8x8_pos)
+{
+    uint32_t xSearchIndex;
+    int16_t xMv, yMv;
+    uint32_t sad8x8_0, sad8x8_1, sad8x8_2, sad8x8_3;
+    uint16_t sad16x16;
+
+
+    /*
+    -------------------------------------   -----------------------------------
+    | 8x8_00 | 8x8_01 | 8x8_04 | 8x8_05 |   8x8_16 | 8x8_17 | 8x8_20 | 8x8_21 |
+    -------------------------------------   -----------------------------------
+    | 8x8_02 | 8x8_03 | 8x8_06 | 8x8_07 |   8x8_18 | 8x8_19 | 8x8_22 | 8x8_23 |
+    -----------------------   -----------   ----------------------   ----------
+    | 8x8_08 | 8x8_09 | 8x8_12 | 8x8_13 |   8x8_24 | 8x8_25 | 8x8_29 | 8x8_29 |
+    ----------------------    -----------   ---------------------    ----------
+    | 8x8_10 | 8x8_11 | 8x8_14 | 8x8_15 |   8x8_26 | 8x8_27 | 8x8_30 | 8x8_31 |
+    -------------------------------------   -----------------------------------
+
+    -------------------------------------   -----------------------------------
+    | 8x8_32 | 8x8_33 | 8x8_36 | 8x8_37 |   8x8_48 | 8x8_49 | 8x8_52 | 8x8_53 |
+    -------------------------------------   -----------------------------------
+    | 8x8_34 | 8x8_35 | 8x8_38 | 8x8_39 |   8x8_50 | 8x8_51 | 8x8_54 | 8x8_55 |
+    -----------------------   -----------   ----------------------   ----------
+    | 8x8_40 | 8x8_41 | 8x8_44 | 8x8_45 |   8x8_56 | 8x8_57 | 8x8_60 | 8x8_61 |
+    ----------------------    -----------   ---------------------    ----------
+    | 8x8_42 | 8x8_43 | 8x8_46 | 8x8_48 |   8x8_58 | 8x8_59 | 8x8_62 | 8x8_63 |
+    -------------------------------------   -----------------------------------
+    */
+
+    /*
+    ----------------------    ----------------------
+    |  16x16_0  |  16x16_1  |  16x16_4  |  16x16_5  |
+    ----------------------    ----------------------
+    |  16x16_2  |  16x16_3  |  16x16_6  |  16x16_7  |
+    -----------------------   -----------------------
+    |  16x16_8  |  16x16_9  |  16x16_12 |  16x16_13 |
+    ----------------------    ----------------------
+    |  16x16_10 |  16x16_11 |  16x16_14 |  16x16_15 |
+    -----------------------   -----------------------
+    */
+
+    for (xSearchIndex = 0; xSearchIndex < 8; xSearchIndex++)
+    {
+
+        //8x8_0 
+        uint32_t   srcStrideSub = (src_stride << 1); //TODO get these from outside
+        uint32_t   refStrideSub = (ref_stride << 1);
+
+
+        pSad8x8[start_8x8_pos][xSearchIndex] = sad8x8_0 =  (compute8x4SAD_funcPtrArray[0](src, srcStrideSub, ref, refStrideSub)) << 1;
+        //sad8x8_0 = Subsad8x8(src, srcStride, ref + xSearchIndex, refStride);
+        if (sad8x8_0 < pBestSad8x8[0]) {
+            pBestSad8x8[0] = sad8x8_0;
+            xMv = _MVXT(mv) + (int16_t)xSearchIndex * 4;
+            yMv = _MVYT(mv);
+            pBestMV8x8[0] = ((uint16_t)yMv << 16) | ((uint16_t)xMv);
+        }
+
+        //8x8_1 
+        pSad8x8[start_8x8_pos+1][xSearchIndex] = sad8x8_1 = (compute8x4SAD_funcPtrArray[0](src + 8, srcStrideSub, ref + xSearchIndex + 8, refStrideSub)) << 1;
+        if (sad8x8_1 < pBestSad8x8[1]) {
+            pBestSad8x8[1] = sad8x8_1;
+            xMv = _MVXT(mv) + (int16_t)xSearchIndex * 4;
+            yMv = _MVYT(mv);
+            pBestMV8x8[1] = ((uint16_t)yMv << 16) | ((uint16_t)xMv);
+        }
+
+        //8x8_2        
+        pSad8x8[start_8x8_pos+2][xSearchIndex] = sad8x8_2 = (compute8x4SAD_funcPtrArray[0](src + 8 * srcStrideSub, srcStrideSub, ref + xSearchIndex + 8 * srcStrideSub, refStrideSub)) << 1;
+        if ( sad8x8_2 < pBestSad8x8[2]) {
+            pBestSad8x8[2] =  sad8x8_2;
+            xMv = _MVXT(mv) + (int16_t)xSearchIndex * 4;
+            yMv = _MVYT(mv);
+            pBestMV8x8[2] = ((uint16_t)yMv << 16) | ((uint16_t)xMv);
+        }
+
+        //8x8_3        
+        pSad8x8[start_8x8_pos+3][xSearchIndex] = sad8x8_3 = (compute8x4SAD_funcPtrArray[0](src + 8 + 8 * srcStrideSub, srcStrideSub, ref + 8 + 8 * srcStrideSub + xSearchIndex, refStrideSub)) << 1;
+        if (sad8x8_3 < pBestSad8x8[3]) {
+            pBestSad8x8[3] =  sad8x8_3;
+            xMv = _MVXT(mv) + (int16_t)xSearchIndex * 4;
+            yMv = _MVYT(mv);
+            pBestMV8x8[3] = ((uint16_t)yMv << 16) | ((uint16_t)xMv);
+        }
+        //16x16
+        sad16x16 = (uint16_t)(sad8x8_0 + sad8x8_1 + sad8x8_2 + sad8x8_3);
+        pSad16x16[start_16x16_pos][xSearchIndex] = sad16x16;  //store the intermediate 16x16 SAD for 32x32 in subsampled form.
+        if ((uint32_t)(sad16x16) < pBestSad16x16[0]) {
+            pBestSad16x16[0] =  sad16x16;
+            xMv = _MVXT(mv) + (int16_t)xSearchIndex * 4;
+            yMv = _MVYT(mv);
+            pBestMV16x16[0] = ((uint16_t)yMv << 16) | ((uint16_t)xMv);
+        }
+    }
+}
+#endif
+
+void ext_eight_sad_calculation_8x8_16x16(
+    uint8_t   *src,
+    uint32_t   src_stride,
+    uint8_t   *ref,
+    uint32_t   ref_stride,
+    uint32_t  *p_best_sad8x8,
+    uint32_t  *p_best_sad16x16,
+    uint32_t  *p_best_mv8x8,
+    uint32_t  *p_best_mv16x16,
+    uint32_t   mv,
+    uint32_t   p_sad16x16[16][8],
+    uint16_t   start_16x16_pos,
+    uint32_t   p_sad8x8[64][8],
+    uint16_t   start_8x8_pos)
+{
+    uint32_t sad8x8_0, sad8x8_1, sad8x8_2, sad8x8_3;
+    uint32_t sad16x16;
+
+    uint32_t search_index;
+    int16_t x_mv, y_mv;
+
+    uint32_t   srcStrideSub = (src_stride << 1); //TODO get these from outside
+    uint32_t   refStrideSub = (ref_stride << 1);
+
+    for (search_index = 0; search_index < 8; search_index++)
+    {
+        p_sad8x8[0 + start_8x8_pos][search_index] = sad8x8_0 = (compute8x4SAD_funcPtrArray[0](src, srcStrideSub, ref + search_index, refStrideSub)) << 1;
+        if (sad8x8_0 < p_best_sad8x8[0]) {
+            p_best_sad8x8[0] = (uint32_t)sad8x8_0;
+            x_mv = _MVXT(mv) + (int16_t)search_index * 4;
+            y_mv = _MVYT(mv);
+            p_best_mv8x8[0] = ((uint16_t)y_mv << 16) | ((uint16_t)x_mv);
+        }
+
+        p_sad8x8[1 + start_8x8_pos][search_index] = sad8x8_1 = (compute8x4SAD_funcPtrArray[0](src + 8, srcStrideSub, ref + 8 + search_index, refStrideSub)) << 1;
+        if (sad8x8_1 < p_best_sad8x8[1]) {
+            p_best_sad8x8[1] = (uint32_t)sad8x8_1;
+            x_mv = _MVXT(mv) + (int16_t)search_index * 4;
+            y_mv = _MVYT(mv);
+            p_best_mv8x8[1] = ((uint16_t)y_mv << 16) | ((uint16_t)x_mv);
+        }
+
+        p_sad8x8[2 + start_8x8_pos][search_index] = sad8x8_2 = (compute8x4SAD_funcPtrArray[0](src + (src_stride << 3), srcStrideSub, ref + (ref_stride << 3) + search_index, refStrideSub)) << 1;
+        if (sad8x8_2 < p_best_sad8x8[2]) {
+            p_best_sad8x8[2] = (uint32_t)sad8x8_2;
+            x_mv = _MVXT(mv) + (int16_t)search_index * 4;
+            y_mv = _MVYT(mv);
+            p_best_mv8x8[2] = ((uint16_t)y_mv << 16) | ((uint16_t)x_mv);
+        }
+
+        p_sad8x8[3 + start_8x8_pos][search_index] = sad8x8_3 = (compute8x4SAD_funcPtrArray[0](src + (src_stride << 3) + 8, srcStrideSub, ref + (ref_stride << 3) + 8 + search_index, refStrideSub)) << 1;
+        if (sad8x8_3 < p_best_sad8x8[3]) {
+            p_best_sad8x8[3] = (uint32_t)sad8x8_3;
+            x_mv = _MVXT(mv) + (int16_t)search_index * 4;
+            y_mv = _MVYT(mv);
+            p_best_mv8x8[3] = ((uint16_t)y_mv << 16) | ((uint16_t)x_mv);
+        }
+
+        p_sad16x16[start_16x16_pos][search_index] = sad16x16 = sad8x8_0 + sad8x8_1 + sad8x8_2 + sad8x8_3;
+        if (sad16x16 < p_best_sad16x16[0]) {
+            p_best_sad16x16[0] = (uint32_t)sad16x16;
+            x_mv = _MVXT(mv) + (int16_t)search_index * 4;
+            y_mv = _MVYT(mv);
+            p_best_mv16x16[0] = ((uint16_t)y_mv << 16) | ((uint16_t)x_mv);
+        }
+    }
+}
+
+#if 0
+/*******************************************
+Calcualte SAD for 32x32,64x64 from 16x16
+and check if there is improvement, if yes keep
+the best SAD+MV
+*******************************************/
+void GetEightHorizontalSearchPointResults_32x32_64x64(
+    uint16_t  **pSad16x16,
+    uint32_t  *pBestSad32x32,
+    uint32_t  *pBestSad64x64,
+    uint32_t  *pBestMV32x32,
+    uint32_t  *pBestMV64x64,
+    uint16_t  **pSad32x32,
+    uint32_t   mv)
+{
+    int16_t xMv, yMv;
+    uint32_t sad32x32_0, sad32x32_1, sad32x32_2, sad32x32_3, sad64x64;
+    uint32_t xSearchIndex;
+
+    /*--------------------
+    |  32x32_0  |  32x32_1
+    ----------------------
+    |  32x32_2  |  32x32_3
+    ----------------------*/
+
+
+    /*  data ordering in pSad16x16 buffer
+
+    Search    Search            Search
+    Point 0   Point 1           Point 7
+    ---------------------------------------
+    16x16_0    |    x    |    x    | ...... |    x    |
+    ---------------------------------------
+    16x16_1    |    x    |    x    | ...... |    x    |
+
+    16x16_n    |    x    |    x    | ...... |    x    |
+
+    ---------------------------------------
+    16x16_15   |    x    |    x    | ...... |    x    |
+    ---------------------------------------
+    */
+
+
+
+    for (xSearchIndex = 0; xSearchIndex < 8; xSearchIndex++)
+    {
+
+        //32x32_0
+        pSad32x32[0][xSearchIndex] = sad32x32_0 = pSad16x16[0 * 8 + xSearchIndex] + pSad16x16[1 * 8 + xSearchIndex] + pSad16x16[2 * 8 + xSearchIndex] + pSad16x16[3 * 8 + xSearchIndex];
+
+        if ( sad32x32_0 < pBestSad32x32[0]) {
+            pBestSad32x32[0] =  sad32x32_0;
+            xMv = _MVXT(mv) + (int16_t)xSearchIndex * 4;
+            yMv = _MVYT(mv);
+            pBestMV32x32[0] = ((uint16_t)yMv << 16) | ((uint16_t)xMv);
+        }
+
+        //32x32_1
+        pSad32x32[1][xSearchIndex] = sad32x32_1 = pSad16x16[4 * 8 + xSearchIndex] + pSad16x16[5 * 8 + xSearchIndex] + pSad16x16[6 * 8 + xSearchIndex] + pSad16x16[7 * 8 + xSearchIndex];
+
+        if ( sad32x32_1 < pBestSad32x32[1]) {
+            pBestSad32x32[1] =  sad32x32_1;
+            xMv = _MVXT(mv) + (int16_t)xSearchIndex * 4;
+            yMv = _MVYT(mv);
+            pBestMV32x32[1] = ((uint16_t)yMv << 16) | ((uint16_t)xMv);
+        }
+
+        //32x32_2
+        pSad32x32[2][xSearchIndex] = sad32x32_2 = pSad16x16[8 * 8 + xSearchIndex] + pSad16x16[9 * 8 + xSearchIndex] + pSad16x16[10 * 8 + xSearchIndex] + pSad16x16[11 * 8 + xSearchIndex];
+
+        if (sad32x32_2 < pBestSad32x32[2]) {
+            pBestSad32x32[2] = sad32x32_2;
+            xMv = _MVXT(mv) + (int16_t)xSearchIndex * 4;
+            yMv = _MVYT(mv);
+            pBestMV32x32[2] = ((uint16_t)yMv << 16) | ((uint16_t)xMv);
+        }
+
+
+        //32x32_3
+        pSad32x32[3][xSearchIndex] = sad32x32_3 = pSad16x16[12 * 8 + xSearchIndex] + pSad16x16[13 * 8 + xSearchIndex] + pSad16x16[14 * 8 + xSearchIndex] + pSad16x16[15 * 8 + xSearchIndex];
+
+        if (sad32x32_3 < pBestSad32x32[3]) {
+            pBestSad32x32[3] = sad32x32_3;
+            xMv = _MVXT(mv) + (int16_t)xSearchIndex * 4;
+            yMv = _MVYT(mv);
+            pBestMV32x32[3] = ((uint16_t)yMv << 16) | ((uint16_t)xMv);
+        }
+
+
+        //64x64
+        sad64x64 = sad32x32_0 + sad32x32_1 + sad32x32_2 + sad32x32_3;
+        if (sad64x64 < pBestSad64x64[0]) {
+            pBestSad64x64[0] = sad64x64;
+            xMv = _MVXT(mv) + (int16_t)xSearchIndex * 4;
+            yMv = _MVYT(mv);
+            pBestMV64x64[0] = ((uint16_t)yMv << 16) | ((uint16_t)xMv);
+
+        }
+
+    }
+
+}
+#endif
+/*******************************************
+Calcualte SAD for 32x32,64x64 from 16x16
+and check if there is improvment, if yes keep
+the best SAD+MV
+*******************************************/
+void ext_eight_sad_calculation_32x32_64x64(
+    uint32_t   p_sad16x16[16][8],
+    uint32_t  *p_best_sad32x32,
+    uint32_t  *p_best_sad64x64,
+    uint32_t  *p_best_mv32x32,
+    uint32_t  *p_best_mv64x64,
+    uint32_t   mv,
+    uint32_t  p_sad32x32[4][8])
+{
+    uint32_t search_index;
+    int16_t x_mv, y_mv;
+    for (search_index = 0; search_index < 8; search_index++) {
+
+        uint32_t sad32x32_0, sad32x32_1, sad32x32_2, sad32x32_3, sad64x64;
+
+        p_sad32x32[0][search_index] = sad32x32_0 = p_sad16x16[0][search_index] + p_sad16x16[1][search_index] + p_sad16x16[2][search_index] + p_sad16x16[3][search_index];
+        if (sad32x32_0 < p_best_sad32x32[0]) {
+            p_best_sad32x32[0] = sad32x32_0;
+            x_mv = _MVXT(mv) + (int16_t)search_index * 4;
+            y_mv = _MVYT(mv);
+            p_best_mv32x32[0] = ((uint16_t)y_mv << 16) | ((uint16_t)x_mv);
+        }
+
+        p_sad32x32[1][search_index] = sad32x32_1 = p_sad16x16[4][search_index] + p_sad16x16[5][search_index] + p_sad16x16[6][search_index] + p_sad16x16[7][search_index];
+        if (sad32x32_1 < p_best_sad32x32[1]) {
+            p_best_sad32x32[1] = sad32x32_1;
+            x_mv = _MVXT(mv) + (int16_t)search_index * 4;
+            y_mv = _MVYT(mv);
+            p_best_mv32x32[1] = ((uint16_t)y_mv << 16) | ((uint16_t)x_mv);
+        }
+
+        p_sad32x32[2][search_index] = sad32x32_2 = p_sad16x16[8][search_index] + p_sad16x16[9][search_index] + p_sad16x16[10][search_index] + p_sad16x16[11][search_index];
+        if (sad32x32_2 < p_best_sad32x32[2]) {
+            p_best_sad32x32[2] = sad32x32_2;
+            x_mv = _MVXT(mv) + (int16_t)search_index * 4;
+            y_mv = _MVYT(mv);
+            p_best_mv32x32[2] = ((uint16_t)y_mv << 16) | ((uint16_t)x_mv);
+        }
+
+        p_sad32x32[3][search_index] = sad32x32_3 = p_sad16x16[12][search_index] + p_sad16x16[13][search_index] + p_sad16x16[14][search_index] + p_sad16x16[15][search_index];
+        if (sad32x32_3 < p_best_sad32x32[3]) {
+            p_best_sad32x32[3] = sad32x32_3;
+            x_mv = _MVXT(mv) + (int16_t)search_index * 4;
+            y_mv = _MVYT(mv);
+            p_best_mv32x32[3] = ((uint16_t)y_mv << 16) | ((uint16_t)x_mv);
+        }
+
+        sad64x64 = sad32x32_0 + sad32x32_1 + sad32x32_2 + sad32x32_3;
+        if (sad64x64 < p_best_sad64x64[0]) {
+            p_best_sad64x64[0] = sad64x64;
+            x_mv = _MVXT(mv) + (int16_t)search_index * 4;
+            y_mv = _MVYT(mv);
+            p_best_mv64x64[0] = ((uint16_t)y_mv << 16) | ((uint16_t)x_mv);
+        }
+    }
+}
+#if 0
+static void open_loop_me_get_eight_search_point_results_block(
+    MeContext_t             *context_ptr,                    // input parameter, ME context Ptr, used to get SB Ptr
+    uint32_t                listIndex,                     // input parameter, reference list index
+    uint32_t                searchRegionIndex,             // input parameter, search area origin, used to point to reference samples
+    int32_t                 xSearchIndex,                  // input parameter, search region position in the horizontal direction, used to derive xMV
+    int32_t                 ySearchIndex,                  // input parameter, search region position in the vertical direction, used to derive yMV
+    EbAsm                   asm_type){
+    uint8_t  *src_ptr = context_ptr->sb_src_ptr;
+
+    // uint8_t  *refPtr = refPicPtr->buffer_y; // NADER
+    uint8_t  *refPtr = context_ptr->integer_buffer_ptr[listIndex][0] + (ME_FILTER_TAP >> 1) + ((ME_FILTER_TAP >> 1) * context_ptr->interpolated_full_stride[listIndex][0]);
+
+    // uint32_t reflumaStride = refPicPtr->stride_y; // NADER
+    uint32_t reflumaStride = context_ptr->interpolated_full_stride[listIndex][0];
+    uint32_t searchPositionTLIndex = searchRegionIndex;
+    uint32_t searchPositionIndex;
+    uint32_t blockIndex;
+    uint32_t srcNext16x16Offset = (BLOCK_SIZE_64 << 4);
+    //uint32_t refNext16x16Offset = (refPicPtr->stride_y << 4); // NADER
+    uint32_t refNext16x16Offset = (reflumaStride << 4);
+    uint32_t   currMV1 = (((uint16_t)ySearchIndex) << 18);
+    uint16_t   currMV2 = (((uint16_t)xSearchIndex << 2));
+    uint32_t   currMV = currMV1 | currMV2;
+    uint32_t  *p_best_sad8x8 = context_ptr->p_best_sad8x8;
+    uint32_t  *p_best_sad16x16 = context_ptr->p_best_sad16x16;
+    uint32_t  *p_best_sad32x32 = context_ptr->p_best_sad32x32;
+    uint32_t  *p_best_sad64x64 = context_ptr->p_best_sad64x64;
+    uint32_t  *p_best_sad64x32 = context_ptr->p_best_sad64x32;
+    uint32_t  *p_best_sad32x16 = context_ptr->p_best_sad32x16;
+    uint32_t  *p_best_sad16x8 = context_ptr->p_best_sad16x8;
+    uint32_t  *p_best_sad32x64 = context_ptr->p_best_sad32x64;
+    uint32_t  *p_best_sad16x32 = context_ptr->p_best_sad16x32;
+    uint32_t  *p_best_sad8x16 = context_ptr->p_best_sad8x16;
+    uint32_t  *p_best_sad32x8 = context_ptr->p_best_sad32x8;
+    uint32_t  *p_best_sad8x32 = context_ptr->p_best_sad8x32;
+    uint32_t  *p_best_sad64x16 = context_ptr->p_best_sad64x16;
+    uint32_t  *p_best_sad16x64 = context_ptr->p_best_sad16x64;
+    uint32_t  *p_best_mv8x8 = context_ptr->p_best_mv8x8;
+    uint32_t  *p_best_mv16x16 = context_ptr->p_best_mv16x16;
+    uint32_t  *p_best_mv32x32 = context_ptr->p_best_mv32x32;
+    uint32_t  *p_best_mv64x64 = context_ptr->p_best_mv64x64;
+    uint32_t  *p_best_mv64x32 = context_ptr->p_best_mv64x32;
+    uint32_t  *p_best_mv32x16 = context_ptr->p_best_mv32x16;
+    uint32_t  *p_best_mv16x8 = context_ptr->p_best_mv16x8;
+    uint32_t  *p_best_mv32x64 = context_ptr->p_best_mv32x64;
+    uint32_t  *p_best_mv16x32 = context_ptr->p_best_mv16x32;
+    uint32_t  *p_best_mv8x16 = context_ptr->p_best_mv8x16;
+    uint32_t  *p_best_mv32x8 = context_ptr->p_best_mv32x8;
+    uint32_t  *p_best_mv8x32 = context_ptr->p_best_mv8x32;
+    //uint32_t  *p_sad32x32 = context_ptr->p_sad32x32;
+    uint32_t  *p_sad16x16 = context_ptr->p_sad16x16;
+    //uint32_t  *p_sad8x8 = context_ptr->p_sad8x8;
+    uint32_t  *p_best_mv64x16 = context_ptr->p_best_mv64x16;
+    uint32_t  *p_best_mv16x64 = context_ptr->p_best_mv16x64;
+
+    /*uint16_t  *p_sad16x16 = context_ptr->p_eight_sad16x16;
+    uint16_t  *p_sad8x8 = context_ptr->p_eight_sad8x8;
+    uint16_t  *p_sad32x32 = context_ptr->p_eight_sad32x32;*/
+
+    /*
+    ----------------------    ----------------------
+    |  16x16_0  |  16x16_1  |  16x16_4  |  16x16_5  |
+    ----------------------    ----------------------
+    |  16x16_2  |  16x16_3  |  16x16_6  |  16x16_7  |
+    -----------------------   -----------------------
+    |  16x16_8  |  16x16_9  |  16x16_12 |  16x16_13 |
+    ----------------------    ----------------------
+    |  16x16_10 |  16x16_11 |  16x16_14 |  16x16_15 |
+    -----------------------   -----------------------
+    */
+
+    const uint32_t  src_stride = context_ptr->sb_src_stride;
+    srcNext16x16Offset = src_stride << 4;
+
+    //---- 16x16_0
+    blockIndex = 0;
+    searchPositionIndex = searchPositionTLIndex;
+    ext_eight_sad_calculation_8x8_16x16(src_ptr + blockIndex,src_stride, refPtr + searchPositionIndex, reflumaStride, &p_best_sad8x8[0], &p_best_mv8x8[0], &p_best_sad16x16[0], &p_best_mv16x16[0], currMV, context_ptr->p_eight_sad16x16,0, context_ptr->p_eight_sad8x8,0);
+    //---- 16x16_1
+    blockIndex = blockIndex + 16;
+    searchPositionIndex = searchPositionTLIndex + 16;
+    ext_eight_sad_calculation_8x8_16x16(src_ptr + blockIndex,src_stride, refPtr + searchPositionIndex, reflumaStride, &p_best_sad8x8[4], &p_best_mv8x8[4], &p_best_sad16x16[1], &p_best_mv16x16[1], currMV, context_ptr->p_eight_sad16x16,1, context_ptr->p_eight_sad8x8,4);
+    //---- 16x16_4
+    blockIndex = blockIndex + 16;
+    searchPositionIndex = searchPositionIndex + 16;
+    ext_eight_sad_calculation_8x8_16x16(src_ptr + blockIndex,src_stride, refPtr + searchPositionIndex, reflumaStride, &p_best_sad8x8[16], &p_best_mv8x8[16], &p_best_sad16x16[4], &p_best_mv16x16[4], currMV, context_ptr->p_eight_sad16x16,4, context_ptr->p_eight_sad8x8,16);
+    //---- 16x16_5
+    blockIndex = blockIndex + 16;
+    searchPositionIndex = searchPositionIndex + 16;
+    ext_eight_sad_calculation_8x8_16x16(src_ptr + blockIndex,src_stride, refPtr + searchPositionIndex, reflumaStride, &p_best_sad8x8[20], &p_best_mv8x8[20], &p_best_sad16x16[5], &p_best_mv16x16[5], currMV, context_ptr->p_eight_sad16x16,5, context_ptr->p_eight_sad8x8,20);
+    //---- 16x16_2
+    blockIndex = srcNext16x16Offset;
+    searchPositionIndex = searchPositionTLIndex + refNext16x16Offset;
+    ext_eight_sad_calculation_8x8_16x16(src_ptr + blockIndex,src_stride, refPtr + searchPositionIndex, reflumaStride, &p_best_sad8x8[8], &p_best_mv8x8[8], &p_best_sad16x16[2], &p_best_mv16x16[2], currMV, context_ptr->p_eight_sad16x16,2, context_ptr->p_eight_sad8x8,8);
+    //---- 16x16_3
+    blockIndex = blockIndex + 16;
+    searchPositionIndex = searchPositionIndex + 16;
+    ext_eight_sad_calculation_8x8_16x16(src_ptr + blockIndex,src_stride, refPtr + searchPositionIndex, reflumaStride, &p_best_sad8x8[12], &p_best_mv8x8[12], &p_best_sad16x16[3], &p_best_mv16x16[3], currMV, context_ptr->p_eight_sad16x16,3, context_ptr->p_eight_sad8x8,12);
+    //---- 16x16_6
+    blockIndex = blockIndex + 16;
+    searchPositionIndex = searchPositionIndex + 16;
+    ext_eight_sad_calculation_8x8_16x16(src_ptr + blockIndex,src_stride, refPtr + searchPositionIndex, reflumaStride, &p_best_sad8x8[24], &p_best_mv8x8[24], &p_best_sad16x16[6], &p_best_mv16x16[6], currMV, context_ptr->p_eight_sad16x16,6, context_ptr->p_eight_sad8x8,24);
+    //---- 16x16_7
+    blockIndex = blockIndex + 16;
+    searchPositionIndex = searchPositionIndex + 16;
+    ext_eight_sad_calculation_8x8_16x16(src_ptr + blockIndex,src_stride, refPtr + searchPositionIndex, reflumaStride, &p_best_sad8x8[28], &p_best_mv8x8[28], &p_best_sad16x16[7], &p_best_mv16x16[7], currMV, context_ptr->p_eight_sad16x16,7, context_ptr->p_eight_sad8x8,28);
+    //---- 16x16_8
+    blockIndex = (srcNext16x16Offset << 1);
+    searchPositionIndex = searchPositionTLIndex + (refNext16x16Offset << 1);
+    ext_eight_sad_calculation_8x8_16x16(src_ptr + blockIndex,src_stride, refPtr + searchPositionIndex, reflumaStride, &p_best_sad8x8[32], &p_best_mv8x8[32], &p_best_sad16x16[8], &p_best_mv16x16[8], currMV, context_ptr->p_eight_sad16x16,8, context_ptr->p_eight_sad8x8,32);
+    //---- 16x16_9
+    blockIndex = blockIndex + 16;
+    searchPositionIndex = searchPositionIndex + 16;
+    ext_eight_sad_calculation_8x8_16x16(src_ptr + blockIndex,src_stride, refPtr + searchPositionIndex, reflumaStride, &p_best_sad8x8[36], &p_best_mv8x8[36], &p_best_sad16x16[9], &p_best_mv16x16[9], currMV, context_ptr->p_eight_sad16x16,9, context_ptr->p_eight_sad8x8,36);
+    //---- 16x16_12
+    blockIndex = blockIndex + 16;
+    searchPositionIndex = searchPositionIndex + 16;
+    ext_eight_sad_calculation_8x8_16x16(src_ptr + blockIndex,src_stride, refPtr + searchPositionIndex, reflumaStride, &p_best_sad8x8[48], &p_best_mv8x8[48], &p_best_sad16x16[12], &p_best_mv16x16[12], currMV, context_ptr->p_eight_sad16x16,12, context_ptr->p_eight_sad8x8,48);
+    //---- 16x1_13
+    blockIndex = blockIndex + 16;
+    searchPositionIndex = searchPositionIndex + 16;
+    ext_eight_sad_calculation_8x8_16x16(src_ptr + blockIndex,src_stride, refPtr + searchPositionIndex, reflumaStride, &p_best_sad8x8[52], &p_best_mv8x8[52], &p_best_sad16x16[13], &p_best_mv16x16[13], currMV, context_ptr->p_eight_sad16x16,13, context_ptr->p_eight_sad8x8,52);
+    //---- 16x16_10
+    blockIndex = (srcNext16x16Offset * 3);
+    searchPositionIndex = searchPositionTLIndex + (refNext16x16Offset * 3);
+    ext_eight_sad_calculation_8x8_16x16(src_ptr + blockIndex,src_stride, refPtr + searchPositionIndex, reflumaStride, &p_best_sad8x8[40], &p_best_mv8x8[40], &p_best_sad16x16[10], &p_best_mv16x16[10], currMV, context_ptr->p_eight_sad16x16,10, context_ptr->p_eight_sad8x8,40);
+    //---- 16x16_11
+    blockIndex = blockIndex + 16;
+    searchPositionIndex = searchPositionIndex + 16;
+    ext_eight_sad_calculation_8x8_16x16(src_ptr + blockIndex,src_stride, refPtr + searchPositionIndex, reflumaStride, &p_best_sad8x8[44], &p_best_mv8x8[44], &p_best_sad16x16[11], &p_best_mv16x16[11], currMV, context_ptr->p_eight_sad16x16,11, context_ptr->p_eight_sad8x8,44);
+    //---- 16x16_14
+    blockIndex = blockIndex + 16;
+    searchPositionIndex = searchPositionIndex + 16;
+    ext_eight_sad_calculation_8x8_16x16(src_ptr + blockIndex,src_stride, refPtr + searchPositionIndex, reflumaStride, &p_best_sad8x8[56], &p_best_mv8x8[56], &p_best_sad16x16[14], &p_best_mv16x16[14], currMV, context_ptr->p_eight_sad16x16,14, context_ptr->p_eight_sad8x8,56);
+    //---- 16x16_15
+    blockIndex = blockIndex + 16;
+    searchPositionIndex = searchPositionIndex + 16;
+    ext_eight_sad_calculation_8x8_16x16(src_ptr + blockIndex,src_stride, refPtr + searchPositionIndex, reflumaStride, &p_best_sad8x8[60], &p_best_mv8x8[60], &p_best_sad16x16[15], &p_best_mv16x16[15], currMV, context_ptr->p_eight_sad16x16,15, context_ptr->p_eight_sad8x8,60);
+
+    //32x32 and 64x64
+    //GetEightHorizontalSearchPointResults_32x32_64x64(p_sad16x16, p_best_sad32x32, p_best_sad64x64, p_best_mv32x32, p_best_mv32x32, currMV);
+
+    ext_eight_sad_calculation_32x32_64x64(context_ptr->p_eight_sad16x16, p_best_sad32x32, p_best_sad64x64, p_best_mv32x32, p_best_mv64x64, currMV, context_ptr->p_eight_sad32x32);
+
+    ext_eigth_sad_calculation_nsq(
+        context_ptr->p_eight_sad8x8,
+        context_ptr->p_eight_sad16x16,
+        context_ptr->p_eight_sad32x32,
+        p_best_sad64x32,
+        p_best_mv64x32,
+        p_best_sad32x16,
+        p_best_mv32x16,
+        p_best_sad16x8,
+        p_best_mv16x8,
+        p_best_sad32x64,
+        p_best_mv32x64,
+        p_best_sad16x32,
+        p_best_mv16x32,
+        p_best_sad8x16,
+        p_best_mv8x16,
+        p_best_sad32x8,
+        p_best_mv32x8,
+        p_best_sad8x32,
+        p_best_mv8x32,
+        p_best_sad64x16,
+        p_best_mv64x16,
+        p_best_sad16x64,
+        p_best_mv16x64,
+        currMV);
+}
+#endif
+/*******************************************
+* open_loop_me_get_search_point_results_block
+*******************************************/
+static void open_loop_me_get_eight_search_point_results_block(
+    MeContext_t             *context_ptr,                    // input parameter, ME context Ptr, used to get SB Ptr
+    uint32_t                listIndex,                     // input parameter, reference list index
+    uint32_t                searchRegionIndex,             // input parameter, search area origin, used to point to reference samples
+    int32_t                 xSearchIndex,                  // input parameter, search region position in the horizontal direction, used to derive xMV
+    int32_t                 ySearchIndex,                  // input parameter, search region position in the vertical direction, used to derive yMV
+    EbAsm                   asm_type)
+{
+    uint8_t  *src_ptr = context_ptr->sb_src_ptr;
+
+    // uint8_t  *refPtr = refPicPtr->buffer_y; // NADER
+    uint8_t  *refPtr = context_ptr->integer_buffer_ptr[listIndex][0] + (ME_FILTER_TAP >> 1) + ((ME_FILTER_TAP >> 1) * context_ptr->interpolated_full_stride[listIndex][0]);
+
+    // uint32_t reflumaStride = refPicPtr->stride_y; // NADER
+    uint32_t reflumaStride = context_ptr->interpolated_full_stride[listIndex][0];
+    uint32_t searchPositionTLIndex = searchRegionIndex;
+    uint32_t searchPositionIndex;
+    uint32_t blockIndex;
+    uint32_t srcNext16x16Offset = (BLOCK_SIZE_64 << 4);
+    //uint32_t refNext16x16Offset = (refPicPtr->stride_y << 4); // NADER
+    uint32_t refNext16x16Offset = (reflumaStride << 4);
+    uint32_t   currMV1 = (((uint16_t)ySearchIndex) << 18);
+    uint16_t   currMV2 = (((uint16_t)xSearchIndex << 2));
+    uint32_t   currMV = currMV1 | currMV2;
+    uint32_t  *p_best_sad8x8 = context_ptr->p_best_sad8x8;
+    uint32_t  *p_best_sad16x16 = context_ptr->p_best_sad16x16;
+    uint32_t  *p_best_sad32x32 = context_ptr->p_best_sad32x32;
+    uint32_t  *p_best_sad64x64 = context_ptr->p_best_sad64x64;
+    uint32_t  *p_best_sad64x32 = context_ptr->p_best_sad64x32;
+    uint32_t  *p_best_sad32x16 = context_ptr->p_best_sad32x16;
+    uint32_t  *p_best_sad16x8 = context_ptr->p_best_sad16x8;
+    uint32_t  *p_best_sad32x64 = context_ptr->p_best_sad32x64;
+    uint32_t  *p_best_sad16x32 = context_ptr->p_best_sad16x32;
+    uint32_t  *p_best_sad8x16 = context_ptr->p_best_sad8x16;
+    uint32_t  *p_best_sad32x8 = context_ptr->p_best_sad32x8;
+    uint32_t  *p_best_sad8x32 = context_ptr->p_best_sad8x32;
+    uint32_t  *p_best_sad64x16 = context_ptr->p_best_sad64x16;
+    uint32_t  *p_best_sad16x64 = context_ptr->p_best_sad16x64;
+    uint32_t  *p_best_mv8x8 = context_ptr->p_best_mv8x8;
+    uint32_t  *p_best_mv16x16 = context_ptr->p_best_mv16x16;
+    uint32_t  *p_best_mv32x32 = context_ptr->p_best_mv32x32;
+    uint32_t  *p_best_mv64x64 = context_ptr->p_best_mv64x64;
+    uint32_t  *p_best_mv64x32 = context_ptr->p_best_mv64x32;
+    uint32_t  *p_best_mv32x16 = context_ptr->p_best_mv32x16;
+    uint32_t  *p_best_mv16x8 = context_ptr->p_best_mv16x8;
+    uint32_t  *p_best_mv32x64 = context_ptr->p_best_mv32x64;
+    uint32_t  *p_best_mv16x32 = context_ptr->p_best_mv16x32;
+    uint32_t  *p_best_mv8x16 = context_ptr->p_best_mv8x16;
+    uint32_t  *p_best_mv32x8 = context_ptr->p_best_mv32x8;
+    uint32_t  *p_best_mv8x32 = context_ptr->p_best_mv8x32;
+    //uint32_t  *p_sad32x32 = context_ptr->p_sad32x32;
+    //uint32_t  *p_sad16x16 = context_ptr->p_sad16x16;
+    //uint32_t  *p_sad8x8 = context_ptr->p_sad8x8;
+    uint32_t  *p_best_mv64x16 = context_ptr->p_best_mv64x16;
+    uint32_t  *p_best_mv16x64 = context_ptr->p_best_mv16x64;
+
+    //TODO: blockIndex searchPositionIndex could be removed  + Connect asm_type
+    (void)asm_type;
+
+    const uint32_t  src_stride = context_ptr->sb_src_stride;
+    srcNext16x16Offset = src_stride << 4;
+
+    //---- 16x16 : 0
+    blockIndex = 0;
+    searchPositionIndex = searchPositionTLIndex;
+
+    ext_eight_sad_calculation_8x8_16x16(src_ptr + blockIndex, src_stride, refPtr + searchPositionIndex, reflumaStride, &p_best_sad8x8[0], &p_best_sad16x16[0], &p_best_mv8x8[0], &p_best_mv16x16[0], currMV, context_ptr->p_eight_sad16x16, 0, context_ptr->p_eight_sad8x8, 0);
+
+    //---- 16x16 : 1
+    blockIndex = blockIndex + 16;
+    searchPositionIndex = searchPositionTLIndex + 16;
+    ext_eight_sad_calculation_8x8_16x16(src_ptr + blockIndex, src_stride, refPtr + searchPositionIndex, reflumaStride, &p_best_sad8x8[4], &p_best_sad16x16[1], &p_best_mv8x8[4], &p_best_mv16x16[1], currMV, context_ptr->p_eight_sad16x16, 1, context_ptr->p_eight_sad8x8, 4);
+    //---- 16x16 : 4
+    blockIndex = blockIndex + 16;
+    searchPositionIndex = searchPositionIndex + 16;
+
+    ext_eight_sad_calculation_8x8_16x16(src_ptr + blockIndex, src_stride, refPtr + searchPositionIndex, reflumaStride, &p_best_sad8x8[16], &p_best_sad16x16[4], &p_best_mv8x8[16], &p_best_mv16x16[4], currMV, context_ptr->p_eight_sad16x16, 4, context_ptr->p_eight_sad8x8, 16);
+
+
+    //---- 16x16 : 5
+    blockIndex = blockIndex + 16;
+    searchPositionIndex = searchPositionIndex + 16;
+    ext_eight_sad_calculation_8x8_16x16(src_ptr + blockIndex, src_stride, refPtr + searchPositionIndex, reflumaStride, &p_best_sad8x8[20], &p_best_sad16x16[5], &p_best_mv8x8[20], &p_best_mv16x16[5], currMV, context_ptr->p_eight_sad16x16, 5, context_ptr->p_eight_sad8x8, 20);
+
+
+    //---- 16x16 : 2
+    blockIndex = srcNext16x16Offset;
+    searchPositionIndex = searchPositionTLIndex + refNext16x16Offset;
+    ext_eight_sad_calculation_8x8_16x16(src_ptr + blockIndex, src_stride, refPtr + searchPositionIndex, reflumaStride, &p_best_sad8x8[8], &p_best_sad16x16[2], &p_best_mv8x8[8], &p_best_mv16x16[2], currMV, context_ptr->p_eight_sad16x16, 2, context_ptr->p_eight_sad8x8, 8);
+    //---- 16x16 : 3
+    blockIndex = blockIndex + 16;
+    searchPositionIndex = searchPositionIndex + 16;
+    ext_eight_sad_calculation_8x8_16x16(src_ptr + blockIndex, src_stride, refPtr + searchPositionIndex, reflumaStride, &p_best_sad8x8[12], &p_best_sad16x16[3], &p_best_mv8x8[12], &p_best_mv16x16[3], currMV, context_ptr->p_eight_sad16x16, 3, context_ptr->p_eight_sad8x8, 12);
+    //---- 16x16 : 6
+    blockIndex = blockIndex + 16;
+    searchPositionIndex = searchPositionIndex + 16;
+    ext_eight_sad_calculation_8x8_16x16(src_ptr + blockIndex, src_stride, refPtr + searchPositionIndex, reflumaStride, &p_best_sad8x8[24], &p_best_sad16x16[6], &p_best_mv8x8[24], &p_best_mv16x16[6], currMV, context_ptr->p_eight_sad16x16, 6, context_ptr->p_eight_sad8x8, 24);
+    //---- 16x16 : 7
+    blockIndex = blockIndex + 16;
+    searchPositionIndex = searchPositionIndex + 16;
+    ext_eight_sad_calculation_8x8_16x16(src_ptr + blockIndex, src_stride, refPtr + searchPositionIndex, reflumaStride, &p_best_sad8x8[28], &p_best_sad16x16[7], &p_best_mv8x8[28], &p_best_mv16x16[7], currMV, context_ptr->p_eight_sad16x16, 7, context_ptr->p_eight_sad8x8, 28);
+
+
+    //---- 16x16 : 8
+    blockIndex = (srcNext16x16Offset << 1);
+    searchPositionIndex = searchPositionTLIndex + (refNext16x16Offset << 1);
+    ext_eight_sad_calculation_8x8_16x16(src_ptr + blockIndex, src_stride, refPtr + searchPositionIndex, reflumaStride, &p_best_sad8x8[32], &p_best_sad16x16[8], &p_best_mv8x8[32], &p_best_mv16x16[8], currMV, context_ptr->p_eight_sad16x16, 8, context_ptr->p_eight_sad8x8, 32);
+    //---- 16x16 : 9
+    blockIndex = blockIndex + 16;
+    searchPositionIndex = searchPositionIndex + 16;
+    ext_eight_sad_calculation_8x8_16x16(src_ptr + blockIndex, src_stride, refPtr + searchPositionIndex, reflumaStride, &p_best_sad8x8[36], &p_best_sad16x16[9], &p_best_mv8x8[36], &p_best_mv16x16[9], currMV, context_ptr->p_eight_sad16x16, 9, context_ptr->p_eight_sad8x8, 36);
+    //---- 16x16 : 12
+    blockIndex = blockIndex + 16;
+    searchPositionIndex = searchPositionIndex + 16;
+    ext_eight_sad_calculation_8x8_16x16(src_ptr + blockIndex, src_stride, refPtr + searchPositionIndex, reflumaStride, &p_best_sad8x8[48], &p_best_sad16x16[12], &p_best_mv8x8[48], &p_best_mv16x16[12], currMV, context_ptr->p_eight_sad16x16, 12, context_ptr->p_eight_sad8x8, 48);
+    //---- 16x16 : 13
+    blockIndex = blockIndex + 16;
+    searchPositionIndex = searchPositionIndex + 16;
+    ext_eight_sad_calculation_8x8_16x16(src_ptr + blockIndex, src_stride, refPtr + searchPositionIndex, reflumaStride, &p_best_sad8x8[52], &p_best_sad16x16[13], &p_best_mv8x8[52], &p_best_mv16x16[13], currMV, context_ptr->p_eight_sad16x16, 13, context_ptr->p_eight_sad8x8, 52);
+
+
+    //---- 16x16 : 10
+    blockIndex = (srcNext16x16Offset * 3);
+    searchPositionIndex = searchPositionTLIndex + (refNext16x16Offset * 3);
+    ext_eight_sad_calculation_8x8_16x16(src_ptr + blockIndex, src_stride, refPtr + searchPositionIndex, reflumaStride, &p_best_sad8x8[40], &p_best_sad16x16[10], &p_best_mv8x8[40], &p_best_mv16x16[10], currMV, context_ptr->p_eight_sad16x16, 10, context_ptr->p_eight_sad8x8, 40);
+    //---- 16x16 : 11
+    blockIndex = blockIndex + 16;
+    searchPositionIndex = searchPositionIndex + 16;
+    ext_eight_sad_calculation_8x8_16x16(src_ptr + blockIndex, src_stride, refPtr + searchPositionIndex, reflumaStride, &p_best_sad8x8[44], &p_best_sad16x16[11], &p_best_mv8x8[44], &p_best_mv16x16[11], currMV, context_ptr->p_eight_sad16x16, 11, context_ptr->p_eight_sad8x8, 44);
+    //---- 16x16 : 14
+    blockIndex = blockIndex + 16;
+    searchPositionIndex = searchPositionIndex + 16;
+    ext_eight_sad_calculation_8x8_16x16(src_ptr + blockIndex, src_stride, refPtr + searchPositionIndex, reflumaStride, &p_best_sad8x8[56], &p_best_sad16x16[14], &p_best_mv8x8[56], &p_best_mv16x16[14], currMV, context_ptr->p_eight_sad16x16, 14, context_ptr->p_eight_sad8x8, 56);
+    //---- 16x16 : 15
+    blockIndex = blockIndex + 16;
+    searchPositionIndex = searchPositionIndex + 16;
+    ext_eight_sad_calculation_8x8_16x16(src_ptr + blockIndex, src_stride, refPtr + searchPositionIndex, reflumaStride, &p_best_sad8x8[60], &p_best_sad16x16[15], &p_best_mv8x8[60], &p_best_mv16x16[15], currMV, context_ptr->p_eight_sad16x16, 15, context_ptr->p_eight_sad8x8, 60);
+
+    ext_eight_sad_calculation_32x32_64x64(context_ptr->p_eight_sad16x16, p_best_sad32x32, p_best_sad64x64, p_best_mv32x32, p_best_mv64x64, currMV, context_ptr->p_eight_sad32x32);
+
+    ext_eigth_sad_calculation_nsq(
+        context_ptr->p_eight_sad8x8,
+        context_ptr->p_eight_sad16x16,
+        context_ptr->p_eight_sad32x32,
+        p_best_sad64x32,
+        p_best_mv64x32,
+        p_best_sad32x16,
+        p_best_mv32x16,
+        p_best_sad16x8,
+        p_best_mv16x8,
+        p_best_sad32x64,
+        p_best_mv32x64,
+        p_best_sad16x32,
+        p_best_mv16x32,
+        p_best_sad8x16,
+        p_best_mv8x16,
+        p_best_sad32x8,
+        p_best_mv32x8,
+        p_best_sad8x32,
+        p_best_mv8x32,
+        p_best_sad64x16,
+        p_best_mv64x16,
+        p_best_sad16x64,
+        p_best_mv16x64,
+        currMV);
+
+}
+#endif
 /*******************************************
 * open_loop_me_get_search_point_results_block
 *******************************************/
 static void open_loop_me_get_search_point_results_block(
     MeContext_t             *context_ptr,                    // input parameter, ME context Ptr, used to get SB Ptr
-    uint32_t                   listIndex,                     // input parameter, reference list index
-    uint32_t                   searchRegionIndex,             // input parameter, search area origin, used to point to reference samples
-    int32_t                   xSearchIndex,                  // input parameter, search region position in the horizontal direction, used to derive xMV
-    int32_t                   ySearchIndex,                  // input parameter, search region position in the vertical direction, used to derive yMV
+    uint32_t                listIndex,                     // input parameter, reference list index
+    uint32_t                searchRegionIndex,             // input parameter, search area origin, used to point to reference samples
+    int32_t                 xSearchIndex,                  // input parameter, search region position in the horizontal direction, used to derive xMV
+    int32_t                 ySearchIndex,                  // input parameter, search region position in the vertical direction, used to derive yMV
     EbAsm                   asm_type)
 {
     uint8_t  *src_ptr = context_ptr->sb_src_ptr;
@@ -1564,22 +3296,29 @@ static void open_loop_me_fullpel_search_sblock(
 {
 
     uint32_t xSearchIndex, ySearchIndex;
+#if NSQ_ME_OPT
+    uint32_t  searchAreaWidthRest8 = search_area_width & 7;
+    uint32_t  searchAreaWidthMult8 = search_area_width - searchAreaWidthRest8;
+#endif
+
     for (ySearchIndex = 0; ySearchIndex < search_area_height; ySearchIndex++) {
+#if NSQ_ME_OPT
+        for (xSearchIndex = 0; xSearchIndex < searchAreaWidthMult8; xSearchIndex += 8){
 
-        //for (xSearchIndex = 0; xSearchIndex < searchAreaWidthMult8; xSearchIndex += 8){
+            //this function will do:  xSearchIndex, +1, +2, ..., +7
+            open_loop_me_get_eight_search_point_results_block(
+                context_ptr,
+                listIndex,
+                xSearchIndex + ySearchIndex * context_ptr->interpolated_full_stride[listIndex][0],
+                (int32_t)xSearchIndex + x_search_area_origin,
+                (int32_t)ySearchIndex + y_search_area_origin,
+                asm_type);
+        }
 
-        //    //this function will do:  xSearchIndex, +1, +2, ..., +7
-        //    GetEightHorizontalSearchPointResultsAll85PUs(
-        //        context_ptr,
-        //        listIndex,
-        //        xSearchIndex + ySearchIndex * context_ptr->interpolated_full_stride[listIndex][0],
-        //        xSearchIndex + x_search_area_origin,
-        //        ySearchIndex + y_search_area_origin,
-        //        asm_type
-        //        );
-        //}
-
+        for (xSearchIndex = searchAreaWidthMult8; xSearchIndex < search_area_width; xSearchIndex++) {
+#else
         for (xSearchIndex = 0/*searchAreaWidthMult8*/; xSearchIndex < search_area_width; xSearchIndex++) {
+#endif
 
             open_loop_me_get_search_point_results_block(
                 context_ptr,
