@@ -525,6 +525,9 @@ uint64_t av1_intra_fast_cost(
     uint64_t                 luma_distortion,
     uint64_t                 chroma_distortion,
     uint64_t                 lambda,
+#if USE_SSE_FL
+    EbBool                   use_ssd,
+#endif
     PictureControlSet_t     *picture_control_set_ptr,
     CandidateMv             *ref_mv_stack,
     const BlockGeom         *blk_geom,
@@ -739,19 +742,55 @@ EbErrorType av1_intra_fast_cost(
     candidate_buffer_ptr->candidate_ptr->fast_luma_rate = lumaRate;
     candidate_buffer_ptr->candidate_ptr->fast_chroma_rate = chromaRate;
 #endif
-    lumaSad = (LUMA_WEIGHT * luma_distortion) << AV1_COST_PRECISION;
-    chromaSad = chroma_distortion << AV1_COST_PRECISION;
-    totalDistortion = lumaSad + chromaSad;
+#if USE_SSE_FL // cost
+    if (use_ssd) {
 
-    rate = lumaRate + chromaRate;
+        int32_t current_q_index = MAX(0, MIN(QINDEX_RANGE - 1, picture_control_set_ptr->parent_pcs_ptr->base_qindex));
+        Dequants *const dequants = &picture_control_set_ptr->parent_pcs_ptr->deq;
 
-    // Assign fast cost
+        int16_t quantizer = dequants->y_dequant_Q3[current_q_index][1];
+        rate = 0;
+        model_rd_from_sse(
+            blk_geom->bsize,
+            quantizer,
+            luma_distortion,
+            &rate,
+            &lumaSad);
+        lumaRate += rate;
+        totalDistortion = lumaSad;
+
+        rate = 0;
+        model_rd_from_sse(
+            blk_geom->bsize_uv,
+            quantizer,
+            chroma_distortion,
+            &chromaRate,
+            &chromaSad);
+        chromaRate += rate;
+        totalDistortion += chromaSad;
+
+        rate = lumaRate + chromaRate;
+
+        return(RDCOST(lambda, rate, totalDistortion));
+    }
+    else {
+#endif
+        lumaSad = (LUMA_WEIGHT * luma_distortion) << AV1_COST_PRECISION;
+        chromaSad = chroma_distortion << AV1_COST_PRECISION;
+        totalDistortion = lumaSad + chromaSad;
+
+        rate = lumaRate + chromaRate;
+
+        // Assign fast cost
 #if REST_FAST_RATE_EST
-    return(RDCOST(lambda, rate, totalDistortion));
+        return(RDCOST(lambda, rate, totalDistortion));
 #else
-    *(candidate_buffer_ptr->fast_cost_ptr) = RDCOST(lambda, rate, totalDistortion);
+        *(candidate_buffer_ptr->fast_cost_ptr) = RDCOST(lambda, rate, totalDistortion);
 
-    return return_error;
+        return return_error;
+#endif
+#if USE_SSE_FL
+    }
 #endif
 }
 
@@ -1059,6 +1098,9 @@ uint64_t av1_inter_fast_cost(
     uint64_t                 luma_distortion,
     uint64_t                 chroma_distortion,
     uint64_t                 lambda,
+#if USE_SSE_FL
+    EbBool                   use_ssd,
+#endif
     PictureControlSet_t     *picture_control_set_ptr,
     CandidateMv             *ref_mv_stack,
     const BlockGeom         *blk_geom,
@@ -1455,45 +1497,87 @@ EbErrorType av1_inter_fast_cost(
     candidate_buffer_ptr->candidate_ptr->fast_chroma_rate = chromaRate;
 #endif
 
-    lumaSad = (LUMA_WEIGHT * luma_distortion) << AV1_COST_PRECISION;
-    chromaSad = chroma_distortion << AV1_COST_PRECISION;
-    totalDistortion = lumaSad + chromaSad;
-#if REST_FAST_RATE_EST
-    if (blk_geom->has_uv == 0 && chromaSad != 0) {
-#else
-    if (context_ptr->blk_geom->has_uv == 0 && chromaSad != 0) {
+#if USE_SSE_FL // cost
+    if (use_ssd) {
+
+        int32_t current_q_index = MAX(0, MIN(QINDEX_RANGE - 1, picture_control_set_ptr->parent_pcs_ptr->base_qindex));
+        Dequants *const dequants = &picture_control_set_ptr->parent_pcs_ptr->deq;
+
+        int16_t quantizer = dequants->y_dequant_Q3[current_q_index][1];
+        rate = 0;
+        model_rd_from_sse(
+            blk_geom->bsize,
+            quantizer,
+            luma_distortion,
+            &rate,
+            &lumaSad);
+        lumaRate += rate;
+        totalDistortion = lumaSad;
+
+        rate = 0;
+        model_rd_from_sse(
+            blk_geom->bsize_uv,
+            quantizer,
+            chroma_distortion,
+            &chromaRate,
+            &chromaSad);
+        chromaRate += rate;
+        totalDistortion += chromaSad;
+
+        rate = lumaRate + chromaRate;
+
+        if (candidate_ptr->merge_flag) {
+            uint64_t skipModeRate = candidate_ptr->md_rate_estimation_ptr->skipModeFacBits[skipModeCtx][1];
+            if (skipModeRate < rate) {
+                return(RDCOST(lambda, skipModeRate, totalDistortion));
+            }
+        }
+        return(RDCOST(lambda, rate, totalDistortion));
+    }
+    else {
 #endif
-        printf("av1_inter_fast_cost: Chroma error");
-    }
-
-
-    rate = lumaRate + chromaRate;
-
-
-    // Assign fast cost
+        lumaSad = (LUMA_WEIGHT * luma_distortion) << AV1_COST_PRECISION;
+        chromaSad = chroma_distortion << AV1_COST_PRECISION;
+        totalDistortion = lumaSad + chromaSad;
 #if REST_FAST_RATE_EST
-    if (candidate_ptr->merge_flag) {
-        uint64_t skipModeRate = candidate_ptr->md_rate_estimation_ptr->skipModeFacBits[skipModeCtx][1];
-        if (skipModeRate < rate) {
-            return(RDCOST(lambda, skipModeRate, totalDistortion));
-        }
-    }
-    return(RDCOST(lambda, rate, totalDistortion));
-   
+        if (blk_geom->has_uv == 0 && chromaSad != 0) {
 #else
-    *(candidate_buffer_ptr->fast_cost_ptr) = RDCOST(lambda, rate, totalDistortion);
-
-    if (candidate_buffer_ptr->candidate_ptr->merge_flag) {
-        uint64_t skipModeRate = candidate_buffer_ptr->candidate_ptr->md_rate_estimation_ptr->skipModeFacBits[skipModeCtx][1];
-        if (skipModeRate < rate) {
-
-            *(candidate_buffer_ptr->fast_cost_ptr) = RDCOST(lambda, skipModeRate, totalDistortion);
+        if (context_ptr->blk_geom->has_uv == 0 && chromaSad != 0) {
+#endif
+            printf("av1_inter_fast_cost: Chroma error");
         }
 
+
+        rate = lumaRate + chromaRate;
+
+
+        // Assign fast cost
+#if REST_FAST_RATE_EST
+        if (candidate_ptr->merge_flag) {
+            uint64_t skipModeRate = candidate_ptr->md_rate_estimation_ptr->skipModeFacBits[skipModeCtx][1];
+            if (skipModeRate < rate) {
+                return(RDCOST(lambda, skipModeRate, totalDistortion));
+            }
+        }
+        return(RDCOST(lambda, rate, totalDistortion));
+
+#else
+        *(candidate_buffer_ptr->fast_cost_ptr) = RDCOST(lambda, rate, totalDistortion);
+
+        if (candidate_buffer_ptr->candidate_ptr->merge_flag) {
+            uint64_t skipModeRate = candidate_buffer_ptr->candidate_ptr->md_rate_estimation_ptr->skipModeFacBits[skipModeCtx][1];
+            if (skipModeRate < rate) {
+
+                *(candidate_buffer_ptr->fast_cost_ptr) = RDCOST(lambda, skipModeRate, totalDistortion);
+            }
+
+        }
+
+
+        return return_error;
+#endif
+#if USE_SSE_FL
     }
-
-
-    return return_error;
 #endif
 }
 

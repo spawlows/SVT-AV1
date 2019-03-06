@@ -29,13 +29,15 @@ extern "C" {
 #define MODE_DECISION_CANDIDATE_MAX_COUNT               90//35//20 // 61 Intra & 18 Inter
 #endif
 #if INC_NFL12
+#if !INTRA_INTER_FAST_LOOP
 #define MODE_DECISION_CANDIDATE_BUFFER_MAX_COUNT        (MAX_NFL*6) //up to 6 depths
+#endif
 #else
 #define MODE_DECISION_CANDIDATE_BUFFER_MAX_COUNT        33
 #endif
-
+#if !INTRA_INTER_FAST_LOOP
 #define INDEPENDENT_INTRA_CHROMA_MODE_TOTAL_COUNT       4       // Planar, Vertical, Horizontal, DC
-
+#endif
 #define DEPTH_ONE_STEP   21
 #define DEPTH_TWO_STEP    5
 #define DEPTH_THREE_STEP  1
@@ -132,11 +134,11 @@ extern "C" {
         uint64_t                       *full_cost_array;
         uint64_t                       *full_cost_skip_ptr;
         uint64_t                       *full_cost_merge_ptr;
-
+#if !INTRA_INTER_FAST_LOOP
         // Fast loop buffers
         uint8_t                         buffer_depth_index_start[MAX_LEVEL_COUNT];
         uint8_t                         buffer_depth_index_width[MAX_LEVEL_COUNT];
-
+#endif
         // Lambda
 #if ADD_DELTA_QP_SUPPORT
         uint16_t                        qp;
@@ -167,7 +169,11 @@ extern "C" {
         uint8_t                         group_of16x16_blocks_count;
         uint8_t                         pu_itr;
         uint8_t                         cu_size_log2;
+#if INTRA_INTER_FAST_LOOP
+        uint8_t                         best_candidate_index_array[MAX_NFL + 2];
+#else
         uint8_t                         best_candidate_index_array[MAX_NFL];
+#endif
 #if USED_NFL_FEATURE_BASED
         uint8_t                         sorted_candidate_index_array[MAX_NFL];
 #endif
@@ -228,7 +234,10 @@ extern "C" {
         int16_t                           injected_mv_y_bipred_l1_array[MODE_DECISION_CANDIDATE_MAX_COUNT]; // used to do not inject existing MV
         uint8_t                           injected_mv_count_bipred;
 #endif
-
+#if INTRA_INTER_FAST_LOOP
+        uint32_t                          fast_candidate_intra_count;
+        uint32_t                          fast_candidate_inter_count;
+#endif
         // Multi-modes signal(s) 
         uint8_t                           nfl_level;
         uint8_t                           skip_interpolation_search;
@@ -241,7 +250,9 @@ extern "C" {
 #if NSQ_OPTIMASATION
         PART                              nsq_table[NSQ_TAB_SIZE];
 #endif
-
+#if INTRA_INTER_FAST_LOOP
+        uint8_t                           decoupled_fast_loop_search_method;
+#endif
     } ModeDecisionContext_t;
 
     typedef void(*EB_AV1_LAMBDA_ASSIGN_FUNC)(

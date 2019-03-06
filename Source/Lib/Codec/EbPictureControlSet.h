@@ -14058,8 +14058,9 @@ extern "C" {
         int32_t                               intra_max_distance[4];
         int32_t                               inter_min_distance[4];
         int32_t                               inter_max_distance[4];
+#if !INTRA_INTER_FAST_LOOP
         uint8_t                              *cmplx_status_sb;            // used by EncDecProcess()
-
+#endif
         // Histograms
         uint32_t                          ****picture_histogram;
         uint64_t                              average_intensity_per_region[MAX_NUMBER_OF_REGIONS_IN_WIDTH][MAX_NUMBER_OF_REGIONS_IN_HEIGHT][3];

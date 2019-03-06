@@ -161,6 +161,9 @@ extern "C" {
         uint64_t                 luma_distortion,
         uint64_t                 chroma_distortion,
         uint64_t                 lambda,
+#if USE_SSE_FL
+        EbBool                   use_ssd,
+#endif
         PictureControlSet_t     *picture_control_set_ptr,
         CandidateMv             *ref_mv_stack,
         const BlockGeom         *blk_geom,
@@ -188,6 +191,9 @@ extern "C" {
         uint64_t                 luma_distortion,
         uint64_t                 chroma_distortion,
         uint64_t                 lambda,
+#if USE_SSE_FL
+        EbBool                   use_ssd,
+#endif
         PictureControlSet_t     *picture_control_set_ptr,
         CandidateMv             *ref_mv_stack,
         const BlockGeom         *blk_geom,

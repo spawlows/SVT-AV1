@@ -1371,7 +1371,14 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
             CHROMA_MODE_1 :
             CHROMA_MODE_2 ;
 #endif
-
+#if INTRA_INTER_FAST_LOOP
+    // Set the search method when decoupled fast loop is used 
+    // Hsan: FULL_SAD_SEARCH not supported
+    if (picture_control_set_ptr->enc_mode <= ENC_M0)
+        context_ptr->decoupled_fast_loop_search_method = SSD_SEARCH;
+    else
+        context_ptr->decoupled_fast_loop_search_method = FULL_SAD_SEARCH;
+#endif
     return return_error;
 }
 void move_cu_data(

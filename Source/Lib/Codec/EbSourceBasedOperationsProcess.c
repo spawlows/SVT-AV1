@@ -48,9 +48,10 @@
 #define LOW_MEAN_THLD1                   40
 #define HIGH_MEAN_THLD1                  210
 #define NORM_FACTOR                      10 // Used ComplexityClassifier32x32
-
+#if !INTRA_INTER_FAST_LOOP
 const uint32_t    THRESHOLD_NOISE[MAX_TEMPORAL_LAYERS] = { 33, 28, 27, 26, 26, 26 }; // [Temporal Layer Index]  // Used ComplexityClassifier32x32
 // Outlier removal threshold per depth {2%, 2%, 4%, 4%}
+#endif
 const int8_t  MinDeltaQPdefault[3] = {
     -4, -3, -2
 };
@@ -176,6 +177,7 @@ void DerivePictureActivityStatistics(
 
     return;
 }
+#if !INTRA_INTER_FAST_LOOP
 /***************************************************
 * complexity Classification
 ***************************************************/
@@ -225,7 +227,7 @@ void ComplexityClassifier32x32(
         }
     }
 }
-
+#endif
 
 
 
@@ -1182,12 +1184,12 @@ void* source_based_operations_kernel(void *input_ptr)
         GrassSkinPicture(
             context_ptr,
             picture_control_set_ptr);
-
+#if !INTRA_INTER_FAST_LOOP
         // Complexity Classification
         ComplexityClassifier32x32(
             sequence_control_set_ptr,
             picture_control_set_ptr);
-
+#endif
         // Get Empty Results Object
         eb_get_empty_object(
             context_ptr->picture_demux_results_output_fifo_ptr,

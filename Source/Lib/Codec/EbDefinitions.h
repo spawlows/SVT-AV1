@@ -153,7 +153,10 @@ extern "C" {
 #define REMOVED_DUPLICATE_INTER                         1
 #define REMOVED_DUPLICATE_INTER_L1                      1
 #define REMOVED_DUPLICATE_INTER_BIPRED                  1
-
+#define INTRA_INTER_FAST_LOOP                           1
+#if INTRA_INTER_FAST_LOOP
+#define USE_SSE_FL                                      1
+#endif
 #define USED_NFL_FEATURE_BASED                          1
 #if USED_NFL_FEATURE_BASED
 #define NFL_TX_TH                                      12 // To be tuned
@@ -161,7 +164,9 @@ extern "C" {
 #endif
 
 #define ENABLE_PAETH                                    1
+#if !INTRA_INTER_FAST_LOOP
 #define TWO_FAST_LOOP                                   1
+#endif
 #define ENABLE_EOB_ZERO_CHECK                           1
 #define DISABLE_128_SB_FOR_SUB_720                      1
 #define BASE_LAYER_REF                                  1 // Base layer pictures use the previous I slice as the second reference
