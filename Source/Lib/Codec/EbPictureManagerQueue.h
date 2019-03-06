@@ -51,6 +51,9 @@ extern "C" {
         EbBool                         is_used_as_reference_flag;
 
         uint64_t                          rcGroupIndex;
+#if BASE_LAYER_REF
+        EB_SLICE                        slice_type;
+#endif
 
     } ReferenceQueueEntry_t;
 
