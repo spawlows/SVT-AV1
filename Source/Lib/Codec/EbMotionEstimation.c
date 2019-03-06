@@ -6622,6 +6622,11 @@ EbErrorType MotionEstimateLcu(
 #else
     numOfListToSearch = (picture_control_set_ptr->slice_type == P_SLICE) || (picture_control_set_ptr->temporal_layer_index == 0) ? (uint32_t)REF_LIST_0 : (uint32_t)REF_LIST_1;
 #endif
+#if NSQ_OPTIMASATION
+    EbBool is_nsq_table_used = (picture_control_set_ptr->pic_depth_mode <= PIC_ALL_C_DEPTH_MODE &&
+                                picture_control_set_ptr->nsq_search_level >= NSQ_SEARCH_LEVEL1 &&
+                                picture_control_set_ptr->nsq_search_level < NSQ_SEARCH_FULL) ? EB_TRUE : EB_FALSE;
+#endif
     referenceObject = (EbPaReferenceObject_t*)picture_control_set_ptr->ref_pa_pic_ptr_array[0]->object_ptr;
     ref0Poc = picture_control_set_ptr->ref_pic_poc_array[0];
 
@@ -7230,11 +7235,13 @@ EbErrorType MotionEstimateLcu(
 
                     }
 #if NSQ_OPTIMASATION
-                    context_ptr->p_best_nsq64x64 = &(context_ptr->p_sb_best_nsq[listIndex][0][ME_TIER_ZERO_PU_64x64]);
-                    context_ptr->p_best_nsq32x32 = &(context_ptr->p_sb_best_nsq[listIndex][0][ME_TIER_ZERO_PU_32x32_0]);
-                    context_ptr->p_best_nsq16x16 = &(context_ptr->p_sb_best_nsq[listIndex][0][ME_TIER_ZERO_PU_16x16_0]);
-                    context_ptr->p_best_nsq8x8 = &(context_ptr->p_sb_best_nsq[listIndex][0][ME_TIER_ZERO_PU_8x8_0]);
-                    nsq_get_analysis_results_block(context_ptr);
+                    if (is_nsq_table_used) {
+                        context_ptr->p_best_nsq64x64 = &(context_ptr->p_sb_best_nsq[listIndex][0][ME_TIER_ZERO_PU_64x64]);
+                        context_ptr->p_best_nsq32x32 = &(context_ptr->p_sb_best_nsq[listIndex][0][ME_TIER_ZERO_PU_32x32_0]);
+                        context_ptr->p_best_nsq16x16 = &(context_ptr->p_sb_best_nsq[listIndex][0][ME_TIER_ZERO_PU_16x16_0]);
+                        context_ptr->p_best_nsq8x8 = &(context_ptr->p_sb_best_nsq[listIndex][0][ME_TIER_ZERO_PU_8x8_0]);
+                        nsq_get_analysis_results_block(context_ptr);
+                    }
 #endif
                 }
             }
@@ -7315,8 +7322,8 @@ EbErrorType MotionEstimateLcu(
         mePuResult->totalMeCandidateIndex = totalMeCandidateIndex;
 
 #if NSQ_OPTIMASATION
-        uint8_t l0_nsq = context_ptr->p_sb_best_nsq[0][0][nIdx];
-        uint8_t l1_nsq = context_ptr->p_sb_best_nsq[1][0][nIdx];
+        uint8_t l0_nsq = is_nsq_table_used ? context_ptr->p_sb_best_nsq[0][0][nIdx] : 0;
+        uint8_t l1_nsq = is_nsq_table_used ? context_ptr->p_sb_best_nsq[1][0][nIdx] : 0;
         mePuResult->me_nsq[0] = l0_nsq;
         mePuResult->me_nsq[1] = l1_nsq;
 #endif

@@ -175,9 +175,9 @@ extern "C" {
 #define NSQ_TAB_SIZE                                    6
 #endif
 
-#define IMPROVE_CHROMA_MODE                  1
+#define IMPROVE_CHROMA_MODE                             1
 #define CHROMA_BLIND_IF_SEARCH                          1
-#define OIS_BASED_INTRA                               1
+#define OIS_BASED_INTRA                                 1
 
 /********************************************************/
 /****************** Pre-defined Values ******************/
