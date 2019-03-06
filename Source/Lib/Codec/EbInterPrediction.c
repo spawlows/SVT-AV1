@@ -3539,8 +3539,13 @@ static const int32_t filter_sets[DUAL_FILTER_SET_SIZE][2] = {
 
 
     const Av1Common *cm = picture_control_set_ptr->parent_pcs_ptr->av1_cm;//&cpi->common;
-
+#if CHROMA_BLIND_IF_SEARCH
+    EbBool use_uv = (md_context_ptr->blk_geom->has_uv && md_context_ptr->chroma_level == CHROMA_MODE_0 &&
+        picture_control_set_ptr->parent_pcs_ptr->interpolation_search_level != IT_SEARCH_FAST_LOOP_UV_BLIND) ? EB_TRUE : EB_FALSE;
+    const int32_t num_planes = use_uv ? MAX_MB_PLANE : 1;
+#else
     const int32_t num_planes = MAX_MB_PLANE;
+#endif
 
     int32_t i;
     int32_t tmp_rate;
@@ -3580,8 +3585,12 @@ static const int32_t filter_sets[DUAL_FILTER_SET_SIZE][2] = {
         prediction_ptr,
         md_context_ptr->blk_geom->origin_x,
         md_context_ptr->blk_geom->origin_y,
+#if CHROMA_BLIND_IF_SEARCH
+        use_uv,
+#else
 #if CHROMA_BLIND
         md_context_ptr->chroma_level == CHROMA_MODE_0,
+#endif
 #endif
         asm_type);
 
@@ -3657,8 +3666,12 @@ static const int32_t filter_sets[DUAL_FILTER_SET_SIZE][2] = {
                         prediction_ptr,
                         md_context_ptr->blk_geom->origin_x,
                         md_context_ptr->blk_geom->origin_y,
+#if CHROMA_BLIND_IF_SEARCH
+                        use_uv,
+#else
 #if CHROMA_BLIND
                         md_context_ptr->chroma_level == CHROMA_MODE_0,
+#endif
 #endif
                         asm_type);
 
@@ -3731,8 +3744,12 @@ static const int32_t filter_sets[DUAL_FILTER_SET_SIZE][2] = {
                         prediction_ptr,
                         md_context_ptr->blk_geom->origin_x,
                         md_context_ptr->blk_geom->origin_y,
+#if CHROMA_BLIND_IF_SEARCH
+                        use_uv,
+#else
 #if CHROMA_BLIND
                         md_context_ptr->chroma_level == CHROMA_MODE_0,
+#endif
 #endif
                         asm_type);
 
@@ -3808,8 +3825,12 @@ static const int32_t filter_sets[DUAL_FILTER_SET_SIZE][2] = {
                         prediction_ptr,
                         md_context_ptr->blk_geom->origin_x,
                         md_context_ptr->blk_geom->origin_y,
+#if CHROMA_BLIND_IF_SEARCH
+                        use_uv,
+#else
 #if CHROMA_BLIND
                         md_context_ptr->chroma_level == CHROMA_MODE_0,
+#endif
 #endif
                         asm_type);
 
@@ -3885,10 +3906,16 @@ static const int32_t filter_sets[DUAL_FILTER_SET_SIZE][2] = {
 
     const Av1Common *cm = picture_control_set_ptr->parent_pcs_ptr->av1_cm;//&cpi->common;
 
+#if CHROMA_BLIND_IF_SEARCH
+    EbBool use_uv = (md_context_ptr->blk_geom->has_uv && md_context_ptr->chroma_level == CHROMA_MODE_0 &&
+        picture_control_set_ptr->parent_pcs_ptr->interpolation_search_level != IT_SEARCH_FAST_LOOP_UV_BLIND) ? EB_TRUE : EB_FALSE;
+    const int32_t num_planes = use_uv ? MAX_MB_PLANE : 1;
+#else
 #if CHROMA_BLIND
     const int32_t num_planes = (md_context_ptr->blk_geom->has_uv && md_context_ptr->chroma_level == CHROMA_MODE_0) ? MAX_MB_PLANE : 1;
 #else
     const int32_t num_planes = md_context_ptr->blk_geom->has_uv ? MAX_MB_PLANE : 1;
+#endif
 #endif
     int32_t i;
     int32_t tmp_rate;
@@ -3929,8 +3956,12 @@ static const int32_t filter_sets[DUAL_FILTER_SET_SIZE][2] = {
         prediction_ptr,
         md_context_ptr->blk_geom->origin_x,
         md_context_ptr->blk_geom->origin_y,
+#if CHROMA_BLIND_IF_SEARCH
+        use_uv,
+#else
 #if CHROMA_BLIND
         md_context_ptr->chroma_level == CHROMA_MODE_0,
+#endif
 #endif
         asm_type);
 
@@ -4005,8 +4036,12 @@ static const int32_t filter_sets[DUAL_FILTER_SET_SIZE][2] = {
                         prediction_ptr,
                         md_context_ptr->blk_geom->origin_x,
                         md_context_ptr->blk_geom->origin_y,
+#if CHROMA_BLIND_IF_SEARCH
+                        use_uv,
+#else
 #if CHROMA_BLIND
                         md_context_ptr->chroma_level == CHROMA_MODE_0,
+#endif
 #endif
                         asm_type);
 
@@ -4080,8 +4115,12 @@ static const int32_t filter_sets[DUAL_FILTER_SET_SIZE][2] = {
                         prediction_ptr,
                         md_context_ptr->blk_geom->origin_x,
                         md_context_ptr->blk_geom->origin_y,
+#if CHROMA_BLIND_IF_SEARCH
+                        use_uv,
+#else
 #if CHROMA_BLIND
                         md_context_ptr->chroma_level == CHROMA_MODE_0,
+#endif
 #endif
                         asm_type);
 
@@ -4158,8 +4197,12 @@ static const int32_t filter_sets[DUAL_FILTER_SET_SIZE][2] = {
                         prediction_ptr,
                         md_context_ptr->blk_geom->origin_x,
                         md_context_ptr->blk_geom->origin_y,
+#if CHROMA_BLIND_IF_SEARCH
+                        use_uv,
+#else
 #if CHROMA_BLIND
                         md_context_ptr->chroma_level == CHROMA_MODE_0,
+#endif
 #endif
                         asm_type);
 

@@ -1229,7 +1229,11 @@ void ProductMdFastPuPrediction(
     enableSubPelFlag = 2;
 #endif
     // Prediction
+#if CHROMA_BLIND_IF_SEARCH
+    context_ptr->skip_interpolation_search = picture_control_set_ptr->parent_pcs_ptr->interpolation_search_level >= IT_SEARCH_FAST_LOOP_UV_BLIND ? 0 : 1;
+#else
     context_ptr->skip_interpolation_search = picture_control_set_ptr->parent_pcs_ptr->interpolation_search_level == IT_SEARCH_FAST_LOOP ? 0 : 1;
+#endif
     candidateBuffer->candidate_ptr->prediction_is_ready_luma = EB_TRUE;
     candidateBuffer->candidate_ptr->interp_filters = 0;
 
