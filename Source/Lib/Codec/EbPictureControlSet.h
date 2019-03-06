@@ -14279,6 +14279,9 @@ extern "C" {
         uint8_t                               tx_search_reduced_set;
         uint8_t                               interpolation_search_level;
         uint8_t                               nsq_search_level;
+#if NSQ_OPTIMASATION
+        uint8_t                               nsq_max_shapes_md; // max number of shapes to be tested in MD
+#endif
 
     } PictureParentControlSet_t;
 

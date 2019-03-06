@@ -238,6 +238,9 @@ extern "C" {
 #if CHROMA_BLIND
         uint8_t                           chroma_level;
 #endif
+#if NSQ_OPTIMASATION
+        PART                              nsq_table[NSQ_TAB_SIZE];
+#endif
 
     } ModeDecisionContext_t;
 

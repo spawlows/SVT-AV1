@@ -662,17 +662,70 @@ EbErrorType signal_derivation_multi_processes_oq(
 #endif
     picture_control_set_ptr->max_number_of_pus_per_sb = (picture_control_set_ptr->pic_depth_mode <= PIC_ALL_C_DEPTH_MODE) ? MAX_ME_PU_COUNT : SQUARE_PU_COUNT;
 
+   
+
+#if NSQ_OPTIMASATION
     // NSQ search Level                               Settings
-    // 0                                              OFF
-    // 1                                              Allow only NSQ Intra-FULL if parent SQ is intra-coded and vice versa.
-    // 2                                              Allow only NSQ Inter-NEAREST/NEAR/GLOBAL if parent SQ has no coeff
-    // 3                                              Allow only NSQ Intra-FULL and Inter-NEWMV if parent SQ is NEWMV
-    // 4                                              Allow only NSQ Inter-FULL and Intra-Z3 if parent SQ is intra-coded
-    // 5                                              Allow NSQ Intra-FULL and Inter-FULL
+    // NSQ_SEARCH_OFF                                 OFF
+    // NSQ_SEARCH_LEVEL1                              Allow only NSQ Inter-NEAREST/NEAR/GLOBAL if parent SQ has no coeff + reordering nsq_table number and testing only 1 NSQ SHAPE
+    // NSQ_SEARCH_LEVEL2                              Allow only NSQ Inter-NEAREST/NEAR/GLOBAL if parent SQ has no coeff + reordering nsq_table number and testing only 2 NSQ SHAPE   
+    // NSQ_SEARCH_LEVEL3                              Allow only NSQ Inter-NEAREST/NEAR/GLOBAL if parent SQ has no coeff + reordering nsq_table number and testing only 3 NSQ SHAPE
+    // NSQ_SEARCH_LEVEL4                              Allow only NSQ Inter-NEAREST/NEAR/GLOBAL if parent SQ has no coeff + reordering nsq_table number and testing only 4 NSQ SHAPE
+    // NSQ_SEARCH_LEVEL5                              Allow only NSQ Inter-NEAREST/NEAR/GLOBAL if parent SQ has no coeff + reordering nsq_table number and testing only 5 NSQ SHAPE
+    // NSQ_SEARCH_LEVEL6                              Allow only NSQ Inter-NEAREST/NEAR/GLOBAL if parent SQ has no coeff + reordering nsq_table number and testing only 6 NSQ SHAPE
+    // NSQ_SEARCH_FULL                                Allow NSQ Intra-FULL and Inter-FULL
+
+    if (MR_MODE) {
+        picture_control_set_ptr->nsq_search_level = NSQ_SEARCH_FULL;
+    }
+    else {
+        picture_control_set_ptr->nsq_search_level = NSQ_SEARCH_LEVEL6;
+    }
+
+    switch (picture_control_set_ptr->nsq_search_level) {
+    case NSQ_SEARCH_OFF:
+        picture_control_set_ptr->nsq_max_shapes_md = 0;
+        break;
+    case NSQ_SEARCH_LEVEL1:
+        picture_control_set_ptr->nsq_max_shapes_md = 1;
+        break;
+    case NSQ_SEARCH_LEVEL2:
+        picture_control_set_ptr->nsq_max_shapes_md = 2;
+        break;
+    case NSQ_SEARCH_LEVEL3:
+        picture_control_set_ptr->nsq_max_shapes_md = 3;
+        break;
+    case NSQ_SEARCH_LEVEL4:
+        picture_control_set_ptr->nsq_max_shapes_md = 4;
+        break;
+    case NSQ_SEARCH_LEVEL5:
+        picture_control_set_ptr->nsq_max_shapes_md = 5;
+        break;
+    case NSQ_SEARCH_LEVEL6:
+        picture_control_set_ptr->nsq_max_shapes_md = 6;
+        break;
+    case NSQ_SEARCH_FULL:
+        picture_control_set_ptr->nsq_max_shapes_md = 6;
+        break;
+    default:
+        printf("nsq_search_level is not supported\n");
+        break;
+    }
+        
+
+#else
+    // NSQ search Level                               Settings
+   // 0                                              OFF
+   // 1                                              Allow only NSQ Intra-FULL if parent SQ is intra-coded and vice versa.
+   // 2                                              Allow only NSQ Inter-NEAREST/NEAR/GLOBAL if parent SQ has no coeff
+   // 3                                              Allow only NSQ Intra-FULL and Inter-NEWMV if parent SQ is NEWMV
+   // 4                                              Allow only NSQ Inter-FULL and Intra-Z3 if parent SQ is intra-coded
+   // 5                                              Allow NSQ Intra-FULL and Inter-FULL
     if (!MR_MODE)
         picture_control_set_ptr->nsq_search_level        = NSQ_SEARCH_BASE_ON_SQ_COEFF;
     else
         picture_control_set_ptr->nsq_search_level        = NSQ_SEARCH_FULL;
+#endif
 
     if (picture_control_set_ptr->nsq_search_level == NSQ_SEARCH_OFF) {
         if (picture_control_set_ptr->pic_depth_mode <= PIC_ALL_C_DEPTH_MODE) picture_control_set_ptr->pic_depth_mode = PIC_SQ_DEPTH_MODE;
