@@ -840,32 +840,43 @@ EbErrorType signal_derivation_multi_processes_oq(
     else
         picture_control_set_ptr->tx_search_reduced_set = 1;
 
-    // Intra prediction levels                      Settings
-    // 0                                            OFF : disable_angle_prediction
-    // 1                                            OFF per block : disable_angle_prediction for 64/32/4
-    // 2                                            LIGHT: disable_z2_prediction && disable_angle_refinement
-    // 3                                            LIGHT per block : disable_z2_prediction && disable_angle_refinement  for 64/32/4
-    // 4                                            FULL  
+    // Intra prediction modes                       Settings
+    // 0                                            FULL  
+    // 1                                            LIGHT per block : disable_z2_prediction && disable_angle_refinement  for 64/32/4
+    // 2                                            OFF per block : disable_angle_prediction for 64/32/4
+    // 3                                            OFF : disable_angle_prediction
+    // 4                                            OIS based Intra
 
     if (picture_control_set_ptr->slice_type == I_SLICE) 
-         picture_control_set_ptr->intra_pred_mode = 4;
+         picture_control_set_ptr->intra_pred_mode = 0;
     else {
         if (picture_control_set_ptr->enc_mode  <= ENC_M1) 
-            picture_control_set_ptr->intra_pred_mode = 4;
-        else if (picture_control_set_ptr->enc_mode <= ENC_M5) 
-            if (picture_control_set_ptr->temporal_layer_index == 0)
-                picture_control_set_ptr->intra_pred_mode = 3;
-            else
-                picture_control_set_ptr->intra_pred_mode = 0;
-        else
             if (picture_control_set_ptr->temporal_layer_index == 0)
                 picture_control_set_ptr->intra_pred_mode = 1;
             else
-                picture_control_set_ptr->intra_pred_mode = 0;
+                picture_control_set_ptr->intra_pred_mode = 2;
+        else if (picture_control_set_ptr->enc_mode <= ENC_M5) 
+            if (picture_control_set_ptr->temporal_layer_index == 0)
+                picture_control_set_ptr->intra_pred_mode = 1;
+            else
+                picture_control_set_ptr->intra_pred_mode = 3;
+#if OIS_BASED_INTRA
+        else if (picture_control_set_ptr->enc_mode <= ENC_M6) 
+#else
+        else
+#endif
+            if (picture_control_set_ptr->temporal_layer_index == 0)
+                picture_control_set_ptr->intra_pred_mode = 2;
+            else
+                picture_control_set_ptr->intra_pred_mode = 3;
+#if OIS_BASED_INTRA
+        else 
+            picture_control_set_ptr->intra_pred_mode = 4;
+#endif
     } 
     
     if (MR_MODE)
-        picture_control_set_ptr->intra_pred_mode = 4;
+        picture_control_set_ptr->intra_pred_mode = 0;
 
 
 #if TWO_FAST_LOOP

@@ -33,6 +33,7 @@
 #include "EbCodingLoop.h"
 
 #define TH_NFL_BIAS             7
+#if !OIS_BASED_INTRA
 extern void av1_predict_intra_block_md(
     ModeDecisionContext_t       *cu_ptr,
     const Av1Common *cm,
@@ -56,6 +57,7 @@ extern void av1_predict_intra_block_md(
     uint32_t OrgX,
     uint32_t OrgY
 );
+#endif
 EbErrorType ProductGenerateMdCandidatesCu(
     LargestCodingUnit_t             *sb_ptr,
     ModeDecisionContext_t           *context_ptr,
@@ -1311,6 +1313,9 @@ void ProductPerformFastLoop(
             
 #if TWO_FAST_LOOP 
             const unsigned enable_two_fast_loops = candidate_ptr->enable_two_fast_loops;
+#if OIS_BASED_INTRA
+            const unsigned distortion_ready = candidate_ptr->distortion_ready;
+#endif
 #else
             const unsigned distortion_ready = candidate_ptr->distortion_ready;
 #endif
@@ -1328,8 +1333,17 @@ void ProductPerformFastLoop(
                 lumaFastDistortion = candidate_ptr->me_distortion;
 #endif
                 firstFastCandidateTotalCount++;
+#if OIS_BASED_INTRA
+                if (!!distortion_ready) {
+
+                    lumaFastDistortion = candidate_ptr->me_distortion;
+                    chromaFastDistortion = 0;
+
+                }else{
+#else
 
                 {
+#endif
                     // Fast Cost Calc
 #if REST_FAST_RATE_EST
 #if TWO_FAST_LOOP        
@@ -1416,7 +1430,7 @@ void ProductPerformFastLoop(
                         }
 
                     }
-                    
+                }                
                     // Fast Cost Calc
                 *(candidateBuffer->fast_cost_ptr) = Av1ProductFastCostFuncTable[candidate_ptr->type] (
                     cu_ptr, 
@@ -1470,7 +1484,7 @@ void ProductPerformFastLoop(
                     }
                     // Initialize Fast Cost - to do not interact with the second Fast-Cost Search
                     *(candidateBuffer->fast_cost_ptr) = 0xFFFFFFFFFFFFFFFFull;
-                }
+
             }
         } while (--fastLoopCandidateIndex >= 0);
     }
@@ -1488,6 +1502,9 @@ void ProductPerformFastLoop(
                   
 #if TWO_FAST_LOOP 
         const unsigned                  enable_two_fast_loops = candidate_ptr->enable_two_fast_loops;
+#if OIS_BASED_INTRA
+        const unsigned                  distortion_ready = candidate_ptr->distortion_ready;
+#endif
 #else
         const unsigned                  distortion_ready = candidate_ptr->distortion_ready;
 #endif
@@ -1503,7 +1520,11 @@ void ProductPerformFastLoop(
 
                  
 #if TWO_FAST_LOOP 
+#if OIS_BASED_INTRA
+        if ((!distortion_ready) || (!enable_two_fast_loops) || fastLoopCandidateIndex == bestFirstFastCostSearchCandidateIndex) {
+#else
         if ((!enable_two_fast_loops) || fastLoopCandidateIndex == bestFirstFastCostSearchCandidateIndex) {
+#endif
 #else
         if ((!distortion_ready) || fastLoopCandidateIndex == bestFirstFastCostSearchCandidateIndex) {
 #endif

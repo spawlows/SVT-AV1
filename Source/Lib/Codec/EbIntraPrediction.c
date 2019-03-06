@@ -2432,6 +2432,8 @@ EbErrorType GenerateChromaIntraReference16bitSamplesEncodePass(
 }
 
 #endif
+
+    #if !OIS_BASED_INTRA
 static void IntraModeAngular_27To33(
     uint32_t            mode,                       //input parameter, indicates the Intra luma mode
     const uint32_t      size,                       //input parameter, denotes the size of the current PU
@@ -2606,6 +2608,7 @@ static void IntraModeAngular_3To9(
 
     return;
 }
+#endif
 #if !QT_10BIT_SUPPORT
 void highbd_dc_predictor(
     EbBool                         is_left_availble,
@@ -3485,6 +3488,7 @@ void IntraModeAngular_AV1_Z3_16bit(
     return;
 }
 
+    #if !OIS_BASED_INTRA
 
 /** IntraModeAngular_all()
         is the main function to compute intra  angular prediction for a PU
@@ -3574,6 +3578,8 @@ static inline void IntraModeAngular_all(
         break;
     }
 }
+
+#endif
 #if !QT_10BIT_SUPPORT
 /** IntraPrediction()
         is the main function to compute intra prediction for a PU
@@ -5118,6 +5124,7 @@ EbErrorType UpdateNeighborSamplesArrayOpenLoop(
     return return_error;
 }
 
+#if !OIS_BASED_INTRA
 /** IntraPredictionOpenLoop()
         performs Open-loop Intra candidate Search for a CU
  */
@@ -5206,10 +5213,7 @@ EbErrorType IntraPredictionOpenLoop(
 
     return return_error;
 }
-
-
-
-
+#endif
 void cfl_luma_subsampling_420_lbd_c(
     uint8_t *input,
     int32_t input_stride, int16_t *output_q3,
@@ -8162,6 +8166,7 @@ void av1_upsample_intra_edge_c(uint8_t *p, int32_t sz) {
         p[2 * i] = in[i + 2];
     }
 }
+#if !OIS_BASED_INTRA
 static void build_intra_predictors_md(
 
     ModeDecisionContext_t            *cu_ptr,
@@ -8385,7 +8390,7 @@ static void build_intra_predictors_md(
         pred[mode][tx_size](dst, dst_stride, above_row, left_col);
     }
 }
-
+#endif
 /*static INLINE*/ block_size scale_chroma_bsize(block_size bsize, int32_t subsampling_x,
     int32_t subsampling_y) {
     block_size bs = bsize;
@@ -9226,6 +9231,7 @@ static void build_intra_predictors_high(
 #endif
 
 
+#if !OIS_BASED_INTRA
 extern void av1_predict_intra_block_md(
     ModeDecisionContext_t *cu_ptr,
     const Av1Common *cm,
@@ -9419,6 +9425,7 @@ extern void av1_predict_intra_block_md(
         have_bottom_left ? AOMMIN(txhpx, yd) : 0, plane);
 }
 
+#endif
 extern void av1_predict_intra_block(
 #if TILES  
     TileInfo * tile,
@@ -10127,3 +10134,107 @@ EbErrorType AV1IntraPredictionCL(
 
     return return_error;
 }
+
+#if OIS_BASED_INTRA
+EbErrorType update_neighbor_samples_array_open_loop(
+        uint8_t                           *above_ref,
+        uint8_t                            *left_ref,
+        EbPictureBufferDesc_t              *input_ptr,
+        uint32_t                            stride,
+        uint32_t                            src_origin_x,
+        uint32_t                            src_origin_y,
+        uint8_t                             bwidth,
+        uint8_t                             bheight)
+{
+
+    EbErrorType    return_error = EB_ErrorNone;
+
+    uint32_t idx;
+    uint8_t  *src_ptr;
+    uint8_t  *read_ptr;
+    uint32_t count;
+
+
+    uint32_t width = input_ptr->width;
+    uint32_t height = input_ptr->height;
+    uint32_t block_size_half = bwidth << 1;
+
+    // Adjust the Source ptr to start at the origin of the block being updated
+    src_ptr = input_ptr->buffer_y + (((src_origin_y + input_ptr->origin_y) * stride) + (src_origin_x + input_ptr->origin_x));
+
+    //Initialise the Luma Intra Reference Array to the mid range value 128 (for CUs at the picture boundaries)
+    EB_MEMSET(above_ref, 127, (bwidth << 1) + 1);
+    EB_MEMSET(left_ref, 129, (bheight << 1) + 1);
+
+    // Get the upper left sample
+    if (src_origin_x != 0 && src_origin_y != 0) {
+        read_ptr = src_ptr - stride - 1;
+        *above_ref = *read_ptr;
+        *left_ref = *read_ptr;
+        left_ref++;
+        above_ref++;
+    }else {
+        *above_ref = *left_ref = 128;
+        left_ref++;
+        above_ref++;
+    }
+    // Get the left-column
+    count = block_size_half;
+    if (src_origin_x != 0) {
+        read_ptr = src_ptr - 1;
+        count = ((src_origin_y + count) > height) ? count - ((src_origin_y + count) - height) : count;
+        for (idx = 0; idx < count; ++idx) {
+            *left_ref = *read_ptr;
+            read_ptr += stride;
+            left_ref++;
+        }
+        left_ref += (block_size_half - count);
+    }else 
+        left_ref += count;
+    
+    // Get the top-row
+    count = block_size_half;
+    if (src_origin_y != 0) {
+        read_ptr = src_ptr - stride;
+        count = ((src_origin_x + count) > width) ? count - ((src_origin_x + count) - width) : count;
+        EB_MEMCPY(above_ref, read_ptr, count);
+        above_ref += (block_size_half - count);
+    }else 
+        above_ref += count;
+
+    return return_error;
+}
+/** intra_prediction_open_loop()
+        performs Open-loop Intra candidate Search for a CU
+ */
+EbErrorType intra_prediction_open_loop(
+     int32_t  p_angle ,
+        uint8_t                          ois_intra_mode,
+        uint32_t                         src_origin_x,
+        uint32_t                         src_origin_y,
+        TxSize                          tx_size,
+        uint8_t                         *above_row,
+        uint8_t                         *left_col,
+        MotionEstimationContext_t       *context_ptr)                  // input parameter, ME context
+        
+{
+    EbErrorType                return_error = EB_ErrorNone;
+    PredictionMode mode = ois_intra_mode;
+    const int32_t is_dr_mode = av1_is_directional_mode(mode);
+    uint8_t *dst = (&(context_ptr->me_context_ptr->sb_buffer[0]));
+    uint32_t dst_stride = context_ptr->me_context_ptr->sb_buffer_stride;
+
+    if (is_dr_mode) {
+        dr_predictor(dst, dst_stride, tx_size, above_row, left_col, 0, 0, p_angle);         
+    }
+    else {
+        // predict
+        if (mode == DC_PRED) {
+            dc_pred[src_origin_x > 0][src_origin_y > 0][tx_size](dst, dst_stride, above_row, left_col);     
+        } else {
+            pred[mode][tx_size](dst, dst_stride, above_row, left_col);
+        }
+    }
+    return return_error;
+}
+#endif

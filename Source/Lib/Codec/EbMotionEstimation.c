@@ -70,6 +70,7 @@ static const uint8_t numberOfOisModePoints[5/*IOS poitnt*/] = {
 };
 
 #define MAX_INTRA_IN_MD   9
+#if !OIS_BASED_INTRA
 //CHKN: Note that the max number set in this table should be referenced by the upper macro!!!
 static uint8_t intraSearchInMd[5][4] = {
     /*depth0*/    /*depth1*/    /*depth2*/    /*depth3*/
@@ -83,7 +84,7 @@ static uint8_t intraSearchInMd[5][4] = {
 // Intra Open Loop
 uint32_t iSliceModesArray[11] = { EB_INTRA_PLANAR, EB_INTRA_DC, EB_INTRA_HORIZONTAL, EB_INTRA_VERTICAL, EB_INTRA_MODE_2, EB_INTRA_MODE_18, EB_INTRA_MODE_34, EB_INTRA_MODE_6, EB_INTRA_MODE_14, EB_INTRA_MODE_22, EB_INTRA_MODE_30 };
 uint32_t stage1ModesArray[9] = { EB_INTRA_HORIZONTAL, EB_INTRA_VERTICAL, EB_INTRA_MODE_2, EB_INTRA_MODE_18, EB_INTRA_MODE_34, EB_INTRA_MODE_6, EB_INTRA_MODE_14, EB_INTRA_MODE_22, EB_INTRA_MODE_30 };
-
+#endif
 #define REFERENCE_PIC_LIST_0  0
 #define REFERENCE_PIC_LIST_1  1
 
@@ -7685,6 +7686,7 @@ EbBool IsComplexLcu(
 
 }
 
+#if !OIS_BASED_INTRA
 /** IntraOpenLoopSearchTheseModesOutputBest
 
 */
@@ -8546,7 +8548,156 @@ EbErrorType OpenLoopIntraSearchLcu(
     return return_error;
 }
 
+#else
 
+EbErrorType open_loop_intra_search_sb(
+    PictureParentControlSet_t   *picture_control_set_ptr,
+    uint32_t                     sb_index,
+    MotionEstimationContext_t   *context_ptr,
+    EbPictureBufferDesc_t       *input_ptr,
+    EbAsm                        asm_type)
+{
+    EbErrorType return_error = EB_ErrorNone;
+    SequenceControlSet_t    *sequence_control_set_ptr = (SequenceControlSet_t*)picture_control_set_ptr->sequence_control_set_wrapper_ptr->object_ptr;
 
+    uint32_t    cu_origin_x;
+    uint32_t    cu_origin_y;
+    uint32_t    pa_blk_index = 0;
+    uint8_t     is_16_bit = (sequence_control_set_ptr->static_config.encoder_bit_depth > EB_8BIT);
 
+    SbParams_t          *sb_params          = &sequence_control_set_ptr->sb_params_array[sb_index];
+    ois_sb_results_t    *ois_sb_results_ptr = picture_control_set_ptr->ois_sb_results[sb_index];    
+
+    uint8_t top_neigh_array[64 * 2 + 1];
+    uint8_t left_neigh_array[64 * 2 + 1];
+    uint8_t *above_ref = top_neigh_array;
+    uint8_t *left_ref = left_neigh_array;
+
+        while (pa_blk_index < CU_MAX_COUNT)
+        {
+           
+            const CodedUnitStats_t  *blk_stats_ptr;
+            blk_stats_ptr = GetCodedUnitStats(pa_blk_index);
+            uint8_t bsize = blk_stats_ptr->size;
+            if (sb_params->raster_scan_cu_validity[MD_SCAN_TO_RASTER_SCAN[pa_blk_index]]) {
+
+                ois_candidate_t *ois_blk_ptr = ois_sb_results_ptr->ois_candidate_array[pa_blk_index];
+                cu_origin_x = sb_params->origin_x + blk_stats_ptr->origin_x;
+                cu_origin_y = sb_params->origin_y + blk_stats_ptr->origin_y;
+
+                // Fill Neighbor Arrays
+                update_neighbor_samples_array_open_loop(
+                    above_ref,
+                    left_ref,
+                    input_ptr,
+                    input_ptr->stride_y,
+                    cu_origin_x,
+                    cu_origin_y,
+                    bsize,
+                    bsize);
+
+                uint8_t * above_row;
+                uint8_t * left_col;
+
+                DECLARE_ALIGNED(16, uint8_t, left_data[MAX_TX_SIZE * 2 + 32]);
+                DECLARE_ALIGNED(16, uint8_t, above_data[MAX_TX_SIZE * 2 + 32]);
+                above_row = above_data + 16;
+                left_col = left_data + 16;
+                
+                memcpy(above_row, top_neigh_array  + 1, 64 * 2 );
+                memcpy(left_col, left_neigh_array + 1, 64 * 2 );
+                
+                above_row[-1] =  left_col [-1] = top_neigh_array[0];
+
+                uint8_t     ois_intra_mode;
+                uint8_t     ois_intra_count = 0;
+                uint8_t     best_intra_ois_index = 0;
+                uint32_t    best_intra_ois_distortion = 64 * 64 * 255;
+                uint8_t     intra_mode_start = DC_PRED;
+                uint8_t     intra_mode_end = is_16_bit ? SMOOTH_H_PRED : PAETH_PRED;
+
+                EbBool      use_angle_delta = (bsize >= 8);
+                uint8_t     angle_delta_candidate_count = use_angle_delta ? 5 : 1;
+                uint8_t     angle_delta_counter = 0;
+
+                uint8_t     disable_angular_prediction = 0;
+                disable_angular_prediction = picture_control_set_ptr->temporal_layer_index > 0 ? 1 : (bsize > 16) ? 1 : 0;
+
+                angle_delta_candidate_count = disable_angular_prediction ? 1 : angle_delta_candidate_count;
+                TxSize  tx_size = bsize == 8 ? TX_8X8 : bsize == 16 ? TX_16X16: bsize == 32 ? TX_32X32 : TX_64X64;
+
+                for (ois_intra_mode = intra_mode_start; ois_intra_mode <= intra_mode_end; ++ois_intra_mode) {              
+                    if (av1_is_directional_mode((PredictionMode)ois_intra_mode)) {
+
+                        if (!disable_angular_prediction) {
+                            for (angle_delta_counter = 0; angle_delta_counter < angle_delta_candidate_count; ++angle_delta_counter) {
+                                int32_t angle_delta = angle_delta_candidate_count == 1 ? 0 : angle_delta_counter - (angle_delta_candidate_count >> 1);
+                                int32_t  p_angle = mode_to_angle_map[(PredictionMode)ois_intra_mode] + angle_delta * ANGLE_STEP;
+                                // PRED
+                                intra_prediction_open_loop(
+                                    p_angle,
+                                    ois_intra_mode,
+                                    cu_origin_x,
+                                    cu_origin_y,
+                                    tx_size,
+                                    above_row,
+                                    left_col,
+                                    context_ptr);
+                                //Distortion
+                                ois_blk_ptr[ois_intra_count].distortion = (uint32_t)NxMSadKernel_funcPtrArray[asm_type][bsize >> 3]( // Always SAD without weighting
+                                    &(input_ptr->buffer_y[(input_ptr->origin_y + cu_origin_y) * input_ptr->stride_y + (input_ptr->origin_x + cu_origin_x)]),
+                                    input_ptr->stride_y,
+                                    &(context_ptr->me_context_ptr->sb_buffer[0]),
+                                    BLOCK_SIZE_64,
+                                    bsize,
+                                    bsize);
+                                //kepp track of best SAD
+                                if (ois_blk_ptr[ois_intra_count].distortion < best_intra_ois_distortion) {
+                                    best_intra_ois_index = ois_intra_count;
+                                    best_intra_ois_distortion = ois_blk_ptr[ois_intra_count].distortion;
+                                }
+                                ois_blk_ptr[ois_intra_count].intra_mode = ois_intra_mode;
+                                ois_blk_ptr[ois_intra_count].valid_distortion = EB_TRUE;
+                                ois_blk_ptr[ois_intra_count++].angle_delta = angle_delta;
+                            }
+                        }                        
+                    }
+                    else {
+                            // PRED
+                            intra_prediction_open_loop(
+                                 0 ,
+                                ois_intra_mode,
+                                cu_origin_x,
+                                cu_origin_y,
+                                tx_size,
+                                above_row,
+                                left_col,
+                                context_ptr);
+                            //Distortion
+                            ois_blk_ptr[ois_intra_count].distortion = (uint32_t)NxMSadKernel_funcPtrArray[asm_type][bsize >> 3]( // Always SAD without weighting
+                                &(input_ptr->buffer_y[(input_ptr->origin_y + cu_origin_y) * input_ptr->stride_y + (input_ptr->origin_x + cu_origin_x)]),
+                                input_ptr->stride_y,
+                                &(context_ptr->me_context_ptr->sb_buffer[0]),
+                                BLOCK_SIZE_64,
+                                bsize,
+                                bsize);                            
+                            //kepp track of best SAD
+                            if (ois_blk_ptr[ois_intra_count].distortion < best_intra_ois_distortion) {
+                                best_intra_ois_index = ois_intra_count;
+                                best_intra_ois_distortion = ois_blk_ptr[ois_intra_count].distortion;
+                            }
+                            ois_blk_ptr[ois_intra_count].intra_mode = ois_intra_mode;
+                            ois_blk_ptr[ois_intra_count].valid_distortion = EB_TRUE;
+                            ois_blk_ptr[ois_intra_count++].angle_delta = 0;
+                    }
+                }                
+                ois_sb_results_ptr->best_distortion_index[pa_blk_index] = best_intra_ois_index;
+                ois_sb_results_ptr->total_ois_intra_candidate[pa_blk_index] = ois_intra_count;        
+            }
+            pa_blk_index ++;
+        }
+    return return_error;
+}
+
+#endif
 

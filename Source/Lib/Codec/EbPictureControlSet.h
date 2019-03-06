@@ -14083,9 +14083,12 @@ extern "C" {
         EbHandle                              rc_distortion_histogram_mutex;
         
         // Open loop Intra candidate Search Results
+#if OIS_BASED_INTRA
+        ois_sb_results_t                    **ois_sb_results;
+#else
         OisCu32Cu16Results_t                **ois_cu32_cu16_results;
         OisCu8Results_t                     **ois_cu8_results;
-
+#endif
         // Dynamic GOP
         EbPred                                pred_structure;
         uint8_t                               hierarchical_levels;

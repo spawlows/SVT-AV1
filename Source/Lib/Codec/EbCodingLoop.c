@@ -2359,7 +2359,13 @@ EbErrorType Av1QpModulationLcu(
         if (type == INTRA_MODE) {
 
 
+            
+#if OIS_BASED_INTRA
+            ois_sb_results_t        *ois_sb_results_ptr = picture_control_set_ptr->parent_pcs_ptr->ois_sb_results[sb_index];
+            ois_candidate_t *OisCuPtr = ois_sb_results_ptr->sorted_ois_candidate[from_1101_to_85[cu_index]];
+            distortion = OisCuPtr[ois_sb_results_ptr->best_distortion_index[from_1101_to_85[cu_index]]].distortion;
 
+#else
 
             OisCu32Cu16Results_t  *oisCu32Cu16ResultsPtr = picture_control_set_ptr->parent_pcs_ptr->ois_cu32_cu16_results[sb_index];
             //OisCu8Results_t         *oisCu8ResultsPtr = picture_control_set_ptr->parent_pcs_ptr->ois_cu8_results[sb_index];
@@ -2369,7 +2375,7 @@ EbErrorType Av1QpModulationLcu(
                 oisCu32Cu16ResultsPtr->sorted_ois_candidate[2][0].distortion +
                 oisCu32Cu16ResultsPtr->sorted_ois_candidate[3][0].distortion +
                 oisCu32Cu16ResultsPtr->sorted_ois_candidate[4][0].distortion;
-
+#endif
 
 
             distortion = (uint32_t)CLIP3(picture_control_set_ptr->parent_pcs_ptr->intra_complexity_min[0], picture_control_set_ptr->parent_pcs_ptr->intra_complexity_max[0], distortion);
@@ -2550,6 +2556,11 @@ EbErrorType EncQpmDeriveDeltaQPForEachLeafLcu(
 
 
 
+#if OIS_BASED_INTRA
+            ois_sb_results_t        *ois_sb_results_ptr = picture_control_set_ptr->parent_pcs_ptr->ois_sb_results[sb_index];
+            ois_candidate_t *OisCuPtr = ois_sb_results_ptr->ois_candidate_array[ep_to_pa_block_index[cu_index]];
+            distortion = OisCuPtr[ois_sb_results_ptr->best_distortion_index[ep_to_pa_block_index[cu_index]]].distortion;
+#else
 
             OisCu32Cu16Results_t  *oisCu32Cu16ResultsPtr = picture_control_set_ptr->parent_pcs_ptr->ois_cu32_cu16_results[sb_index];
             OisCu8Results_t         *oisCu8ResultsPtr = picture_control_set_ptr->parent_pcs_ptr->ois_cu8_results[sb_index];
@@ -2608,7 +2619,7 @@ EbErrorType EncQpmDeriveDeltaQPForEachLeafLcu(
                 }
             }
 
-
+#endif
 
 
 

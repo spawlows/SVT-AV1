@@ -45,7 +45,12 @@ extern "C" {
 #else
                 unsigned                        distortion_ready : 1;
 #endif
+#if OIS_BASED_INTRA
+                unsigned                        distortion_ready : 1;
+                unsigned                        : 2;
+#else
                 unsigned : 3;
+#endif
                 unsigned                        intra_luma_mode : 8; // HEVC mode, use pred_mode for AV1
             };
             uint32_t ois_results;
