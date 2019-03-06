@@ -2686,7 +2686,9 @@ EbBool allowed_ns_cu(
     }
 
 #if NSQ_OPTIMASATION
-    if (picture_control_set_ptr->slice_type == !I_SLICE) {
+    if (picture_control_set_ptr->slice_type == !I_SLICE && 
+        picture_control_set_ptr->parent_pcs_ptr->nsq_search_level >= NSQ_SEARCH_LEVEL1 &&
+        picture_control_set_ptr->parent_pcs_ptr->nsq_search_level < NSQ_SEARCH_FULL) {
         if (context_ptr->blk_geom->shape != PART_N) {
             ret = 0;
             for (int i = 0; i < picture_control_set_ptr->parent_pcs_ptr->nsq_max_shapes_md; i++) {
@@ -3325,7 +3327,9 @@ void md_encode_block(
     CodingUnit_t *  cu_ptr = context_ptr->cu_ptr;
     candidate_buffer_ptr_array = &(candidateBufferPtrArrayBase[context_ptr->buffer_depth_index_start[0]]);
 #if NSQ_OPTIMASATION
-    if (picture_control_set_ptr->slice_type == !I_SLICE) {
+    if (picture_control_set_ptr->slice_type == !I_SLICE &&
+        picture_control_set_ptr->parent_pcs_ptr->nsq_search_level >= NSQ_SEARCH_LEVEL1 &&
+        picture_control_set_ptr->parent_pcs_ptr->nsq_search_level < NSQ_SEARCH_FULL) {
         if (context_ptr->blk_geom->shape == PART_N) {
             order_nsq_table(
                 picture_control_set_ptr,
