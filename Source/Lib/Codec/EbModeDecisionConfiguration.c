@@ -279,6 +279,8 @@ EbErrorType MdcRefinement(
 
     return return_error;
 }
+
+#if !OPEN_LOOP_EARLY_PARTITION
 /*******************************************
 Cost Computation for intra CU
 *******************************************/
@@ -430,7 +432,7 @@ uint64_t MdcInterCuRate(
     return rate;
 }
 
-
+#endif
 /*******************************************
 Derive the contouring class
 If (AC energy < 32 * 32) then apply aggressive action (Class 1),
@@ -536,7 +538,11 @@ void RefinementPredictionLoop(
 #endif    
             {
 #if ADAPTIVE_DEPTH_PARTITIONING
+#if M8_ADP
+                if (picture_control_set_ptr->parent_pcs_ptr->pic_depth_mode == PIC_SB_SWITCH_DEPTH_MODE && picture_control_set_ptr->parent_pcs_ptr->sb_depth_mode_array[sb_index] == SB_PRED_OPEN_LOOP_DEPTH_MODE) {
+#else
                 if (picture_control_set_ptr->parent_pcs_ptr->pic_depth_mode == PIC_SB_SWITCH_DEPTH_MODE && (picture_control_set_ptr->parent_pcs_ptr->sb_depth_mode_array[sb_index] == SB_PRED_OPEN_LOOP_DEPTH_MODE || picture_control_set_ptr->parent_pcs_ptr->sb_depth_mode_array[sb_index] == SB_PRED_OPEN_LOOP_1_NFL_DEPTH_MODE)) {
+#endif
 #else
                 if (picture_control_set_ptr->parent_pcs_ptr->pic_depth_mode == PIC_SB_SWITCH_DEPTH_MODE && (picture_control_set_ptr->parent_pcs_ptr->sb_md_mode_array[sb_index] == LCU_PRED_OPEN_LOOP_DEPTH_MODE || picture_control_set_ptr->parent_pcs_ptr->sb_md_mode_array[sb_index] == LCU_PRED_OPEN_LOOP_1_NFL_DEPTH_MODE)) {
 #endif
@@ -545,7 +551,16 @@ void RefinementPredictionLoop(
                 else
 
 #if MDC_FIX_1
+#if M8_ADP
+                    if (picture_control_set_ptr->parent_pcs_ptr->pic_depth_mode == PIC_SB_SWITCH_DEPTH_MODE && picture_control_set_ptr->parent_pcs_ptr->sb_depth_mode_array[sb_index] == SB_FAST_OPEN_LOOP_DEPTH_MODE) {
+                        refinementLevel = ndp_level_1[depth];
+                    }
+                    else  { // SB_OPEN_LOOP_DEPTH_MODE
+                        refinementLevel = ndp_level_0[depth];
+                    }
+#else
                     refinementLevel = NdpRefinementControl[temporal_layer_index][depth];
+#endif
 #else
                     if (picture_control_set_ptr->parent_pcs_ptr->pic_depth_mode == PIC_OPEN_LOOP_DEPTH_MODE ||
 #if ADAPTIVE_DEPTH_PARTITIONING
