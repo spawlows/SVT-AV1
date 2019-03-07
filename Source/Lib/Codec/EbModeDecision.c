@@ -2973,11 +2973,13 @@ EbErrorType ProductGenerateMdCandidatesCu(
                 sb_ptr,
                 &canTotalCnt,
                 leaf_index);
+    }
+
 #if INTRA_INTER_FAST_LOOP
     // Track the total number of fast intra candidates
     context_ptr->fast_candidate_intra_count = canTotalCnt;
 #endif
-    }
+
     if (slice_type != I_SLICE) {
         if (inject_inter_candidate)
             inject_inter_candidates(
