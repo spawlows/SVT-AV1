@@ -124,7 +124,7 @@ extern "C" {
 #define ENCDEC_TX_SEARCH                                1
 #define DISABLE_ANGULAR_MODE                            0
 #define FIX_ME_SR_10BIT                                 1
-#define TEST5_DISABLE_NSQ_ME                            1
+#define TEST5_DISABLE_NSQ_ME                            0
 #define DISABLE_ANGULAR_MODE_FOR_NON_REF                0
 #define INJECT_ONLY_SQ                                  1
 #define OPT_MEMCPY                                      1
