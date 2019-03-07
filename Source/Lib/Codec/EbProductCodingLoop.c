@@ -1257,7 +1257,11 @@ void ProductMdFastPuPrediction(
     candidateBuffer->candidate_ptr->interp_filters = 0;
 
 #if CHROMA_BLIND
+#if ICOPY
+    ProductPredictionFunTable[candidateBuffer->candidate_ptr->use_intrabc ? INTER_MODE : modeType](
+#else
     ProductPredictionFunTable[modeType](
+#endif
         context_ptr,
         picture_control_set_ptr,
         candidateBuffer,
