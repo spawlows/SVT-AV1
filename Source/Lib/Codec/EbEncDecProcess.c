@@ -393,6 +393,9 @@ static void ResetEncDec(
 
         // Initial Rate Estimatimation of the Motion vectors
         av1_estimate_mv_rate(
+#if ICOPY
+            picture_control_set_ptr,
+#endif
             md_rate_estimation_array,
             &picture_control_set_ptr->coeff_est_entropy_coder_ptr->fc->nmvc);
 

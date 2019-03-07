@@ -29,7 +29,12 @@ block_size GetBlockSize(uint8_t cu_size) {
     return (cu_size == 64 ? BLOCK_64X64 : cu_size == 32 ? BLOCK_32X32 : cu_size == 16 ? BLOCK_16X16 : cu_size == 8 ? BLOCK_8X8 : BLOCK_4X4);
 }
 
+#if ICOPY
+int av1_allow_intrabc(const Av1Common *const cm);
+int32_t is_chroma_reference(int32_t mi_row, int32_t mi_col, block_size bsize,
+#else
 static INLINE int32_t is_chroma_reference(int32_t mi_row, int32_t mi_col, block_size bsize,
+#endif
     int32_t subsampling_x, int32_t subsampling_y) {
     const int32_t bw = mi_size_wide[bsize];
     const int32_t bh = mi_size_high[bsize];
@@ -595,6 +600,54 @@ EbErrorType av1_intra_fast_cost(
     UNUSED(miCol);
     UNUSED(left_neighbor_mode);
     UNUSED(top_neighbor_mode);
+
+#if ICOPY 
+   
+    if (av1_allow_intrabc(picture_control_set_ptr->parent_pcs_ptr->av1_cm) && candidate_ptr->use_intrabc) {
+
+        uint64_t lumaSad = (LUMA_WEIGHT * luma_distortion) << AV1_COST_PRECISION;
+        uint64_t chromaSad = chroma_distortion << AV1_COST_PRECISION;
+        uint64_t totalDistortion = lumaSad + chromaSad;
+
+        uint64_t rate = 0;
+
+        EbReflist refListIdx = 0;
+        int16_t predRefX = candidate_ptr->motion_vector_pred_x[refListIdx];
+        int16_t predRefY = candidate_ptr->motion_vector_pred_y[refListIdx];
+        int16_t mvRefX = candidate_ptr->motionVector_x_L0;
+        int16_t mvRefY = candidate_ptr->motionVector_y_L0;
+        MV mv;
+        mv.row = mvRefY;
+        mv.col = mvRefX;
+        MV ref_mv;
+        ref_mv.row = predRefY;
+        ref_mv.col = predRefX;
+
+        int *dvcost[2] = { (int *)&candidate_ptr->md_rate_estimation_ptr->dv_cost[0][MV_MAX],
+                           (int *)&candidate_ptr->md_rate_estimation_ptr->dv_cost[1][MV_MAX] };
+
+        int32_t mvRate = av1_mv_bit_cost(
+            &mv,
+            &ref_mv,
+            candidate_ptr->md_rate_estimation_ptr->dv_joint_cost,
+            dvcost, MV_COST_WEIGHT_SUB);
+
+        rate = mvRate + candidate_ptr->md_rate_estimation_ptr->intrabcFacBits[candidate_ptr->use_intrabc];
+
+        candidate_ptr->fast_luma_rate = rate;
+        candidate_ptr->fast_chroma_rate = 0;
+
+        lumaSad = (LUMA_WEIGHT * luma_distortion) << AV1_COST_PRECISION;
+        chromaSad = chroma_distortion << AV1_COST_PRECISION;
+        totalDistortion = lumaSad + chromaSad;
+
+       
+        return(RDCOST(lambda, rate, totalDistortion));
+
+    }
+    else {
+#endif
+
     EbBool isMonochromeFlag = EB_FALSE; // NM - isMonochromeFlag is harcoded to false.
 #if REST_FAST_RATE_EST
     EbBool isCflAllowed = (blk_geom->bwidth <= 32 && blk_geom->bheight <= 32) ? 1 : 0;
@@ -731,6 +784,10 @@ EbErrorType av1_intra_fast_cost(
     uint32_t isInterRate = picture_control_set_ptr->slice_type != I_SLICE ? candidate_buffer_ptr->candidate_ptr->md_rate_estimation_ptr->intraInterFacBits[cu_ptr->is_inter_ctx][0] : 0;
 #endif
     lumaRate = intraModeBitsNum + skipModeRate + intraLumaModeBitsNum + intraLumaAngModeBitsNum + isInterRate;
+#if ICOPY
+    if (av1_allow_intrabc(picture_control_set_ptr->parent_pcs_ptr->av1_cm))
+        lumaRate += candidate_ptr->md_rate_estimation_ptr->intrabcFacBits[candidate_ptr->use_intrabc];
+#endif
 
     chromaRate = intraChromaModeBitsNum + intraChromaAngModeBitsNum;
 
@@ -790,6 +847,9 @@ EbErrorType av1_intra_fast_cost(
         return return_error;
 #endif
 #if USE_SSE_FL
+    }
+#endif
+#if ICOPY
     }
 #endif
 }

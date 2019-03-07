@@ -410,6 +410,10 @@ void asmSetConvolveAsmTable(void);
 void asmSetConvolveHbdAsmTable(void);
 void init_intra_dc_predictors_c_internal(void);
 void init_intra_predictors_internal(void);
+#if ICOPY
+void av1_init_me_luts(void);
+#endif
+
 void SwitchToRealTime(){
 #if defined(__linux__) || defined(__APPLE__)
 
@@ -885,6 +889,10 @@ EbErrorType RestResultsCtor(
     return EB_ErrorNone;
 }
 #endif
+#if ICOPY
+void init_fn_ptr(void);
+#endif
+
 /**********************************
 * Initialize Encoder Library
 **********************************/
@@ -932,6 +940,10 @@ EB_API EbErrorType eb_init_encoder(EbComponentType *svt_enc_component)
 
     build_blk_geom(scs_init.sb_size == 128);
 
+#if ICOPY
+    av1_init_me_luts();
+    init_fn_ptr();
+#endif
 
     /************************************
     * Sequence Control Set

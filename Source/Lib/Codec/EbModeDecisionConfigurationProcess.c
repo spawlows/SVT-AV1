@@ -26,7 +26,37 @@
 #include "EbModeDecisionConfiguration.h"
 #include "EbReferenceObject.h"
 #include "EbModeDecisionProcess.h"
+#if ICOPY
+#include "av1me.h"
 
+
+#define MAX_MESH_SPEED 5  // Max speed setting for mesh motion method
+static MESH_PATTERN
+good_quality_mesh_patterns[MAX_MESH_SPEED + 1][MAX_MESH_STEP] = {
+    { { 64, 8 }, { 28, 4 }, { 15, 1 }, { 7, 1 } },
+    { { 64, 8 }, { 28, 4 }, { 15, 1 }, { 7, 1 } },
+    { { 64, 8 }, { 14, 2 }, { 7, 1 }, { 7, 1 } },
+    { { 64, 16 }, { 24, 8 }, { 12, 4 }, { 7, 1 } },
+    { { 64, 16 }, { 24, 8 }, { 12, 4 }, { 7, 1 } },
+    { { 64, 16 }, { 24, 8 }, { 12, 4 }, { 7, 1 } },
+};
+static unsigned char good_quality_max_mesh_pct[MAX_MESH_SPEED + 1] = {
+    50, 50, 25, 15, 5, 1
+};
+// TODO: These settings are pretty relaxed, tune them for
+// each speed setting
+static MESH_PATTERN intrabc_mesh_patterns[MAX_MESH_SPEED + 1][MAX_MESH_STEP] = {
+  { { 256, 1 }, { 256, 1 }, { 0, 0 }, { 0, 0 } },
+  { { 256, 1 }, { 256, 1 }, { 0, 0 }, { 0, 0 } },
+  { { 64, 1 }, { 64, 1 }, { 0, 0 }, { 0, 0 } },
+  { { 64, 1 }, { 64, 1 }, { 0, 0 }, { 0, 0 } },
+  { { 64, 4 }, { 16, 1 }, { 0, 0 }, { 0, 0 } },
+  { { 64, 4 }, { 16, 1 }, { 0, 0 }, { 0, 0 } },
+};
+static uint8_t intrabc_max_mesh_pct[MAX_MESH_SPEED + 1] = { 100, 100, 100,
+                                                            25,  25,  10 };
+
+#endif
 #if ADAPTIVE_DEPTH_PARTITIONING
 // Adaptive Depth Partitioning
 // Shooting states
@@ -3158,6 +3188,9 @@ void* ModeDecisionConfigurationKernel(void *input_ptr)
 
         // Initial Rate Estimatimation of the Motion vectors
         av1_estimate_mv_rate(
+#if ICOPY
+            picture_control_set_ptr,
+#endif
             md_rate_estimation_array,
             &picture_control_set_ptr->coeff_est_entropy_coder_ptr->fc->nmvc);
 
@@ -3274,6 +3307,124 @@ void* ModeDecisionConfigurationKernel(void *input_ptr)
             picture_control_set_ptr->parent_pcs_ptr->average_qp = (uint8_t)picture_control_set_ptr->parent_pcs_ptr->picture_qp;
         }
 
+#if ICOPY
+        if (picture_control_set_ptr->parent_pcs_ptr->allow_intrabc)
+        {
+            int i;
+            int speed = 1;
+            SPEED_FEATURES *sf = &picture_control_set_ptr->sf;
+            sf->allow_exhaustive_searches = 1;
+
+            const int mesh_speed = AOMMIN(speed, MAX_MESH_SPEED);
+            //if (cpi->twopass.fr_content_type == FC_GRAPHICS_ANIMATION)
+            //    sf->exhaustive_searches_thresh = (1 << 24);
+            //else
+            sf->exhaustive_searches_thresh = (1 << 25);
+
+            sf->max_exaustive_pct = good_quality_max_mesh_pct[mesh_speed];
+            if (mesh_speed > 0)
+                sf->exhaustive_searches_thresh = sf->exhaustive_searches_thresh << 1;
+
+            for (i = 0; i < MAX_MESH_STEP; ++i) {
+                sf->mesh_patterns[i].range =
+                    good_quality_mesh_patterns[mesh_speed][i].range;
+                sf->mesh_patterns[i].interval =
+                    good_quality_mesh_patterns[mesh_speed][i].interval;
+            }
+
+            if (picture_control_set_ptr->slice_type == I_SLICE)
+            {
+                for (i = 0; i < MAX_MESH_STEP; ++i) {
+                    sf->mesh_patterns[i].range = intrabc_mesh_patterns[mesh_speed][i].range;
+                    sf->mesh_patterns[i].interval =
+                        intrabc_mesh_patterns[mesh_speed][i].interval;
+                }
+                sf->max_exaustive_pct = intrabc_max_mesh_pct[mesh_speed];
+            }
+
+            {
+                // add to hash table
+                const int pic_width = picture_control_set_ptr->parent_pcs_ptr->sequence_control_set_ptr->luma_width;
+                const int pic_height = picture_control_set_ptr->parent_pcs_ptr->sequence_control_set_ptr->luma_height;
+                uint32_t *block_hash_values[2][2];
+                int8_t *is_block_same[2][3];
+                int k, j;
+
+                for (k = 0; k < 2; k++) {
+                    for (j = 0; j < 2; j++) {
+                        block_hash_values[k][j] = malloc(sizeof(uint32_t) * pic_width * pic_height);
+                    }
+
+                    for (j = 0; j < 3; j++) {
+                        is_block_same[k][j] = malloc(sizeof(int8_t) * pic_width * pic_height);
+                    }
+                }
+
+                //picture_control_set_ptr->hash_table.p_lookup_table = NULL;
+                //av1_hash_table_create(&picture_control_set_ptr->hash_table);
+
+                Yv12BufferConfig cpi_source;
+                LinkEbToAomBufferDesc(
+                    picture_control_set_ptr->parent_pcs_ptr->enhanced_picture_ptr,
+                    &cpi_source);
+
+                av1_crc_calculator_init(&picture_control_set_ptr->crc_calculator1, 24, 0x5D6DCB);
+                av1_crc_calculator_init(&picture_control_set_ptr->crc_calculator2, 24, 0x864CFB);
+
+                av1_generate_block_2x2_hash_value(&cpi_source, block_hash_values[0],
+                    is_block_same[0], picture_control_set_ptr);
+                av1_generate_block_hash_value(&cpi_source, 4, block_hash_values[0],
+                    block_hash_values[1], is_block_same[0],
+                    is_block_same[1], picture_control_set_ptr);
+                av1_add_to_hash_map_by_row_with_precal_data(
+                    &picture_control_set_ptr->hash_table, block_hash_values[1], is_block_same[1][2],
+                    pic_width, pic_height, 4);
+                av1_generate_block_hash_value(&cpi_source, 8, block_hash_values[1],
+                    block_hash_values[0], is_block_same[1],
+                    is_block_same[0], picture_control_set_ptr);
+                av1_add_to_hash_map_by_row_with_precal_data(
+                    &picture_control_set_ptr->hash_table, block_hash_values[0], is_block_same[0][2],
+                    pic_width, pic_height, 8);
+                av1_generate_block_hash_value(&cpi_source, 16, block_hash_values[0],
+                    block_hash_values[1], is_block_same[0],
+                    is_block_same[1], picture_control_set_ptr);
+                av1_add_to_hash_map_by_row_with_precal_data(
+                    &picture_control_set_ptr->hash_table, block_hash_values[1], is_block_same[1][2],
+                    pic_width, pic_height, 16);
+                av1_generate_block_hash_value(&cpi_source, 32, block_hash_values[1],
+                    block_hash_values[0], is_block_same[1],
+                    is_block_same[0], picture_control_set_ptr);
+                av1_add_to_hash_map_by_row_with_precal_data(
+                    &picture_control_set_ptr->hash_table, block_hash_values[0], is_block_same[0][2],
+                    pic_width, pic_height, 32);
+                av1_generate_block_hash_value(&cpi_source, 64, block_hash_values[0],
+                    block_hash_values[1], is_block_same[0],
+                    is_block_same[1], picture_control_set_ptr);
+                av1_add_to_hash_map_by_row_with_precal_data(
+                    &picture_control_set_ptr->hash_table, block_hash_values[1], is_block_same[1][2],
+                    pic_width, pic_height, 64);
+
+                av1_generate_block_hash_value(&cpi_source, 128, block_hash_values[1],
+                    block_hash_values[0], is_block_same[1],
+                    is_block_same[0], picture_control_set_ptr);
+                av1_add_to_hash_map_by_row_with_precal_data(
+                    &picture_control_set_ptr->hash_table, block_hash_values[0], is_block_same[0][2],
+                    pic_width, pic_height, 128);
+
+                for (k = 0; k < 2; k++) {
+                    for (j = 0; j < 2; j++) {
+                        free(block_hash_values[k][j]);
+                    }
+
+                    for (j = 0; j < 3; j++) {
+                        free(is_block_same[k][j]);
+                    }
+                }
+            }
+
+            av1_init3smotion_compensation(&picture_control_set_ptr->ss_cfg, picture_control_set_ptr->parent_pcs_ptr->enhanced_picture_ptr->stride_y);
+        }
+#endif
 
         // Derive MD parameters
         SetMdSettings( // HT Done

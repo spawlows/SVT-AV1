@@ -1149,7 +1149,11 @@ void ProductFullLoopTxSearch(
     uint64_t                       y_tu_coeff_bits;
     uint64_t                       tuFullDistortion[3][DIST_CALC_TOTAL];
     int32_t                        plane = 0;
+#if ICOPY
+    const int32_t                  is_inter = (candidateBuffer->candidate_ptr->type == INTER_MODE || candidateBuffer->candidate_ptr->use_intrabc) ? EB_TRUE : EB_FALSE;
+#else
     const int32_t                  is_inter = candidateBuffer->candidate_ptr->type == INTER_MODE ? EB_TRUE : EB_FALSE;//is_inter_block(mbmi);
+#endif
     uint64_t                       bestFullCost = UINT64_MAX;
     uint64_t                       y_full_cost = MAX_CU_COST;
     uint32_t                       yCountNonZeroCoeffsTemp;

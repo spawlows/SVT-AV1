@@ -14,6 +14,9 @@
 #include "EbPredictionUnit.h"
 #include "EbTransformUnit.h"
 #include "EbCabacContextModel.h"
+#if ICOPY
+#include "hash.h"
+#endif
 
 #ifdef __cplusplus
 extern "C" {
@@ -181,7 +184,11 @@ extern "C" {
         // Only for INTRA blocks
         UV_PredictionMode uv_mode;
         //PALETTE_MODE_INFO palette_mode_info;
+#if ICOPY
+        uint8_t use_intrabc;
+#else
         //uint8_t use_intrabc;
+#endif
         // Only for INTER blocks
         //InterpFilters interp_filters;
         MvReferenceFrame ref_frame[2];
@@ -239,6 +246,44 @@ extern "C" {
         int32_t tile_col;
 #endif
     } TileInfo;
+
+#if ICOPY
+    typedef struct macroblockd_plane {
+
+        int subsampling_x;
+        int subsampling_y;
+        struct buf_2d dst;
+        struct buf_2d pre[2];
+        // block size in pixels
+        uint8_t width, height;
+
+    } MACROBLOCKD_PLANE;
+
+    typedef struct macroblock_plane {
+#if 0
+        DECLARE_ALIGNED(16, int16_t, src_diff[MAX_SB_SQUARE]);
+        tran_low_t *qcoeff;
+        tran_low_t *coeff;
+        uint16_t *eobs;
+        uint8_t *txb_entropy_ctx;
+#endif
+        struct buf_2d src;
+#if 0
+        // Quantizer setings
+        // These are used/accessed only in the quantization process
+        // RDO does not / must not depend on any of these values
+        // All values below share the coefficient scale/shift used in TX
+        const int16_t *quant_fp_QTX;
+        const int16_t *round_fp_QTX;
+        const int16_t *quant_QTX;
+        const int16_t *quant_shift_QTX;
+        const int16_t *zbin_QTX;
+        const int16_t *round_QTX;
+        const int16_t *dequant_QTX;
+#endif
+    } MACROBLOCK_PLANE;
+#endif
+
     typedef struct MacroBlockD {
         // block dimension in the unit of mode_info.
         uint8_t n8_w, n8_h;
@@ -258,13 +303,50 @@ extern "C" {
         int32_t mb_to_top_edge;
         int32_t mb_to_bottom_edge;
         uint8_t neighbors_ref_counts[TOTAL_REFS_PER_FRAME];
+
+#if ICOPY 
+        uint8_t  use_intrabc;
+        MbModeInfo *above_mbmi;
+        MbModeInfo *left_mbmi;
+        MbModeInfo *chroma_above_mbmi;
+        MbModeInfo *chroma_left_mbmi;
+#endif
     } MacroBlockD;
+
     typedef struct Macroblock {
         int32_t rdmult;
         int32_t switchable_restore_cost[RESTORE_SWITCHABLE_TYPES];
         int32_t wiener_restore_cost[2];
         int32_t sgrproj_restore_cost[2];
     } Macroblock;
+
+#if ICOPY
+    typedef struct IntraBcContext {
+        int32_t rdmult;
+        struct macroblockd_plane xdplane[MAX_MB_PLANE];
+        struct macroblock_plane plane[MAX_MB_PLANE];
+        MvLimits mv_limits;
+        // The equivalend SAD error of one (whole) bit at the current quantizer
+       // for large blocks.
+        int sadperbit16;
+        // The equivalent error at the current rdmult of one whole bit (not one
+        // bitcost unit).
+        int errorperbit;
+        // Store the best motion vector during motion search
+        IntMv best_mv;
+        // Store the second best motion vector during full-pixel motion search
+        IntMv second_best_mv;
+        MacroBlockD * xd;
+        int* nmv_vec_cost;
+        int **mv_cost_stack;
+        // buffer for hash value calculation of a block
+        // used only in av1_get_block_hash_value()
+        // [first hash/second hash]
+        // [two buffers used ping-pong]
+        uint32_t *hash_value_buffer[2][2];
+    } IntraBcContext;
+#endif
+
     typedef struct CodingUnit_s
     {
         TransformUnit_t             transform_unit_array[TRANSFORM_UNIT_MAX_COUNT]; // 2-bytes * 21 = 42-bytes

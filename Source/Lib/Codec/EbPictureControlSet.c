@@ -28,6 +28,9 @@ void *aom_malloc(size_t size);
 #endif
 EbErrorType av1_alloc_restoration_buffers(Av1Common *cm);
 
+#if ICOPY
+EbErrorType av1_hash_table_create(hash_table *p_hash_table);
+#endif
 
 static void set_restoration_unit_size(int32_t width, int32_t height, int32_t sx, int32_t sy,
     RestorationInfo *rst) {
@@ -893,6 +896,10 @@ EbErrorType picture_control_set_ctor(
     }
 
     object_ptr->mi_stride = pictureLcuWidth * (BLOCK_SIZE_64 / 4);
+#if ICOPY
+    object_ptr->hash_table.p_lookup_table = NULL;
+    av1_hash_table_create(&object_ptr->hash_table);
+#endif
     return EB_ErrorNone;
 }
 

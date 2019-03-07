@@ -4872,7 +4872,50 @@ void DecimateInputPicture(
         }
     }
 }
+#if ICOPY
+int av1_count_colors(const uint8_t *src, int stride, int rows, int cols,
+    int *val_count) {
+    const int max_pix_val = 1 << 8;
+    memset(val_count, 0, max_pix_val * sizeof(val_count[0]));
+    for (int r = 0; r < rows; ++r) {
+        for (int c = 0; c < cols; ++c) {
+            const int this_val = src[r * stride + c];
+            assert(this_val < max_pix_val);
+            ++val_count[this_val];
+        }
+    }
+    int n = 0;
+    for (int i = 0; i < max_pix_val; ++i) {
+        if (val_count[i]) ++n;
+    }
+    return n;
+}
+// Estimate if the source frame is screen content, based on the portion of
+// blocks that have no more than 4 (experimentally selected) luma colors.
+static int is_screen_content(const uint8_t *src, int use_hbd,
+    int stride, int width, int height) {
+    assert(src != NULL);
+    int counts = 0;
+    const int blk_w = 16;
+    const int blk_h = 16;
+    const int limit = 4;
+    for (int r = 0; r + blk_h <= height; r += blk_h) {
+        for (int c = 0; c + blk_w <= width; c += blk_w) {
+            int count_buf[1 << 12];  // Maximum (1 << 12) color levels.
+            const int n_colors =
+                use_hbd ? 0 /*av1_count_colors_highbd(src + r * stride + c, stride, blk_w,
+                    blk_h, bd, count_buf)*/
+                : av1_count_colors(src + r * stride + c, stride, blk_w, blk_h,
+                    count_buf);
+            if (n_colors > 1 && n_colors <= limit) counts++;
+        }
+    }
+    // The threshold is 10%.
+    return counts * blk_h * blk_w * 10 > width * height;
+}
 
+
+#endif
 /************************************************
  * Picture Analysis Kernel
  * The Picture Analysis Process pads & decimates the input pictures.
@@ -4932,6 +4975,14 @@ void* picture_analysis_kernel(void *input_ptr)
         // Set picture parameters to account for subpicture, picture scantype, and set regions by resolutions
         SetPictureParametersForStatisticsGathering(
             sequence_control_set_ptr);
+
+#if ICOPY
+        picture_control_set_ptr->sc_content_detected = is_screen_content(
+            input_picture_ptr->buffer_y + input_picture_ptr->origin_x + input_picture_ptr->origin_y*input_picture_ptr->stride_y,
+            0,
+            input_picture_ptr->stride_y,
+            sequence_control_set_ptr->luma_width, sequence_control_set_ptr->luma_height);
+#endif
 
         // Pad pictures to multiple min cu size
         PadPictureToMultipleOfMinCuSizeDimensions(

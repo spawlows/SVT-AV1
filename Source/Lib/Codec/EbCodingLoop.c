@@ -3246,8 +3246,11 @@ EB_EXTERN void AV1EncodePass(
 #endif
 
                 if (cu_ptr->prediction_mode_flag == INTRA_MODE) {
-
+#if ICOPY
+                    context_ptr->is_inter = cu_ptr->av1xd->use_intrabc;
+#else
                     context_ptr->is_inter = 0;
+#endif
                     context_ptr->tot_intra_coded_area += blk_geom->bwidth* blk_geom->bheight;
                     if (picture_control_set_ptr->slice_type != I_SLICE) {
                         context_ptr->intra_coded_area_sb[tbAddr] += blk_geom->bwidth* blk_geom->bheight;
@@ -3279,10 +3282,88 @@ EB_EXTERN void AV1EncodePass(
 
                             uint32_t cu_originy_uv = (context_ptr->cu_origin_y >> 3 << 3) >> 1;
                             uint32_t cu_originx_uv = (context_ptr->cu_origin_x >> 3 << 3) >> 1;
-                            if (is16bit) {
-                                uint16_t    topNeighArray[64 * 2 + 1];
-                                uint16_t    leftNeighArray[64 * 2 + 1];
-                                PredictionMode mode;
+#if ICOPY
+                            if (cu_ptr->av1xd->use_intrabc)
+                            {
+                                MvReferenceFrame ref_frame = INTRA_FRAME;
+                                generate_av1_mvp_table(
+#if TILES
+                                    &sb_ptr->tile_info,
+#endif
+                                    context_ptr->md_context,
+                                    cu_ptr,
+                                    context_ptr->blk_geom,
+                                    context_ptr->cu_origin_x,
+                                    context_ptr->cu_origin_y,
+                                    &ref_frame,
+                                    1,
+                                    picture_control_set_ptr);
+
+                                IntMv nearestmv, nearmv;
+                                av1_find_best_ref_mvs_from_stack(0, context_ptr->md_context->md_local_cu_unit[blk_geom->blkidx_mds].ed_ref_mv_stack, cu_ptr->av1xd, ref_frame, &nearestmv, &nearmv,
+                                    0);
+
+                                if (nearestmv.as_int == INVALID_MV) {
+                                    nearestmv.as_int = 0;
+                                }
+                                if (nearmv.as_int == INVALID_MV) {
+                                    nearmv.as_int = 0;
+                                }
+
+                                IntMv dv_ref = nearestmv.as_int == 0 ? nearmv : nearestmv;
+                                if (dv_ref.as_int == 0)
+                                    av1_find_ref_dv(&dv_ref, &cu_ptr->av1xd->tile, sequence_control_set_ptr->mib_size, context_ptr->cu_origin_y >> MI_SIZE_LOG2, context_ptr->cu_origin_x >> MI_SIZE_LOG2);
+                                // Ref DV should not have sub-pel.
+                                assert((dv_ref.as_mv.col & 7) == 0);
+                                assert((dv_ref.as_mv.row & 7) == 0);
+                                context_ptr->md_context->md_local_cu_unit[blk_geom->blkidx_mds].ed_ref_mv_stack[INTRA_FRAME][0].this_mv = dv_ref;
+                                cu_ptr->predmv[0] = dv_ref;
+
+                                //keep final usefull mvp for entropy
+                                memcpy(cu_ptr->av1xd->final_ref_mv_stack,
+                                    context_ptr->md_context->md_local_cu_unit[context_ptr->blk_geom->blkidx_mds].ed_ref_mv_stack[cu_ptr->prediction_unit_array[0].ref_frame_type],
+                                    sizeof(CandidateMv)*MAX_REF_MV_STACK_SIZE);
+
+                                pu_ptr = cu_ptr->prediction_unit_array;
+                                // Set MvUnit
+                                context_ptr->mv_unit.predDirection = (uint8_t)pu_ptr->inter_pred_direction_index;
+                                context_ptr->mv_unit.mv[REF_LIST_0].mvUnion = pu_ptr->mv[REF_LIST_0].mvUnion;
+                                context_ptr->mv_unit.mv[REF_LIST_1].mvUnion = pu_ptr->mv[REF_LIST_1].mvUnion;
+
+                                EbPictureBufferDesc_t * ref_pic_list0 = ((EbReferenceObject_t*)picture_control_set_ptr->parent_pcs_ptr->reference_picture_wrapper_ptr->object_ptr)->referencePicture;
+
+                                av1_inter_prediction(
+                                    picture_control_set_ptr,
+                                    cu_ptr->interp_filters,
+                                    cu_ptr,
+                                    cu_ptr->prediction_unit_array->ref_frame_type,
+                                    &context_ptr->mv_unit,
+#if ICOPY
+                                    1,// use_intrabc,
+#endif
+                                    context_ptr->cu_origin_x,
+                                    context_ptr->cu_origin_y,
+                                    blk_geom->bwidth,
+                                    blk_geom->bheight,
+                                    ref_pic_list0,
+                                    0,
+                                    recon_buffer,
+                                    context_ptr->cu_origin_x,
+                                    context_ptr->cu_origin_y,
+#if CHROMA_BLIND
+                                    EB_TRUE,
+#endif
+                                    asm_type);
+
+
+                            }
+                            else
+                            {
+#endif
+                                if (is16bit) {
+                                    uint16_t    topNeighArray[64 * 2 + 1];
+                                    uint16_t    leftNeighArray[64 * 2 + 1];
+                                    PredictionMode mode;
 
                                 int32_t plane_end = blk_geom->has_uv ? 2 : 0;
 
@@ -3434,7 +3515,10 @@ EB_EXTERN void AV1EncodePass(
                                         0,  // MD ONLY - NOT USED BY ENCDEC
                                         0);
                                 }
+                                }
+#if ICOPY
                             }
+#endif
 
 #else
                             uint8_t    topNeighArray[64 * 2 + 1];
@@ -3766,6 +3850,9 @@ EB_EXTERN void AV1EncodePass(
                                     cu_ptr,
                                     cu_ptr->prediction_unit_array->ref_frame_type,
                                     &context_ptr->mv_unit,
+#if ICOPY
+                                    0,//use_intrabc,
+#endif
                                     context_ptr->cu_origin_x,
                                     context_ptr->cu_origin_y,
                                     blk_geom->bwidth,

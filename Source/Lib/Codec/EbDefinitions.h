@@ -184,6 +184,37 @@ extern "C" {
 #define CHROMA_BLIND_IF_SEARCH                          1
 #define OIS_BASED_INTRA                                 1
 
+#define ICOPY       0 //Intra Block Copy
+#define AOM_INTERP_EXTEND 4
+struct buf_2d {
+    uint8_t *buf;
+    uint8_t *buf0;
+    int width;
+    int height;
+    int stride;
+};
+typedef struct {
+    int col_min;
+    int col_max;
+    int row_min;
+    int row_max;
+} MvLimits;
+
+/*!\brief force enum to be unsigned 1 byte*/
+#define UENUM1BYTE(enumvar) \
+  ;                         \
+  typedef uint8_t enumvar
+
+enum {
+    DIAMOND = 0,
+    NSTEP = 1,
+    HEX = 2,
+    BIGDIA = 3,
+    SQUARE = 4,
+    FAST_HEX = 5,
+    FAST_DIAMOND = 6
+} UENUM1BYTE(SEARCH_METHODS);
+
 /********************************************************/
 /****************** Pre-defined Values ******************/
 /********************************************************/

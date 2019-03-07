@@ -29,6 +29,11 @@
 #include "EbModeDecisionProcess.h"
 #include "EbMotionEstimation.h"
 
+#if ICOPY
+#include "av1me.h"
+#include "hash.h"
+#endif
+
 /********************************************
 * Constants
 ********************************************/
@@ -678,6 +683,9 @@ void Unipred3x3CandidatesInjection(
 #else
             candidateArray[canTotalCnt].distortion_ready = 0;
 #endif
+#if ICOPY
+            candidateArray[canTotalCnt].use_intrabc = 0;
+#endif
             candidateArray[canTotalCnt].merge_flag = EB_FALSE;
 #if !INTRA_INTER_FAST_LOOP
             candidateArray[canTotalCnt].merge_index = 0;
@@ -759,6 +767,9 @@ void Unipred3x3CandidatesInjection(
 #endif
 #else
                 candidateArray[canTotalCnt].distortion_ready = 0;
+#endif
+#if ICOPY
+                candidateArray[canTotalCnt].use_intrabc = 0;
 #endif
                 candidateArray[canTotalCnt].merge_flag = EB_FALSE;
 #if !INTRA_INTER_FAST_LOOP
@@ -872,6 +883,9 @@ void Bipred3x3CandidatesInjection(
 #else
             candidateArray[canTotalCnt].distortion_ready = 0;
 #endif
+#if ICOPY
+            candidateArray[canTotalCnt].use_intrabc = 0;
+#endif
             candidateArray[canTotalCnt].merge_flag = EB_FALSE;
 #if !INTRA_INTER_FAST_LOOP
             candidateArray[canTotalCnt].merge_index = 0;
@@ -961,6 +975,9 @@ void Bipred3x3CandidatesInjection(
 #endif
 #else
             candidateArray[canTotalCnt].distortion_ready = 0;
+#endif
+#if ICOPY
+            candidateArray[canTotalCnt].use_intrabc = 0;
 #endif
             candidateArray[canTotalCnt].merge_flag = EB_FALSE;
 #if !INTRA_INTER_FAST_LOOP
@@ -1116,6 +1133,9 @@ void InjectAv1MvpCandidates(
 #else
     candidateArray[canIdx].distortion_ready = 0;
 #endif
+#if ICOPY
+    candidateArray[canIdx].use_intrabc = 0;
+#endif
     candidateArray[canIdx].merge_flag = EB_FALSE;
 #if !INTRA_INTER_FAST_LOOP
     candidateArray[canIdx].merge_index = 0;
@@ -1181,6 +1201,9 @@ void InjectAv1MvpCandidates(
 #else
         candidateArray[canIdx].distortion_ready = 0;
 #endif
+#if ICOPY
+        candidateArray[canIdx].use_intrabc = 0;
+#endif
         candidateArray[canIdx].merge_flag = EB_FALSE;
 #if !INTRA_INTER_FAST_LOOP
         candidateArray[canIdx].merge_index = 0;
@@ -1234,6 +1257,9 @@ void InjectAv1MvpCandidates(
 #endif
 #else
         candidateArray[canIdx].distortion_ready = 0;
+#endif
+#if ICOPY
+        candidateArray[canIdx].use_intrabc = 0;
 #endif
         candidateArray[canIdx].merge_flag = EB_FALSE;
 #if !INTRA_INTER_FAST_LOOP
@@ -1299,6 +1325,9 @@ void InjectAv1MvpCandidates(
 #else
             candidateArray[canIdx].distortion_ready = 0;
 #endif
+#if ICOPY
+            candidateArray[canIdx].use_intrabc = 0;
+#endif
             candidateArray[canIdx].merge_flag = EB_FALSE;
 #if !INTRA_INTER_FAST_LOOP
             candidateArray[canIdx].merge_index = 0;
@@ -1356,6 +1385,9 @@ void InjectAv1MvpCandidates(
 #endif
 #else
                 candidateArray[canIdx].distortion_ready = 0;
+#endif
+#if ICOPY
+                candidateArray[canIdx].use_intrabc = 0;
 #endif
                 candidateArray[canIdx].merge_flag = EB_TRUE;
 #if !INTRA_INTER_FAST_LOOP
@@ -1431,6 +1463,9 @@ void InjectAv1MvpCandidates(
 #endif
 #else
                 candidateArray[canIdx].distortion_ready = 0;
+#endif
+#if ICOPY
+                candidateArray[canIdx].use_intrabc = 0;
 #endif
                 candidateArray[canIdx].merge_flag = EB_FALSE;
 #if !INTRA_INTER_FAST_LOOP
@@ -1512,6 +1547,9 @@ void inject_warped_motion_candidates(
 #else
         candidateArray[canIdx].distortion_ready = 0;
 #endif
+#if ICOPY
+        candidateArray[canIdx].use_intrabc = 0;
+#endif
         candidateArray[canIdx].merge_flag = EB_FALSE;
 #if !INTRA_INTER_FAST_LOOP
         candidateArray[canIdx].merge_index = 0;
@@ -1592,6 +1630,9 @@ void inject_warped_motion_candidates(
 #else
             candidateArray[canIdx].distortion_ready = 0;
 #endif
+#if ICOPY
+            candidateArray[canIdx].use_intrabc = 0;
+#endif
             candidateArray[canIdx].merge_flag = EB_FALSE;
 #if !INTRA_INTER_FAST_LOOP
             candidateArray[canIdx].merge_index = 0;
@@ -1663,6 +1704,9 @@ void inject_warped_motion_candidates(
 #endif
 #else
         candidateArray[canIdx].distortion_ready = 0;
+#endif
+#if ICOPY
+        candidateArray[canIdx].use_intrabc = 0;
 #endif
         candidateArray[canIdx].merge_flag = EB_FALSE;
 #if !INTRA_INTER_FAST_LOOP
@@ -1902,6 +1946,9 @@ void  inject_inter_candidates(
 #else
         candidateArray[canTotalCnt].distortion_ready = 0;
 #endif
+#if ICOPY
+        candidateArray[canTotalCnt].use_intrabc = 0;
+#endif
         candidateArray[canTotalCnt].merge_flag = EB_FALSE;
 #if !INTRA_INTER_FAST_LOOP
         candidateArray[canTotalCnt].merge_index = 0;
@@ -1978,6 +2025,9 @@ void  inject_inter_candidates(
 #endif
 #else
             candidateArray[canTotalCnt].distortion_ready = 0;
+#endif
+#if ICOPY
+            candidateArray[canTotalCnt].use_intrabc = 0;
 #endif
             candidateArray[canTotalCnt].merge_flag = EB_FALSE;
 #if !INTRA_INTER_FAST_LOOP
@@ -2058,6 +2108,9 @@ void  inject_inter_candidates(
 #endif
 #else
                 candidateArray[canTotalCnt].distortion_ready = 0;
+#endif
+#if ICOPY
+                candidateArray[canTotalCnt].use_intrabc = 0;
 #endif
                 candidateArray[canTotalCnt].merge_flag = EB_FALSE;
 #if !INTRA_INTER_FAST_LOOP
@@ -2147,6 +2200,9 @@ void  inject_inter_candidates(
 #else
             candidateArray[canTotalCnt].distortion_ready = 0;
 #endif
+#if ICOPY
+            candidateArray[canTotalCnt].use_intrabc = 0;
+#endif
             candidateArray[canTotalCnt].merge_flag = EB_FALSE;
 #if !INTRA_INTER_FAST_LOOP
             candidateArray[canTotalCnt].merge_index = 0;
@@ -2229,6 +2285,9 @@ void  inject_inter_candidates(
 #else
         candidateArray[canTotalCnt].distortion_ready = 0;
 #endif
+#if ICOPY
+        candidateArray[canTotalCnt].use_intrabc = 0;
+#endif
         candidateArray[canTotalCnt].merge_flag = EB_FALSE;
 #if !INTRA_INTER_FAST_LOOP
         candidateArray[canTotalCnt].merge_index = 0;
@@ -2292,6 +2351,9 @@ void  inject_inter_candidates(
 #endif
 #else
         candidateArray[canTotalCnt].distortion_ready = 0;
+#endif
+#if ICOPY
+        candidateArray[canTotalCnt].use_intrabc = 0;
 #endif
         candidateArray[canTotalCnt].merge_flag = EB_FALSE;
 #if !INTRA_INTER_FAST_LOOP
@@ -2666,6 +2728,328 @@ void  inject_intra_candidates_ois(
 }
 
 #endif
+
+#if ICOPY
+double av1_convert_qindex_to_q(int32_t qindex, aom_bit_depth_t bit_depth);
+
+static INLINE void setup_pred_plane(struct buf_2d *dst, block_size bsize,
+    uint8_t *src, int width, int height,
+    int stride, int mi_row, int mi_col,
+    int subsampling_x, int subsampling_y) {
+    // Offset the buffer pointer
+    if (subsampling_y && (mi_row & 0x01) && (mi_size_high[bsize] == 1))
+        mi_row -= 1;
+    if (subsampling_x && (mi_col & 0x01) && (mi_size_wide[bsize] == 1))
+        mi_col -= 1;
+
+    const int x = (MI_SIZE * mi_col) >> subsampling_x;
+    const int y = (MI_SIZE * mi_row) >> subsampling_y;
+    dst->buf = src + (y * stride + x);// scaled_buffer_offset(x, y, stride, scale);
+    dst->buf0 = src;
+    dst->width = width;
+    dst->height = height;
+    dst->stride = stride;
+}
+void av1_setup_pred_block(block_size sb_type,
+    struct buf_2d dst[MAX_MB_PLANE],
+    const Yv12BufferConfig *src, int mi_row, int mi_col) {
+    int i;
+
+    dst[0].buf = src->y_buffer;
+    dst[0].stride = src->y_stride;
+    dst[1].buf = src->u_buffer;
+    dst[2].buf = src->v_buffer;
+    dst[1].stride = dst[2].stride = src->uv_stride;
+
+    i = 0;
+    setup_pred_plane(dst + i, sb_type, dst[i].buf,
+        i ? src->uv_crop_width : src->y_crop_width,
+        i ? src->uv_crop_height : src->y_crop_height,
+        dst[i].stride, mi_row, mi_col,
+        0, 0);
+
+}
+// Values are now correlated to quantizer.
+static int sad_per_bit16lut_8[QINDEX_RANGE];
+static int sad_per_bit4lut_8[QINDEX_RANGE];
+
+static void init_me_luts_bd(int *bit16lut, int *bit4lut, int range,
+    aom_bit_depth_t bit_depth) {
+    int i;
+    // Initialize the sad lut tables using a formulaic calculation for now.
+    // This is to make it easier to resolve the impact of experimental changes
+    // to the quantizer tables.
+    for (i = 0; i < range; i++) {
+        const double q = av1_convert_qindex_to_q(i, bit_depth);
+        bit16lut[i] = (int)(0.0418 * q + 2.4107);
+        bit4lut[i] = (int)(0.063 * q + 2.742);
+    }
+}
+
+void av1_init_me_luts(void) {
+    init_me_luts_bd(sad_per_bit16lut_8, sad_per_bit4lut_8, QINDEX_RANGE,
+        AOM_BITS_8);
+}
+
+static INLINE int mv_check_bounds(const MvLimits *mv_limits, const MV *mv) {
+    return (mv->row >> 3) < mv_limits->row_min ||
+        (mv->row >> 3) > mv_limits->row_max ||
+        (mv->col >> 3) < mv_limits->col_min ||
+        (mv->col >> 3) > mv_limits->col_max;
+}
+void assert_release(int statement)
+{
+    if (statement == 0)
+        printf("ASSERT_ERRRR\n");
+}
+
+void  intra_bc_search(
+    PictureControlSet_t            *pcs,
+    ModeDecisionContext_t          *context_ptr,
+    const SequenceControlSet_t     *scs,
+    LargestCodingUnit_t            *sb_ptr,
+    CodingUnit_t                   *cu_ptr,
+    MV                             *dv_cand,
+    uint8_t                        *num_dv_cand)
+{
+
+    IntraBcContext  x_st;
+    IntraBcContext  *x = &x_st;
+    //fill x with what needed.
+    x->xd = cu_ptr->av1xd;
+    x->nmv_vec_cost = context_ptr->md_rate_estimation_ptr->nmv_vec_cost;
+    x->mv_cost_stack = context_ptr->md_rate_estimation_ptr->nmvcoststack;
+    block_size bsize = context_ptr->blk_geom->bsize;
+    const Av1Common *const cm = pcs->parent_pcs_ptr->av1_cm;
+    MvReferenceFrame ref_frame = INTRA_FRAME;
+    generate_av1_mvp_table(
+#if TILES
+        &sb_ptr->tile_info,
+#endif
+        context_ptr,
+        context_ptr->cu_ptr,
+        context_ptr->blk_geom,
+        context_ptr->cu_origin_x,
+        context_ptr->cu_origin_y,
+        &ref_frame,
+        1,
+        pcs);
+
+    const int num_planes = 3;
+    MacroBlockD * xd = cu_ptr->av1xd;
+    const TileInfo *tile = &xd->tile;
+    const int mi_row = -xd->mb_to_top_edge / (8 * MI_SIZE);
+    const int mi_col = -xd->mb_to_left_edge / (8 * MI_SIZE);
+    const int w = block_size_wide[bsize];
+    const int h = block_size_high[bsize];
+    const int sb_row = mi_row >> scs->mib_size_log2;
+    const int sb_col = mi_col >> scs->mib_size_log2;
+
+    // Set up limit values for MV components.
+    // Mv beyond the range do not produce new/different prediction block.
+    const int mi_width = mi_size_wide[bsize];
+    const int mi_height = mi_size_high[bsize];
+    x->mv_limits.row_min =
+        -(((mi_row + mi_height) * MI_SIZE) + AOM_INTERP_EXTEND);
+    x->mv_limits.col_min = -(((mi_col + mi_width) * MI_SIZE) + AOM_INTERP_EXTEND);
+    x->mv_limits.row_max = (cm->mi_rows - mi_row) * MI_SIZE + AOM_INTERP_EXTEND;
+    x->mv_limits.col_max = (cm->mi_cols - mi_col) * MI_SIZE + AOM_INTERP_EXTEND;
+    //set search paramters
+    x->sadperbit16 = sad_per_bit16lut_8[pcs->parent_pcs_ptr->base_qindex];
+    x->errorperbit = context_ptr->full_lambda >> RD_EPB_SHIFT;
+    x->errorperbit += (x->errorperbit == 0);
+    //temp buffer for hash me
+    for (int xi = 0; xi < 2; xi++)
+        for (int yj = 0; yj < 2; yj++)
+            x->hash_value_buffer[xi][yj] = (uint32_t*)malloc(AOM_BUFFER_SIZE_FOR_BLOCK_HASH * sizeof(uint32_t));
+
+    IntMv nearestmv, nearmv;
+    av1_find_best_ref_mvs_from_stack(0, context_ptr->md_local_cu_unit[context_ptr->blk_geom->blkidx_mds].ed_ref_mv_stack /*mbmi_ext*/, xd, ref_frame, &nearestmv, &nearmv,
+        0);
+    if (nearestmv.as_int == INVALID_MV) {
+        nearestmv.as_int = 0;
+    }
+    if (nearmv.as_int == INVALID_MV) {
+        nearmv.as_int = 0;
+    }
+    IntMv dv_ref = nearestmv.as_int == 0 ? nearmv : nearestmv;
+    if (dv_ref.as_int == 0)
+        av1_find_ref_dv(&dv_ref, tile, scs->mib_size, mi_row, mi_col);
+    // Ref DV should not have sub-pel.
+    assert((dv_ref.as_mv.col & 7) == 0);
+    assert((dv_ref.as_mv.row & 7) == 0);
+    context_ptr->md_local_cu_unit[context_ptr->blk_geom->blkidx_mds].ed_ref_mv_stack[INTRA_FRAME][0].this_mv = dv_ref;
+
+    /* pointer to current frame */
+    Yv12BufferConfig cur_buf;
+    LinkEbToAomBufferDesc(
+        pcs->parent_pcs_ptr->enhanced_picture_ptr,
+        &cur_buf);
+    struct buf_2d yv12_mb[MAX_MB_PLANE];
+    av1_setup_pred_block(bsize, yv12_mb, &cur_buf, mi_row, mi_col);
+    for (int i = 0; i < num_planes; ++i) {
+        x->xdplane[i].pre[0] = yv12_mb[i];  //ref in ME
+    }
+    //setup src for DV search same as ref
+    x->plane[0].src = x->xdplane[0].pre[0];
+
+
+    enum IntrabcMotionDirection {
+        IBC_MOTION_ABOVE,
+        IBC_MOTION_LEFT,
+        IBC_MOTION_DIRECTIONS
+    };
+
+    //up to two dv candidates will be generated 
+    for (enum IntrabcMotionDirection dir = IBC_MOTION_ABOVE;
+        dir < IBC_MOTION_DIRECTIONS; ++dir) {
+
+        const MvLimits tmp_mv_limits = x->mv_limits;
+
+        switch (dir) {
+        case IBC_MOTION_ABOVE:
+            x->mv_limits.col_min = (tile->mi_col_start - mi_col) * MI_SIZE;
+            x->mv_limits.col_max = (tile->mi_col_end - mi_col) * MI_SIZE - w;
+            x->mv_limits.row_min = (tile->mi_row_start - mi_row) * MI_SIZE;
+            x->mv_limits.row_max =
+                (sb_row * scs->mib_size - mi_row) * MI_SIZE - h;
+            break;
+        case IBC_MOTION_LEFT:
+            x->mv_limits.col_min = (tile->mi_col_start - mi_col) * MI_SIZE;
+            x->mv_limits.col_max =
+                (sb_col * scs->mib_size - mi_col) * MI_SIZE - w;
+            // TODO: Minimize the overlap between above and
+            // left areas.
+            x->mv_limits.row_min = (tile->mi_row_start - mi_row) * MI_SIZE;
+            int bottom_coded_mi_edge =
+                AOMMIN((sb_row + 1) * scs->mib_size, tile->mi_row_end);
+            x->mv_limits.row_max = (bottom_coded_mi_edge - mi_row) * MI_SIZE - h;
+            break;
+        default: assert(0);
+        }
+        assert_release(x->mv_limits.col_min >= tmp_mv_limits.col_min);
+        assert_release(x->mv_limits.col_max <= tmp_mv_limits.col_max);
+        assert_release(x->mv_limits.row_min >= tmp_mv_limits.row_min);
+        assert_release(x->mv_limits.row_max <= tmp_mv_limits.row_max);
+
+        av1_set_mv_search_range(&x->mv_limits, &dv_ref.as_mv);
+
+        if (x->mv_limits.col_max < x->mv_limits.col_min ||
+            x->mv_limits.row_max < x->mv_limits.row_min) {
+            x->mv_limits = tmp_mv_limits;
+            continue;
+        }
+
+        int step_param = 0;
+        MV mvp_full = dv_ref.as_mv;
+        mvp_full.col >>= 3;
+        mvp_full.row >>= 3;
+        const int sadpb = x->sadperbit16;
+        x->best_mv.as_int = 0;
+
+#define INT_VAR_MAX  2147483647    // maximum (signed) int value
+
+        const int bestsme = av1_full_pixel_search(
+            pcs, x, bsize, &mvp_full, step_param, 1, 0,
+            sadpb, NULL, &dv_ref.as_mv, INT_VAR_MAX, 1,
+            (MI_SIZE * mi_col), (MI_SIZE * mi_row), 1);
+
+        x->mv_limits = tmp_mv_limits;
+        if (bestsme == INT_VAR_MAX) continue;
+        mvp_full = x->best_mv.as_mv;
+
+        const MV dv = { .row = mvp_full.row * 8,.col = mvp_full.col * 8 };
+        if (mv_check_bounds(&x->mv_limits, &dv)) continue;
+        if (!av1_is_dv_valid(dv, xd, mi_row, mi_col, bsize,
+            scs->mib_size_log2))
+            continue;
+
+        // DV should not have sub-pel.
+        assert_release((dv.col & 7) == 0);
+        assert_release((dv.row & 7) == 0);
+
+        //store output
+        dv_cand[*num_dv_cand] = dv;
+        (*num_dv_cand)++;
+
+    }
+
+    for (int i = 0; i < 2; i++)
+        for (int j = 0; j < 2; j++)
+            free(x->hash_value_buffer[i][j]);
+
+}
+
+void  inject_intra_bc_candidates(
+    PictureControlSet_t            *picture_control_set_ptr,
+    ModeDecisionContext_t          *context_ptr,
+    const SequenceControlSet_t     *sequence_control_set_ptr,
+    LargestCodingUnit_t            *sb_ptr,
+    CodingUnit_t                   *cu_ptr,
+    uint32_t                       *cand_cnt)
+{
+    MV dv_cand[2];
+    uint8_t num_dv_cand = 0;
+
+    //perform dv-pred + search up to 2 dv(s)
+    intra_bc_search(
+        picture_control_set_ptr,
+        context_ptr,
+        sequence_control_set_ptr,
+        sb_ptr,
+        cu_ptr,
+        dv_cand,
+        &num_dv_cand);
+
+    ModeDecisionCandidate_t    *candidateArray = context_ptr->fast_candidate_array;
+    uint32_t dv_i;
+
+    for (dv_i = 0; dv_i < num_dv_cand; dv_i++)
+    {
+        candidateArray[*cand_cnt].type = INTRA_MODE;
+        candidateArray[*cand_cnt].intra_luma_mode = DC_PRED;
+#if TWO_FAST_LOOP 
+        candidateArray[*cand_cnt].enable_two_fast_loops = 0;
+#else
+        candidateArray[*cand_cnt].distortion_ready = 0;
+#endif
+        candidateArray[*cand_cnt].use_intrabc = 1;
+        candidateArray[*cand_cnt].is_directional_mode_flag = 0;
+        candidateArray[*cand_cnt].use_angle_delta = 0;
+        candidateArray[*cand_cnt].angle_delta[PLANE_TYPE_Y] = 0;
+        candidateArray[*cand_cnt].intra_chroma_mode = UV_DC_PRED;
+        candidateArray[*cand_cnt].cfl_alpha_signs = 0;
+        candidateArray[*cand_cnt].cfl_alpha_idx = 0;
+        candidateArray[*cand_cnt].is_directional_chroma_mode_flag = 0;
+        candidateArray[*cand_cnt].angle_delta[PLANE_TYPE_UV] = 0;
+        candidateArray[*cand_cnt].transform_type[PLANE_TYPE_Y] = DCT_DCT;
+        candidateArray[*cand_cnt].transform_type[PLANE_TYPE_UV] = DCT_DCT;
+        candidateArray[*cand_cnt].mpm_flag = EB_FALSE;
+        candidateArray[*cand_cnt].ref_frame_type = INTRA_FRAME;
+        candidateArray[*cand_cnt].pred_mode = DC_PRED;
+        candidateArray[*cand_cnt].motion_mode = SIMPLE_TRANSLATION;
+        //inter ralated
+        candidateArray[*cand_cnt].is_compound = 0;
+        candidateArray[*cand_cnt].merge_flag = EB_FALSE;
+        candidateArray[*cand_cnt].merge_index = 0;
+        candidateArray[*cand_cnt].prediction_direction[0] = UNI_PRED_LIST_0;
+        candidateArray[*cand_cnt].is_skip_mode_flag = 0;
+        candidateArray[*cand_cnt].is_new_mv = 0;
+        candidateArray[*cand_cnt].is_zero_mv = 0;
+        candidateArray[*cand_cnt].motionVector_x_L0 = dv_cand[dv_i].col;
+        candidateArray[*cand_cnt].motionVector_y_L0 = dv_cand[dv_i].row;
+        candidateArray[*cand_cnt].motion_vector_pred_x[REF_LIST_0] = context_ptr->md_local_cu_unit[context_ptr->blk_geom->blkidx_mds].ed_ref_mv_stack[INTRA_FRAME][0].this_mv.as_mv.col;
+        candidateArray[*cand_cnt].motion_vector_pred_y[REF_LIST_0] = context_ptr->md_local_cu_unit[context_ptr->blk_geom->blkidx_mds].ed_ref_mv_stack[INTRA_FRAME][0].this_mv.as_mv.row;
+        candidateArray[*cand_cnt].drl_index = 0;
+        candidateArray[*cand_cnt].ref_mv_index = 0;
+        candidateArray[*cand_cnt].pred_mv_weight = 0;
+        candidateArray[*cand_cnt].interp_filters = av1_broadcast_interp_filter(BILINEAR);
+        ++(*cand_cnt);
+
+    }
+
+}
+#endif
 // END of Function Declarations
 void  inject_intra_candidates(
     PictureControlSet_t            *picture_control_set_ptr,
@@ -2760,6 +3144,9 @@ void  inject_intra_candidates(
 #else
                         candidateArray[canTotalCnt].distortion_ready = 0;
 #endif
+#if ICOPY
+                        candidateArray[canTotalCnt].use_intrabc = 0;
+#endif
                         candidateArray[canTotalCnt].is_directional_mode_flag = (uint8_t)av1_is_directional_mode((PredictionMode)openLoopIntraCandidate);
                         candidateArray[canTotalCnt].use_angle_delta = use_angle_delta ? candidateArray[canTotalCnt].is_directional_mode_flag : 0;
                         candidateArray[canTotalCnt].angle_delta[PLANE_TYPE_Y] = angle_delta;
@@ -2819,6 +3206,9 @@ void  inject_intra_candidates(
 #endif
 #else
             candidateArray[canTotalCnt].distortion_ready = 0;
+#endif
+#if ICOPY
+            candidateArray[canTotalCnt].use_intrabc = 0;
 #endif
             candidateArray[canTotalCnt].is_directional_mode_flag = (uint8_t)av1_is_directional_mode((PredictionMode)openLoopIntraCandidate);
             candidateArray[canTotalCnt].use_angle_delta = candidateArray[canTotalCnt].is_directional_mode_flag;
@@ -2980,6 +3370,18 @@ EbErrorType ProductGenerateMdCandidatesCu(
     context_ptr->fast_candidate_intra_count = canTotalCnt;
 #endif
 
+#if ICOPY
+    if (picture_control_set_ptr->parent_pcs_ptr->allow_intrabc)
+        inject_intra_bc_candidates(
+            picture_control_set_ptr,
+            context_ptr,
+            sequence_control_set_ptr,
+            sb_ptr,
+            context_ptr->cu_ptr,
+            &canTotalCnt
+        );
+#endif
+
     if (slice_type != I_SLICE) {
         if (inject_inter_candidate)
             inject_inter_candidates(
@@ -3074,6 +3476,10 @@ uint8_t product_full_mode_decision(
 
     context_ptr->md_local_cu_unit[cu_ptr->mds_idx].count_non_zero_coeffs = candidate_ptr->count_non_zero_coeffs;
 
+#if ICOPY    
+    cu_ptr->av1xd->use_intrabc = candidate_ptr->use_intrabc;
+#endif
+
     // Set the PU level variables
     cu_ptr->interp_filters = candidate_ptr->interp_filters;
     {
@@ -3100,7 +3506,11 @@ uint8_t product_full_mode_decision(
         // Inter Prediction
         pu_ptr->inter_pred_direction_index = candidate_ptr->prediction_direction[0];
         pu_ptr->merge_flag = candidate_ptr->merge_flag;
+#if ICOPY
+        if (cu_ptr->prediction_mode_flag != INTER_MODE && cu_ptr->av1xd->use_intrabc == 0)
+#else
         if (cu_ptr->prediction_mode_flag != INTER_MODE)
+#endif
         {
             pu_ptr->inter_pred_direction_index = 0x03;
             pu_ptr->merge_flag = EB_FALSE;
