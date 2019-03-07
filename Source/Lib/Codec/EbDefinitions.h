@@ -149,7 +149,7 @@ extern "C" {
 #define MDC_FIX_1                                       1
 #endif
 #endif
-
+#define M8_ADP                                          1
 #define REMOVED_DUPLICATE_INTER                         1
 #define REMOVED_DUPLICATE_INTER_L1                      1
 #define REMOVED_DUPLICATE_INTER_BIPRED                  1
@@ -3049,8 +3049,13 @@ typedef enum EbPictureDepthMode {
 #define SB_SQ_BLOCKS_DEPTH_MODE             1
 #define SB_SQ_NON4_BLOCKS_DEPTH_MODE        2
 #define SB_OPEN_LOOP_DEPTH_MODE             3
+#if M8_ADP
+#define SB_FAST_OPEN_LOOP_DEPTH_MODE        4
+#define SB_PRED_OPEN_LOOP_DEPTH_MODE        5
+#else
 #define SB_PRED_OPEN_LOOP_DEPTH_MODE        4
 #define SB_PRED_OPEN_LOOP_1_NFL_DEPTH_MODE  5
+#endif
 #else
 typedef enum EbLcuDepthMode {
 

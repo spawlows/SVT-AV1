@@ -33,18 +33,29 @@
 #define UNDER_SHOOTING                        0
 #define OVER_SHOOTING                         1
 #define TBD_SHOOTING                          2
+
+#if !M8_ADP
 // Set a cost to each search method (could be modified)
 // EB30 @ Revision 12879
 #define PRED_OPEN_LOOP_1_NFL_COST    97 // PRED_OPEN_LOOP_1_NFL_COST is ~03% faster than PRED_OPEN_LOOP_COST  
 #define U_099                        99
+#endif
+#if M8_ADP
+#define SB_PRED_OPEN_LOOP_COST      100 // Let's assume PRED_OPEN_LOOP_COST costs ~100 U   
+#else
 #define PRED_OPEN_LOOP_COST         100 // Let's assume PRED_OPEN_LOOP_COST costs ~100 U   
+#endif
 #define U_101                       101
 #define U_102                       102
 #define U_103                       103
 #define U_104                       104  
 #define U_105                       105    
 #define U_107                       107  
+#if M8_ADP
+#define SB_FAST_OPEN_LOOP_COST      108
+#else
 #define U_108                       108  
+#endif
 #define U_109                       109
 #define SB_OPEN_LOOP_COST           110 // F_MDC is ~10% slower than PRED_OPEN_LOOP_COST
 #define U_111                       111
@@ -54,6 +65,7 @@
 #define U_115                       115  
 #define U_116                       116
 #define U_117                       117
+#define U_118                       118
 #define U_119                       119
 #define U_120                       120
 #define U_121                       121
@@ -1666,9 +1678,14 @@ void configure_adp(
     UNUSED(picture_control_set_ptr);
     context_ptr->cost_depth_mode[SB_SQ_BLOCKS_DEPTH_MODE      - 1]       = SQ_BLOCKS_SEARCH_COST;
     context_ptr->cost_depth_mode[SB_SQ_NON4_BLOCKS_DEPTH_MODE - 1]       = SQ_NON4_BLOCKS_SEARCH_COST;
-    context_ptr->cost_depth_mode[SB_OPEN_LOOP_DEPTH_MODE - 1]            = SB_OPEN_LOOP_COST;
+    context_ptr->cost_depth_mode[SB_OPEN_LOOP_DEPTH_MODE      - 1]       = SB_OPEN_LOOP_COST;
+#if M8_ADP
+    context_ptr->cost_depth_mode[SB_FAST_OPEN_LOOP_DEPTH_MODE - 1]       = SB_FAST_OPEN_LOOP_COST;
+    context_ptr->cost_depth_mode[SB_PRED_OPEN_LOOP_DEPTH_MODE - 1]       = SB_PRED_OPEN_LOOP_COST;
+#else
     context_ptr->cost_depth_mode[SB_PRED_OPEN_LOOP_DEPTH_MODE - 1]       = PRED_OPEN_LOOP_COST;
     context_ptr->cost_depth_mode[SB_PRED_OPEN_LOOP_1_NFL_DEPTH_MODE - 1] = PRED_OPEN_LOOP_1_NFL_COST;
+#endif
 
     // Initialize the score based TH
     context_ptr->score_th[0] = ~0;
@@ -1695,13 +1712,21 @@ void derive_search_method(
     uint32_t sb_index;
 
     for (sb_index = 0; sb_index < picture_control_set_ptr->parent_pcs_ptr->sequence_control_set_ptr->sb_tot_cnt; sb_index++) {
-
+#if M8_ADP
+        if (context_ptr->sb_cost_array[sb_index] == context_ptr->cost_depth_mode[SB_PRED_OPEN_LOOP_DEPTH_MODE - 1]) {
+            picture_control_set_ptr->parent_pcs_ptr->sb_depth_mode_array[sb_index] = SB_PRED_OPEN_LOOP_DEPTH_MODE;
+        }
+        else if (context_ptr->sb_cost_array[sb_index] == context_ptr->cost_depth_mode[SB_FAST_OPEN_LOOP_DEPTH_MODE - 1]) {
+            picture_control_set_ptr->parent_pcs_ptr->sb_depth_mode_array[sb_index] = SB_FAST_OPEN_LOOP_DEPTH_MODE;
+        }
+#else
         if (context_ptr->sb_cost_array[sb_index] == context_ptr->cost_depth_mode[SB_PRED_OPEN_LOOP_1_NFL_DEPTH_MODE - 1]) {
             picture_control_set_ptr->parent_pcs_ptr->sb_depth_mode_array[sb_index] = SB_PRED_OPEN_LOOP_1_NFL_DEPTH_MODE;
         }
         else if (context_ptr->sb_cost_array[sb_index] == context_ptr->cost_depth_mode[SB_PRED_OPEN_LOOP_DEPTH_MODE - 1]) {
             picture_control_set_ptr->parent_pcs_ptr->sb_depth_mode_array[sb_index] = SB_PRED_OPEN_LOOP_DEPTH_MODE;
         }
+#endif
         else if (context_ptr->sb_cost_array[sb_index] == context_ptr->cost_depth_mode[SB_OPEN_LOOP_DEPTH_MODE - 1]) {
             picture_control_set_ptr->parent_pcs_ptr->sb_depth_mode_array[sb_index] = SB_OPEN_LOOP_DEPTH_MODE;
         }
@@ -1714,7 +1739,7 @@ void derive_search_method(
     }
 
 #if ADP_STATS_PER_LAYER
-    SequenceControlSet_t *sequence_control_set_ptr = (SequenceControlSet_t *)picture_control_set_ptr->sequence_control_set_wrapper_ptr->objectPtr;
+    SequenceControlSet_t *sequence_control_set_ptr = (SequenceControlSet_t *)picture_control_set_ptr->sequence_control_set_wrapper_ptr->object_ptr;
 
     for (sb_index = 0; sb_index < picture_control_set_ptr->parent_pcs_ptr->sequence_control_set_ptr->sb_tot_cnt; sb_index++) {
 
@@ -1729,12 +1754,21 @@ void derive_search_method(
         else if (picture_control_set_ptr->parent_pcs_ptr->sb_depth_mode_array[sb_index] == SB_OPEN_LOOP_DEPTH_MODE) {
             sequence_control_set_ptr->mdc_count[picture_control_set_ptr->parent_pcs_ptr->temporal_layer_index]  ++;
         }
+#if M8_ADP
+        else if (picture_control_set_ptr->parent_pcs_ptr->sb_depth_mode_array[sb_index] == SB_FAST_OPEN_LOOP_DEPTH_MODE) {
+            sequence_control_set_ptr->pred_count[picture_control_set_ptr->parent_pcs_ptr->temporal_layer_index]  ++;
+        }
+        else if (picture_control_set_ptr->parent_pcs_ptr->sb_depth_mode_array[sb_index] == SB_PRED_OPEN_LOOP_DEPTH_MODE) {
+            sequence_control_set_ptr->pred1_nfl_count[picture_control_set_ptr->parent_pcs_ptr->temporal_layer_index]  ++;
+        }
+#else
         else if (picture_control_set_ptr->parent_pcs_ptr->sb_depth_mode_array[sb_index] == SB_PRED_OPEN_LOOP_DEPTH_MODE) {
             sequence_control_set_ptr->pred_count[picture_control_set_ptr->parent_pcs_ptr->temporal_layer_index]  ++;
         }
         else if (picture_control_set_ptr->parent_pcs_ptr->sb_depth_mode_array[sb_index] == SB_PRED_OPEN_LOOP_1_NFL_DEPTH_MODE) {
             sequence_control_set_ptr->pred1_nfl_count[picture_control_set_ptr->parent_pcs_ptr->temporal_layer_index]  ++;
         }
+#endif
         else
         {
             SVT_LOG("error");
@@ -1874,6 +1908,42 @@ EbErrorType derive_default_segments(
 
     EbErrorType return_error = EB_ErrorNone;
 
+#if M8_ADP
+    if (picture_control_set_ptr->parent_pcs_ptr->temporal_layer_index == 0) {
+        context_ptr->number_of_segments = 2;
+        context_ptr->score_th[0] = (int8_t)((1 * 100) / context_ptr->number_of_segments);
+        context_ptr->score_th[1] = (int8_t)((2 * 100) / context_ptr->number_of_segments);
+        context_ptr->score_th[2] = (int8_t)((3 * 100) / context_ptr->number_of_segments);
+        context_ptr->score_th[3] = (int8_t)((4 * 100) / context_ptr->number_of_segments);
+        context_ptr->interval_cost[0] = context_ptr->cost_depth_mode[SB_OPEN_LOOP_DEPTH_MODE      - 1];
+        context_ptr->interval_cost[1] = context_ptr->cost_depth_mode[SB_SQ_NON4_BLOCKS_DEPTH_MODE - 1];
+    }
+    else if (picture_control_set_ptr->parent_pcs_ptr->is_used_as_reference_flag == EB_TRUE) {
+        context_ptr->number_of_segments = 3;
+
+        context_ptr->score_th[0] = (int8_t)((1 * 100) / context_ptr->number_of_segments);
+        context_ptr->score_th[1] = (int8_t)((2 * 100) / context_ptr->number_of_segments);
+        context_ptr->score_th[2] = (int8_t)((3 * 100) / context_ptr->number_of_segments);
+        context_ptr->score_th[3] = (int8_t)((4 * 100) / context_ptr->number_of_segments);
+
+        context_ptr->interval_cost[0] = context_ptr->cost_depth_mode[SB_FAST_OPEN_LOOP_DEPTH_MODE - 1];
+        context_ptr->interval_cost[1] = context_ptr->cost_depth_mode[SB_OPEN_LOOP_DEPTH_MODE      - 1];
+        context_ptr->interval_cost[2] = context_ptr->cost_depth_mode[SB_SQ_NON4_BLOCKS_DEPTH_MODE - 1];
+    }
+    else {
+        context_ptr->number_of_segments = 4;
+
+        context_ptr->score_th[0] = (int8_t)((1 * 100) / context_ptr->number_of_segments);
+        context_ptr->score_th[1] = (int8_t)((2 * 100) / context_ptr->number_of_segments);
+        context_ptr->score_th[2] = (int8_t)((3 * 100) / context_ptr->number_of_segments);
+        context_ptr->score_th[3] = (int8_t)((4 * 100) / context_ptr->number_of_segments);
+
+        context_ptr->interval_cost[0] = context_ptr->cost_depth_mode[SB_PRED_OPEN_LOOP_DEPTH_MODE - 1];
+        context_ptr->interval_cost[1] = context_ptr->cost_depth_mode[SB_FAST_OPEN_LOOP_DEPTH_MODE - 1];
+        context_ptr->interval_cost[2] = context_ptr->cost_depth_mode[SB_OPEN_LOOP_DEPTH_MODE      - 1];
+        context_ptr->interval_cost[3] = context_ptr->cost_depth_mode[SB_SQ_NON4_BLOCKS_DEPTH_MODE - 1];
+    }
+#else
     if (picture_control_set_ptr->parent_pcs_ptr->temporal_layer_index == 0) {
         context_ptr->number_of_segments = 2;
         context_ptr->score_th[0] = (int8_t)((1 * 100) / context_ptr->number_of_segments);
@@ -1908,7 +1978,7 @@ EbErrorType derive_default_segments(
         context_ptr->interval_cost[2] = context_ptr->cost_depth_mode[SB_OPEN_LOOP_DEPTH_MODE            - 1];
         context_ptr->interval_cost[3] = context_ptr->cost_depth_mode[SB_SQ_NON4_BLOCKS_DEPTH_MODE       - 1];
     }
-
+#endif
     return return_error;
 }
 /******************************************************
@@ -1978,6 +2048,35 @@ void set_target_budget_oq(
     ModeDecisionConfigurationContext_t *context_ptr)
 {
     uint32_t budget;
+
+
+#if M8_ADP
+#if 0
+    if (context_ptr->adp_level <= ENC_M7) {
+        if (picture_control_set_ptr->parent_pcs_ptr->temporal_layer_index == 0)
+            budget = sequence_control_set_ptr->sb_tot_cnt * U_150;
+        else if (picture_control_set_ptr->parent_pcs_ptr->is_used_as_reference_flag)
+            budget = sequence_control_set_ptr->sb_tot_cnt * U_130;
+        else
+            budget = sequence_control_set_ptr->sb_tot_cnt * U_120;
+    }
+    else {
+        if (picture_control_set_ptr->parent_pcs_ptr->temporal_layer_index == 0)
+            budget = sequence_control_set_ptr->sb_tot_cnt * U_150;
+        else if (picture_control_set_ptr->parent_pcs_ptr->is_used_as_reference_flag)
+            budget = sequence_control_set_ptr->sb_tot_cnt * U_130;
+        else
+            budget = sequence_control_set_ptr->sb_tot_cnt * U_120;
+    }
+#endif
+    if (picture_control_set_ptr->parent_pcs_ptr->temporal_layer_index == 0)
+        budget = sequence_control_set_ptr->sb_tot_cnt * U_150;
+    else if (picture_control_set_ptr->parent_pcs_ptr->is_used_as_reference_flag)
+        budget = sequence_control_set_ptr->sb_tot_cnt * U_118;
+    else
+        budget = sequence_control_set_ptr->sb_tot_cnt * U_112;
+
+#else
     if (picture_control_set_ptr->parent_pcs_ptr->temporal_layer_index == 0)
         budget = sequence_control_set_ptr->sb_tot_cnt * U_150;
     else if (picture_control_set_ptr->parent_pcs_ptr->is_used_as_reference_flag)
@@ -1991,6 +2090,7 @@ void set_target_budget_oq(
         budget = sequence_control_set_ptr->sb_tot_cnt * PRED_OPEN_LOOP_COST;
 #else
         budget = sequence_control_set_ptr->sb_tot_cnt * U_120;
+#endif
 #endif
   
     context_ptr->budget = budget;
@@ -2040,6 +2140,24 @@ void derive_sb_md_mode(
         picture_control_set_ptr,
         context_ptr);
 }
+
+#if M8_ADP
+/******************************************************
+* Derive Mode Decision Config Settings for OQ
+Input   : encoder mode and tune
+Output  : EncDec Kernel signal(s)
+******************************************************/
+EbErrorType signal_derivation_mode_decision_config_kernel_oq(
+    PictureControlSet_t                *picture_control_set_ptr,
+    ModeDecisionConfigurationContext_t *context_ptr) {
+
+    EbErrorType return_error = EB_ErrorNone;
+
+    context_ptr->adp_level = picture_control_set_ptr->parent_pcs_ptr->enc_mode;
+
+    return return_error;
+}
+#endif
 #else
 EbErrorType DeriveDefaultSegments(
     PictureControlSet_t                 *picture_control_set_ptr,
@@ -3008,6 +3126,14 @@ void* ModeDecisionConfigurationKernel(void *input_ptr)
         picture_control_set_ptr = (PictureControlSet_t*)rateControlResultsPtr->pictureControlSetWrapperPtr->object_ptr;
         sequence_control_set_ptr = (SequenceControlSet_t*)picture_control_set_ptr->sequence_control_set_wrapper_ptr->object_ptr;
       
+#if M8_ADP
+        // Mode Decision Configuration Kernel Signal(s) derivation
+        signal_derivation_mode_decision_config_kernel_oq(
+            picture_control_set_ptr,
+            context_ptr);
+#endif
+
+
         context_ptr->qp = picture_control_set_ptr->picture_qp;
 
         picture_control_set_ptr->parent_pcs_ptr->average_qp = 0;

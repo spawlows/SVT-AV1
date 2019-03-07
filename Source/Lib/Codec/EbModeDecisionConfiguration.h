@@ -71,6 +71,10 @@ typedef EbErrorType(*EB_MDC_FUNC)(
 #define AllD        0x80
 
 #if MDC_FIX_1
+#if M8_ADP
+EB_ALIGN(16) static const uint8_t ndp_level_0[4] = {Pred + Predp1 + Predp2, Pred + Predp1, Pred + Predp1, Pred + Predm1};
+EB_ALIGN(16) static const uint8_t ndp_level_1[4] = {Pred + Predp1         , Pred + Predp1, Pred + Predp1, Pred + Predm1 };
+#else
 EB_ALIGN(16) static const uint8_t NdpRefinementControl[MAX_TEMPORAL_LAYERS/*temporal layer*/][4/*cu Size*/] =
 {
     //   64                         32                              16                  8  
@@ -81,6 +85,7 @@ EB_ALIGN(16) static const uint8_t NdpRefinementControl[MAX_TEMPORAL_LAYERS/*temp
     /* layer-4 */      { Pred + Predp1 + Predp2     , Pred + Predp1                  ,Pred + Predp1          ,Pred + Predm1         },
     /* layer-5 */      { Pred + Predp1 + Predp2     , Pred + Predp1                  ,Pred + Predp1          ,Pred + Predm1         },
 };
+#endif
 #else
 EB_ALIGN(16) static const uint8_t NdpRefinementControlNREF[MAX_TEMPORAL_LAYERS/*temporal layer*/][4/*cu Size*/] =
 {
