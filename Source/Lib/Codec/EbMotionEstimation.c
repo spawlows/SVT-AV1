@@ -2813,6 +2813,7 @@ void HalfPelSearch_LCU(
             }
         }
     }
+#if !TEST5_DISABLE_NSQ_ME
 #if DISABLE_NSQ_FOR_NON_REF || DISABLE_NSQ
     if (picture_control_set_ptr->pic_depth_mode <= PIC_ALL_C_DEPTH_MODE) {
 #else
@@ -3177,6 +3178,7 @@ void HalfPelSearch_LCU(
         }
 
     }
+#endif
 
     return;
 }
@@ -7235,7 +7237,11 @@ EbErrorType MotionEstimateLcu(
                             picture_control_set_ptr->cu8x8_mode == CU_8x8_MODE_1,
                             enableQuarterPel,
 #if DISABLE_NSQ_FOR_NON_REF || DISABLE_NSQ
+#if TEST5_DISABLE_NSQ_ME
+                            EB_FALSE);
+#else
                             picture_control_set_ptr->pic_depth_mode <= PIC_ALL_C_DEPTH_MODE);
+#endif
 #else
                             sequence_control_set_ptr->static_config.ext_block_flag);
 #endif
@@ -7310,7 +7316,11 @@ EbErrorType MotionEstimateLcu(
 
         if (numOfListToSearch) {
 #if DISABLE_NSQ_FOR_NON_REF || DISABLE_NSQ
+#if TEST5_DISABLE_NSQ_ME
+            if (picture_control_set_ptr->cu8x8_mode == CU_8x8_MODE_0 || pu_index < 21){
+#else
             if (picture_control_set_ptr->cu8x8_mode == CU_8x8_MODE_0 || pu_index < 21 || (picture_control_set_ptr->pic_depth_mode <= PIC_ALL_C_DEPTH_MODE)) {
+#endif
 #else
             if (picture_control_set_ptr->cu8x8_mode == CU_8x8_MODE_0 || pu_index < 21 || sequence_control_set_ptr->static_config.ext_block_flag) {
 #endif
