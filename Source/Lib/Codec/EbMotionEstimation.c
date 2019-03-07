@@ -6622,10 +6622,15 @@ EbErrorType MotionEstimateLcu(
 #else
     numOfListToSearch = (picture_control_set_ptr->slice_type == P_SLICE) || (picture_control_set_ptr->temporal_layer_index == 0) ? (uint32_t)REF_LIST_0 : (uint32_t)REF_LIST_1;
 #endif
-#if NSQ_OPTIMASATION
+
+#if NSQ_OPTIMASATION 
     EbBool is_nsq_table_used = (picture_control_set_ptr->pic_depth_mode <= PIC_ALL_C_DEPTH_MODE &&
                                 picture_control_set_ptr->nsq_search_level >= NSQ_SEARCH_LEVEL1 &&
                                 picture_control_set_ptr->nsq_search_level < NSQ_SEARCH_FULL) ? EB_TRUE : EB_FALSE;
+#endif
+
+#if TEST5_DISABLE_NSQ_ME
+    is_nsq_table_used = EB_FALSE;
 #endif
     referenceObject = (EbPaReferenceObject_t*)picture_control_set_ptr->ref_pa_pic_ptr_array[0]->object_ptr;
     ref0Poc = picture_control_set_ptr->ref_pic_poc_array[0];
@@ -7036,11 +7041,14 @@ EbErrorType MotionEstimateLcu(
 
             {
                 {
-
+#if TEST5_DISABLE_NSQ_ME
+                    if(0){
+#else
 #if DISABLE_NSQ_FOR_NON_REF || DISABLE_NSQ
                     if (picture_control_set_ptr->pic_depth_mode <= PIC_ALL_C_DEPTH_MODE) {
 #else
                     if (sequence_control_set_ptr->static_config.ext_block_flag) {
+#endif
 #endif
                         uint8_t refPicIndex = 0;
 
@@ -7234,7 +7242,7 @@ EbErrorType MotionEstimateLcu(
 #endif
 
                     }
-#if NSQ_OPTIMASATION
+#if NSQ_OPTIMASATION 
                     if (is_nsq_table_used) {
                         context_ptr->p_best_nsq64x64 = &(context_ptr->p_sb_best_nsq[listIndex][0][ME_TIER_ZERO_PU_64x64]);
                         context_ptr->p_best_nsq32x32 = &(context_ptr->p_sb_best_nsq[listIndex][0][ME_TIER_ZERO_PU_32x32_0]);
