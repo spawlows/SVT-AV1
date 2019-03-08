@@ -197,6 +197,8 @@ extern "C" {
 #define HASH_X      1
 #endif
 
+#define ADD_CDEF_FILTER_LEVEL                           1
+
 #define SC_HME_ME  0//use sc detector for hme/me setting
 
 #define AOM_INTERP_EXTEND 4
