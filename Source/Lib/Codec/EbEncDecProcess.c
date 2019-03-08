@@ -1390,7 +1390,7 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
     // 2                    On both INTRA and INTER
     if (picture_control_set_ptr->enc_mode <= ENC_M6)
         context_ptr->full_loop_escape = 0;
-    else if (picture_control_set_ptr->enc_mode <= ENC_M7)
+    else
         context_ptr->full_loop_escape = 1;
 #endif
     return return_error;

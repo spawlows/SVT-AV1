@@ -2136,8 +2136,8 @@ void set_target_budget_oq(
         0 :
         0;
 
-    //uint32_t budget_per_sb_boost[MAX_SUPPORTED_MODES] = {55,55,55,55,55,55,55,20,10,10,10,10};
-    uint32_t budget_per_sb_boost[8] = { 55,55,55,55,55,55,55,10 };
+    uint32_t budget_per_sb_boost[MAX_SUPPORTED_MODES] = {55,55,55,55,55,55,55,10,10,10,10,10,10 };
+    //uint32_t budget_per_sb_boost[8] = { 55,55,55,55,55,55,55,10 };
     // Hsan: cross multiplication to derive budget_per_sb from sb_average_score; budget_per_sb range is [SB_PRED_OPEN_LOOP_COST,SQ_NON4_BLOCKS_SEARCH_COST], and sb_average_score range [0,HIGH_SB_SCORE]
     // Hsan: 3 segments [0,LOW_SB_SCORE], [LOW_SB_SCORE,MEDIUM_SB_SCORE] and [MEDIUM_SB_SCORE,SQ_NON4_BLOCKS_SEARCH_COST]
     uint32_t budget_per_sb;

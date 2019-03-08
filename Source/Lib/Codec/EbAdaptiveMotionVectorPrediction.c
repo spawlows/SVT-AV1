@@ -1162,8 +1162,8 @@ void generate_av1_mvp_table(
     uint16_t                          cu_origin_y,
     MvReferenceFrame                 *ref_frames,
     uint32_t                          tot_refs,
-    PictureControlSet_t              *picture_control_set_ptr)
-{
+    PictureControlSet_t              *picture_control_set_ptr){
+
     int32_t mi_row = cu_origin_y >> MI_SIZE_LOG2;
     int32_t mi_col = cu_origin_x >> MI_SIZE_LOG2;
     Av1Common  *cm = picture_control_set_ptr->parent_pcs_ptr->av1_cm;

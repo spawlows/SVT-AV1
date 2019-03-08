@@ -3740,7 +3740,6 @@ void md_encode_block(
             buffer_total_count = intra_buffer_count + inter_buffer_count;
 
             // Evaluate intra fast loop candidates
-            uint32_t final_fast_candidate_intra_count = 0;
             if (context_ptr->fast_candidate_intra_count) {
                 perform_fast_loop(
                     picture_control_set_ptr,
@@ -3764,7 +3763,6 @@ void md_encode_block(
             }
 
             // Evaluate inter fast loop candidates
-            uint32_t final_fast_candidate_inter_count = 0;
             if (context_ptr->fast_candidate_inter_count) {
                 perform_fast_loop(
                     picture_control_set_ptr,

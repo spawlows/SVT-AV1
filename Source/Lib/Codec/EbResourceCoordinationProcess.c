@@ -203,7 +203,7 @@ void SpeedBufferControl(
             changeCond = 7;
         }
         encoderModeDelta = CLIP3(-1, 1, encoderModeDelta);
-        sequence_control_set_ptr->encode_context_ptr->enc_mode = (EbEncMode)CLIP3(1, 6, (int8_t)sequence_control_set_ptr->encode_context_ptr->enc_mode + encoderModeDelta);
+        sequence_control_set_ptr->encode_context_ptr->enc_mode = (EbEncMode)CLIP3(1, MAX_ENC_PRESET, (int8_t)sequence_control_set_ptr->encode_context_ptr->enc_mode + encoderModeDelta);
 
         // Update previous stats
         context_ptr->previousFrameInCheck1 = sequence_control_set_ptr->encode_context_ptr->sc_frame_in;
@@ -231,7 +231,7 @@ void SpeedBufferControl(
         }
 
         encoderModeDelta = CLIP3(-1, 1, encoderModeDelta);
-        sequence_control_set_ptr->encode_context_ptr->enc_mode = (EbEncMode)CLIP3(1, 6, (int8_t)sequence_control_set_ptr->encode_context_ptr->enc_mode + encoderModeDelta);
+        sequence_control_set_ptr->encode_context_ptr->enc_mode = (EbEncMode)CLIP3(1, MAX_ENC_PRESET, (int8_t)sequence_control_set_ptr->encode_context_ptr->enc_mode + encoderModeDelta);
 
         // Update previous stats
         context_ptr->previousFrameInCheck2 = sequence_control_set_ptr->encode_context_ptr->sc_frame_in;

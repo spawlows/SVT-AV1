@@ -813,9 +813,9 @@ EbErrorType signal_derivation_multi_processes_oq(
         else
             picture_control_set_ptr->cdef_filter_mode = 1;
     }
-    else {
+    else
         picture_control_set_ptr->cdef_filter_mode = 0;
-    }
+
 #endif
 #if FAST_SG
     // SG Level                                    Settings
