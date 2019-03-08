@@ -256,7 +256,10 @@ extern "C" {
         PART                              nsq_table[NSQ_TAB_SIZE];
 #endif
 #if INTRA_INTER_FAST_LOOP
-        uint8_t                           decoupled_fast_loop_search_method;
+        uint8_t                           decoupled_fast_loop_search_method; 
+#endif
+#if FULL_LOOP_ESCAPE
+        uint8_t                           full_loop_escape;
 #endif
     } ModeDecisionContext_t;
 

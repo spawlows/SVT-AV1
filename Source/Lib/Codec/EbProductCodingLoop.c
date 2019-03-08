@@ -2496,8 +2496,11 @@ void AV1PerformFullLoop(
     uint64_t                 ref_fast_cost,
     EbAsm                    asm_type)
 {
-
+#if FULL_LOOP_ESCAPE
+    uint32_t       best_inter_luma_zero_coeff;
+#else
     //uint32_t      prevRootCbf;
+#endif
     uint64_t      bestfullCost;
     uint32_t      fullLoopCandidateIndex;
     uint8_t       candidateIndex;
@@ -2511,8 +2514,12 @@ void AV1PerformFullLoop(
     uint64_t      y_coeff_bits;
     uint64_t        cb_coeff_bits = 0;
     uint64_t        cr_coeff_bits = 0;
-
+#if FULL_LOOP_ESCAPE
+    best_inter_luma_zero_coeff = 1;
     bestfullCost = 0xFFFFFFFFull;
+#else
+    bestfullCost = 0xFFFFFFFFull;
+#endif
 
     ModeDecisionCandidateBuffer_t         **candidateBufferPtrArrayBase = context_ptr->candidate_buffer_ptr_array;
 #if INTRA_INTER_FAST_LOOP
@@ -2542,6 +2549,17 @@ void AV1PerformFullLoop(
         // Set the Candidate Buffer
         candidateBuffer = candidate_buffer_ptr_array[candidateIndex];
         candidate_ptr = candidateBuffer->candidate_ptr;//this is the FastCandidateStruct
+
+
+#if FULL_LOOP_ESCAPE
+        if (picture_control_set_ptr->slice_type != I_SLICE) {
+            if ((candidate_ptr->type == INTRA_MODE || context_ptr->full_loop_escape == 2) && best_inter_luma_zero_coeff == 0) {
+                // Update # of NFL
+                context_ptr->full_recon_search_count = fullLoopCandidateIndex;
+                return;
+            }
+        }
+#endif
 
         candidate_ptr->full_distortion = 0;
 
@@ -2810,7 +2828,20 @@ void AV1PerformFullLoop(
 
         candidate_ptr->full_distortion = (uint32_t)(y_full_distortion[0]);
 
+#if FULL_LOOP_ESCAPE
+        if (context_ptr->full_loop_escape) 
+        {
+            if (picture_control_set_ptr->slice_type != I_SLICE) {
+                if (candidate_ptr->type == INTER_MODE) {
+                    if (*candidateBuffer->full_cost_ptr < bestfullCost) {
+                        best_inter_luma_zero_coeff = candidate_ptr->y_has_coeff;
+                        bestfullCost = *candidateBuffer->full_cost_ptr;
+                    }
+                }
 
+            }
+        }
+#else
 #if SHUT_CBF_FL_SKIP
         if(0)
 #endif
@@ -2822,7 +2853,7 @@ void AV1PerformFullLoop(
                     }
                 }
             }
-
+#endif
     }//end for( full loop)
 }
 
