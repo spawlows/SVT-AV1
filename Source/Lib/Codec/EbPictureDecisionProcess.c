@@ -515,6 +515,8 @@ EbErrorType update_base_layer_reference_queue_dependent_count(
 #if BASE_LAYER_REF
                 if (input_entry_ptr->pPcsPtr->slice_type == I_SLICE)
                     input_entry_ptr->depList1Count = input_entry_ptr->list1.listCount + sequence_control_set_ptr->extra_frames_to_ref_islice;
+                else if (input_entry_ptr->pPcsPtr->temporal_layer_index == 0 && picture_control_set_ptr->picture_number + (1 << sequence_control_set_ptr->static_config.hierarchical_levels) < sequence_control_set_ptr->max_frame_window_to_ref_islice + input_entry_ptr->pPcsPtr->last_islice_picture_number)
+                    input_entry_ptr->depList1Count = MAX((int32_t)input_entry_ptr->list1.listCount - 1, 0);
                 else
                     input_entry_ptr->depList1Count = input_entry_ptr->list1.listCount;
 #else
@@ -2259,6 +2261,8 @@ void* picture_decision_kernel(void *input_ptr)
 #if BASE_LAYER_REF
                                 if (picture_control_set_ptr->slice_type == I_SLICE)
                                     inputEntryPtr->depList1Count = inputEntryPtr->list1.listCount + sequence_control_set_ptr->extra_frames_to_ref_islice;
+                                else if (picture_control_set_ptr->temporal_layer_index == 0 && picture_control_set_ptr->picture_number + (1 << sequence_control_set_ptr->static_config.hierarchical_levels) < sequence_control_set_ptr->max_frame_window_to_ref_islice + picture_control_set_ptr->last_islice_picture_number)
+                                    inputEntryPtr->depList1Count = MAX((int32_t)inputEntryPtr->list1.listCount - 1, 0);
                                 else
                                     inputEntryPtr->depList1Count = inputEntryPtr->list1.listCount;
 #else
