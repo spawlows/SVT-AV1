@@ -6700,7 +6700,9 @@ EbErrorType MotionEstimateLcu(
                     }
 
                     // HME: Level0 search
-
+#if SC_HME_ME
+                    uint8_t  sc_mul = picture_control_set_ptr->sc_content_detected ? 1 : 1;
+#endif
 
                     if (enable_hme_level0_flag) {
 
@@ -6722,8 +6724,13 @@ EbErrorType MotionEstimateLcu(
                                 &(hmeLevel0Sad[searchRegionNumberInWidth][searchRegionNumberInHeight]),
                                 &(xHmeLevel0SearchCenter[searchRegionNumberInWidth][searchRegionNumberInHeight]),
                                 &(yHmeLevel0SearchCenter[searchRegionNumberInWidth][searchRegionNumberInHeight]),
+#if SC_HME_ME
+                                HME_LEVEL_0_SEARCH_AREA_MULTIPLIER_X[picture_control_set_ptr->hierarchical_levels][picture_control_set_ptr->temporal_layer_index]*sc_mul,
+                                HME_LEVEL_0_SEARCH_AREA_MULTIPLIER_Y[picture_control_set_ptr->hierarchical_levels][picture_control_set_ptr->temporal_layer_index]*sc_mul,
+#else
                                 HME_LEVEL_0_SEARCH_AREA_MULTIPLIER_X[picture_control_set_ptr->hierarchical_levels][picture_control_set_ptr->temporal_layer_index],
                                 HME_LEVEL_0_SEARCH_AREA_MULTIPLIER_Y[picture_control_set_ptr->hierarchical_levels][picture_control_set_ptr->temporal_layer_index],
+#endif
                                 asm_type);
 
 
@@ -6753,8 +6760,13 @@ EbErrorType MotionEstimateLcu(
                                             &(hmeLevel0Sad[searchRegionNumberInWidth][searchRegionNumberInHeight]),
                                             &(xHmeLevel0SearchCenter[searchRegionNumberInWidth][searchRegionNumberInHeight]),
                                             &(yHmeLevel0SearchCenter[searchRegionNumberInWidth][searchRegionNumberInHeight]),
+#if SC_HME_ME
+                                            HME_LEVEL_0_SEARCH_AREA_MULTIPLIER_X[picture_control_set_ptr->hierarchical_levels][picture_control_set_ptr->temporal_layer_index] * sc_mul,
+                                            HME_LEVEL_0_SEARCH_AREA_MULTIPLIER_Y[picture_control_set_ptr->hierarchical_levels][picture_control_set_ptr->temporal_layer_index] * sc_mul,
+#else
                                             HME_LEVEL_0_SEARCH_AREA_MULTIPLIER_X[picture_control_set_ptr->hierarchical_levels][picture_control_set_ptr->temporal_layer_index],
                                             HME_LEVEL_0_SEARCH_AREA_MULTIPLIER_Y[picture_control_set_ptr->hierarchical_levels][picture_control_set_ptr->temporal_layer_index],
+#endif
                                             asm_type);
 
 

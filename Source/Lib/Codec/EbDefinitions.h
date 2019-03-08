@@ -185,7 +185,15 @@ extern "C" {
 #define CHROMA_BLIND_IF_SEARCH                          1
 #define OIS_BASED_INTRA                                 1
 
-#define ICOPY       0 //Intra Block Copy
+#define ICOPY       1 //Intra Block Copy
+#if ICOPY
+#define IBC_EARLY_0 1
+#define HASH_ME     0
+#define HASH_X      1
+#endif
+
+#define SC_HME_ME  1//use sc detector for hme/me setting
+
 #define AOM_INTERP_EXTEND 4
 struct buf_2d {
     uint8_t *buf;
