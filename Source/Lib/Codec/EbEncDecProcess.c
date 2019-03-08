@@ -1399,9 +1399,9 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
     // 0                    Injection off (Hsan: but not derivation as used by MV ref derivation)
     // 1                    On
     if (picture_control_set_ptr->enc_mode <= ENC_M7)
-        context_ptr->global_mv_injection = 0;
-    else
         context_ptr->global_mv_injection = 1;
+    else
+        context_ptr->global_mv_injection = 0;
 #endif
     return return_error;
 }
