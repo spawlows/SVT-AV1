@@ -5024,6 +5024,7 @@ void HmeLevel2(
     // round the search region width to nearest multiple of 8 if it is less than 8 or non multiple of 8
     // SAD calculation performance is the same for searchregion width from 1 to 8
     (void)picture_control_set_ptr;
+
     int16_t hmeLevel2SearchAreaInWidth = (int16_t)context_ptr->hme_level2_search_area_in_width_array[searchRegionNumberInWidth];
     int16_t search_area_width = (hmeLevel2SearchAreaInWidth < 8) ? 8 : (hmeLevel2SearchAreaInWidth & 7) ? hmeLevel2SearchAreaInWidth + (hmeLevel2SearchAreaInWidth - ((hmeLevel2SearchAreaInWidth >> 3) << 3)) : hmeLevel2SearchAreaInWidth;
     int16_t search_area_height = (int16_t)context_ptr->hme_level2_search_area_in_height_array[searchRegionNumberInHeight];
@@ -6700,9 +6701,7 @@ EbErrorType MotionEstimateLcu(
                     }
 
                     // HME: Level0 search
-#if SC_HME_ME
-                    uint8_t  sc_mul = picture_control_set_ptr->sc_content_detected ? 1 : 1;
-#endif
+
 
                     if (enable_hme_level0_flag) {
 
@@ -6724,13 +6723,8 @@ EbErrorType MotionEstimateLcu(
                                 &(hmeLevel0Sad[searchRegionNumberInWidth][searchRegionNumberInHeight]),
                                 &(xHmeLevel0SearchCenter[searchRegionNumberInWidth][searchRegionNumberInHeight]),
                                 &(yHmeLevel0SearchCenter[searchRegionNumberInWidth][searchRegionNumberInHeight]),
-#if SC_HME_ME
-                                HME_LEVEL_0_SEARCH_AREA_MULTIPLIER_X[picture_control_set_ptr->hierarchical_levels][picture_control_set_ptr->temporal_layer_index]*sc_mul,
-                                HME_LEVEL_0_SEARCH_AREA_MULTIPLIER_Y[picture_control_set_ptr->hierarchical_levels][picture_control_set_ptr->temporal_layer_index]*sc_mul,
-#else
                                 HME_LEVEL_0_SEARCH_AREA_MULTIPLIER_X[picture_control_set_ptr->hierarchical_levels][picture_control_set_ptr->temporal_layer_index],
                                 HME_LEVEL_0_SEARCH_AREA_MULTIPLIER_Y[picture_control_set_ptr->hierarchical_levels][picture_control_set_ptr->temporal_layer_index],
-#endif
                                 asm_type);
 
 
@@ -6760,13 +6754,8 @@ EbErrorType MotionEstimateLcu(
                                             &(hmeLevel0Sad[searchRegionNumberInWidth][searchRegionNumberInHeight]),
                                             &(xHmeLevel0SearchCenter[searchRegionNumberInWidth][searchRegionNumberInHeight]),
                                             &(yHmeLevel0SearchCenter[searchRegionNumberInWidth][searchRegionNumberInHeight]),
-#if SC_HME_ME
-                                            HME_LEVEL_0_SEARCH_AREA_MULTIPLIER_X[picture_control_set_ptr->hierarchical_levels][picture_control_set_ptr->temporal_layer_index] * sc_mul,
-                                            HME_LEVEL_0_SEARCH_AREA_MULTIPLIER_Y[picture_control_set_ptr->hierarchical_levels][picture_control_set_ptr->temporal_layer_index] * sc_mul,
-#else
                                             HME_LEVEL_0_SEARCH_AREA_MULTIPLIER_X[picture_control_set_ptr->hierarchical_levels][picture_control_set_ptr->temporal_layer_index],
                                             HME_LEVEL_0_SEARCH_AREA_MULTIPLIER_Y[picture_control_set_ptr->hierarchical_levels][picture_control_set_ptr->temporal_layer_index],
-#endif
                                             asm_type);
 
 
@@ -6789,6 +6778,7 @@ EbErrorType MotionEstimateLcu(
                                 while (searchRegionNumberInWidth < context_ptr->number_hme_search_region_in_width) {
 
                                     // When HME level 0 has been disabled, increase the search area width and height for level 1 to (32x12) for Gold only
+
                                     hmeLevel1SearchAreaInWidth = (int16_t)context_ptr->hme_level1_search_area_in_width_array[searchRegionNumberInWidth];
                                     hmeLevel1SearchAreaInHeight = (int16_t)context_ptr->hme_level1_search_area_in_height_array[searchRegionNumberInHeight];
 
