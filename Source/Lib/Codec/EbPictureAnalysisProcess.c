@@ -4045,7 +4045,13 @@ void PicturePreProcessingOperations(
             asm_type);
     }
     else {
-
+#if SHUT_FULL_DENOISE
+        //Reset the flat noise flag array to False for both RealTime/HighComplexity Modes
+        for (uint32_t lcuCodingOrder = 0; lcuCodingOrder < sb_total_count; ++lcuCodingOrder) {
+            picture_control_set_ptr->sb_flat_noise_array[lcuCodingOrder] = 0;
+        }
+        picture_control_set_ptr->pic_noise_class = PIC_NOISE_CLASS_INV; //this init is for both REAL-TIME and BEST-QUALITY
+#else
         FullSampleDenoise(
             context_ptr,
             sequence_control_set_ptr,
@@ -4054,6 +4060,8 @@ void PicturePreProcessingOperations(
             sequence_control_set_ptr->static_config.enable_denoise_flag,
             picture_width_in_sb,
             asm_type);
+#endif
+        
     }
     return;
 
