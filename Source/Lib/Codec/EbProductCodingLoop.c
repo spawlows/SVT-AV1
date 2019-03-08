@@ -657,6 +657,7 @@ void set_nfl(
     // 1                    10
     // 2                    8
     // 3                    6
+    // 4                    6/4
 #if M8_ADP
     if (context_ptr->nfl_level == 0)
         context_ptr->full_recon_search_count = MAX_NFL;
@@ -664,8 +665,14 @@ void set_nfl(
         context_ptr->full_recon_search_count = 10;
     else if (context_ptr->nfl_level == 2)
         context_ptr->full_recon_search_count = 8;
-    else
+    else if(context_ptr->nfl_level == 3)
         context_ptr->full_recon_search_count = 6;
+    else
+        if (picture_control_set_ptr->parent_pcs_ptr->slice_type == I_SLICE)
+            context_ptr->full_recon_search_count = 6;
+        else
+            context_ptr->full_recon_search_count = 4;
+            
 #else
     if (picture_control_set_ptr->parent_pcs_ptr->pic_depth_mode == PIC_SB_SWITCH_DEPTH_MODE && picture_control_set_ptr->parent_pcs_ptr->sb_depth_mode_array[sb_ptr->index] == SB_PRED_OPEN_LOOP_1_NFL_DEPTH_MODE)
         context_ptr->full_recon_search_count = 1;

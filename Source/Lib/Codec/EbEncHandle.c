@@ -437,7 +437,7 @@ int32_t set_parent_pcs(EbSvtAv1EncConfiguration*   config) {
         fps        = fps > 120 ? 120   : fps;
         fps        = fps < 24  ? 24    : fps; 
         ppcs_count = MAX(min_ppcs_count, fps);
-        ppcs_count = ((ppcs_count * 5) >> 2);  // 1.25 sec worth of internal buffering
+        ppcs_count = ((ppcs_count * 4) >> 1);  // 2 sec worth of internal buffering
     
         return (int32_t) ppcs_count;
     }
@@ -535,7 +535,7 @@ EbErrorType LoadDefaultBufferConfigurationSettings(
     sequence_control_set_ptr->rest_segment_row_count    = MIN(rest_seg_h,4);
 #endif
     //#====================== Data Structures and Picture Buffers ======================
-    sequence_control_set_ptr->picture_control_set_pool_init_count       = inputPic;
+    sequence_control_set_ptr->picture_control_set_pool_init_count       = inputPic + sequence_control_set_ptr->static_config.look_ahead_distance + SCD_LAD;
     sequence_control_set_ptr->picture_control_set_pool_init_count_child = MAX(MAX(MIN(3, coreCount/2), coreCount / 6), 1);
     sequence_control_set_ptr->reference_picture_buffer_init_count       = MAX((uint32_t)(inputPic >> 1),
                                                                           (uint32_t)((1 << sequence_control_set_ptr->static_config.hierarchical_levels) + 2)) +
@@ -1000,7 +1000,6 @@ EB_API EbErrorType eb_init_encoder(EbComponentType *svt_enc_component)
         inputData.is16bit = is16bit;
         inputData.ten_bit_format = encHandlePtr->sequence_control_set_instance_array[instanceIndex]->sequence_control_set_ptr->static_config.ten_bit_format;
         inputData.compressed_ten_bit_format = encHandlePtr->sequence_control_set_instance_array[instanceIndex]->sequence_control_set_ptr->static_config.compressed_ten_bit_format;
-        encHandlePtr->sequence_control_set_instance_array[instanceIndex]->sequence_control_set_ptr->picture_control_set_pool_init_count += maxLookAheadDistance;
         inputData.enc_mode = encHandlePtr->sequence_control_set_instance_array[instanceIndex]->sequence_control_set_ptr->static_config.enc_mode;
         inputData.speed_control = (uint8_t)encHandlePtr->sequence_control_set_instance_array[instanceIndex]->sequence_control_set_ptr->static_config.speed_control_flag;
         inputData.film_grain_noise_level = encHandlePtr->sequence_control_set_instance_array[0]->sequence_control_set_ptr->static_config.film_grain_denoise_strength;

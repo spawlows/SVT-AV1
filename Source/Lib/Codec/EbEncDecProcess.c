@@ -1353,14 +1353,15 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
     // 1                    10
     // 2                    8
     // 3                    6
-    // 4                    4/3/2
+    // 4                    6/4
     if (picture_control_set_ptr->enc_mode <= ENC_M1)
         context_ptr->nfl_level = 0;
     else if (picture_control_set_ptr->enc_mode <= ENC_M3)
         context_ptr->nfl_level = 2;
-    else
+    else if(picture_control_set_ptr->enc_mode <= ENC_M7)
         context_ptr->nfl_level = 3;
-
+    else
+        context_ptr->nfl_level = 4;
 #if CHROMA_BLIND
     // Set Chroma Mode
     // Level                Settings

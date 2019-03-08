@@ -593,7 +593,7 @@ void* cdef_kernel(void *input_ptr)
         }
         else {
 
-#if CDEF_REF_ONLY || ICOPY
+#if 1//CDEF_REF_ONLY || ICOPY
             picture_control_set_ptr->parent_pcs_ptr->cdef_bits = 0;
             picture_control_set_ptr->parent_pcs_ptr->cdef_strengths[0] = 0;
             picture_control_set_ptr->parent_pcs_ptr->nb_cdef_strengths = 1;
