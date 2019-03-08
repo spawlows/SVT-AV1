@@ -116,6 +116,8 @@ static uint8_t intrabc_max_mesh_pct[MAX_MESH_SPEED + 1] = { 100, 100, 100,
 #define HIGH_SB_SCORE             50000  
 #define MEDIUM_SB_SCORE           10000 
 #define LOW_SB_SCORE               5000
+#define MAX_LUMINOSITY_BOOST         10
+uint32_t budget_per_sb_boost[MAX_SUPPORTED_MODES] = { 55,55,55,55,55,55,55,10,10,10,10,10,10 };
 #endif
 #else
 // Shooting states
@@ -2099,45 +2101,20 @@ void set_target_budget_oq(
 
 
 #if M8_ADP
-#if 0
-    if (context_ptr->adp_level <= ENC_M7) {
-        if (picture_control_set_ptr->parent_pcs_ptr->temporal_layer_index == 0)
-            budget = sequence_control_set_ptr->sb_tot_cnt * U_150;
-        else if (picture_control_set_ptr->parent_pcs_ptr->is_used_as_reference_flag)
-            budget = sequence_control_set_ptr->sb_tot_cnt * U_130;
-        else
-            budget = sequence_control_set_ptr->sb_tot_cnt * U_120;
-    }
-    else {
-        if (picture_control_set_ptr->parent_pcs_ptr->temporal_layer_index == 0)
-            budget = sequence_control_set_ptr->sb_tot_cnt * U_150;
-        else if (picture_control_set_ptr->parent_pcs_ptr->is_used_as_reference_flag)
-            budget = sequence_control_set_ptr->sb_tot_cnt * U_130;
-        else
-            budget = sequence_control_set_ptr->sb_tot_cnt * U_120;
-    }
-#endif  
     // Luminosity-based budget boost - if P or B only; add 1 U for each 1 current-to-ref diff 
     uint32_t luminosity_change_boost = 0;
     if (picture_control_set_ptr->slice_type != I_SLICE) {
         if (picture_control_set_ptr->parent_pcs_ptr->is_used_as_reference_flag) {
-            EbReferenceObject_t  * refObjL0, *refObjL1;
-            refObjL0 = (EbReferenceObject_t*)picture_control_set_ptr->ref_pic_ptr_array[REF_LIST_0]->object_ptr;
-            refObjL1 = (picture_control_set_ptr->parent_pcs_ptr->slice_type == B_SLICE) ? (EbReferenceObject_t*)picture_control_set_ptr->ref_pic_ptr_array[REF_LIST_1]->object_ptr : (EbReferenceObject_t*)EB_NULL;
+            EbReferenceObject_t  * ref_obj_l0, *ref_obj_l1;
+            ref_obj_l0 = (EbReferenceObject_t*)picture_control_set_ptr->ref_pic_ptr_array[REF_LIST_0]->object_ptr;
+            ref_obj_l1 = (picture_control_set_ptr->parent_pcs_ptr->slice_type == B_SLICE) ? (EbReferenceObject_t*)picture_control_set_ptr->ref_pic_ptr_array[REF_LIST_1]->object_ptr : (EbReferenceObject_t*)EB_NULL;
 
-            luminosity_change_boost = ABS(picture_control_set_ptr->parent_pcs_ptr->average_intensity[0] - refObjL0->average_intensity);
-            luminosity_change_boost += (refObjL1 != EB_NULL) ? ABS(picture_control_set_ptr->parent_pcs_ptr->average_intensity[0] - refObjL1->average_intensity) : 0;
-            luminosity_change_boost = CLIP3(0, 10, luminosity_change_boost);
+            luminosity_change_boost = ABS(picture_control_set_ptr->parent_pcs_ptr->average_intensity[0] - ref_obj_l0->average_intensity);
+            luminosity_change_boost += (ref_obj_l1 != EB_NULL) ? ABS(picture_control_set_ptr->parent_pcs_ptr->average_intensity[0] - ref_obj_l1->average_intensity) : 0;
+            luminosity_change_boost = CLIP3(0, MAX_LUMINOSITY_BOOST, luminosity_change_boost);
         }
     }
 
-    // Variance-based budget boost - 
-    uint32_t variance_boost = (picture_control_set_ptr->parent_pcs_ptr->pic_avg_variance > 1000) ?
-        0 :
-        0;
-
-    uint32_t budget_per_sb_boost[MAX_SUPPORTED_MODES] = {55,55,55,55,55,55,55,10,10,10,10,10,10 };
-    //uint32_t budget_per_sb_boost[8] = { 55,55,55,55,55,55,55,10 };
     // Hsan: cross multiplication to derive budget_per_sb from sb_average_score; budget_per_sb range is [SB_PRED_OPEN_LOOP_COST,SQ_NON4_BLOCKS_SEARCH_COST], and sb_average_score range [0,HIGH_SB_SCORE]
     // Hsan: 3 segments [0,LOW_SB_SCORE], [LOW_SB_SCORE,MEDIUM_SB_SCORE] and [MEDIUM_SB_SCORE,SQ_NON4_BLOCKS_SEARCH_COST]
     uint32_t budget_per_sb;
@@ -2151,7 +2128,7 @@ void set_target_budget_oq(
         budget_per_sb = (((context_ptr->sb_average_score - MEDIUM_SB_SCORE) * (SQ_NON4_BLOCKS_SEARCH_COST - U_125)) / (HIGH_SB_SCORE - MEDIUM_SB_SCORE)) + U_125;
     }
 
-    budget_per_sb = CLIP3(SB_PRED_OPEN_LOOP_COST, SQ_NON4_BLOCKS_SEARCH_COST, budget_per_sb + budget_per_sb_boost[context_ptr->adp_level] + luminosity_change_boost + variance_boost);
+    budget_per_sb = CLIP3(SB_PRED_OPEN_LOOP_COST, SQ_NON4_BLOCKS_SEARCH_COST, budget_per_sb + budget_per_sb_boost[context_ptr->adp_level] + luminosity_change_boost);
     //printf("picture_number = %d\tsb_average_score = %d\n", picture_control_set_ptr->picture_number, budget_per_sb);
     budget = sequence_control_set_ptr->sb_tot_cnt * budget_per_sb;
     
