@@ -800,11 +800,29 @@ EbErrorType signal_derivation_multi_processes_oq(
 #if FAST_CDEF
     // CDEF Level                                   Settings
     // 0                                            OFF
-    // 1                                            4 step refinement
-    // 2                                            8 step refinement
-    // 3                                            16 step refinement
+    // 1                                            1 step refinement
+    // 2                                            4 step refinement
+    // 3                                            8 step refinement
+    // 4                                            16 step refinement
+    // 5                                            64 step refinement
     SequenceControlSet_t                    *sequence_control_set_ptr;
     sequence_control_set_ptr = (SequenceControlSet_t*)picture_control_set_ptr->sequence_control_set_wrapper_ptr->object_ptr;
+#if ADD_CDEF_FILTER_LEVEL
+#if ICOPY 
+    if (sequence_control_set_ptr->enable_cdef && picture_control_set_ptr->allow_intrabc == 0) {
+#else
+    if (sequence_control_set_ptr->enable_cdef) {
+#endif
+        if (picture_control_set_ptr->enc_mode <= ENC_M3)
+            picture_control_set_ptr->cdef_filter_mode = 4;
+        else if (picture_control_set_ptr->enc_mode <= ENC_M7)
+            picture_control_set_ptr->cdef_filter_mode = 1;
+        else
+            picture_control_set_ptr->cdef_filter_mode = 2;
+    }
+    else
+        picture_control_set_ptr->cdef_filter_mode = 0;
+#else
 #if ICOPY 
     if (sequence_control_set_ptr->enable_cdef && picture_control_set_ptr->allow_intrabc == 0) {
 #else
@@ -820,6 +838,7 @@ EbErrorType signal_derivation_multi_processes_oq(
     else
         picture_control_set_ptr->cdef_filter_mode = 0;
 
+#endif
 #endif
 #if FAST_SG
     // SG Level                                    Settings
