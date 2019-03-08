@@ -150,6 +150,7 @@ extern "C" {
 #endif
 #endif
 #define M8_ADP                                          1
+#define FULL_LOOP_ESCAPE                                1
 #define REMOVED_DUPLICATE_INTER                         1
 #define REMOVED_DUPLICATE_INTER_L1                      1
 #define REMOVED_DUPLICATE_INTER_BIPRED                  1

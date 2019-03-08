@@ -1382,6 +1382,17 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
     else
         context_ptr->decoupled_fast_loop_search_method = FULL_SAD_SEARCH;
 #endif
+#if FULL_LOOP_ESCAPE
+    // Set the full loop escape level
+    // Level                Settings
+    // 0                    Off
+    // 1                    On but only INTRA
+    // 2                    On both INTRA and INTER
+    if (picture_control_set_ptr->enc_mode <= ENC_M6)
+        context_ptr->full_loop_escape = 0;
+    else if (picture_control_set_ptr->enc_mode <= ENC_M7)
+        context_ptr->full_loop_escape = 1;
+#endif
     return return_error;
 }
 void move_cu_data(
