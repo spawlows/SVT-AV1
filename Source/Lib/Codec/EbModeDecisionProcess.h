@@ -261,6 +261,9 @@ extern "C" {
 #if FULL_LOOP_ESCAPE
         uint8_t                           full_loop_escape;
 #endif
+#if SHUT_GLOBAL_MV
+        uint8_t                           global_mv_injection;
+#endif
     } ModeDecisionContext_t;
 
     typedef void(*EB_AV1_LAMBDA_ASSIGN_FUNC)(

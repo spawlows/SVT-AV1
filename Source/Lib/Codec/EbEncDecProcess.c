@@ -1393,6 +1393,16 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
     else
         context_ptr->full_loop_escape = 1;
 #endif
+#if SHUT_GLOBAL_MV
+    // Set global MV injection
+    // Level                Settings
+    // 0                    Injection off (Hsan: but not derivation as used by MV ref derivation)
+    // 1                    On
+    if (picture_control_set_ptr->enc_mode <= ENC_M7)
+        context_ptr->global_mv_injection = 0;
+    else
+        context_ptr->global_mv_injection = 1;
+#endif
     return return_error;
 }
 void move_cu_data(

@@ -153,6 +153,7 @@ extern "C" {
 #define FULL_LOOP_ESCAPE                                1
 #define SIMULATE_PF_N2                                  0
 #define PF_N2_32X32                                     0
+#define SHUT_GLOBAL_MV                                  1
 
 #define REMOVED_DUPLICATE_INTER                         1
 #define REMOVED_DUPLICATE_INTER_L1                      1
