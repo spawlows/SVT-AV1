@@ -53,6 +53,8 @@ extern "C" {
         uint64_t                          rcGroupIndex;
 #if BASE_LAYER_REF
         EB_SLICE                        slice_type;
+        uint8_t                         temporal_layer_index;
+        uint64_t                        last_islice_picture_number;
 #endif
 
     } ReferenceQueueEntry_t;

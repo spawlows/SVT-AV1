@@ -254,6 +254,8 @@ void* picture_manager_kernel(void *input_ptr)
 #if BASE_LAYER_REF
                             if (referenceEntryPtr->slice_type == I_SLICE)
                                 referenceEntryPtr->depList1Count = referenceEntryPtr->list1.listCount + sequence_control_set_ptr->extra_frames_to_ref_islice;
+                            else if (referenceEntryPtr->temporal_layer_index == 0 && referenceEntryPtr->picture_number + (1 << sequence_control_set_ptr->static_config.hierarchical_levels) < sequence_control_set_ptr->max_frame_window_to_ref_islice + referenceEntryPtr->last_islice_picture_number)
+                                referenceEntryPtr->depList1Count = MAX((int32_t)referenceEntryPtr->list1.listCount - 1, 0);
                             else
                                 referenceEntryPtr->depList1Count = referenceEntryPtr->list1.listCount;
 #else
@@ -446,6 +448,8 @@ void* picture_manager_kernel(void *input_ptr)
                 referenceEntryPtr->picture_number = picture_control_set_ptr->picture_number;
 #if BASE_LAYER_REF
                 referenceEntryPtr->slice_type = picture_control_set_ptr->slice_type;
+                referenceEntryPtr->temporal_layer_index = picture_control_set_ptr->temporal_layer_index;
+                referenceEntryPtr->last_islice_picture_number = picture_control_set_ptr->last_islice_picture_number;
 #endif
                 referenceEntryPtr->referenceObjectPtr = (EbObjectWrapper_t*)EB_NULL;
                 referenceEntryPtr->releaseEnable = EB_TRUE;
@@ -472,6 +476,8 @@ void* picture_manager_kernel(void *input_ptr)
 #if BASE_LAYER_REF
                 if (picture_control_set_ptr->slice_type == I_SLICE)
                     referenceEntryPtr->depList1Count = referenceEntryPtr->list1.listCount + sequence_control_set_ptr->extra_frames_to_ref_islice;
+                else if (picture_control_set_ptr->temporal_layer_index == 0 && picture_control_set_ptr->picture_number + (1 << sequence_control_set_ptr->static_config.hierarchical_levels) < sequence_control_set_ptr->max_frame_window_to_ref_islice + picture_control_set_ptr->last_islice_picture_number)
+                    referenceEntryPtr->depList1Count = MAX((int32_t)referenceEntryPtr->list1.listCount - 1, 0);
                 else
                     referenceEntryPtr->depList1Count = referenceEntryPtr->list1.listCount;
 #else
