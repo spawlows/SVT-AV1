@@ -1805,15 +1805,6 @@ static const EbWarpedMotionParams default_warp_params = {
 #define $Line                   EB_MAKESTRING( EB_STRINGIZE, __LINE__ )
 #define EB_SRC_LINE             __FILE__ "(" $Line ") : message "
 
-
-typedef enum eb_memcpy_mode
-{
-    e_nt_store = 1,
-    e_nt_load = 2,
-    e_nt_avx = 4
-}
-eb_memcpy_mode;
-
 // ***************************** Definitions *****************************
 #define PM_DC_TRSHLD1                       10 // The threshold for DC to disable masking for DC
 
@@ -2570,10 +2561,93 @@ extern errno_t
 extern rsize_t
     strnlen_ss(const char *s, rsize_t smax);
 
-extern void DRDmemcpy(void  *dst_ptr, void *src_ptr, uint32_t  cnt);
-#define EB_MEMCPY(dst, src, size) \
-DRDmemcpy(dst, src, size)
+/********************************************************************************************
+* faster memcopy for <= 64B blocks, great w/ inlining and size known at compile time (or w/ PGO)
+* THIS NEEDS TO STAY IN A HEADER FOR BEST PERFORMANCE
+********************************************************************************************/
 
+#include <immintrin.h>
+
+#ifdef __GNUC__
+__attribute__((optimize("unroll-loops")))
+#endif
+FORCE_INLINE void eb_memcpy_small(void* dst_ptr, void const* src_ptr, size_t size)
+{
+    const char* src = (const char*)src_ptr;
+    char*       dst = (char*)dst_ptr;
+    size_t      i = 0;
+
+#ifdef _INTEL_COMPILER
+#pragma unroll
+#endif
+    while ((i + 16) <= size)
+    {
+        _mm_storeu_ps((float*)(dst + i), _mm_loadu_ps((const float*)(src + i)));
+        i += 16;
+    }
+
+    if ((i + 8) <= size)
+    {
+        _mm_store_sd((double*)(dst + i), _mm_load_sd((const double*)(src + i)));
+        i += 8;
+    }
+
+    for (; i < size; ++i)
+        dst[i] = src[i];
+}
+#define EB_MIN(a,b)             (((a) < (b)) ? (a) : (b))
+FORCE_INLINE void eb_memcpy_sse(void* dst_ptr, void const* src_ptr, size_t size)
+{
+    const char* src = (const char*)src_ptr;
+    char*       dst = (char*)dst_ptr;
+    size_t      i = 0;
+    size_t align_cnt = EB_MIN((64 - ((size_t)dst & 63)), size);
+
+
+    // align dest to a $line
+    if (align_cnt != 64)
+    {
+        eb_memcpy_small(dst, src, align_cnt);
+        dst += align_cnt;
+        src += align_cnt;
+        size -= align_cnt;
+    }
+
+    // copy a $line at a time
+    // dst aligned to a $line
+    size_t cline_cnt = (size & ~(size_t)63);
+    for (i = 0; i < cline_cnt; i += 64)
+    {
+
+        __m128 c0 = _mm_loadu_ps((const float*)(src + i));
+        __m128 c1 = _mm_loadu_ps((const float*)(src + i + sizeof(c0)));
+        __m128 c2 = _mm_loadu_ps((const float*)(src + i + sizeof(c0) * 2));
+        __m128 c3 = _mm_loadu_ps((const float*)(src + i + sizeof(c0) * 3));
+
+        _mm_storeu_ps((float*)(dst + i), c0);
+        _mm_storeu_ps((float*)(dst + i + sizeof(c0)), c1);
+        _mm_storeu_ps((float*)(dst + i + sizeof(c0) * 2), c2);
+        _mm_storeu_ps((float*)(dst + i + sizeof(c0) * 3), c3);
+
+    }
+
+    // copy the remainder
+    if (i < size)
+        eb_memcpy_small(dst + i, src + i, size - i);
+}
+
+FORCE_INLINE void eb_memcpy(void  *dst_ptr, void  *src_ptr, size_t size)
+{
+    if (size > 64) {
+        eb_memcpy_sse(dst_ptr, src_ptr, size);
+    }
+    else
+    {
+        eb_memcpy_small(dst_ptr, src_ptr, size);
+    }
+}
+#define EB_MEMCPY(dst, src, size) \
+    eb_memcpy(dst, src, size)
 
 #define EB_MEMSET(dst, val, count) \
 memset(dst, val, count)
