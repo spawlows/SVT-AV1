@@ -151,6 +151,9 @@ extern "C" {
 #endif
 #define M8_ADP                                          1
 #define FULL_LOOP_ESCAPE                                1
+#define SIMULATE_PF_N2                                  0
+#define PF_N2_32X32                                     0
+
 #define REMOVED_DUPLICATE_INTER                         1
 #define REMOVED_DUPLICATE_INTER_L1                      1
 #define REMOVED_DUPLICATE_INTER_BIPRED                  1

@@ -1979,7 +1979,7 @@ void ProductConfigureChroma(
 
     context_ptr->chroma_weight = (picture_control_set_ptr->parent_pcs_ptr->failing_motion_sb_flag[lcuAddr]) ? chroma_weight << 1 : chroma_weight;
 }
-
+#if !PF_N2_32X32
 void ProductDerivePartialFrequencyN2Flag(
     SequenceControlSet_t               *sequence_control_set_ptr,
     PictureControlSet_t                *picture_control_set_ptr,
@@ -1990,7 +1990,7 @@ void ProductDerivePartialFrequencyN2Flag(
     context_ptr->pf_md_mode = PF_OFF;
 
 }
-
+#endif
 void AV1CostCalcCfl(
     PictureControlSet_t                *picture_control_set_ptr,
     ModeDecisionCandidateBuffer_t      *candidateBuffer,
@@ -3676,12 +3676,13 @@ void md_encode_block(
 #endif
 #endif
     {
+#if !PF_N2_32X32
         // Set PF Mode - should be done per TU (and not per CU) to avoid the correction
         ProductDerivePartialFrequencyN2Flag(
             sequence_control_set_ptr,
             picture_control_set_ptr,
             context_ptr);
-
+#endif
         ProductCodingLoopInitFastLoop(
             context_ptr,
             context_ptr->skip_coeff_neighbor_array,
