@@ -76,6 +76,9 @@ extern "C" {
         uint8_t                               number_of_segments;
         uint32_t                              sb_min_score;
         uint32_t                              sb_max_score;
+#if M8_ADP
+        uint32_t                              sb_average_score;
+#endif
 #else
         // Budgeting
         uint32_t                             *lcuScoreArray;

@@ -1504,6 +1504,12 @@ void* EncDecKernel(void *input_ptr)
                 sequence_control_set_ptr,
                 segment_index);
 
+#if M8_ADP
+            if (picture_control_set_ptr->parent_pcs_ptr->reference_picture_wrapper_ptr != NULL) {
+                ((EbReferenceObject_t  *)picture_control_set_ptr->parent_pcs_ptr->reference_picture_wrapper_ptr->object_ptr)->average_intensity = picture_control_set_ptr->parent_pcs_ptr->average_intensity[0];
+            }
+#endif
+
             if (sequence_control_set_ptr->static_config.improve_sharpness) {
                 QpmDeriveWeightsMinAndMax(
                     picture_control_set_ptr,

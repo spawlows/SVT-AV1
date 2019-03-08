@@ -112,7 +112,11 @@ static uint8_t intrabc_max_mesh_pct[MAX_MESH_SPEED + 1] = { 100, 100, 100,
 #define U_152                       152
 #define SQ_NON4_BLOCKS_SEARCH_COST  155
 #define SQ_BLOCKS_SEARCH_COST       190
-
+#if M8_ADP
+#define HIGH_SB_SCORE             50000  
+#define MEDIUM_SB_SCORE           10000 
+#define LOW_SB_SCORE               5000
+#endif
 #else
 // Shooting states
 #define UNDER_SHOOTING                        0
@@ -1933,13 +1937,16 @@ void  derive_optimal_budget_per_sb(
 }
 
 EbErrorType derive_default_segments(
+#if M8_ADP
+    SequenceControlSet_t               *sequence_control_set_ptr,
+#endif
     PictureControlSet_t                *picture_control_set_ptr,
     ModeDecisionConfigurationContext_t *context_ptr){
 
     EbErrorType return_error = EB_ErrorNone;
 
 #if M8_ADP
-    if (picture_control_set_ptr->parent_pcs_ptr->temporal_layer_index == 0) {
+    if (context_ptr->budget > sequence_control_set_ptr->sb_tot_cnt * U_140) {
         context_ptr->number_of_segments = 2;
         context_ptr->score_th[0] = (int8_t)((1 * 100) / context_ptr->number_of_segments);
         context_ptr->score_th[1] = (int8_t)((2 * 100) / context_ptr->number_of_segments);
@@ -1948,7 +1955,7 @@ EbErrorType derive_default_segments(
         context_ptr->interval_cost[0] = context_ptr->cost_depth_mode[SB_OPEN_LOOP_DEPTH_MODE      - 1];
         context_ptr->interval_cost[1] = context_ptr->cost_depth_mode[SB_SQ_NON4_BLOCKS_DEPTH_MODE - 1];
     }
-    else if (picture_control_set_ptr->parent_pcs_ptr->is_used_as_reference_flag == EB_TRUE) {
+    else if (context_ptr->budget > sequence_control_set_ptr->sb_tot_cnt * U_115) {
         context_ptr->number_of_segments = 3;
 
         context_ptr->score_th[0] = (int8_t)((1 * 100) / context_ptr->number_of_segments);
@@ -2024,7 +2031,9 @@ void derive_sb_score(
     uint32_t  sb_index;
     uint32_t  sb_score = 0;
     uint32_t  distortion;
-
+#if M8_ADP
+    uint64_t  sb_tot_score = 0;
+#endif
     context_ptr->sb_min_score = ~0u;
     context_ptr->sb_max_score = 0u;
 
@@ -2060,11 +2069,20 @@ void derive_sb_score(
         }
 
         context_ptr->sb_score_array[sb_index] = sb_score;
-
+#if M8_ADP
+        // Track MIN and MAX LCU scores
+        context_ptr->sb_min_score = MIN(sb_score, context_ptr->sb_min_score);
+        context_ptr->sb_max_score = MAX(sb_score, context_ptr->sb_max_score);
+        sb_tot_score += sb_score;
+#else
         // Track MIN & MAX LCU scores
         context_ptr->sb_min_score = MIN(context_ptr->sb_score_array[sb_index], context_ptr->sb_min_score);
         context_ptr->sb_max_score = MAX(context_ptr->sb_score_array[sb_index], context_ptr->sb_max_score);
+#endif
     }
+#if M8_ADP
+    context_ptr->sb_average_score = sb_tot_score / sequence_control_set_ptr->sb_tot_cnt;
+#endif
 }
 
 /******************************************************
@@ -2098,14 +2116,45 @@ void set_target_budget_oq(
         else
             budget = sequence_control_set_ptr->sb_tot_cnt * U_120;
     }
-#endif
-    if (picture_control_set_ptr->parent_pcs_ptr->temporal_layer_index == 0)
-        budget = sequence_control_set_ptr->sb_tot_cnt * U_150;
-    else if (picture_control_set_ptr->parent_pcs_ptr->is_used_as_reference_flag)
-        budget = sequence_control_set_ptr->sb_tot_cnt * U_118;
-    else
-        budget = sequence_control_set_ptr->sb_tot_cnt * U_112;
+#endif  
+    // Luminosity-based budget boost - if P or B only; add 1 U for each 1 current-to-ref diff 
+    uint32_t luminosity_change_boost = 0;
+    if (picture_control_set_ptr->slice_type != I_SLICE) {
+        if (picture_control_set_ptr->parent_pcs_ptr->is_used_as_reference_flag) {
+            EbReferenceObject_t  * refObjL0, *refObjL1;
+            refObjL0 = (EbReferenceObject_t*)picture_control_set_ptr->ref_pic_ptr_array[REF_LIST_0]->object_ptr;
+            refObjL1 = (picture_control_set_ptr->parent_pcs_ptr->slice_type == B_SLICE) ? (EbReferenceObject_t*)picture_control_set_ptr->ref_pic_ptr_array[REF_LIST_1]->object_ptr : (EbReferenceObject_t*)EB_NULL;
 
+            luminosity_change_boost = ABS(picture_control_set_ptr->parent_pcs_ptr->average_intensity[0] - refObjL0->average_intensity);
+            luminosity_change_boost += (refObjL1 != EB_NULL) ? ABS(picture_control_set_ptr->parent_pcs_ptr->average_intensity[0] - refObjL1->average_intensity) : 0;
+            luminosity_change_boost = CLIP3(0, 10, luminosity_change_boost);
+        }
+    }
+
+    // Variance-based budget boost - 
+    uint32_t variance_boost = (picture_control_set_ptr->parent_pcs_ptr->pic_avg_variance > 1000) ?
+        0 :
+        0;
+
+    //uint32_t budget_per_sb_boost[MAX_SUPPORTED_MODES] = {55,55,55,55,55,55,55,20,10,10,10,10};
+    uint32_t budget_per_sb_boost[8] = { 55,55,55,55,55,55,55,10 };
+    // Hsan: cross multiplication to derive budget_per_sb from sb_average_score; budget_per_sb range is [SB_PRED_OPEN_LOOP_COST,SQ_NON4_BLOCKS_SEARCH_COST], and sb_average_score range [0,HIGH_SB_SCORE]
+    // Hsan: 3 segments [0,LOW_SB_SCORE], [LOW_SB_SCORE,MEDIUM_SB_SCORE] and [MEDIUM_SB_SCORE,SQ_NON4_BLOCKS_SEARCH_COST]
+    uint32_t budget_per_sb;
+    if (context_ptr->sb_average_score <= LOW_SB_SCORE) {
+        budget_per_sb = ((context_ptr->sb_average_score * (SB_OPEN_LOOP_COST - SB_PRED_OPEN_LOOP_COST)) / LOW_SB_SCORE) + SB_PRED_OPEN_LOOP_COST;
+    }
+    else if (context_ptr->sb_average_score <= MEDIUM_SB_SCORE) {
+        budget_per_sb = (((context_ptr->sb_average_score - LOW_SB_SCORE) * (U_125 - SB_OPEN_LOOP_COST)) / (MEDIUM_SB_SCORE - LOW_SB_SCORE)) + SB_OPEN_LOOP_COST;
+    }
+    else {
+        budget_per_sb = (((context_ptr->sb_average_score - MEDIUM_SB_SCORE) * (SQ_NON4_BLOCKS_SEARCH_COST - U_125)) / (HIGH_SB_SCORE - MEDIUM_SB_SCORE)) + U_125;
+    }
+
+    budget_per_sb = CLIP3(SB_PRED_OPEN_LOOP_COST, SQ_NON4_BLOCKS_SEARCH_COST, budget_per_sb + budget_per_sb_boost[context_ptr->adp_level] + luminosity_change_boost + variance_boost);
+    //printf("picture_number = %d\tsb_average_score = %d\n", picture_control_set_ptr->picture_number, budget_per_sb);
+    budget = sequence_control_set_ptr->sb_tot_cnt * budget_per_sb;
+    
 #else
     if (picture_control_set_ptr->parent_pcs_ptr->temporal_layer_index == 0)
         budget = sequence_control_set_ptr->sb_tot_cnt * U_150;
@@ -2142,6 +2191,14 @@ void derive_sb_md_mode(
         picture_control_set_ptr,
         context_ptr);
 
+#if M8_ADP
+    // Derive SB score
+    derive_sb_score(
+        sequence_control_set_ptr,
+        picture_control_set_ptr,
+        context_ptr);
+#endif
+
     // Set the target budget
     set_target_budget_oq(
         sequence_control_set_ptr,
@@ -2150,15 +2207,18 @@ void derive_sb_md_mode(
 
     // Set the percentage based thresholds
     derive_default_segments(
+#if M8_ADP
+        sequence_control_set_ptr,
+#endif
         picture_control_set_ptr,
         context_ptr);
-
+#if !M8_ADP
     // Derive SB score
     derive_sb_score(
         sequence_control_set_ptr,
         picture_control_set_ptr,
         context_ptr);
-
+#endif
     // Perform Budgetting
     derive_optimal_budget_per_sb(
         sequence_control_set_ptr,
