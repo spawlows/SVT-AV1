@@ -36,6 +36,8 @@ extern "C" {
 #endif
     
      //Mode definition : Only one mode should be ON at a time
+#define M8_SKIP_BLK             0
+#define M8_OIS                  0
 
 #define MR_MODE                                         0
 #define SHUT_FILTERING                                  0 // CDEF RESTORATION DLF

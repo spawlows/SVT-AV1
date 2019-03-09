@@ -2151,7 +2151,7 @@ void coding_loop_context_generation(
     NeighborArrayUnit_t        *inter_pred_dir_neighbor_array,
     NeighborArrayUnit_t        *ref_frame_type_neighbor_array,
 
-    NeighborArrayUnit_t        *intraLumaNeighborArray,
+    NeighborArrayUnit_t        *intra_luma_mode_neighbor_array,
     NeighborArrayUnit_t        *skip_flag_neighbor_array,
     NeighborArrayUnit_t        *mode_type_neighbor_array,
     NeighborArrayUnit_t        *leaf_depth_neighbor_array,
@@ -2177,10 +2177,10 @@ void coding_loop_context_generation(
         skip_flag_neighbor_array,
         cu_origin_x);
     uint32_t intraLumaModeLeftNeighborIndex = get_neighbor_array_unit_left_index(
-        intraLumaNeighborArray,
+        intra_luma_mode_neighbor_array,
         cu_origin_y);
     uint32_t intraLumaModeTopNeighborIndex = get_neighbor_array_unit_top_index(
-        intraLumaNeighborArray,
+        intra_luma_mode_neighbor_array,
         cu_origin_x);
 
     uint32_t partition_left_neighbor_index = get_neighbor_array_unit_left_index(
@@ -2194,11 +2194,11 @@ void coding_loop_context_generation(
 
     cu_ptr->prediction_unit_array->intra_luma_left_mode = (uint32_t)(
         (mode_type_neighbor_array->leftArray[modeTypeLeftNeighborIndex] != INTRA_MODE) ? (uint32_t)DC_PRED :
-        intraLumaNeighborArray->leftArray[intraLumaModeLeftNeighborIndex]);
+        intra_luma_mode_neighbor_array->leftArray[intraLumaModeLeftNeighborIndex]);
 
     cu_ptr->prediction_unit_array->intra_luma_top_mode = (uint32_t)(
         (mode_type_neighbor_array->topArray[modeTypeTopNeighborIndex] != INTRA_MODE) ? (uint32_t)DC_PRED :
-        intraLumaNeighborArray->topArray[intraLumaModeTopNeighborIndex]);
+        intra_luma_mode_neighbor_array->topArray[intraLumaModeTopNeighborIndex]);
 
     int32_t contextIndex;
     if (mode_type_neighbor_array->leftArray[modeTypeLeftNeighborIndex] != (uint8_t)INVALID_MODE && mode_type_neighbor_array->topArray[modeTypeTopNeighborIndex] != (uint8_t)INVALID_MODE) {
@@ -2232,11 +2232,11 @@ void coding_loop_context_generation(
     // Split Flag Context (neighbor info)
     context_ptr->md_local_cu_unit[cu_ptr->mds_idx].left_neighbor_mode = (uint32_t)(
         (mode_type_neighbor_array->leftArray[modeTypeLeftNeighborIndex] != INTRA_MODE) ? (uint32_t)DC_PRED :
-        intraLumaNeighborArray->leftArray[intraLumaModeLeftNeighborIndex]);
+        intra_luma_mode_neighbor_array->leftArray[intraLumaModeLeftNeighborIndex]);
     context_ptr->md_local_cu_unit[cu_ptr->mds_idx].left_neighbor_depth = leaf_depth_neighbor_array->leftArray[leafDepthLeftNeighborIndex];
     context_ptr->md_local_cu_unit[cu_ptr->mds_idx].top_neighbor_mode = (uint32_t)(
         (mode_type_neighbor_array->topArray[modeTypeTopNeighborIndex] != INTRA_MODE) ? (uint32_t)DC_PRED :
-        intraLumaNeighborArray->topArray[intraLumaModeTopNeighborIndex]);
+        intra_luma_mode_neighbor_array->topArray[intraLumaModeTopNeighborIndex]);
     context_ptr->md_local_cu_unit[cu_ptr->mds_idx].top_neighbor_depth = leaf_depth_neighbor_array->topArray[leafDepthTopNeighborIndex];
 
 

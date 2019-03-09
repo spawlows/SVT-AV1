@@ -1097,11 +1097,15 @@ void InjectAv1MvpCandidates(
     MvReferenceFrame               *refFrames,
     PictureControlSet_t              *picture_control_set_ptr,
     uint32_t                            lcuAddr,
+#if !M8_SKIP_BLK    
     uint32_t                            leaf_index,
+#endif    
     EbBool                           allow_bipred,
     uint32_t                           *candTotCnt)
 {
+#if !M8_SKIP_BLK  
     (void)leaf_index;
+#endif
     (void)lcuAddr;
     (void)refFrames;
     uint32_t                   canIdx = *candTotCnt;
@@ -1796,8 +1800,12 @@ void  inject_inter_candidates(
     SsMeContext_t                  *ss_mecontext,
     const SequenceControlSet_t     *sequence_control_set_ptr,
     LargestCodingUnit_t            *sb_ptr,
+#if M8_SKIP_BLK
+    uint32_t                       *candidateTotalCnt){
+#else
     uint32_t                       *candidateTotalCnt,
     const uint32_t                  leaf_index){
+#endif
 
     (void)sequence_control_set_ptr;
     uint32_t                   canTotalCnt = *candidateTotalCnt;
@@ -1924,7 +1932,9 @@ void  inject_inter_candidates(
         refFrames,
         picture_control_set_ptr,
         lcuAddr,
+#if !M8_SKIP_BLK
         leaf_index,
+#endif
         allow_bipred,
         &canTotalCnt);
 
@@ -3062,10 +3072,14 @@ void  inject_intra_candidates(
     ModeDecisionContext_t          *context_ptr,
     const SequenceControlSet_t     *sequence_control_set_ptr,
     LargestCodingUnit_t            *sb_ptr,
+#if M8_SKIP_BLK
+    uint32_t                       *candidateTotalCnt){
+#else
     uint32_t                       *candidateTotalCnt,
     const uint32_t                  leaf_index){
 
     (void)leaf_index;
+#endif
     (void)sequence_control_set_ptr;
     (void)sb_ptr;
 #if ENABLE_PAETH
@@ -3296,7 +3310,9 @@ EbErrorType ProductGenerateMdCandidatesCu(
     LargestCodingUnit_t                 *sb_ptr,
     ModeDecisionContext_t             *context_ptr,
     SsMeContext_t                    *ss_mecontext,
+#if !M8_SKIP_BLK
     const uint32_t                      leaf_index,
+#endif
     const uint32_t                      lcuAddr,
 #if !INTRA_INTER_FAST_LOOP
     uint32_t                           *bufferTotalCountPtr,
@@ -3367,8 +3383,12 @@ EbErrorType ProductGenerateMdCandidatesCu(
                 context_ptr,
                 sequence_control_set_ptr,
                 sb_ptr,
+#if M8_SKIP_BLK
+                &canTotalCnt);
+#else
                 &canTotalCnt,
                 leaf_index);
+#endif
     }
 
 #if INTRA_INTER_FAST_LOOP
@@ -3396,8 +3416,12 @@ EbErrorType ProductGenerateMdCandidatesCu(
                 ss_mecontext,
                 sequence_control_set_ptr,
                 sb_ptr,
+#if M8_SKIP_BLK
+                &canTotalCnt);
+#else
                 &canTotalCnt,
                 leaf_index);
+#endif
     }
 #if !INTRA_INTER_FAST_LOOP
     // Set BufferTotalCount: determines the number of candidates to fully reconstruct

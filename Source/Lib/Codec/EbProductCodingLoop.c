@@ -62,8 +62,9 @@ EbErrorType ProductGenerateMdCandidatesCu(
     LargestCodingUnit_t             *sb_ptr,
     ModeDecisionContext_t           *context_ptr,
     SsMeContext_t                  *ss_mecontext,
+#if !M8_SKIP_BLK
     const uint32_t                    leaf_index,
-
+#endif
     const uint32_t                    lcuAddr,
 #if !INTRA_INTER_FAST_LOOP
     uint32_t                         *buffer_total_count,
@@ -206,7 +207,17 @@ void mode_decision_update_neighbor_arrays(
             bwdith,
             bheight,
             NEIGHBOR_ARRAY_UNIT_FULL_MASK);
-
+#if M8_SKIP_BLK        
+        // Intra Luma Mode Update
+        neighbor_array_unit_mode_write(
+            context_ptr->leaf_depth_neighbor_array,
+            (uint8_t*)&context_ptr->blk_geom->bsize,//(uint8_t*)luma_mode,
+            origin_x,
+            origin_y,
+            bwdith,
+            bheight,
+            NEIGHBOR_ARRAY_UNIT_TOP_AND_LEFT_ONLY_MASK);
+#endif
         // Intra Luma Mode Update
         neighbor_array_unit_mode_write(
             context_ptr->intra_luma_mode_neighbor_array,
@@ -1123,7 +1134,7 @@ void ProductCodingLoopInitFastLoop(
     NeighborArrayUnit_t        *cr_dc_sign_level_coeff_neighbor_array,
     NeighborArrayUnit_t        *inter_pred_dir_neighbor_array,
     NeighborArrayUnit_t        *ref_frame_type_neighbor_array,
-    NeighborArrayUnit_t        *intraLumaNeighborArray,
+    NeighborArrayUnit_t        *intra_luma_mode_neighbor_array,
     NeighborArrayUnit_t        *skip_flag_neighbor_array,
     NeighborArrayUnit_t        *mode_type_neighbor_array,
     NeighborArrayUnit_t        *leaf_depth_neighbor_array,
@@ -1147,7 +1158,7 @@ void ProductCodingLoopInitFastLoop(
         cr_dc_sign_level_coeff_neighbor_array,
         inter_pred_dir_neighbor_array,
         ref_frame_type_neighbor_array,
-        intraLumaNeighborArray,
+        intra_luma_mode_neighbor_array,
         skip_flag_neighbor_array,
         mode_type_neighbor_array,
         leaf_depth_neighbor_array,
@@ -3630,7 +3641,11 @@ void md_encode_block(
     PictureControlSet_t              *picture_control_set_ptr,
     ModeDecisionContext_t            *context_ptr,
     SsMeContext_t                    *ss_mecontext,
+#if M8_SKIP_BLK
+    uint8_t                          *skip_sub_blocks,
+#else
     uint32_t                          leaf_index,
+#endif
     uint32_t                          lcuAddr,
     ModeDecisionCandidateBuffer_t    *bestCandidateBuffers[5])
 {
@@ -3682,9 +3697,12 @@ void md_encode_block(
         }
     }
 #endif
+
+    uint8_t                            is_complete_sb = sequence_control_set_ptr->sb_geom[lcuAddr].is_complete_sb;
+
     if (allowed_ns_cu(
 #if NSQ_OPTIMASATION
-        is_nsq_table_used, picture_control_set_ptr->parent_pcs_ptr->nsq_max_shapes_md,context_ptr, sequence_control_set_ptr->sb_geom[lcuAddr].is_complete_sb))
+        is_nsq_table_used, picture_control_set_ptr->parent_pcs_ptr->nsq_max_shapes_md,context_ptr,is_complete_sb ))
 #else
 #if DISABLE_NSQ_FOR_NON_REF || DISABLE_NSQ
         context_ptr, sequence_control_set_ptr->sb_geom[lcuAddr].is_complete_sb))
@@ -3714,7 +3732,15 @@ void md_encode_block(
             context_ptr->mode_type_neighbor_array,
             context_ptr->leaf_depth_neighbor_array,
             context_ptr->leaf_partition_neighbor_array);
-
+#if M8_SKIP_BLK
+        if (picture_control_set_ptr->parent_pcs_ptr->pic_depth_mode == PIC_OPEN_LOOP_DEPTH_MODE || (picture_control_set_ptr->parent_pcs_ptr->pic_depth_mode == PIC_SB_SWITCH_DEPTH_MODE && picture_control_set_ptr->parent_pcs_ptr->sb_depth_mode_array[lcuAddr] >= SB_OPEN_LOOP_DEPTH_MODE))
+            if (picture_control_set_ptr->parent_pcs_ptr->is_used_as_reference_flag == 0 && is_complete_sb  ) 
+                if (context_ptr->md_local_cu_unit[cu_ptr->mds_idx].top_neighbor_depth == context_ptr->blk_geom->bsize &&  context_ptr->md_local_cu_unit[cu_ptr->mds_idx].left_neighbor_depth == context_ptr->blk_geom->bsize) {
+                    *skip_sub_blocks = 1;
+                    context_ptr->md_cu_arr_nsq[blk_geom->sqi_mds].split_flag = 0;
+                }
+      
+#endif
 #if ADAPTIVE_DEPTH_PARTITIONING
         set_nfl(
             context_ptr,
@@ -3729,7 +3755,9 @@ void md_encode_block(
             context_ptr->sb_ptr,
             context_ptr,
             ss_mecontext,
+#if !M8_SKIP_BLK
             leaf_index,
+#endif
             lcuAddr,
 #if !INTRA_INTER_FAST_LOOP
             &buffer_total_count,
@@ -4143,10 +4171,15 @@ EB_EXTERN EbErrorType mode_decision_sb(
     EbBool all_d1_blocks_done = 0;
     uint32_t  d1_blocks_accumlated = 0;
     UNUSED(all_d1_blocks_done);
+#if M8_SKIP_BLK
 
+    uint8_t skip_sub_blocks;
+#endif
     do
     {
-
+   #if M8_SKIP_BLK     
+        skip_sub_blocks = 0;
+#endif
         blk_idx_mds = leaf_data_array[cuIdx].mds_idx;
 
         const BlockGeom * blk_geom = context_ptr->blk_geom = get_blk_geom_mds(blk_idx_mds);
@@ -4201,7 +4234,11 @@ EB_EXTERN EbErrorType mode_decision_sb(
             picture_control_set_ptr,
             context_ptr,
             ss_mecontext,
+#if M8_SKIP_BLK
+            &skip_sub_blocks,
+#else
             0xFFFFFFFF,
+#endif
             lcuAddr,
             bestCandidateBuffers);
 
@@ -4259,9 +4296,24 @@ EB_EXTERN EbErrorType mode_decision_sb(
 
 
         }
+#if !M8_SKIP_BLK
 
         cuIdx++;
+#else
+        if (skip_sub_blocks && leaf_data_array[cuIdx].split_flag) {
 
+                cuIdx++;
+            while (cuIdx < leaf_count ) {
+                const BlockGeom * next_blk_geom = get_blk_geom_mds(leaf_data_array[cuIdx].mds_idx);
+                if ((next_blk_geom->origin_x < blk_geom->origin_x + blk_geom->bwidth ) && (next_blk_geom->origin_y < blk_geom->origin_y + blk_geom->bheight ) )
+                    cuIdx++;
+                else
+                    break;
+            }
+
+        }else
+            cuIdx++;
+#endif
     } while (cuIdx < leaf_count);// End of CU loop
 
 

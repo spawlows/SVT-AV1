@@ -8644,15 +8644,22 @@ EbErrorType open_loop_intra_search_sb(
                 uint8_t     intra_mode_end = is_16_bit ? SMOOTH_H_PRED : PAETH_PRED;
 
                 EbBool      use_angle_delta = (bsize >= 8);
+#if M8_OIS
+                uint8_t     angle_delta_candidate_count =   1;
+#else                
                 uint8_t     angle_delta_candidate_count = use_angle_delta ? 5 : 1;
+#endif
                 uint8_t     angle_delta_counter = 0;
 
                 uint8_t     disable_angular_prediction = 0;
                 disable_angular_prediction = picture_control_set_ptr->temporal_layer_index > 0 ? 1 : (bsize > 16) ? 1 : 0;
-
+#if !M8_OIS
                 angle_delta_candidate_count = disable_angular_prediction ? 1 : angle_delta_candidate_count;
+#endif
                 TxSize  tx_size = bsize == 8 ? TX_8X8 : bsize == 16 ? TX_16X16: bsize == 32 ? TX_32X32 : TX_64X64;
-
+#if !M8_OIS
+                intra_mode_end = picture_control_set_ptr->is_used_as_reference_flag == 0 ? DC_PRED: intra_mode_end;
+#endif 
                 for (ois_intra_mode = intra_mode_start; ois_intra_mode <= intra_mode_end; ++ois_intra_mode) {              
                     if (av1_is_directional_mode((PredictionMode)ois_intra_mode)) {
 

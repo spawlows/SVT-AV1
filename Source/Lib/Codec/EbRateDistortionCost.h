@@ -33,7 +33,7 @@ extern "C" {
         NeighborArrayUnit_t     *cr_dc_sign_level_coeff_neighbor_array,
         NeighborArrayUnit_t     *inter_pred_dir_neighbor_array,
         NeighborArrayUnit_t     *ref_frame_type_neighbor_array,
-        NeighborArrayUnit_t     *intraLumaNeighborArray,
+        NeighborArrayUnit_t     *intra_luma_mode_neighbor_array,
         NeighborArrayUnit_t     *skip_flag_neighbor_array,
         NeighborArrayUnit_t     *mode_type_neighbor_array,
         NeighborArrayUnit_t     *leaf_depth_neighbor_array,
