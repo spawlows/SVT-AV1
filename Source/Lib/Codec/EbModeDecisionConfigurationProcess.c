@@ -115,7 +115,7 @@ static uint8_t intrabc_max_mesh_pct[MAX_MESH_SPEED + 1] = { 100, 100, 100,
 #if M8_ADP
 #if FASTER_M8_ADP
 #define HIGH_SB_SCORE             60000  
-#define MEDIUM_SB_SCORE           40000 
+#define MEDIUM_SB_SCORE           16000 
 #define LOW_SB_SCORE               6000
 #define MAX_LUMINOSITY_BOOST         10
 uint32_t budget_per_sb_boost[MAX_SUPPORTED_MODES] = { 55,55,55,55,55,55,55,15,10,10,10,10,10 };
