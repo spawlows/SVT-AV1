@@ -96,7 +96,11 @@ extern "C" {
         uint64_t                               fast_chroma_rate;
         uint64_t                               chroma_distortion;
         uint64_t                               chroma_distortion_inter_depth;
+#if TRACK_FAST_DISTORTION
+        uint32_t                               luma_fast_distortion;
+#else
         uint32_t                               luma_distortion;
+#endif
         uint32_t                               full_distortion;
 
         EbPtr                                 prediction_context_ptr;

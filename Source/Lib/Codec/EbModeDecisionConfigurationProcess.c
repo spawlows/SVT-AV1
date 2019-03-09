@@ -113,11 +113,19 @@ static uint8_t intrabc_max_mesh_pct[MAX_MESH_SPEED + 1] = { 100, 100, 100,
 #define SQ_NON4_BLOCKS_SEARCH_COST  155
 #define SQ_BLOCKS_SEARCH_COST       190
 #if M8_ADP
+#if FASTER_M8_ADP
+#define HIGH_SB_SCORE             60000  
+#define MEDIUM_SB_SCORE           40000 
+#define LOW_SB_SCORE               6000
+#define MAX_LUMINOSITY_BOOST         10
+uint32_t budget_per_sb_boost[MAX_SUPPORTED_MODES] = { 55,55,55,55,55,55,55,15,10,10,10,10,10 };
+#else
 #define HIGH_SB_SCORE             50000  
 #define MEDIUM_SB_SCORE           10000 
 #define LOW_SB_SCORE               5000
 #define MAX_LUMINOSITY_BOOST         10
 uint32_t budget_per_sb_boost[MAX_SUPPORTED_MODES] = { 55,55,55,55,55,55,55,10,10,10,10,10,10 };
+#endif
 #endif
 #else
 // Shooting states
@@ -2114,6 +2122,25 @@ void set_target_budget_oq(
             luminosity_change_boost = CLIP3(0, MAX_LUMINOSITY_BOOST, luminosity_change_boost);
         }
     }
+#if FASTER_M8_ADP
+    // Hsan: cross multiplication to derive budget_per_sb from sb_average_score; budget_per_sb range is [SB_PRED_OPEN_LOOP_COST,U_150], and sb_average_score range [0,HIGH_SB_SCORE]
+    // Hsan: 3 segments [0,LOW_SB_SCORE], [LOW_SB_SCORE,MEDIUM_SB_SCORE] and [MEDIUM_SB_SCORE,U_150]
+    uint32_t budget_per_sb;
+    if (context_ptr->sb_average_score <= LOW_SB_SCORE) {
+        budget_per_sb = ((context_ptr->sb_average_score * (SB_OPEN_LOOP_COST - SB_PRED_OPEN_LOOP_COST)) / LOW_SB_SCORE) + SB_PRED_OPEN_LOOP_COST;
+    }
+    else if (context_ptr->sb_average_score <= MEDIUM_SB_SCORE) {
+        budget_per_sb = (((context_ptr->sb_average_score - LOW_SB_SCORE) * (U_125 - SB_OPEN_LOOP_COST)) / (MEDIUM_SB_SCORE - LOW_SB_SCORE)) + SB_OPEN_LOOP_COST;
+    }
+    else {
+        budget_per_sb = (((context_ptr->sb_average_score - MEDIUM_SB_SCORE) * (U_150 - U_125)) / (HIGH_SB_SCORE - MEDIUM_SB_SCORE)) + U_125;
+    }
+
+    budget_per_sb = CLIP3(SB_PRED_OPEN_LOOP_COST, U_150, budget_per_sb + budget_per_sb_boost[context_ptr->adp_level] + luminosity_change_boost);
+    //printf("picture_number = %d\tsb_average_score = %d\n", picture_control_set_ptr->picture_number, budget_per_sb);
+    budget = sequence_control_set_ptr->sb_tot_cnt * budget_per_sb;
+#else
+
 
     // Hsan: cross multiplication to derive budget_per_sb from sb_average_score; budget_per_sb range is [SB_PRED_OPEN_LOOP_COST,SQ_NON4_BLOCKS_SEARCH_COST], and sb_average_score range [0,HIGH_SB_SCORE]
     // Hsan: 3 segments [0,LOW_SB_SCORE], [LOW_SB_SCORE,MEDIUM_SB_SCORE] and [MEDIUM_SB_SCORE,SQ_NON4_BLOCKS_SEARCH_COST]
@@ -2132,6 +2159,7 @@ void set_target_budget_oq(
     //printf("picture_number = %d\tsb_average_score = %d\n", picture_control_set_ptr->picture_number, budget_per_sb);
     budget = sequence_control_set_ptr->sb_tot_cnt * budget_per_sb;
     
+#endif
 #else
     if (picture_control_set_ptr->parent_pcs_ptr->temporal_layer_index == 0)
         budget = sequence_control_set_ptr->sb_tot_cnt * U_150;

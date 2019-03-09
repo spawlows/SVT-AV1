@@ -1387,8 +1387,11 @@ void perform_fast_loop(
 #if USE_SSE_FL
             // Y
             if (use_ssd) {
-
+#if TRACK_FAST_DISTORTION
+                candidateBuffer->candidate_ptr->luma_fast_distortion = lumaFastDistortion = spatial_full_distortion_kernel_func_ptr_array[asm_type][Log2f(context_ptr->blk_geom->bwidth) - 2](
+#else
                 lumaFastDistortion = spatial_full_distortion_kernel_func_ptr_array[asm_type][Log2f(context_ptr->blk_geom->bwidth) - 2](
+#endif
                     input_picture_ptr->buffer_y + inputOriginIndex,
                     input_picture_ptr->stride_y,
                     prediction_ptr->buffer_y + cuOriginIndex,
@@ -1398,7 +1401,11 @@ void perform_fast_loop(
 
             }
             else {
+#if TRACK_FAST_DISTORTION
+                candidateBuffer->candidate_ptr->luma_fast_distortion = lumaFastDistortion = (NxMSadKernelSubSampled_funcPtrArray[asm_type][context_ptr->blk_geom->bwidth >> 3](
+#else
                 lumaFastDistortion = (NxMSadKernelSubSampled_funcPtrArray[asm_type][context_ptr->blk_geom->bwidth >> 3](
+#endif
                     input_picture_ptr->buffer_y + inputOriginIndex,
                     input_picture_ptr->stride_y,
                     prediction_ptr->buffer_y + cuOriginIndex,
@@ -1406,6 +1413,7 @@ void perform_fast_loop(
                     context_ptr->blk_geom->bheight,
                     context_ptr->blk_geom->bwidth));
             }
+
 #else
             lumaFastDistortion = (NxMSadKernelSubSampled_funcPtrArray[asm_type][context_ptr->blk_geom->bwidth >> 3](
                 input_picture_ptr->buffer_y + inputOriginIndex,
@@ -2801,8 +2809,9 @@ void AV1PerformFullLoop(
         candidateBuffer->cr_distortion[DIST_CALC_PREDICTION] = crFullDistortion[DIST_CALC_PREDICTION];
         candidateBuffer->cr_coeff_bits = cr_coeff_bits;
         candidateBuffer->candidate_ptr->full_distortion = (uint32_t)(y_full_distortion[0]);
+#if !TRACK_FAST_DISTORTION
         candidateBuffer->candidate_ptr->luma_distortion = (uint32_t)(y_full_distortion[0]);
-
+#endif
 
         candidateBuffer->y_coeff_bits = y_coeff_bits;
 #if !CHROMA_BLIND
@@ -3168,8 +3177,9 @@ void inter_depth_tx_search(
         candidateBuffer->cr_coeff_bits = cr_coeff_bits;
 
         candidateBuffer->candidate_ptr->full_distortion = (uint32_t)(y_full_distortion[0]);
+#if !TRACK_FAST_DISTORTION
         candidateBuffer->candidate_ptr->luma_distortion = (uint32_t)(y_full_distortion[0]);
-
+#endif
 
         candidateBuffer->y_coeff_bits = y_coeff_bits;
 #if !CHROMA_BLIND

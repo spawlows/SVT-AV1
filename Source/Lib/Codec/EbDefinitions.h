@@ -150,6 +150,9 @@ extern "C" {
 #endif
 #endif
 #define M8_ADP                                          1
+#if M8_ADP
+#define  FASTER_M8_ADP                                  0
+#endif
 #define FULL_LOOP_ESCAPE                                1
 #define SIMULATE_PF_N2                                  0
 #define PF_N2_32X32_TX_SEARCH                           0
@@ -163,6 +166,9 @@ extern "C" {
 #if INTRA_INTER_FAST_LOOP
 #define USE_SSE_FL                                      1
 #endif
+#define TRACK_FAST_DISTORTION                           1
+
+
 #define USED_NFL_FEATURE_BASED                          1
 #if USED_NFL_FEATURE_BASED
 #define NFL_TX_TH                                      12 // To be tuned
