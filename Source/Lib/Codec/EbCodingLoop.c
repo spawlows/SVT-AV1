@@ -698,7 +698,9 @@ static void Av1EncodeLoop(
             candidate_plane[0],
             asm_type,
             &(count_non_zero_coeffs[0]),
+#if !PF_N2_32X32
             0,
+#endif
             0,
             COMPONENT_LUMA,
 #if QT_10BIT_SUPPORT
@@ -943,7 +945,9 @@ static void Av1EncodeLoop(
             candidate_plane[1],
             asm_type,
             &(count_non_zero_coeffs[1]),
+#if !PF_N2_32X32
             0,
+#endif
             0,
             COMPONENT_CHROMA_CB,
             BIT_INCREMENT_8BIT,
@@ -989,7 +993,9 @@ static void Av1EncodeLoop(
             candidate_plane[2],
             asm_type,
             &(count_non_zero_coeffs[2]),
+#if !PF_N2_32X32
             0,
+#endif
             0,
             COMPONENT_CHROMA_CR,
             BIT_INCREMENT_8BIT,
@@ -1193,7 +1199,9 @@ static void Av1EncodeLoop16bit(
                 candidate_plane[0],
                 asm_type,
                 &(count_non_zero_coeffs[0]),
+#if !PF_N2_32X32
                 0,
+#endif
                 0,
                 COMPONENT_LUMA,
 #if QT_10BIT_SUPPORT
@@ -1397,7 +1405,9 @@ static void Av1EncodeLoop16bit(
                 candidate_plane[1],
                 asm_type,
                 &(count_non_zero_coeffs[1]),
+#if !PF_N2_32X32
                 0,
+#endif
                 0,
                 COMPONENT_CHROMA_CB,
 #if QT_10BIT_SUPPORT
@@ -1466,7 +1476,9 @@ static void Av1EncodeLoop16bit(
                 candidate_plane[2],
                 asm_type,
                 &(count_non_zero_coeffs[2]),
+#if !PF_N2_32X32
                 0,
+#endif
                 0,
                 COMPONENT_CHROMA_CR,
 #if QT_10BIT_SUPPORT

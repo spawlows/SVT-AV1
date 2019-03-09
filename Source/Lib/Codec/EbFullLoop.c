@@ -684,7 +684,9 @@ void av1_quantize_inv_quantize_ii(
     //  MacroblockPlane      candidate_plane,
     EbAsm                asm_type,
     uint32_t                *y_count_non_zero_coeffs,
+#if !PF_N2_32X32
     EbPfMode              pf_mode,
+#endif
     uint8_t                 enable_contouring_qc_update_flag,
     uint32_t                component_type,
 #if QT_10BIT_SUPPORT
@@ -890,7 +892,9 @@ void av1_quantize_inv_quantize(
     MacroblockPlane      candidate_plane,
     EbAsm                asm_type,
     uint32_t                *y_count_non_zero_coeffs,
+#if !PF_N2_32X32
     EbPfMode              pf_mode,
+#endif
     uint8_t                 enable_contouring_qc_update_flag,
     uint32_t                component_type,
 #if QT_10BIT_SUPPORT
@@ -902,7 +906,9 @@ void av1_quantize_inv_quantize(
     (void)coeff_stride;
     (void)candidate_plane;
     (void)enable_contouring_qc_update_flag;
+#if !PF_N2_32X32
     (void)pf_mode;
+#endif
     //Note: Transformed, Quantized, iQuantized coeff are stored in 1D fashion. 64x64 is hence in the first 32x32 corner.
 
     uint32_t i;
@@ -929,7 +935,9 @@ void av1_quantize_inv_quantize(
         &eob[0],
         asm_type,
         y_count_non_zero_coeffs,
+#if !PF_N2_32X32
         0,
+#endif
         0,
         component_type,
 #if QT_10BIT_SUPPORT
@@ -1049,7 +1057,9 @@ void ProductFullLoop(
             candidateBuffer->candidate_ptr->candidate_plane[0],
             asm_type,
             &(y_count_non_zero_coeffs[txb_itr]),
+#if !PF_N2_32X32
             context_ptr->pf_md_mode,
+#endif
             0,
             COMPONENT_LUMA,
 #if QT_10BIT_SUPPORT
@@ -1299,7 +1309,9 @@ void ProductFullLoopTxSearch(
                 candidateBuffer->candidate_ptr->candidate_plane[0],
                 asm_type,
                 &yCountNonZeroCoeffsTemp,
+#if !PF_N2_32X32
                 context_ptr->pf_md_mode,
+#endif
                 0,
                 COMPONENT_LUMA,
 #if QT_10BIT_SUPPORT
@@ -1524,7 +1536,9 @@ void encode_pass_tx_search(
             candidate_plane[0],
             asm_type,
             &yCountNonZeroCoeffsTemp,
+#if !PF_N2_32X32
             0,
+#endif
             0,
             COMPONENT_LUMA,
             BIT_INCREMENT_8BIT,
@@ -1746,7 +1760,9 @@ void encode_pass_tx_search_hbd(
             candidate_plane[0],
             asm_type,
             &yCountNonZeroCoeffsTemp,
+#if !PF_N2_32X32
             0,
+#endif
             0,
             COMPONENT_LUMA,
 #if QT_10BIT_SUPPORT
@@ -1968,7 +1984,9 @@ void FullLoop_R(
                 candidateBuffer->candidate_ptr->candidate_plane[1],
                 asm_type,
                 &(cb_count_non_zero_coeffs[txb_itr]),
+#if !PF_N2_32X32
                 context_ptr->pf_md_mode,
+#endif
                 0,
                 COMPONENT_CHROMA_CB,
 #if QT_10BIT_SUPPORT
