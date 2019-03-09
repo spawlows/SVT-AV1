@@ -153,7 +153,7 @@ extern "C" {
 #endif
 #define M8_ADP                                          1
 #if M8_ADP
-#define  FASTER_M8_ADP                                  0
+#define FASTER_M8_ADP                                   1
 #endif
 #define FULL_LOOP_ESCAPE                                1
 #define SIMULATE_PF_N2                                  0
