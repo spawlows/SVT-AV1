@@ -14,9 +14,14 @@ extern "C" {
 #endif
 
     // Max Search Area
+#if BIG_ME_TEST
+#define MAX_SEARCH_AREA_WIDTH       MAX_PICTURE_WIDTH_SIZE  + (PAD_VALUE << 1)
+#define MAX_SEARCH_AREA_HEIGHT      MAX_PICTURE_HEIGHT_SIZE + (PAD_VALUE << 1)
+
+#else
 #define MAX_SEARCH_AREA_WIDTH       1350 // This should be a function for the MAX HME L0 * the multiplications per layers and per Hierarchichal structures
 #define MAX_SEARCH_AREA_HEIGHT      675 // This should be a function for the MAX HME L0 * the multiplications per layers and per Hierarchichal structures
-
+#endif
 // 1-D interpolation shift value
 #define IFShift                     6
 #define NUMBER_OF_SB_QUAD           4
@@ -405,8 +410,13 @@ extern "C" {
 #endif
 
         // ME
+#if QUICK_ME_CLEANUP
+        uint16_t                      search_area_width;
+        uint16_t                      search_area_height;
+#else
         uint8_t                       search_area_width;
         uint8_t                       search_area_height;
+#endif
         // HME
         uint16_t                      number_hme_search_region_in_width;
         uint16_t                      number_hme_search_region_in_height;

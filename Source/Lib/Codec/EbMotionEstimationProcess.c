@@ -182,8 +182,8 @@ void* set_me_hme_params_oq(
 #endif
 
 #if BIG_ME_TEST
-    me_context_ptr->search_area_width = 68;
-    me_context_ptr->search_area_height = 48;
+    me_context_ptr->search_area_width = MAX_SEARCH_AREA_WIDTH;
+    me_context_ptr->search_area_height = MAX_SEARCH_AREA_HEIGHT;
 #endif
 
     me_context_ptr->update_hme_search_center_flag = 1;
