@@ -37,6 +37,9 @@ extern "C" {
     
 
      //Mode definition : Only one mode should be ON at a time
+#define QUICK_ME_CLEANUP                                0
+#define BIG_ME_TEST                                     0
+
 // M7_TO_M8 debugging
 #define M8_NFL_DEBUG            0
 #define M8_ADP_DEBUG            0

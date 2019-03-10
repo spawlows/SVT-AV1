@@ -4728,7 +4728,12 @@ void HmeLevel0(
     // Adjust SR size based on the searchAreaShift
 
     (void)picture_control_set_ptr;
+#if QUICK_ME_CLEANUP // constrain
+    // Constrain x_HME_L0 to be a multiple of 16 (round up)
+    int16_t search_area_width = (int16_t)(((((context_ptr->hme_level0_search_area_in_width_array[searchRegionNumberInWidth] * searchAreaMultiplierX) / 100))) + 15) & ~0x0F;
+#else
     int16_t search_area_width = (int16_t)(((context_ptr->hme_level0_search_area_in_width_array[searchRegionNumberInWidth] * searchAreaMultiplierX) / 100));
+#endif
     int16_t search_area_height = (int16_t)(((context_ptr->hme_level0_search_area_in_height_array[searchRegionNumberInHeight] * searchAreaMultiplierY) / 100));
 
     xSearchRegionDistance = xHmeSearchCenter;
@@ -6596,9 +6601,9 @@ EbErrorType MotionEstimateLcu(
 
     int16_t                  hmeLevel1SearchAreaInWidth;
     int16_t                  hmeLevel1SearchAreaInHeight;
-
+#if !QUICK_ME_CLEANUP
     uint32_t                  adjustSearchAreaDirection = 0;
-
+#endif
     // Configure HME level 0, level 1 and level 2 from static config parameters
     EbBool                 enable_hme_level0_flag = picture_control_set_ptr->enable_hme_level0_flag;
     EbBool                 enable_hme_level1_flag = picture_control_set_ptr->enable_hme_level1_flag;
@@ -6955,9 +6960,14 @@ EbErrorType MotionEstimateLcu(
                 x_search_center = 0;
                 y_search_center = 0;
             }
+#if QUICK_ME_CLEANUP // constrain
+            // Constrain x_ME to be a multiple of 8 (round up)
+            search_area_width  = (context_ptr->search_area_width + 7) & ~0x07;
+            search_area_height = context_ptr->search_area_height;
+#else
             search_area_width = (int16_t)MIN(context_ptr->search_area_width, 127);
             search_area_height = (int16_t)MIN(context_ptr->search_area_height, 127);
-
+#endif
             if ((x_search_center != 0 || y_search_center != 0) && (picture_control_set_ptr->is_used_as_reference_flag == EB_TRUE)) {
                 CheckZeroZeroCenter(
                     refPicPtr,
@@ -6972,7 +6982,7 @@ EbErrorType MotionEstimateLcu(
             }
             x_search_area_origin = x_search_center - (search_area_width >> 1);
             y_search_area_origin = y_search_center - (search_area_height >> 1);
-
+#if !QUICK_ME_CLEANUP
             if (listIndex == 1 && sb_width == BLOCK_SIZE_64 && sb_height == BLOCK_SIZE_64)
             {
                 {
@@ -6990,6 +7000,7 @@ EbErrorType MotionEstimateLcu(
 
                 }
             }
+#endif
 
 
             // Correct the left edge of the Search Area if it is not on the reference Picture

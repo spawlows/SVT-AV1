@@ -154,6 +154,12 @@ void* set_me_hme_params_oq(
     me_context_ptr->search_area_width = SearchAreaWidth[input_resolution][hmeMeLevel];
     me_context_ptr->search_area_height = SearchAreaHeight[input_resolution][hmeMeLevel];
 #endif
+
+#if BIG_ME_TEST
+    me_context_ptr->search_area_width = 68;
+    me_context_ptr->search_area_height = 48;
+#endif
+
     me_context_ptr->update_hme_search_center_flag = 1;
 
     if (input_resolution <= INPUT_SIZE_576p_RANGE_OR_LOWER) 
