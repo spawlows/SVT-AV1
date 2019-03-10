@@ -3405,9 +3405,8 @@ void av1_model_rd_from_var_lapndz(int64_t var, uint32_t n_log2,
     //int32_t plane,
     int64_t sse,
     int32_t *rate,
-    int64_t *dist
-)
-{
+    int64_t *dist){
+
     // OMK
   //const struct MacroblockdPlane *const pd = &xd->plane[plane];
     int32_t dequant_shift = 3;
