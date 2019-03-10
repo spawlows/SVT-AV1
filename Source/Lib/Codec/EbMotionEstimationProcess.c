@@ -100,7 +100,9 @@ void* set_me_hme_params_oq(
     //uint8_t  hmeMeLevel = picture_control_set_ptr->enc_mode;
     uint8_t  hmeMeLevel =  picture_control_set_ptr->enc_mode; // OMK to be revised after new presets
 
-
+#if M8_ME_DEBUG
+    hmeMeLevel = ENC_M8;
+#endif
 // HME/ME default settings
     me_context_ptr->number_hme_search_region_in_width = 2;
     me_context_ptr->number_hme_search_region_in_height = 2;

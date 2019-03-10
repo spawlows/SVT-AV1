@@ -118,7 +118,7 @@ static uint8_t intrabc_max_mesh_pct[MAX_MESH_SPEED + 1] = { 100, 100, 100,
 #define MEDIUM_SB_SCORE           16000 
 #define LOW_SB_SCORE               6000
 #define MAX_LUMINOSITY_BOOST         10
-uint32_t budget_per_sb_boost[MAX_SUPPORTED_MODES] = { 55,55,55,55,55,55,55,15,10,10,10,10,10 };
+uint32_t budget_per_sb_boost[MAX_SUPPORTED_MODES] = { 55,55,55,55,55,55,25,25,10,10,10,10,10 };
 #else
 #define HIGH_SB_SCORE             50000  
 #define MEDIUM_SB_SCORE           10000 
@@ -2249,6 +2249,9 @@ EbErrorType signal_derivation_mode_decision_config_kernel_oq(
     EbErrorType return_error = EB_ErrorNone;
 
     context_ptr->adp_level = picture_control_set_ptr->parent_pcs_ptr->enc_mode;
+#if M8_ADP_DEBUG
+    context_ptr->adp_level = ENC_M8;
+#endif
 
     return return_error;
 }

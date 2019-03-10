@@ -35,7 +35,16 @@
 extern "C" {
 #endif
     
+
      //Mode definition : Only one mode should be ON at a time
+// M7_TO_M8 debugging
+#define M8_NFL_DEBUG            0
+#define M8_ADP_DEBUG            0
+#define M8_ME_DEBUG             0
+#define M8_FL_DEBUG             0
+#define M8_GLOBAL_DEBUG         0
+#define M8_CDEF_DEBUG           0
+
 #define M8_SKIP_BLK             0
 #define M8_OIS                  0
 

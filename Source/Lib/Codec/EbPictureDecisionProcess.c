@@ -819,6 +819,9 @@ EbErrorType signal_derivation_multi_processes_oq(
             picture_control_set_ptr->cdef_filter_mode = 2;
         else
             picture_control_set_ptr->cdef_filter_mode = 1;
+#if M8_CDEF_DEBUG
+        picture_control_set_ptr->cdef_filter_mode = 1;
+#endif
     }
     else
         picture_control_set_ptr->cdef_filter_mode = 0;

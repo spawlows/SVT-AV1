@@ -1362,6 +1362,10 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
         context_ptr->nfl_level = 3;
     else
         context_ptr->nfl_level = 4;
+#if M8_NFL_DEBUG
+    context_ptr->nfl_level = 4;
+#endif
+
 #if CHROMA_BLIND
     // Set Chroma Mode
     // Level                Settings
@@ -1393,6 +1397,10 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
         context_ptr->full_loop_escape = 0;
     else
         context_ptr->full_loop_escape = 1;
+#if M8_FL_DEBUG
+    context_ptr->full_loop_escape = 1;
+#endif
+
 #endif
 #if SHUT_GLOBAL_MV
     // Set global MV injection
@@ -1403,6 +1411,9 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
         context_ptr->global_mv_injection = 1;
     else
         context_ptr->global_mv_injection = 0;
+#if M8_GLOBAL_DEBUG
+    context_ptr->global_mv_injection = 0;
+#endif
 #endif
     return return_error;
 }
