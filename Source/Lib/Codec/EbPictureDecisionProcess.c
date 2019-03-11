@@ -648,7 +648,7 @@ EbErrorType signal_derivation_multi_processes_oq(
     //  PIC_SQ_NON4_DEPTH_MODE               ONLY sq: SB size -> 8x8  (No 4x4)
 
 #if BIG_ME_SCENE_CONTENT
-    uint8_t sc_content_detected = 0;// picture_control_set_ptr->sc_content_detected;
+    uint8_t sc_content_detected = picture_control_set_ptr->sc_content_detected;
     if (sc_content_detected) {
         if (picture_control_set_ptr->enc_mode == ENC_M0) {
             if (picture_control_set_ptr->slice_type == I_SLICE)

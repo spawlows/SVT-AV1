@@ -108,7 +108,7 @@ void* set_me_hme_params_oq(
     me_context_ptr->number_hme_search_region_in_height = 2;
 
 #if BIG_ME_SCENE_CONTENT
-    uint8_t sc_content_detected = 0;// picture_control_set_ptr->sc_content_detected;
+    uint8_t sc_content_detected = picture_control_set_ptr->sc_content_detected;
     // HME Level0
     me_context_ptr->hme_level0_total_search_area_width = HmeLevel0TotalSearchAreaWidth[sc_content_detected][input_resolution][hmeMeLevel];
     me_context_ptr->hme_level0_total_search_area_height = HmeLevel0TotalSearchAreaHeight[sc_content_detected][input_resolution][hmeMeLevel];
