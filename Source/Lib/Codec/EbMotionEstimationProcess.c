@@ -107,61 +107,29 @@ void* set_me_hme_params_oq(
     me_context_ptr->number_hme_search_region_in_width = 2;
     me_context_ptr->number_hme_search_region_in_height = 2;
 
-#if SC_HME_ME || BIG_ME_TEST
-#if QUICK_ME_CLEANUP
-#if BIG_ME_TEST
-    uint16_t  sc_mul_hme = 100;
-    uint16_t  sc_mul_me = 400;
-#else
-    uint16_t  sc_mul_hme = picture_control_set_ptr->sc_content_detected ? 100 : 100;
-    uint16_t  sc_mul_me = picture_control_set_ptr->sc_content_detected ? 100 : 100;
-#endif
+#if BIG_ME_SCENE_CONTENT
+    uint8_t sc_content_detected = 0;// picture_control_set_ptr->sc_content_detected;
     // HME Level0
-    me_context_ptr->hme_level0_total_search_area_width = (HmeLevel0TotalSearchAreaWidth[input_resolution][hmeMeLevel] * sc_mul_hme) / 100;
-    me_context_ptr->hme_level0_total_search_area_height = (HmeLevel0TotalSearchAreaHeight[input_resolution][hmeMeLevel] * sc_mul_hme) / 100;
-    me_context_ptr->hme_level0_search_area_in_width_array[0] = (HmeLevel0SearchAreaInWidthArrayRight[input_resolution][hmeMeLevel] * sc_mul_hme) / 100;
-    me_context_ptr->hme_level0_search_area_in_width_array[1] = (HmeLevel0SearchAreaInWidthArrayLeft[input_resolution][hmeMeLevel] * sc_mul_hme) / 100;
-    me_context_ptr->hme_level0_search_area_in_height_array[0] = (HmeLevel0SearchAreaInHeightArrayTop[input_resolution][hmeMeLevel] * sc_mul_hme) / 100;
-    me_context_ptr->hme_level0_search_area_in_height_array[1] = (HmeLevel0SearchAreaInHeightArrayBottom[input_resolution][hmeMeLevel] * sc_mul_hme) / 100;
+    me_context_ptr->hme_level0_total_search_area_width = HmeLevel0TotalSearchAreaWidth[sc_content_detected][input_resolution][hmeMeLevel];
+    me_context_ptr->hme_level0_total_search_area_height = HmeLevel0TotalSearchAreaHeight[sc_content_detected][input_resolution][hmeMeLevel];
+    me_context_ptr->hme_level0_search_area_in_width_array[0] = HmeLevel0SearchAreaInWidthArrayRight[sc_content_detected][input_resolution][hmeMeLevel];
+    me_context_ptr->hme_level0_search_area_in_width_array[1] = HmeLevel0SearchAreaInWidthArrayLeft[sc_content_detected][input_resolution][hmeMeLevel];
+    me_context_ptr->hme_level0_search_area_in_height_array[0] = HmeLevel0SearchAreaInHeightArrayTop[sc_content_detected][input_resolution][hmeMeLevel];
+    me_context_ptr->hme_level0_search_area_in_height_array[1] = HmeLevel0SearchAreaInHeightArrayBottom[sc_content_detected][input_resolution][hmeMeLevel];
     // HME Level1
-    me_context_ptr->hme_level1_search_area_in_width_array[0] = (HmeLevel1SearchAreaInWidthArrayRight[input_resolution][hmeMeLevel] * sc_mul_hme) / 100;
-    me_context_ptr->hme_level1_search_area_in_width_array[1] = (HmeLevel1SearchAreaInWidthArrayLeft[input_resolution][hmeMeLevel] * sc_mul_hme) / 100;
-    me_context_ptr->hme_level1_search_area_in_height_array[0] = (HmeLevel1SearchAreaInHeightArrayTop[input_resolution][hmeMeLevel] * sc_mul_hme) / 100;
-    me_context_ptr->hme_level1_search_area_in_height_array[1] = (HmeLevel1SearchAreaInHeightArrayBottom[input_resolution][hmeMeLevel] * sc_mul_hme) / 100;
+    me_context_ptr->hme_level1_search_area_in_width_array[0] = HmeLevel1SearchAreaInWidthArrayRight[sc_content_detected][input_resolution][hmeMeLevel];
+    me_context_ptr->hme_level1_search_area_in_width_array[1] = HmeLevel1SearchAreaInWidthArrayLeft[sc_content_detected][input_resolution][hmeMeLevel];
+    me_context_ptr->hme_level1_search_area_in_height_array[0] = HmeLevel1SearchAreaInHeightArrayTop[sc_content_detected][input_resolution][hmeMeLevel];
+    me_context_ptr->hme_level1_search_area_in_height_array[1] = HmeLevel1SearchAreaInHeightArrayBottom[sc_content_detected][input_resolution][hmeMeLevel];
     // HME Level2
-    me_context_ptr->hme_level2_search_area_in_width_array[0] = (HmeLevel2SearchAreaInWidthArrayRight[input_resolution][hmeMeLevel] * sc_mul_hme) / 100;
-    me_context_ptr->hme_level2_search_area_in_width_array[1] = (HmeLevel2SearchAreaInWidthArrayLeft[input_resolution][hmeMeLevel] * sc_mul_hme) / 100;
-    me_context_ptr->hme_level2_search_area_in_height_array[0] = (HmeLevel2SearchAreaInHeightArrayTop[input_resolution][hmeMeLevel] * sc_mul_hme) / 100;
-    me_context_ptr->hme_level2_search_area_in_height_array[1] = (HmeLevel2SearchAreaInHeightArrayBottom[input_resolution][hmeMeLevel] * sc_mul_hme) / 100;
+    me_context_ptr->hme_level2_search_area_in_width_array[0] = HmeLevel2SearchAreaInWidthArrayRight[sc_content_detected][input_resolution][hmeMeLevel];
+    me_context_ptr->hme_level2_search_area_in_width_array[1] = HmeLevel2SearchAreaInWidthArrayLeft[sc_content_detected][input_resolution][hmeMeLevel];
+    me_context_ptr->hme_level2_search_area_in_height_array[0] = HmeLevel2SearchAreaInHeightArrayTop[sc_content_detected][input_resolution][hmeMeLevel];
+    me_context_ptr->hme_level2_search_area_in_height_array[1] = HmeLevel2SearchAreaInHeightArrayBottom[sc_content_detected][input_resolution][hmeMeLevel];
 
     // ME
-    me_context_ptr->search_area_width = (SearchAreaWidth[input_resolution][hmeMeLevel] * sc_mul_me) / 100;
-    me_context_ptr->search_area_height = (SearchAreaHeight[input_resolution][hmeMeLevel] * sc_mul_me) / 100;
-#else
-    uint8_t  sc_mul_hme = picture_control_set_ptr->sc_content_detected ? 1 : 1;
-    uint8_t  sc_mul_me = picture_control_set_ptr->sc_content_detected ? 1 : 1;
-    // HME Level0
-    me_context_ptr->hme_level0_total_search_area_width = HmeLevel0TotalSearchAreaWidth[input_resolution][hmeMeLevel]* sc_mul_hme;
-    me_context_ptr->hme_level0_total_search_area_height = HmeLevel0TotalSearchAreaHeight[input_resolution][hmeMeLevel] * sc_mul_hme;
-    me_context_ptr->hme_level0_search_area_in_width_array[0] = HmeLevel0SearchAreaInWidthArrayRight[input_resolution][hmeMeLevel] * sc_mul_hme;
-    me_context_ptr->hme_level0_search_area_in_width_array[1] = HmeLevel0SearchAreaInWidthArrayLeft[input_resolution][hmeMeLevel] * sc_mul_hme;
-    me_context_ptr->hme_level0_search_area_in_height_array[0] = HmeLevel0SearchAreaInHeightArrayTop[input_resolution][hmeMeLevel] * sc_mul_hme;
-    me_context_ptr->hme_level0_search_area_in_height_array[1] = HmeLevel0SearchAreaInHeightArrayBottom[input_resolution][hmeMeLevel] * sc_mul_hme;
-    // HME Level1
-    me_context_ptr->hme_level1_search_area_in_width_array[0] = HmeLevel1SearchAreaInWidthArrayRight[input_resolution][hmeMeLevel] * sc_mul_hme;
-    me_context_ptr->hme_level1_search_area_in_width_array[1] = HmeLevel1SearchAreaInWidthArrayLeft[input_resolution][hmeMeLevel] * sc_mul_hme;
-    me_context_ptr->hme_level1_search_area_in_height_array[0] = HmeLevel1SearchAreaInHeightArrayTop[input_resolution][hmeMeLevel] * sc_mul_hme;
-    me_context_ptr->hme_level1_search_area_in_height_array[1] = HmeLevel1SearchAreaInHeightArrayBottom[input_resolution][hmeMeLevel] * sc_mul_hme;
-    // HME Level2
-    me_context_ptr->hme_level2_search_area_in_width_array[0] = HmeLevel2SearchAreaInWidthArrayRight[input_resolution][hmeMeLevel] * sc_mul_hme;
-    me_context_ptr->hme_level2_search_area_in_width_array[1] = HmeLevel2SearchAreaInWidthArrayLeft[input_resolution][hmeMeLevel] * sc_mul_hme;
-    me_context_ptr->hme_level2_search_area_in_height_array[0] = HmeLevel2SearchAreaInHeightArrayTop[input_resolution][hmeMeLevel] * sc_mul_hme;
-    me_context_ptr->hme_level2_search_area_in_height_array[1] = HmeLevel2SearchAreaInHeightArrayBottom[input_resolution][hmeMeLevel] * sc_mul_hme;
-
-    // ME
-    me_context_ptr->search_area_width = SearchAreaWidth[input_resolution][hmeMeLevel] * sc_mul_me;
-    me_context_ptr->search_area_height = SearchAreaHeight[input_resolution][hmeMeLevel] * sc_mul_me;
-#endif
+    me_context_ptr->search_area_width = SearchAreaWidth[sc_content_detected][input_resolution][hmeMeLevel];
+    me_context_ptr->search_area_height = SearchAreaHeight[sc_content_detected][input_resolution][hmeMeLevel];
 #else
     // HME Level0
     me_context_ptr->hme_level0_total_search_area_width = HmeLevel0TotalSearchAreaWidth[input_resolution][hmeMeLevel];
@@ -184,11 +152,6 @@ void* set_me_hme_params_oq(
     // ME
     me_context_ptr->search_area_width = SearchAreaWidth[input_resolution][hmeMeLevel];
     me_context_ptr->search_area_height = SearchAreaHeight[input_resolution][hmeMeLevel];
-#endif
-
-#if 0 // BIG_ME_TEST
-    me_context_ptr->search_area_width = MAX_SEARCH_AREA_WIDTH;
-    me_context_ptr->search_area_height = MAX_SEARCH_AREA_HEIGHT;
 #endif
 
     me_context_ptr->update_hme_search_center_flag = 1;
