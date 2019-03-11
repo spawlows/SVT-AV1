@@ -39,7 +39,7 @@ extern "C" {
      //Mode definition : Only one mode should be ON at a time
 #define QUICK_ME_CLEANUP        1
 #define SCENE_CONTENT_SETTINGS  1
-#define HARD_CODE_SC_SETTING    1
+#define HARD_CODE_SC_SETTING    0
 
 // M7_TO_M8 debugging
 #define M8_NFL_DEBUG            0
