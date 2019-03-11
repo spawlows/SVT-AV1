@@ -4541,11 +4541,17 @@ void HmeOneQuadrantLevel0(
     int16_t padHeight;
 
     (void)picture_control_set_ptr;
+#if QUICK_ME_CLEANUP // round up
+    // Round up x_HME_L0 to be a multiple of 16
+    int16_t search_area_width = (int16_t)((((((context_ptr->hme_level0_total_search_area_width  * searchAreaMultiplierX) / 100))) + 15) & ~0x0F);
+#else
     int16_t search_area_width = (int16_t)(((context_ptr->hme_level0_total_search_area_width  * searchAreaMultiplierX) / 100));
+#endif
     int16_t search_area_height = (int16_t)(((context_ptr->hme_level0_total_search_area_height * searchAreaMultiplierY) / 100));
+#if !QUICK_ME_CLEANUP
     if (context_ptr->hme_search_type == HME_SPARSE)
         search_area_width = ((search_area_width + 4) >> 3) << 3;  //round down/up the width to the nearest multiple of 8.
-
+#endif
     xSearchRegionDistance = xHmeSearchCenter;
     ySearchRegionDistance = yHmeSearchCenter;
     padWidth = (int16_t)(sixteenthRefPicPtr->origin_x) - 1;
@@ -4573,6 +4579,12 @@ void HmeOneQuadrantLevel0(
         MAX(1, search_area_width - ((origin_x + x_search_area_origin + search_area_width) - (int16_t)sixteenthRefPicPtr->width)) :
         search_area_width;
 
+#if QUICK_ME_CLEANUP // round down
+    // Round down x_HME to be a multiple of 16 as cropping already performed
+    search_area_width = (search_area_width < 16) ?
+        search_area_width :
+        search_area_width & ~0x0F;
+#endif
     // Correct the top edge of the Search Area if it is not on the reference Picture
     y_search_area_origin = ((origin_y + y_search_area_origin) < -padHeight) ?
         -padHeight - origin_y :
@@ -4597,9 +4609,10 @@ void HmeOneQuadrantLevel0(
 
     if (context_ptr->hme_search_type == HME_SPARSE)
     {
+#if !QUICK_ME_CLEANUP 
         //ensure that search area is multiple of 8.
         search_area_width = ((search_area_width >> 3) << 3);
-
+#endif
         NxMSadLoopKernelSparse_funcPtrArray[asm_type](
             &context_ptr->sixteenth_sb_buffer[0],
             context_ptr->sixteenth_sb_buffer_stride,
@@ -4619,12 +4632,12 @@ void HmeOneQuadrantLevel0(
 
     }
     else {
-
+#if !QUICK_ME_CLEANUP 
         if ((search_area_width & 15) != 0)
         {
             search_area_width = (int16_t)(floor((double)((search_area_width >> 4) << 4)));
         }
-
+#endif
         if (((search_area_width & 15) == 0) && (asm_type == ASM_AVX2))
         {
             sad_loop_kernel_avx2_hme_l0_intrin(
@@ -4728,9 +4741,9 @@ void HmeLevel0(
     // Adjust SR size based on the searchAreaShift
 
     (void)picture_control_set_ptr;
-#if QUICK_ME_CLEANUP // constrain
-    // Constrain x_HME_L0 to be a multiple of 16 (round up)
-    int16_t search_area_width = (int16_t)(((((context_ptr->hme_level0_search_area_in_width_array[searchRegionNumberInWidth] * searchAreaMultiplierX) / 100))) + 15) & ~0x0F;
+#if QUICK_ME_CLEANUP // round up
+    // Round up x_HME_L0 to be a multiple of 16
+    int16_t search_area_width = (int16_t)((((((context_ptr->hme_level0_search_area_in_width_array[searchRegionNumberInWidth] * searchAreaMultiplierX) / 100))) + 15) & ~0x0F);
 #else
     int16_t search_area_width = (int16_t)(((context_ptr->hme_level0_search_area_in_width_array[searchRegionNumberInWidth] * searchAreaMultiplierX) / 100));
 #endif
@@ -4770,6 +4783,13 @@ void HmeLevel0(
     search_area_width = ((origin_x + x_search_area_origin + search_area_width) > (int16_t)sixteenthRefPicPtr->width) ?
         MAX(1, search_area_width - ((origin_x + x_search_area_origin + search_area_width) - (int16_t)sixteenthRefPicPtr->width)) :
         search_area_width;
+
+#if QUICK_ME_CLEANUP // round down
+    // Round down x_HME to be a multiple of 16 as cropping already performed
+    search_area_width = (search_area_width < 16) ?
+        search_area_width :
+        search_area_width & ~0x0F;
+#endif
 
     // Correct the top edge of the Search Area if it is not on the reference Picture
     y_search_area_origin = ((origin_y + y_search_area_origin) < -padHeight) ?
@@ -4902,9 +4922,14 @@ void HmeLevel1(
     int16_t xTopLeftSearchRegion;
     int16_t yTopLeftSearchRegion;
     uint32_t searchRegionIndex;
+#if QUICK_ME_CLEANUP // round up
+    // Round up x_HME_L0 to be a multiple of 8
+    int16_t search_area_width = (int16_t) ((hmeLevel1SearchAreaInWidth + 7) & ~0x07);
+#else
     // round the search region width to nearest multiple of 8 if it is less than 8 or non multiple of 8
     // SAD calculation performance is the same for searchregion width from 1 to 8
     int16_t search_area_width = (hmeLevel1SearchAreaInWidth < 8) ? 8 : (hmeLevel1SearchAreaInWidth & 7) ? hmeLevel1SearchAreaInWidth + (hmeLevel1SearchAreaInWidth - ((hmeLevel1SearchAreaInWidth >> 3) << 3)) : hmeLevel1SearchAreaInWidth;
+#endif
     int16_t search_area_height = hmeLevel1SearchAreaInHeight;
 
     int16_t x_search_area_origin;
@@ -4933,6 +4958,12 @@ void HmeLevel1(
         MAX(1, search_area_width - ((origin_x + x_search_area_origin + search_area_width) - (int16_t)quarterRefPicPtr->width)) :
         search_area_width;
 
+#if QUICK_ME_CLEANUP // round down
+    // Constrain x_HME_L1 to be a multiple of 8 (round down as cropping already performed)
+    search_area_width = (search_area_width < 8) ?
+        search_area_width :
+        search_area_width & ~0x07;
+#endif
     // Correct the top edge of the Search Area if it is not on the reference Picture
     y_search_area_origin = ((origin_y + y_search_area_origin) < -padHeight) ?
         -padHeight - origin_y :
@@ -5029,9 +5060,13 @@ void HmeLevel2(
     // round the search region width to nearest multiple of 8 if it is less than 8 or non multiple of 8
     // SAD calculation performance is the same for searchregion width from 1 to 8
     (void)picture_control_set_ptr;
-
     int16_t hmeLevel2SearchAreaInWidth = (int16_t)context_ptr->hme_level2_search_area_in_width_array[searchRegionNumberInWidth];
+#if QUICK_ME_CLEANUP // round up
+    // Round up x_HME_L0 to be a multiple of 8
+    int16_t search_area_width = (int16_t)((hmeLevel2SearchAreaInWidth + 7) & ~0x07);
+#else
     int16_t search_area_width = (hmeLevel2SearchAreaInWidth < 8) ? 8 : (hmeLevel2SearchAreaInWidth & 7) ? hmeLevel2SearchAreaInWidth + (hmeLevel2SearchAreaInWidth - ((hmeLevel2SearchAreaInWidth >> 3) << 3)) : hmeLevel2SearchAreaInWidth;
+#endif
     int16_t search_area_height = (int16_t)context_ptr->hme_level2_search_area_in_height_array[searchRegionNumberInHeight];
     int16_t x_search_area_origin;
     int16_t y_search_area_origin;
@@ -5060,6 +5095,12 @@ void HmeLevel2(
         MAX(1, search_area_width - ((origin_x + x_search_area_origin + search_area_width) - (int16_t)refPicPtr->width)) :
         search_area_width;
 
+#if QUICK_ME_CLEANUP // round down
+    // Constrain x_HME_L1 to be a multiple of 8 (round down as cropping already performed)
+    search_area_width = (search_area_width < 8) ?
+        search_area_width :
+        search_area_width & ~0x07;
+#endif
     // Correct the top edge of the Search Area if it is not on the reference Picture
     y_search_area_origin = ((origin_y + y_search_area_origin) < -padHeight) ?
         -padHeight - origin_y :
@@ -6960,7 +7001,7 @@ EbErrorType MotionEstimateLcu(
                 x_search_center = 0;
                 y_search_center = 0;
             }
-#if QUICK_ME_CLEANUP // constrain
+#if QUICK_ME_CLEANUP // round up
             // Constrain x_ME to be a multiple of 8 (round up)
             search_area_width  = (context_ptr->search_area_width + 7) & ~0x07;
             search_area_height = context_ptr->search_area_height;
@@ -7020,6 +7061,13 @@ EbErrorType MotionEstimateLcu(
             search_area_width = ((origin_x + x_search_area_origin + search_area_width) > picture_width) ?
                 MAX(1, search_area_width - ((origin_x + x_search_area_origin + search_area_width) - picture_width)) :
                 search_area_width;
+
+#if QUICK_ME_CLEANUP // round down
+            // Constrain x_ME to be a multiple of 8 (round down as cropping already performed)
+            search_area_width = (search_area_width < 8) ?
+                search_area_width :
+                search_area_width & ~0x07;
+#endif
 
             // Correct the top edge of the Search Area if it is not on the reference Picture
             y_search_area_origin = ((origin_y + y_search_area_origin) < -padHeight) ?

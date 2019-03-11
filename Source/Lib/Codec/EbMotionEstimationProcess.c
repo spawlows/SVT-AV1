@@ -110,8 +110,8 @@ void* set_me_hme_params_oq(
 #if SC_HME_ME || BIG_ME_TEST
 #if QUICK_ME_CLEANUP
 #if BIG_ME_TEST
-    uint16_t  sc_mul_hme = 150;
-    uint16_t  sc_mul_me = 150;
+    uint16_t  sc_mul_hme = 100;
+    uint16_t  sc_mul_me = 400;
 #else
     uint16_t  sc_mul_hme = picture_control_set_ptr->sc_content_detected ? 100 : 100;
     uint16_t  sc_mul_me = picture_control_set_ptr->sc_content_detected ? 100 : 100;
