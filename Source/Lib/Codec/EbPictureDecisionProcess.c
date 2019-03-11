@@ -647,7 +647,7 @@ EbErrorType signal_derivation_multi_processes_oq(
     //  PIC_SQ_DEPTH_MODE                    ONLY sq: SB size -> 4x4
     //  PIC_SQ_NON4_DEPTH_MODE               ONLY sq: SB size -> 8x8  (No 4x4)
 
-#if BIG_ME_SCENE_CONTENT
+#if SCENE_CONTENT_SETTINGS
     uint8_t sc_content_detected = picture_control_set_ptr->sc_content_detected;
     if (sc_content_detected) {
         if (picture_control_set_ptr->enc_mode == ENC_M0) {
@@ -662,20 +662,8 @@ EbErrorType signal_derivation_multi_processes_oq(
             else
                 picture_control_set_ptr->pic_depth_mode = PIC_SQ_DEPTH_MODE;
         }
-#if ADAPTIVE_DEPTH_PARTITIONING
-        else if (picture_control_set_ptr->enc_mode <= ENC_M5)
-            picture_control_set_ptr->pic_depth_mode = PIC_SQ_NON4_DEPTH_MODE;
-        else {
-            if (picture_control_set_ptr->slice_type == I_SLICE)
-                picture_control_set_ptr->pic_depth_mode = PIC_SQ_NON4_DEPTH_MODE;
-            else
-                picture_control_set_ptr->pic_depth_mode = PIC_SB_SWITCH_DEPTH_MODE;
-        }
-#else
         else
             picture_control_set_ptr->pic_depth_mode = PIC_SQ_NON4_DEPTH_MODE;
-#endif
-
     }
     else {
 #endif
@@ -705,7 +693,7 @@ EbErrorType signal_derivation_multi_processes_oq(
             picture_control_set_ptr->pic_depth_mode = PIC_SQ_NON4_DEPTH_MODE;
 #endif
 
-#if BIG_ME_SCENE_CONTENT
+#if SCENE_CONTENT_SETTINGS
     }
 #endif
 
@@ -811,11 +799,11 @@ EbErrorType signal_derivation_multi_processes_oq(
     if (picture_control_set_ptr->slice_type == I_SLICE) {
         picture_control_set_ptr->allow_screen_content_tools = picture_control_set_ptr->sc_content_detected;
         picture_control_set_ptr->allow_intrabc =  picture_control_set_ptr->sc_content_detected;
-        
+#if !SCENE_CONTENT_SETTINGS
         //turn OFF intra bc for some specific modes
         if (picture_control_set_ptr->enc_mode >= ENC_M1)
             picture_control_set_ptr->allow_intrabc = 0;
-      
+#endif
     }
     else {
         picture_control_set_ptr->allow_screen_content_tools = 0;

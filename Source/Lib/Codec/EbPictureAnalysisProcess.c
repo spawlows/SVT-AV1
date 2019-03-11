@@ -4991,6 +4991,9 @@ void* picture_analysis_kernel(void *input_ptr)
             input_picture_ptr->stride_y,
             sequence_control_set_ptr->luma_width, sequence_control_set_ptr->luma_height);
 #endif
+#if HARD_CODE_SC_SETTING
+        picture_control_set_ptr->sc_content_detected = EB_TRUE;
+#endif
 
         // Pad pictures to multiple min cu size
         PadPictureToMultipleOfMinCuSizeDimensions(
