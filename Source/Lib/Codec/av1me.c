@@ -19,6 +19,7 @@
 #include "EbPictureControlSet.h"
 #include "EbSequenceControlSet.h"
 #include "EbComputeSAD.h"
+#include "aom_dsp_rtcd.h"
 
 
 int av1_is_dv_valid(const MV dv,
@@ -104,6 +105,9 @@ int av1_refining_search_sad(IntraBcContext  *x, MV *ref_mv, int error_per_bit,
     int search_range,
     const aom_variance_fn_ptr_t *fn_ptr,
     const MV *center_mv);
+
+#if !(AOM_SAD_PORTING)
+
 /* Sum the difference between every corresponding element of the buffers. */
 static INLINE unsigned int sad(const uint8_t *a, int a_stride, const uint8_t *b,
     int b_stride, int width, int height) {
@@ -114,15 +118,16 @@ static INLINE unsigned int sad(const uint8_t *a, int a_stride, const uint8_t *b,
         for (x = 0; x < width; x++) {
             sad += abs(a[x] - b[x]);
         }
-
         a += a_stride;
         b += b_stride;
+
     }
     return sad;
+
 }
 #if 1
-#if FIX_SAD
-#define sadMxh(m)                                                          \
+ #if FIX_SAD
+ #define sadMxh(m)                                                          \
   unsigned int aom_sad##m##xh_c(const uint8_t *a, int a_stride,            \
                                 const uint8_t *b, int b_stride, int width, \
                                 int height) {                              \
@@ -142,7 +147,7 @@ static INLINE unsigned int sad(const uint8_t *a, int a_stride, const uint8_t *b,
   unsigned int aom_sad##m##x##n##_c(const uint8_t *src, int src_stride,       \
                                     const uint8_t *ref, int ref_stride) {     \
 return NxMSadKernelSubSampled_funcPtrArray[ASM_AVX2][m >> 3]((uint8_t *)src, src_stride, (uint8_t *)ref, ref_stride, n, m);  \
-  } 
+}
 #else
 #define sadMxh(m)                                                          \
   unsigned int aom_sad##m##xh_c(const uint8_t *a, int a_stride,            \
@@ -164,7 +169,7 @@ return NxMSadKernelSubSampled_funcPtrArray[ASM_AVX2][m >> 3]((uint8_t *)src, src
   unsigned int aom_sad##m##x##n##_c(const uint8_t *src, int src_stride,       \
                                     const uint8_t *ref, int ref_stride) {     \
 return NxMSadKernelSubSampled_funcPtrArray[ASM_AVX2][m >> 3]((uint8_t *)src, src_stride, (uint8_t *)ref, ref_stride, m, n);  \
-  } 
+}
 #endif
 #else
 #define sadMxh(m)                                                          \
@@ -179,7 +184,7 @@ return NxMSadKernelSubSampled_funcPtrArray[ASM_AVX2][m >> 3]((uint8_t *)src, src
                                     const uint8_t *ref, int ref_stride) {     \
    return sad(src, src_stride, ref, ref_stride, m, n);    \
   }                                                                           \
-  
+
 
 // Calculate sad against 4 reference locations and store each in sad_array
 #define sadMxNx4D(m, n)                                                    \
@@ -262,6 +267,8 @@ sadMxNx4D(16, 64);
 sadMxN(64, 16);
 sadMxNx4D(64, 16);
 
+#endif //!(AOM_SAD_PORTING)
+
 static void variance(const uint8_t *a, int a_stride, const uint8_t *b,
     int b_stride, int w, int h, uint32_t *sse, int *sum) {
     int i, j;
@@ -280,6 +287,7 @@ static void variance(const uint8_t *a, int a_stride, const uint8_t *b,
         b += b_stride;
     }
 }
+
 #define VAR(W, H)                                                    \
   uint32_t aom_variance##W##x##H##_c(const uint8_t *a, int a_stride, \
                                      const uint8_t *b, int b_stride, \
@@ -324,56 +332,75 @@ void init_fn_ptr(void)
   mefn_ptr[BT].vf = VF;                                      \
   mefn_ptr[BT].sdx4df = SDX4DF;
 
-      
-        BFP0(BLOCK_4X16, aom_sad4x16_c, aom_variance4x16_c, aom_sad4x16x4d_c)  
-       
-        BFP0(BLOCK_16X4, aom_sad16x4_c, aom_variance16x4_c, aom_sad16x4x4d_c)
-       
-        BFP0(BLOCK_8X32, aom_sad8x32_c, aom_variance8x32_c, aom_sad8x32x4d_c)
+#if AOM_SAD_PORTING
+        BFP0(BLOCK_4X16, aom_sad4x16, aom_variance4x16_c, aom_sad4x16x4d)
+        BFP0(BLOCK_16X4, aom_sad16x4, aom_variance16x4_c, aom_sad16x4x4d)
+        BFP0(BLOCK_8X32, aom_sad8x32, aom_variance8x32_c, aom_sad8x32x4d)
+        BFP0(BLOCK_32X8, aom_sad32x8, aom_variance32x8_c, aom_sad32x8x4d)
+        BFP0(BLOCK_16X64, aom_sad16x64, aom_variance16x64_c, aom_sad16x64x4d)
+        BFP0(BLOCK_64X16, aom_sad64x16, aom_variance64x16_c, aom_sad64x16x4d)
+        BFP0(BLOCK_128X128, aom_sad128x128, aom_variance128x128_c, aom_sad128x128x4d)
+        BFP0(BLOCK_128X64, aom_sad128x64, aom_variance128x64_c, aom_sad128x64x4d)
+        BFP0(BLOCK_64X128, aom_sad64x128, aom_variance64x128_c, aom_sad64x128x4d)
+        BFP0(BLOCK_32X16, aom_sad32x16, aom_variance32x16_c, aom_sad32x16x4d)
+        BFP0(BLOCK_16X32, aom_sad16x32, aom_variance16x32_c, aom_sad16x32x4d)
+        BFP0(BLOCK_64X32, aom_sad64x32, aom_variance64x32_c, aom_sad64x32x4d)
+        BFP0(BLOCK_32X64, aom_sad32x64, aom_variance32x64_c, aom_sad32x64x4d)
+        BFP0(BLOCK_32X32, aom_sad32x32, aom_variance32x32_c, aom_sad32x32x4d)
+        BFP0(BLOCK_64X64, aom_sad64x64, aom_variance64x64_c, aom_sad64x64x4d)
+        BFP0(BLOCK_16X16, aom_sad16x16, aom_variance16x16_c, aom_sad16x16x4d)
+        BFP0(BLOCK_16X8, aom_sad16x8, aom_variance16x8_c, aom_sad16x8x4d)
+        BFP0(BLOCK_8X16, aom_sad8x16, aom_variance8x16_c, aom_sad8x16x4d)
+        BFP0(BLOCK_8X8, aom_sad8x8, aom_variance8x8_c, aom_sad8x8x4d)
+        BFP0(BLOCK_8X4, aom_sad8x4, aom_variance8x4_c, aom_sad8x4x4d)
+        BFP0(BLOCK_4X8, aom_sad4x8, aom_variance4x8_c, aom_sad4x8x4d)
+        BFP0(BLOCK_4X4, aom_sad4x4, aom_variance4x4_c, aom_sad4x4x4d)
+#else
+       BFP0(BLOCK_4X16, aom_sad4x16_c, aom_variance4x16_c, aom_sad4x16x4d_c)
 
-        BFP0(BLOCK_32X8, aom_sad32x8_c, aom_variance32x8_c, aom_sad32x8x4d_c)
+       BFP0(BLOCK_16X4, aom_sad16x4_c, aom_variance16x4_c, aom_sad16x4x4d_c)
 
-        BFP0(BLOCK_16X64, aom_sad16x64_c, aom_variance16x64_c, aom_sad16x64x4d_c)
+       BFP0(BLOCK_8X32, aom_sad8x32_c, aom_variance8x32_c, aom_sad8x32x4d_c)
 
-        BFP0(BLOCK_64X16, aom_sad64x16_c, aom_variance64x16_c, aom_sad64x16x4d_c)
+       BFP0(BLOCK_32X8, aom_sad32x8_c, aom_variance32x8_c, aom_sad32x8x4d_c)
 
-        BFP0(BLOCK_128X128, aom_sad128x128_c, aom_variance128x128_c, aom_sad128x128x4d_c)
+       BFP0(BLOCK_16X64, aom_sad16x64_c, aom_variance16x64_c, aom_sad16x64x4d_c)
 
-        BFP0(BLOCK_128X64, aom_sad128x64_c, aom_variance128x64_c, aom_sad128x64x4d_c)
+       BFP0(BLOCK_64X16, aom_sad64x16_c, aom_variance64x16_c, aom_sad64x16x4d_c)
 
-        BFP0(BLOCK_64X128, aom_sad64x128_c, aom_variance64x128_c, aom_sad64x128x4d_c)
+       BFP0(BLOCK_128X128, aom_sad128x128_c, aom_variance128x128_c, aom_sad128x128x4d_c)
 
-     
-        BFP0(BLOCK_32X16, aom_sad32x16_c, aom_variance32x16_c, aom_sad32x16x4d_c)
+       BFP0(BLOCK_128X64, aom_sad128x64_c, aom_variance128x64_c, aom_sad128x64x4d_c)
 
-        BFP0(BLOCK_16X32, aom_sad16x32_c, aom_variance16x32_c, aom_sad16x32x4d_c)
+       BFP0(BLOCK_64X128, aom_sad64x128_c, aom_variance64x128_c, aom_sad64x128x4d_c)
 
-        BFP0(BLOCK_64X32, aom_sad64x32_c, aom_variance64x32_c, aom_sad64x32x4d_c)
+       BFP0(BLOCK_32X16, aom_sad32x16_c, aom_variance32x16_c, aom_sad32x16x4d_c)
 
-     
-        BFP0(BLOCK_32X64, aom_sad32x64_c, aom_variance32x64_c, aom_sad32x64x4d_c)
+       BFP0(BLOCK_16X32, aom_sad16x32_c, aom_variance16x32_c, aom_sad16x32x4d_c)
 
-      
-        BFP0(BLOCK_32X32, aom_sad32x32_c, aom_variance32x32_c, aom_sad32x32x4d_c)
+       BFP0(BLOCK_64X32, aom_sad64x32_c, aom_variance64x32_c, aom_sad64x32x4d_c)
 
-        BFP0(BLOCK_64X64, aom_sad64x64_c, aom_variance64x64_c, aom_sad64x64x4d_c)
+       BFP0(BLOCK_32X64, aom_sad32x64_c, aom_variance32x64_c, aom_sad32x64x4d_c)
 
-       
-        BFP0(BLOCK_16X16, aom_sad16x16_c, aom_variance16x16_c, aom_sad16x16x4d_c)
+       BFP0(BLOCK_32X32, aom_sad32x32_c, aom_variance32x32_c, aom_sad32x32x4d_c)
 
-        BFP0(BLOCK_16X8, aom_sad16x8_c, aom_variance16x8_c, aom_sad16x8x4d_c)
+       BFP0(BLOCK_64X64, aom_sad64x64_c, aom_variance64x64_c, aom_sad64x64x4d_c)
 
-     
-        BFP0(BLOCK_8X16, aom_sad8x16_c, aom_variance8x16_c, aom_sad8x16x4d_c)
+       BFP0(BLOCK_16X16, aom_sad16x16_c, aom_variance16x16_c, aom_sad16x16x4d_c)
 
-        BFP0(BLOCK_8X8, aom_sad8x8_c, aom_variance8x8_c, aom_sad8x8x4d_c)
+       BFP0(BLOCK_16X8, aom_sad16x8_c, aom_variance16x8_c, aom_sad16x8x4d_c)
 
-        BFP0(BLOCK_8X4, aom_sad8x4_c, aom_variance8x4_c, aom_sad8x4x4d_c)
-        
-       
-        BFP0(BLOCK_4X8, aom_sad4x8_c, aom_variance4x8_c, aom_sad4x8x4d_c)
-       
-        BFP0(BLOCK_4X4, aom_sad4x4_c, aom_variance4x4_c, aom_sad4x4x4d_c)
+       BFP0(BLOCK_8X16, aom_sad8x16_c, aom_variance8x16_c, aom_sad8x16x4d_c)
+
+       BFP0(BLOCK_8X8, aom_sad8x8_c, aom_variance8x8_c, aom_sad8x8x4d_c)
+
+       BFP0(BLOCK_8X4, aom_sad8x4_c, aom_variance8x4_c, aom_sad8x4x4d_c)
+
+       BFP0(BLOCK_4X8, aom_sad4x8_c, aom_variance4x8_c, aom_sad4x8x4d_c)
+
+       BFP0(BLOCK_4X4, aom_sad4x4_c, aom_variance4x4_c, aom_sad4x4x4d_c)
+
+#endif
 }
 
 

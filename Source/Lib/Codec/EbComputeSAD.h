@@ -25,9 +25,9 @@ extern "C" {
     * Function Ptr Types
     ***************************************/
     typedef uint32_t(*EB_SADKERNELNxM_TYPE)(
-        uint8_t  *src,
+        const uint8_t  *src,
         uint32_t  src_stride,
-        uint8_t  *ref,
+        const uint8_t  *ref,
         uint32_t  ref_stride,
         uint32_t  height,
         uint32_t  width);
@@ -108,7 +108,7 @@ extern "C" {
     {
         // NON_AVX2
         {
-            /*0 4xM  */ Compute4xMSadSub_AVX2_INTRIN,
+            /*0 4xM  */ fast_loop_nx_m_sad_kernel,
             /*1 8xM  */ fast_loop_nx_m_sad_kernel,
             /*2 16xM */ fast_loop_nx_m_sad_kernel,
             /*3 24xM */ fast_loop_nx_m_sad_kernel,

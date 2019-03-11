@@ -1342,6 +1342,184 @@ extern "C" {
 #endif
 #endif
 
+#if AOM_SAD_PORTING
+    uint32_t aom_sad128x128_c(const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride);
+    uint32_t aom_sad128x128_avx2(const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride);
+    RTCD_EXTERN uint32_t(*aom_sad128x128)(const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride);
+
+    void aom_sad128x128x4d_c(const uint8_t *src_ptr, int src_stride, const uint8_t * const ref_ptr[], int ref_stride, uint32_t *sad_array);
+    void aom_sad128x128x4d_avx2(const uint8_t *src_ptr, int src_stride, const uint8_t * const ref_ptr[], int ref_stride, uint32_t *sad_array);
+    RTCD_EXTERN void(*aom_sad128x128x4d)(const uint8_t *src_ptr, int src_stride, const uint8_t * const ref_ptr[], int ref_stride, uint32_t *sad_array);
+
+    uint32_t aom_sad128x64_c(const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride);
+    uint32_t aom_sad128x64_avx2(const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride);
+    RTCD_EXTERN uint32_t(*aom_sad128x64)(const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride);
+
+    void aom_sad128x64x4d_c(const uint8_t *src_ptr, int src_stride, const uint8_t * const ref_ptr[], int ref_stride, uint32_t *sad_array);
+    void aom_sad128x64x4d_avx2(const uint8_t *src_ptr, int src_stride, const uint8_t * const ref_ptr[], int ref_stride, uint32_t *sad_array);
+    RTCD_EXTERN void(*aom_sad128x64x4d)(const uint8_t *src_ptr, int src_stride, const uint8_t * const ref_ptr[], int ref_stride, uint32_t *sad_array);
+
+    uint32_t aom_sad16x16_c(const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride);
+    uint32_t aom_sad16x16_avx2(const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride);
+    RTCD_EXTERN uint32_t(*aom_sad16x16)(const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride);
+
+    void aom_sad16x16x4d_c(const uint8_t *src_ptr, int src_stride, const uint8_t * const ref_ptr[], int ref_stride, uint32_t *sad_array);
+    void aom_sad16x16x4d_avx2(const uint8_t *src_ptr, int src_stride, const uint8_t * const ref_ptr[], int ref_stride, uint32_t *sad_array);
+    RTCD_EXTERN void(*aom_sad16x16x4d)(const uint8_t *src_ptr, int src_stride, const uint8_t * const ref_ptr[], int ref_stride, uint32_t *sad_array);
+
+    uint32_t aom_sad16x32_c(const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride);
+    uint32_t aom_sad16x32_avx2(const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride);
+    RTCD_EXTERN uint32_t(*aom_sad16x32)(const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride);
+
+    void aom_sad16x32x4d_c(const uint8_t *src_ptr, int src_stride, const uint8_t * const ref_ptr[], int ref_stride, uint32_t *sad_array);
+    void aom_sad16x32x4d_avx2(const uint8_t *src_ptr, int src_stride, const uint8_t * const ref_ptr[], int ref_stride, uint32_t *sad_array);
+    RTCD_EXTERN void(*aom_sad16x32x4d)(const uint8_t *src_ptr, int src_stride, const uint8_t * const ref_ptr[], int ref_stride, uint32_t *sad_array);
+
+    uint32_t aom_sad16x4_c(const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride);
+    uint32_t aom_sad16x4_avx2(const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride);
+    RTCD_EXTERN uint32_t(*aom_sad16x4)(const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride);
+
+    void aom_sad16x4x4d_c(const uint8_t *src_ptr, int src_stride, const uint8_t * const ref_ptr[], int ref_stride, uint32_t *sad_array);
+    void aom_sad16x4x4d_avx2(const uint8_t *src_ptr, int src_stride, const uint8_t * const ref_ptr[], int ref_stride, uint32_t *sad_array);
+    RTCD_EXTERN void(*aom_sad16x4x4d)(const uint8_t *src_ptr, int src_stride, const uint8_t * const ref_ptr[], int ref_stride, uint32_t *sad_array);
+
+    uint32_t aom_sad16x64_c(const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride);
+    uint32_t aom_sad16x64_avx2(const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride);
+    RTCD_EXTERN uint32_t(*aom_sad16x64)(const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride);
+
+    void aom_sad16x64x4d_c(const uint8_t *src_ptr, int src_stride, const uint8_t * const ref_ptr[], int ref_stride, uint32_t *sad_array);
+    void aom_sad16x64x4d_avx2(const uint8_t *src_ptr, int src_stride, const uint8_t * const ref_ptr[], int ref_stride, uint32_t *sad_array);
+    RTCD_EXTERN void(*aom_sad16x64x4d)(const uint8_t *src_ptr, int src_stride, const uint8_t * const ref_ptr[], int ref_stride, uint32_t *sad_array);
+
+    uint32_t aom_sad16x8_c(const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride);
+    uint32_t aom_sad16x8_avx2(const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride);
+    RTCD_EXTERN uint32_t(*aom_sad16x8)(const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride);
+
+    void aom_sad16x8x4d_c(const uint8_t *src_ptr, int src_stride, const uint8_t * const ref_ptr[], int ref_stride, uint32_t *sad_array);
+    void aom_sad16x8x4d_avx2(const uint8_t *src_ptr, int src_stride, const uint8_t * const ref_ptr[], int ref_stride, uint32_t *sad_array);
+    RTCD_EXTERN void(*aom_sad16x8x4d)(const uint8_t *src_ptr, int src_stride, const uint8_t * const ref_ptr[], int ref_stride, uint32_t *sad_array);
+
+    uint32_t aom_sad32x16_c(const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride);
+    uint32_t aom_sad32x16_avx2(const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride);
+    RTCD_EXTERN uint32_t(*aom_sad32x16)(const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride);
+
+    void aom_sad32x16x4d_c(const uint8_t *src_ptr, int src_stride, const uint8_t * const ref_ptr[], int ref_stride, uint32_t *sad_array);
+    void aom_sad32x16x4d_avx2(const uint8_t *src_ptr, int src_stride, const uint8_t * const ref_ptr[], int ref_stride, uint32_t *sad_array);
+    RTCD_EXTERN void(*aom_sad32x16x4d)(const uint8_t *src_ptr, int src_stride, const uint8_t * const ref_ptr[], int ref_stride, uint32_t *sad_array);
+
+    uint32_t aom_sad32x32_c(const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride);
+    uint32_t aom_sad32x32_avx2(const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride);
+    RTCD_EXTERN uint32_t(*aom_sad32x32)(const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride);
+
+    void aom_sad32x32x4d_c(const uint8_t *src_ptr, int src_stride, const uint8_t * const ref_ptr[], int ref_stride, uint32_t *sad_array);
+    void aom_sad32x32x4d_avx2(const uint8_t *src_ptr, int src_stride, const uint8_t * const ref_ptr[], int ref_stride, uint32_t *sad_array);
+    RTCD_EXTERN void(*aom_sad32x32x4d)(const uint8_t *src_ptr, int src_stride, const uint8_t * const ref_ptr[], int ref_stride, uint32_t *sad_array);
+
+    uint32_t aom_sad32x64_c(const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride);
+    uint32_t aom_sad32x64_avx2(const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride);
+    RTCD_EXTERN uint32_t(*aom_sad32x64)(const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride);
+
+    void aom_sad32x64x4d_c(const uint8_t *src_ptr, int src_stride, const uint8_t * const ref_ptr[], int ref_stride, uint32_t *sad_array);
+    void aom_sad32x64x4d_avx2(const uint8_t *src_ptr, int src_stride, const uint8_t * const ref_ptr[], int ref_stride, uint32_t *sad_array);
+    RTCD_EXTERN void(*aom_sad32x64x4d)(const uint8_t *src_ptr, int src_stride, const uint8_t * const ref_ptr[], int ref_stride, uint32_t *sad_array);
+
+    uint32_t aom_sad32x8_c(const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride);
+    uint32_t aom_sad32x8_avx2(const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride);
+    RTCD_EXTERN uint32_t(*aom_sad32x8)(const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride);
+
+    void aom_sad32x8x4d_c(const uint8_t *src_ptr, int src_stride, const uint8_t * const ref_ptr[], int ref_stride, uint32_t *sad_array);
+    void aom_sad32x8x4d_avx2(const uint8_t *src_ptr, int src_stride, const uint8_t * const ref_ptr[], int ref_stride, uint32_t *sad_array);
+    RTCD_EXTERN void(*aom_sad32x8x4d)(const uint8_t *src_ptr, int src_stride, const uint8_t * const ref_ptr[], int ref_stride, uint32_t *sad_array);
+
+    uint32_t aom_sad4x16_c(const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride);
+    uint32_t aom_sad4x16_avx2(const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride);
+    RTCD_EXTERN uint32_t(*aom_sad4x16)(const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride);
+
+    void aom_sad4x16x4d_c(const uint8_t *src_ptr, int src_stride, const uint8_t * const ref_ptr[], int ref_stride, uint32_t *sad_array);
+    void aom_sad4x16x4d_avx2(const uint8_t *src_ptr, int src_stride, const uint8_t * const ref_ptr[], int ref_stride, uint32_t *sad_array);
+    RTCD_EXTERN void(*aom_sad4x16x4d)(const uint8_t *src_ptr, int src_stride, const uint8_t * const ref_ptr[], int ref_stride, uint32_t *sad_array);
+
+    uint32_t aom_sad4x4_c(const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride);
+    uint32_t aom_sad4x4_avx2(const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride);
+    RTCD_EXTERN uint32_t(*aom_sad4x4)(const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride);
+
+    void aom_sad4x4x4d_c(const uint8_t *src_ptr, int src_stride, const uint8_t * const ref_ptr[], int ref_stride, uint32_t *sad_array);
+    void aom_sad4x4x4d_avx2(const uint8_t *src_ptr, int src_stride, const uint8_t * const ref_ptr[], int ref_stride, uint32_t *sad_array);
+    RTCD_EXTERN void(*aom_sad4x4x4d)(const uint8_t *src_ptr, int src_stride, const uint8_t * const ref_ptr[], int ref_stride, uint32_t *sad_array);
+
+    uint32_t aom_sad4x8_c(const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride);
+    uint32_t aom_sad4x8_avx2(const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride);
+    RTCD_EXTERN uint32_t(*aom_sad4x8)(const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride);
+
+    void aom_sad4x8x4d_c(const uint8_t *src_ptr, int src_stride, const uint8_t * const ref_ptr[], int ref_stride, uint32_t *sad_array);
+    void aom_sad4x8x4d_avx2(const uint8_t *src_ptr, int src_stride, const uint8_t * const ref_ptr[], int ref_stride, uint32_t *sad_array);
+    RTCD_EXTERN void(*aom_sad4x8x4d)(const uint8_t *src_ptr, int src_stride, const uint8_t * const ref_ptr[], int ref_stride, uint32_t *sad_array);
+
+    uint32_t aom_sad64x128_c(const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride);
+    uint32_t aom_sad64x128_avx2(const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride);
+    RTCD_EXTERN uint32_t(*aom_sad64x128)(const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride);
+
+    void aom_sad64x128x4d_c(const uint8_t *src_ptr, int src_stride, const uint8_t * const ref_ptr[], int ref_stride, uint32_t *sad_array);
+    void aom_sad64x128x4d_avx2(const uint8_t *src_ptr, int src_stride, const uint8_t * const ref_ptr[], int ref_stride, uint32_t *sad_array);
+    RTCD_EXTERN void(*aom_sad64x128x4d)(const uint8_t *src_ptr, int src_stride, const uint8_t * const ref_ptr[], int ref_stride, uint32_t *sad_array);
+
+    uint32_t aom_sad64x16_c(const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride);
+    uint32_t aom_sad64x16_avx2(const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride);
+    RTCD_EXTERN uint32_t(*aom_sad64x16)(const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride);
+
+    void aom_sad64x16x4d_c(const uint8_t *src_ptr, int src_stride, const uint8_t * const ref_ptr[], int ref_stride, uint32_t *sad_array);
+    void aom_sad64x16x4d_avx2(const uint8_t *src_ptr, int src_stride, const uint8_t * const ref_ptr[], int ref_stride, uint32_t *sad_array);
+    RTCD_EXTERN void(*aom_sad64x16x4d)(const uint8_t *src_ptr, int src_stride, const uint8_t * const ref_ptr[], int ref_stride, uint32_t *sad_array);
+
+    uint32_t aom_sad64x32_c(const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride);
+    uint32_t aom_sad64x32_avx2(const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride);
+    RTCD_EXTERN uint32_t(*aom_sad64x32)(const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride);
+
+    void aom_sad64x32x4d_c(const uint8_t *src_ptr, int src_stride, const uint8_t * const ref_ptr[], int ref_stride, uint32_t *sad_array);
+    void aom_sad64x32x4d_avx2(const uint8_t *src_ptr, int src_stride, const uint8_t * const ref_ptr[], int ref_stride, uint32_t *sad_array);
+    RTCD_EXTERN void(*aom_sad64x32x4d)(const uint8_t *src_ptr, int src_stride, const uint8_t * const ref_ptr[], int ref_stride, uint32_t *sad_array);
+
+    uint32_t aom_sad64x64_c(const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride);
+    uint32_t aom_sad64x64_avx2(const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride);
+    RTCD_EXTERN uint32_t(*aom_sad64x64)(const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride);
+
+    void aom_sad64x64x4d_c(const uint8_t *src_ptr, int src_stride, const uint8_t * const ref_ptr[], int ref_stride, uint32_t *sad_array);
+    void aom_sad64x64x4d_avx2(const uint8_t *src_ptr, int src_stride, const uint8_t * const ref_ptr[], int ref_stride, uint32_t *sad_array);
+    RTCD_EXTERN void(*aom_sad64x64x4d)(const uint8_t *src_ptr, int src_stride, const uint8_t * const ref_ptr[], int ref_stride, uint32_t *sad_array);
+
+    uint32_t aom_sad8x16_c(const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride);
+    uint32_t aom_sad8x16_avx2(const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride);
+    RTCD_EXTERN uint32_t(*aom_sad8x16)(const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride);
+
+    void aom_sad8x16x4d_c(const uint8_t *src_ptr, int src_stride, const uint8_t * const ref_ptr[], int ref_stride, uint32_t *sad_array);
+    void aom_sad8x16x4d_avx2(const uint8_t *src_ptr, int src_stride, const uint8_t * const ref_ptr[], int ref_stride, uint32_t *sad_array);
+    RTCD_EXTERN void(*aom_sad8x16x4d)(const uint8_t *src_ptr, int src_stride, const uint8_t * const ref_ptr[], int ref_stride, uint32_t *sad_array);
+
+    uint32_t aom_sad8x32_c(const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride);
+    uint32_t aom_sad8x32_avx2(const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride);
+    RTCD_EXTERN uint32_t(*aom_sad8x32)(const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride);
+
+    void aom_sad8x32x4d_c(const uint8_t *src_ptr, int src_stride, const uint8_t * const ref_ptr[], int ref_stride, uint32_t *sad_array);
+    void aom_sad8x32x4d_avx2(const uint8_t *src_ptr, int src_stride, const uint8_t * const ref_ptr[], int ref_stride, uint32_t *sad_array);
+    RTCD_EXTERN void(*aom_sad8x32x4d)(const uint8_t *src_ptr, int src_stride, const uint8_t * const ref_ptr[], int ref_stride, uint32_t *sad_array);
+
+    uint32_t aom_sad8x4_c(const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride);
+    uint32_t aom_sad8x4_avx2(const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride);
+    RTCD_EXTERN uint32_t(*aom_sad8x4)(const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride);
+
+    void aom_sad8x4x4d_c(const uint8_t *src_ptr, int src_stride, const uint8_t * const ref_ptr[], int ref_stride, uint32_t *sad_array);
+    void aom_sad8x4x4d_avx2(const uint8_t *src_ptr, int src_stride, const uint8_t * const ref_ptr[], int ref_stride, uint32_t *sad_array);
+    RTCD_EXTERN void(*aom_sad8x4x4d)(const uint8_t *src_ptr, int src_stride, const uint8_t * const ref_ptr[], int ref_stride, uint32_t *sad_array);
+
+    uint32_t aom_sad8x8_c(const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride);
+    uint32_t aom_sad8x8_avx2(const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride);
+    RTCD_EXTERN uint32_t(*aom_sad8x8)(const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride);
+
+    void aom_sad8x8x4d_c(const uint8_t *src_ptr, int src_stride, const uint8_t * const ref_ptr[], int ref_stride, uint32_t *sad_array);
+    void aom_sad8x8x4d_avx2(const uint8_t *src_ptr, int src_stride, const uint8_t * const ref_ptr[], int ref_stride, uint32_t *sad_array);
+    RTCD_EXTERN void(*aom_sad8x8x4d)(const uint8_t *src_ptr, int src_stride, const uint8_t * const ref_ptr[], int ref_stride, uint32_t *sad_array);
+#endif /* AOM_SAD_PORTING*/
+
     void aom_ifft16x16_float_avx2(const float *input, float *temp, float *output);
     RTCD_EXTERN void(*aom_ifft16x16_float)(const float *input, float *temp, float *output);
 
@@ -2311,6 +2489,7 @@ extern "C" {
         highbd_variance64 = highbd_variance64_c;
         if (flags & HAS_AVX2) highbd_variance64 = highbd_variance64_avx2;
 
+
         //aom_highbd_8_mse16x16 = aom_highbd_8_mse16x16_c;
         if (flags & HAS_SSE2) aom_highbd_8_mse16x16 = aom_highbd_8_mse16x16_sse2;
 
@@ -2877,7 +3056,145 @@ extern "C" {
         aom_h_predictor_8x4 = aom_h_predictor_8x4_c;
         if (flags & HAS_SSE2) aom_h_predictor_8x4 = aom_h_predictor_8x4_sse2;
 
- 
+#if AOM_SAD_PORTING
+        //SAD
+#if INTRINSIC_OPT_2
+        aom_sad4x4 = aom_sad4x4_c;
+        if (flags & HAS_AVX2) aom_sad4x4 = aom_sad4x4_avx2;
+        aom_sad4x4x4d = aom_sad4x4x4d_c;
+        if (flags & HAS_AVX2) aom_sad4x4x4d = aom_sad4x4x4d_avx2;
+        aom_sad4x16 = aom_sad4x16_c;
+        if (flags & HAS_AVX2) aom_sad4x16 = aom_sad4x16_avx2;
+        aom_sad4x16x4d = aom_sad4x16x4d_c;
+        if (flags & HAS_AVX2) aom_sad4x16x4d = aom_sad4x16x4d_avx2;
+        aom_sad4x8 = aom_sad4x8_c;
+        if (flags & HAS_AVX2) aom_sad4x8 = aom_sad4x8_avx2;
+        aom_sad4x8x4d = aom_sad4x8x4d_c;
+        if (flags & HAS_AVX2) aom_sad4x8x4d = aom_sad4x8x4d_avx2;
+        aom_sad64x128 = aom_sad64x128_c;
+        if (flags & HAS_AVX2) aom_sad64x128 = aom_sad64x128_avx2;
+        aom_sad64x128x4d = aom_sad64x128x4d_c;
+        if (flags & HAS_AVX2) aom_sad64x128x4d = aom_sad64x128x4d_avx2;
+        aom_sad64x16 = aom_sad64x16_c;
+        if (flags & HAS_AVX2) aom_sad64x16 = aom_sad64x16_avx2;
+        aom_sad64x16x4d = aom_sad64x16x4d_c;
+        if (flags & HAS_AVX2) aom_sad64x16x4d = aom_sad64x16x4d_avx2;
+        aom_sad64x32 = aom_sad64x32_c;
+        if (flags & HAS_AVX2) aom_sad64x32 = aom_sad64x32_avx2;
+        aom_sad64x32x4d = aom_sad64x32x4d_c;
+        if (flags & HAS_AVX2) aom_sad64x32x4d = aom_sad64x32x4d_avx2;
+        aom_sad64x64 = aom_sad64x64_c;
+        if (flags & HAS_AVX2) aom_sad64x64 = aom_sad64x64_avx2;
+        aom_sad64x64x4d = aom_sad64x64x4d_c;
+        if (flags & HAS_AVX2) aom_sad64x64x4d = aom_sad64x64x4d_avx2;
+        aom_sad8x16 = aom_sad8x16_c;
+        if (flags & HAS_AVX2) aom_sad8x16 = aom_sad8x16_avx2;
+        aom_sad8x16x4d = aom_sad8x16x4d_c;
+        if (flags & HAS_AVX2) aom_sad8x16x4d = aom_sad8x16x4d_avx2;
+        aom_sad8x32 = aom_sad8x32_c;
+        if (flags & HAS_AVX2) aom_sad8x32 = aom_sad8x32_avx2;
+        aom_sad8x32x4d = aom_sad8x32x4d_c;
+        if (flags & HAS_AVX2) aom_sad8x32x4d = aom_sad8x32x4d_avx2;
+        aom_sad8x8 = aom_sad8x8_c;
+        if (flags & HAS_AVX2) aom_sad8x8 = aom_sad8x8_avx2;
+        aom_sad8x8x4d = aom_sad8x8x4d_c;
+        if (flags & HAS_AVX2) aom_sad8x8x4d = aom_sad8x8x4d_avx2;
+        aom_sad16x4 = aom_sad16x4_c;
+        if (flags & HAS_AVX2) aom_sad16x4 = aom_sad16x4_avx2;
+        aom_sad16x4x4d = aom_sad16x4x4d_c;
+        if (flags & HAS_AVX2) aom_sad16x4x4d = aom_sad16x4x4d_avx2;
+        aom_sad32x8 = aom_sad32x8_c;
+        if (flags & HAS_AVX2) aom_sad32x8 = aom_sad32x8_avx2;
+        aom_sad32x8x4d = aom_sad32x8x4d_c;
+        if (flags & HAS_AVX2) aom_sad32x8x4d = aom_sad32x8x4d_avx2;
+        aom_sad16x64 = aom_sad16x64_c;
+        if (flags & HAS_AVX2) aom_sad16x64 = aom_sad16x64_avx2;
+        aom_sad16x64x4d = aom_sad16x64x4d_c;
+        if (flags & HAS_AVX2) aom_sad16x64x4d = aom_sad16x64x4d_avx2;
+        aom_sad128x128 = aom_sad128x128_c;
+        if (flags & HAS_AVX2) aom_sad128x128 = aom_sad128x128_avx2;
+        aom_sad128x128x4d = aom_sad128x128x4d_c;
+        if (flags & HAS_AVX2) aom_sad128x128x4d = aom_sad128x128x4d_avx2;
+        aom_sad128x64 = aom_sad128x64_c;
+        if (flags & HAS_AVX2) aom_sad128x64 = aom_sad128x64_avx2;
+        aom_sad128x64x4d = aom_sad128x64x4d_c;
+        if (flags & HAS_AVX2) aom_sad128x64x4d = aom_sad128x64x4d_avx2;
+        aom_sad32x16 = aom_sad32x16_c;
+        if (flags & HAS_AVX2) aom_sad32x16 = aom_sad32x16_avx2;
+        aom_sad32x16x4d = aom_sad32x16x4d_c;
+        if (flags & HAS_AVX2) aom_sad32x16x4d = aom_sad32x16x4d_avx2;
+        aom_sad16x32 = aom_sad16x32_c;
+        if (flags & HAS_AVX2) aom_sad16x32 = aom_sad16x32_avx2;
+        aom_sad16x32x4d = aom_sad16x32x4d_c;
+        if (flags & HAS_AVX2) aom_sad16x32x4d = aom_sad16x32x4d_avx2;
+        aom_sad32x64 = aom_sad32x64_c;
+        if (flags & HAS_AVX2) aom_sad32x64 = aom_sad32x64_avx2;
+        aom_sad32x64x4d = aom_sad32x64x4d_c;
+        if (flags & HAS_AVX2) aom_sad32x64x4d = aom_sad32x64x4d_avx2;
+        aom_sad32x32 = aom_sad32x32_c;
+        if (flags & HAS_AVX2) aom_sad32x32 = aom_sad32x32_avx2;
+        aom_sad32x32x4d = aom_sad32x32x4d_c;
+        if (flags & HAS_AVX2) aom_sad32x32x4d = aom_sad32x32x4d_avx2;
+        aom_sad16x16 = aom_sad16x16_c;
+        if (flags & HAS_AVX2) aom_sad16x16 = aom_sad16x16_avx2;
+        aom_sad16x16x4d = aom_sad16x16x4d_c;
+        if (flags & HAS_AVX2) aom_sad16x16x4d = aom_sad16x16x4d_avx2;
+        aom_sad16x8 = aom_sad16x8_c;
+        if (flags & HAS_AVX2) aom_sad16x8 = aom_sad16x8_avx2;
+        aom_sad16x8x4d = aom_sad16x8x4d_c;
+        if (flags & HAS_AVX2) aom_sad16x8x4d = aom_sad16x8x4d_avx2;
+        aom_sad8x4 = aom_sad8x4_c;
+        if (flags & HAS_AVX2) aom_sad8x4 = aom_sad8x4_avx2;
+        aom_sad8x4x4d = aom_sad8x4x4d_c;
+        if (flags & HAS_AVX2) aom_sad8x4x4d = aom_sad8x4x4d_avx2;
+#else
+        aom_sad4x4 = aom_sad4x4_c;
+        aom_sad4x4x4d = aom_sad4x4x4d_c;
+        aom_sad4x16 = aom_sad4x16_c;
+        aom_sad4x16x4d = aom_sad4x16x4d_c;
+        aom_sad4x8 = aom_sad4x8_c;
+        aom_sad4x8x4d = aom_sad4x8x4d_c;
+        aom_sad64x128 = aom_sad64x128_c;
+        aom_sad64x128x4d = aom_sad64x128x4d_c;
+        aom_sad64x16 = aom_sad64x16_c;
+        aom_sad64x16x4d = aom_sad64x16x4d_c;
+        aom_sad64x32 = aom_sad64x32_c;
+        aom_sad64x32x4d = aom_sad64x32x4d_c;
+        aom_sad64x64 = aom_sad64x64_c;
+        aom_sad64x64x4d = aom_sad64x64x4d_c;
+        aom_sad8x16 = aom_sad8x16_c;
+        aom_sad8x16x4d = aom_sad8x16x4d_c;
+        aom_sad8x32 = aom_sad8x32_c;
+        aom_sad8x32x4d = aom_sad8x32x4d_c;
+        aom_sad8x8 = aom_sad8x8_c;
+        aom_sad8x8x4d = aom_sad8x8x4d_c;
+        aom_sad16x4 = aom_sad16x4_c;
+        aom_sad16x4x4d = aom_sad16x4x4d_c;
+        aom_sad32x8 = aom_sad32x8_c;
+        aom_sad32x8x4d = aom_sad32x8x4d_c;
+        aom_sad16x64 = aom_sad16x64_c;
+        aom_sad16x64x4d = aom_sad16x64x4d_c;
+        aom_sad128x128 = aom_sad128x128_c;
+        aom_sad128x128x4d = aom_sad128x128x4d_c;
+        aom_sad128x64 = aom_sad128x64_c;
+        aom_sad128x64x4d = aom_sad128x64x4d_c;
+        aom_sad32x16 = aom_sad32x16_c;
+        aom_sad32x16x4d = aom_sad32x16x4d_c;
+        aom_sad16x32 = aom_sad16x32_c;
+        aom_sad16x32x4d = aom_sad16x32x4d_c;
+        aom_sad32x64 = aom_sad32x64_c;
+        aom_sad32x64x4d = aom_sad32x64x4d_c;
+        aom_sad32x32 = aom_sad32x32_c;
+        aom_sad32x32x4d = aom_sad32x32x4d_c;
+        aom_sad16x16 = aom_sad16x16_c;
+        aom_sad16x16x4d = aom_sad16x16x4d_c;
+        aom_sad16x8 = aom_sad16x8_c;
+        aom_sad16x8x4d = aom_sad16x8x4d_c;
+        aom_sad8x4 = aom_sad8x4_c;
+        aom_sad8x4x4d = aom_sad8x4x4d_c;
+#endif
+#endif /* AOM_SAD_PORTING */
+
         //QIQ
 #if INTRINSIC_OPT_2
         aom_quantize_b_64x64 = aom_quantize_b_64x64_c_II;
