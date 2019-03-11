@@ -107,10 +107,15 @@ void* set_me_hme_params_oq(
     me_context_ptr->number_hme_search_region_in_width = 2;
     me_context_ptr->number_hme_search_region_in_height = 2;
 
-#if SC_HME_ME
+#if SC_HME_ME || BIG_ME_TEST
 #if QUICK_ME_CLEANUP
-    uint8_t  sc_mul_hme = picture_control_set_ptr->sc_content_detected ? 100 : 100;
-    uint8_t  sc_mul_me = picture_control_set_ptr->sc_content_detected ? 100 : 100;
+#if BIG_ME_TEST
+    uint16_t  sc_mul_hme = 150;
+    uint16_t  sc_mul_me = 150;
+#else
+    uint16_t  sc_mul_hme = picture_control_set_ptr->sc_content_detected ? 100 : 100;
+    uint16_t  sc_mul_me = picture_control_set_ptr->sc_content_detected ? 100 : 100;
+#endif
     // HME Level0
     me_context_ptr->hme_level0_total_search_area_width = (HmeLevel0TotalSearchAreaWidth[input_resolution][hmeMeLevel] * sc_mul_hme) / 100;
     me_context_ptr->hme_level0_total_search_area_height = (HmeLevel0TotalSearchAreaHeight[input_resolution][hmeMeLevel] * sc_mul_hme) / 100;
@@ -181,7 +186,7 @@ void* set_me_hme_params_oq(
     me_context_ptr->search_area_height = SearchAreaHeight[input_resolution][hmeMeLevel];
 #endif
 
-#if BIG_ME_TEST
+#if 0 // BIG_ME_TEST
     me_context_ptr->search_area_width = MAX_SEARCH_AREA_WIDTH;
     me_context_ptr->search_area_height = MAX_SEARCH_AREA_HEIGHT;
 #endif
