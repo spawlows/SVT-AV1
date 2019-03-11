@@ -344,6 +344,14 @@ extern "C" {
         // [first hash/second hash]
         // [two buffers used ping-pong]
         uint32_t *hash_value_buffer[2][2];
+#if IBC_EARLY_0
+        uint8_t  is_exhaustive_allowed;
+#endif
+#if HASH_X
+        CRC_CALCULATOR crc_calculator1;
+        CRC_CALCULATOR crc_calculator2;
+#endif
+
     } IntraBcContext;
 #endif
 

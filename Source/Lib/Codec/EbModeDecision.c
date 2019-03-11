@@ -2832,6 +2832,15 @@ void  intra_bc_search(
     IntraBcContext  x_st;
     IntraBcContext  *x = &x_st;
     //fill x with what needed.
+#if IBC_EARLY_0
+    x->is_exhaustive_allowed =  context_ptr->blk_geom->bwidth == 4 || context_ptr->blk_geom->bheight == 4 ? 1 : 0;
+#endif
+#if HASH_X
+    //CHKN crc calculator could be moved to mdContext and these init at init time.
+    av1_crc_calculator_init(&x->crc_calculator1, 24, 0x5D6DCB);
+    av1_crc_calculator_init(&x->crc_calculator2, 24, 0x864CFB);
+#endif
+
     x->xd = cu_ptr->av1xd;
     x->nmv_vec_cost = context_ptr->md_rate_estimation_ptr->nmv_vec_cost;
     x->mv_cost_stack = context_ptr->md_rate_estimation_ptr->nmvcoststack;
@@ -3391,7 +3400,7 @@ EbErrorType ProductGenerateMdCandidatesCu(
 #endif
     }
 
-#if INTRA_INTER_FAST_LOOP
+#if 0//INTRA_INTER_FAST_LOOP
     // Track the total number of fast intra candidates
     context_ptr->fast_candidate_intra_count = canTotalCnt;
 #endif
@@ -3406,6 +3415,11 @@ EbErrorType ProductGenerateMdCandidatesCu(
             context_ptr->cu_ptr,
             &canTotalCnt
         );
+#endif
+
+#if INTRA_INTER_FAST_LOOP
+    // Track the total number of fast intra candidates
+    context_ptr->fast_candidate_intra_count = canTotalCnt;
 #endif
 
     if (slice_type != I_SLICE) {

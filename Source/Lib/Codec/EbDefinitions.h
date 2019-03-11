@@ -212,11 +212,13 @@ extern "C" {
 
 #define SHUT_FULL_DENOISE                               1
 
-#define ICOPY       0 //Intra Block Copy
+#define ICOPY       1 //Intra Block Copy
 #if ICOPY
 #define IBC_EARLY_0 1
 #define HASH_ME     0
 #define HASH_X      1
+#define IBC_SW_WAVEFRONT    1
+#define FIX_SAD   1
 #endif
 
 #define ADD_CDEF_FILTER_LEVEL                           1

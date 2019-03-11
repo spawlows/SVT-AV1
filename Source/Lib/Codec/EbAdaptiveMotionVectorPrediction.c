@@ -2157,6 +2157,24 @@ int av1_is_dv_valid(const MV dv,
         src_sb64_col >= active_sb64_col - INTRABC_DELAY_SB64 + wf_offset)
         return 0;
 
+#if IBC_SW_WAVEFRONT
+    //add a SW-Wavefront constraint
+    if (sb_size == 64)
+    {
+        if (src_sb64_col > active_sb64_col + (active_sb_row - src_sb_row))           
+            return 0;
+    }
+    else
+    {
+        const int src_sb128_col = ((src_right_edge >> 3) - 1) >> 7;
+        const int active_sb128_col = (mi_col * MI_SIZE) >> 7;
+
+        if (src_sb128_col > active_sb128_col + (active_sb_row - src_sb_row))          
+            return 0;
+
+    }
+#endif
+
     return 1;
 }
 
