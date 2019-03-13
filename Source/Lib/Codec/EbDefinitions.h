@@ -146,7 +146,7 @@ extern "C" {
 #define TUNED_SETTINGS_FOR_M0                           1
 #define TUNED_SETTINGS_FOR_M1                           1
 #define CONTENT_BASED_QPS                               1 // Adaptive QP Scaling (active for I only)
-#define NSQ_ME_OPT                                      1
+#define NSQ_ME_OPT                                      0
 /********************************************************/
 /****************** Pre-defined Values ******************/
 /********************************************************/
