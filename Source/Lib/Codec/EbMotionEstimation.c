@@ -56,9 +56,42 @@ int32_t OisPointTh[3][MAX_TEMPORAL_LAYERS][OIS_TH_COUNT] = {
     }
 };
 
+#if NSQ_ME_OPT
+void ext_eigth_sad_calculation_nsq_c(
+    uint32_t   p_sad8x8[64][8],
+    uint32_t   p_sad16x16[16][8],
+    uint32_t   p_sad32x32[4][8],
+    uint32_t  *p_best_sad64x32,
+    uint32_t  *p_best_mv64x32,
+    uint32_t  *p_best_sad32x16,
+    uint32_t  *p_best_mv32x16,
+    uint32_t  *p_best_sad16x8,
+    uint32_t  *p_best_mv16x8,
+    uint32_t  *p_best_sad32x64,
+    uint32_t  *p_best_mv32x64,
+    uint32_t  *p_best_sad16x32,
+    uint32_t  *p_best_mv16x32,
+    uint32_t  *p_best_sad8x16,
+    uint32_t  *p_best_mv8x16,
+    uint32_t  *p_best_sad32x8,
+    uint32_t  *p_best_mv32x8,
+    uint32_t  *p_best_sad8x32,
+    uint32_t  *p_best_mv8x32,
+    uint32_t  *p_best_sad64x16,
+    uint32_t  *p_best_mv64x16,
+    uint32_t  *p_best_sad16x64,
+    uint32_t  *p_best_mv16x64,
+    uint32_t   mv);
 
-
-
+void ext_eight_sad_calculation_32x32_64x64_c(
+    uint32_t   p_sad16x16[16][8],
+    uint32_t  *p_best_sad32x32,
+    uint32_t  *p_best_sad64x64,
+    uint32_t  *p_best_mv32x32,
+    uint32_t  *p_best_mv64x64,
+    uint32_t   mv,
+    uint32_t  p_sad32x32[4][8]);
+#endif
 
 #define AVCCODEL
 /********************************************
@@ -150,6 +183,22 @@ static EB_SADCALCULATION32X32AND64X64_TYPE SadCalculation_32x32_64x64_funcPtrArr
     // AVX2
     sad_calculation_32x32_64x64_sse2_intrin,
 };
+
+#if NSQ_ME_OPT
+static EB_EIGHTSADCALCULATIONNSQ_TYPE Ext_eigth_sad_calculation_nsq_funcPtrArray[ASM_TYPE_TOTAL] = {
+    // NON_AVX2
+    ext_eigth_sad_calculation_nsq_c,
+    // AVX2
+    ext_eigth_sad_calculation_nsq_avx2,
+};
+
+static EB_EXT_EIGHT_SAD_CALCULATION_32x32_64x64_TYPE Ext_ext_eight_sad_calculation_32x32_64x64_funcPtrArray[ASM_TYPE_TOTAL] = {
+    // NON_AVX2
+    ext_eight_sad_calculation_32x32_64x64_c,
+    // AVX2
+    ext_eight_sad_calculation_32x32_64x64_avx2,
+};
+#endif
 
 /*******************************************
 Calcualte SAD for 16x16 and its 8x8 sublcoks
@@ -1064,7 +1113,7 @@ static EB_EXTSADCALCULATION_TYPE ExtSadCalculation_funcPtrArray[ASM_TYPE_TOTAL] 
 Calcualte SAD for Rect H, V and H4, V4 partitions
 and update its Motion info if the result SAD is better
 ****************************************************/
-void ext_eigth_sad_calculation_nsq(
+void ext_eigth_sad_calculation_nsq_c(
     uint32_t   p_sad8x8[64][8],
     uint32_t   p_sad16x16[16][8],
     uint32_t   p_sad32x32[4][8],
@@ -1160,7 +1209,7 @@ void ext_eigth_sad_calculation_nsq(
         }
 
         sad_32x16[5] = p_sad16x16[10][search_index] + p_sad16x16[11][search_index];
-        if (sad < p_best_sad32x16[5]) {
+        if (sad_32x16[5] < p_best_sad32x16[5]) {
             p_best_sad32x16[5] = sad_32x16[5];
             x_mv = _MVXT(mv) + (int16_t)search_index * 4;
             y_mv = _MVYT(mv);
@@ -2175,7 +2224,7 @@ Calcualte SAD for 32x32,64x64 from 16x16
 and check if there is improvment, if yes keep
 the best SAD+MV
 *******************************************/
-void ext_eight_sad_calculation_32x32_64x64(
+void ext_eight_sad_calculation_32x32_64x64_c(
     uint32_t   p_sad16x16[16][8],
     uint32_t  *p_best_sad32x32,
     uint32_t  *p_best_sad64x64,
@@ -2231,6 +2280,7 @@ void ext_eight_sad_calculation_32x32_64x64(
         }
     }
 }
+
 /*******************************************
 * open_loop_me_get_search_point_results_block
 *******************************************/
@@ -2289,7 +2339,6 @@ static void open_loop_me_get_eight_search_point_results_block(
     uint32_t  *p_best_mv16x64 = context_ptr->p_best_mv16x64;
 
     //TODO: blockIndex searchPositionIndex could be removed  + Connect asm_type
-    (void)asm_type;
 
     const uint32_t  src_stride = context_ptr->sb_src_stride;
     srcNext16x16Offset = src_stride << 4;
@@ -2370,9 +2419,9 @@ static void open_loop_me_get_eight_search_point_results_block(
     searchPositionIndex = searchPositionIndex + 16;
     ext_eight_sad_calculation_8x8_16x16(src_ptr + blockIndex, src_stride, refPtr + searchPositionIndex, reflumaStride, &p_best_sad8x8[60], &p_best_sad16x16[15], &p_best_mv8x8[60], &p_best_mv16x16[15], currMV, context_ptr->p_eight_sad16x16, 15, context_ptr->p_eight_sad8x8, 60);
 
-    ext_eight_sad_calculation_32x32_64x64(context_ptr->p_eight_sad16x16, p_best_sad32x32, p_best_sad64x64, p_best_mv32x32, p_best_mv64x64, currMV, context_ptr->p_eight_sad32x32);
+    Ext_ext_eight_sad_calculation_32x32_64x64_funcPtrArray[asm_type](context_ptr->p_eight_sad16x16, p_best_sad32x32, p_best_sad64x64, p_best_mv32x32, p_best_mv64x64, currMV, context_ptr->p_eight_sad32x32);
 
-    ext_eigth_sad_calculation_nsq(
+    Ext_eigth_sad_calculation_nsq_funcPtrArray[asm_type](
         context_ptr->p_eight_sad8x8,
         context_ptr->p_eight_sad16x16,
         context_ptr->p_eight_sad32x32,
