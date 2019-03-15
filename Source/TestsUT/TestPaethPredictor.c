@@ -539,6 +539,23 @@ void aom_highbd_paeth_predictor_4x16_avx2(uint16_t *dst, ptrdiff_t stride,
         dst += stride;
     }
 }
+
+void aom_highbd_paeth_predictor_2x2_avx2(uint16_t *dst, ptrdiff_t stride,
+    int bw, int bh, const uint16_t *above, const uint16_t *left, int bd) {
+    const __m128i t0 = _mm_set1_epi32(((uint32_t*)above)[0]);
+
+    const __m128i tl = _mm_set1_epi16(above[-1]);
+
+    __m128i l16 = _mm_setr_epi16(left[0], left[0], left[1], left[1],0,0,0,0);
+    __m256i test1 = _mm256_zextsi128_si256(l16);
+    __m256i test2 = _mm256_zextsi128_si256(t0);
+    __m256i test3 = _mm256_zextsi128_si256(tl);
+    __m128i row = _mm256_castsi256_si128(paeth_pred(&test1, &test2, &test3));
+
+    ((uint32_t*)dst)[0] = _mm_extract_epi32(row, 0);
+    dst += stride;
+    ((uint32_t*)dst)[0] = _mm_extract_epi32(row, 1);
+}
 //**************************END funciton AVX2*********************************
 int TestCase_highbd_paeth_predictor(void** context, enum TEST_STAGE stage, int test_id, int verbose)
 {
@@ -583,7 +600,7 @@ int TestCase_highbd_paeth_predictor(void** context, enum TEST_STAGE stage, int t
 
         switch (cnt->tx_type) {
         case paeth_2x2:
-            cnt->b = highbd_paeth_predictor_c;
+            cnt->b = aom_highbd_paeth_predictor_2x2_avx2;
             cnt->bw = 2;
             cnt->bh = 2;
             break;
