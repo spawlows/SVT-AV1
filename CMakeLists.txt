@@ -59,6 +59,9 @@ endif()
 add_subdirectory (Source/Lib)
 add_subdirectory (Source/App)
 add_subdirectory (Source/SimpleApp)
+
+add_subdirectory (Source/TestsUT)
+
 if (BUILD_TESTING)
     add_subdirectory (test)
     add_subdirectory (third_party/googletest)
