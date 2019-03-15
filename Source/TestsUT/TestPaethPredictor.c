@@ -90,7 +90,7 @@ enum highbd_paeth_enum {
     paeth_32x64,
     paeth_64x16,
     paeth_64x32,
-
+    paeth_size
 };
 const char* Names[] = { EP(paeth_2x2), EP(paeth_4x4),EP(paeth_8x8),
 EP(paeth_16x16), EP(paeth_32x32),EP(paeth_64x64),
@@ -121,7 +121,7 @@ int TestCase_highbd_paeth_predictor(void** context, enum TEST_STAGE stage, int t
     } *cnt;
 
     if (stage == STAGE_GET_ID_MAX) {
-        return 20;  //Once test id
+        return paeth_size;  //Once test id
     }
 
     if (stage == STAGE_CREATE) {
@@ -137,11 +137,11 @@ int TestCase_highbd_paeth_predictor(void** context, enum TEST_STAGE stage, int t
 
 
         cnt->a = highbd_paeth_predictor_c;
-        //cnt->b = highbd_paeth_predictor_c;
 
         cnt->rand = 0;
+        cnt->tx_type = test_id;
 
-        switch (test_id) {
+        switch (cnt->tx_type) {
         case paeth_2x2:
             cnt->b = highbd_paeth_predictor_c;
             cnt->bw = 2;
