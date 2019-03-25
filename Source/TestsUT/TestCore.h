@@ -25,6 +25,7 @@ int TestCase_sad_calculation_32x32_64x64(void** context, enum TEST_STAGE stage, 
 int TestCase_sad_calculation_nsq(void** context, enum TEST_STAGE stage, int test_id, int verbose);
 int TestCase_sad_calculation_8x8_16x16(void** context, enum TEST_STAGE stage, int test_id, int verbose);
 int TestCase_highbd_paeth_predictor(void** context, enum TEST_STAGE stage, int test_id, int verbose);
+int TestCase_fill_rect(void** context, enum TEST_STAGE stage, int test_id, int verbose);
 
 int TestCase_fwd_txfm2d_64x64(void** context, enum TEST_STAGE stage, int test_id, int verbose);
 

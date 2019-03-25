@@ -47,7 +47,8 @@ typedef struct timeval Timer;
 #endif
 
 fnTestCase cases[] = {
-    TestCase_highbd_paeth_predictor
+    TestCase_fill_rect
+    //TestCase_highbd_paeth_predictor
     //TestCase_sad_calculation_8x8_16x16,
     //TestCase_sad_calculation_32x32_64x64,
     //TestCase_sad_calculation_nsq

@@ -794,3 +794,248 @@ int TestCase_highbd_paeth_predictor(void** context, enum TEST_STAGE stage, int t
 
     return -1;
 }
+
+
+
+
+
+///////////////////////////fill rect
+typedef void(*fnfill_rect)(uint16_t *dst, int32_t dstride, int32_t v, int32_t h,
+    uint16_t x);
+
+static INLINE void fill_rect(uint16_t *dst, int32_t dstride, int32_t v, int32_t h,
+    uint16_t x) {
+    for (int32_t i = 0; i < v; i++) {
+        for (int32_t j = 0; j < h; j++) {
+            dst[i * dstride + j] = x;
+        }
+    }
+}
+
+static INLINE void fill_rect_avx2(uint16_t *dst, int32_t dstride, int32_t v, int32_t h,
+    uint16_t x) {
+    int32_t i, j;
+
+    if (h >= 16) {
+        __m256i x_avx2 = _mm256_set1_epi16(x);
+        for (i = 0; i < v; i++) {
+            for (j = 0; j < h; j+=16) {
+                _mm256_storeu_si256((__m256i*)(dst + i * dstride + j), x_avx2);
+            }
+            for (j; j < h; j++) {
+                dst[i * dstride + j] = x;
+            }
+        }
+    }
+    else if(h >= 8){
+        __m128i x_avx = _mm_set1_epi16(x);
+        for (i = 0; i < v; i++) {
+            for (j = 0; j < h; j+=8) {
+                _mm_storeu_si128((__m128i*)(dst+ i * dstride + j), x_avx);
+            }
+            for (j; j < h; j++) {
+                dst[i * dstride + j] = x;
+            }
+        }
+    }
+    else {
+        for (i = 0; i < v; i++) {
+            for (j = 0; j < h; j++) {
+                dst[i * dstride + j] = x;
+            }
+        }
+    }
+}
+int TestCase_fill_rect(void** context, enum TEST_STAGE stage, int test_id, int verbose)
+{
+    struct contextX {
+
+        uint16_t dst_src[100 * 100]; //Size to cover all tests
+        uint16_t dst_cpy[100 * 100]; //Size to cover all tests
+        ptrdiff_t stride;
+        int bw;
+        int bh;
+
+        uint16_t x;
+
+        int bd;
+
+
+        uint32_t tx_type;
+        fnfill_rect a;
+        fnfill_rect b;
+        int rand;
+    } *cnt;
+
+    if (stage == STAGE_GET_ID_MAX) {
+        return paeth_size;  //Once test id
+    }
+
+    if (stage == STAGE_CREATE) {
+        *context = malloc(sizeof(struct contextX));
+        cnt = (struct contextX*)*context;
+
+        memset(cnt->dst_src, 0, sizeof(cnt->dst_src));
+        memset(cnt->dst_cpy, 0, sizeof(cnt->dst_cpy));
+        cnt->stride = 100;
+
+
+        printf("Create test: %s case %i/%i %s\n", __FUNCTION__, test_id + 1, (TestCase_fill_rect)(NULL, STAGE_GET_ID_MAX, 0, 0), Names[test_id]);
+
+
+        cnt->a = fill_rect;
+        cnt->b = fill_rect_avx2;
+
+        cnt->rand = 0;
+        cnt->tx_type = test_id;
+
+
+        switch (cnt->tx_type) {
+        case paeth_2x2:
+            cnt->bw = 2;
+            cnt->bh = 2;
+            break;
+        case paeth_4x4:
+            cnt->bw = 4;
+            cnt->bh = 4;
+            break;
+        case paeth_8x8:
+            cnt->bw = 8;
+            cnt->bh = 8;
+            break;
+        case paeth_16x16:
+            cnt->bw = 16;
+            cnt->bh = 16;
+            break;
+        case paeth_32x32:
+            cnt->bw = 32;
+            cnt->bh = 32;
+            break;
+        case paeth_64x64:
+            cnt->bw = 64;
+            cnt->bh = 64;
+            break;
+        case paeth_4x8:
+            cnt->bw = 4;
+            cnt->bh = 8;
+            break;
+        case paeth_4x16:
+            cnt->bw = 4;
+            cnt->bh = 16;
+            break;
+        case paeth_8x4:
+            cnt->bw = 8;
+            cnt->bh = 4;
+            break;
+        case paeth_8x16:
+            cnt->bw = 8;
+            cnt->bh = 16;
+            break;
+        case paeth_8x32:
+            cnt->bw = 8;
+            cnt->bh = 32;
+            break;
+        case paeth_16x4:
+            cnt->bw = 16;
+            cnt->bh = 4;
+            break;
+        case paeth_16x8:
+            cnt->bw = 16;
+            cnt->bh = 8;
+            break;
+        case paeth_16x32:
+            cnt->bw = 16;
+            cnt->bh = 32;
+            break;
+        case paeth_16x64:
+            cnt->bw = 16;
+            cnt->bh = 64;
+            break;
+        case paeth_32x8:
+            cnt->bw = 32;
+            cnt->bh = 8;
+            break;
+        case paeth_32x16:
+            cnt->bw = 32;
+            cnt->bh = 16;
+            break;
+        case paeth_32x64:
+            cnt->bw = 32;
+            cnt->bh = 64;
+            break;
+        case paeth_64x16:
+            cnt->bw = 64;
+            cnt->bh = 16;
+            break;
+        case paeth_64x32:
+            cnt->bw = 64;
+            cnt->bh = 32;
+            break;
+        }
+
+
+        return 0;
+    }
+
+    assert(*context);
+    cnt = (struct contextX*)*context;
+
+    switch (stage) {
+    case STAGE_RAND_VALUES: {
+        if (cnt->rand == 0) {
+                cnt->x = rand();
+        }
+        else if (cnt->rand == 1) {
+            cnt->x = rand();
+        }
+        else if (cnt->rand == 2) {
+            cnt->x = rand();
+        }
+        else {
+            cnt->x = rand();
+        }
+
+
+        ++cnt->rand;
+        return 0;
+    }
+    case STAGE_EXECUTE_A: {
+        cnt->a(cnt->dst_src, cnt->stride, cnt->bw, cnt->bh, cnt->x);
+        return 0;
+    }
+    case STAGE_EXECUTE_B: {
+        cnt->b(cnt->dst_cpy, cnt->stride, cnt->bw, cnt->bh, cnt->x);
+        return 0;
+    }
+    case STAGE_CHECK: {
+
+        if (memcmp(cnt->dst_src, cnt->dst_cpy, sizeof(cnt->dst_src))) {
+            printf("Invalid dst buffers!!! [ERROR]\n");
+            return -1;
+        }
+        else if (!verbose) {
+            printf("Correct dst buffers. [OK]\n");
+        }
+
+
+        return 0;
+
+        break;
+    }
+    case STAGE_DESTROY: {
+
+        free(*context);
+        *context = NULL;
+        return 0;
+        break;
+    }
+    default:
+
+
+
+
+        assert(0);
+    }
+
+    return -1;
+}
