@@ -103,12 +103,17 @@ EP(paeth_64x16), EP(paeth_64x32)};
 //*******************************funcitons AVX2*******************************
 static INLINE __m256i paeth_pred(const __m256i *left, const __m256i *top,
     const __m256i *topleft) {
-    const __m256i base =
-        _mm256_sub_epi16(_mm256_add_epi16(*top, *left), *topleft);
+    /*const __m256i base =
+        _mm256_sub_epi16(_mm256_add_epi16(*top, *left), *topleft);*/
 
-    __m256i pl = _mm256_abs_epi16(_mm256_sub_epi16(base, *left));
-    __m256i pt = _mm256_abs_epi16(_mm256_sub_epi16(base, *top));
-    __m256i ptl = _mm256_abs_epi16(_mm256_sub_epi16(base, *topleft));
+    /*__m256i pl = _mm256_abs_epi16(_mm256_sub_epi16(*top, *topleft));
+    __m256i pt = _mm256_abs_epi16(_mm256_sub_epi16(*left, *topleft));
+    __m256i ptl = _mm256_abs_epi16(_mm256_add_epi16(pl,pt));*/
+    __m256i pl = _mm256_sub_epi16(*top, *topleft);
+    __m256i pt = _mm256_sub_epi16(*left, *topleft);
+    __m256i ptl = _mm256_abs_epi16(_mm256_add_epi16(pl, pt));
+    pl = _mm256_abs_epi16(pl);
+    pt = _mm256_abs_epi16(pt);
 
     __m256i mask1 = _mm256_cmpgt_epi16(pl, pt);
     mask1 = _mm256_or_si256(mask1, _mm256_cmpgt_epi16(pl, ptl));
