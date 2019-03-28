@@ -35,34 +35,34 @@ endif()
 
 
 # Include Subdirectories
-include_directories (${PROJECT_SOURCE_DIR}/Source/API/)
-include_directories (${PROJECT_SOURCE_DIR}/Source/API/OpenMAX/IL/)
-include_directories (${PROJECT_SOURCE_DIR}/Bin/${CMAKE_BUILD_TYPE}/)
+#include_directories (${PROJECT_SOURCE_DIR}/Source/API/)
+#include_directories (${PROJECT_SOURCE_DIR}/Source/API/OpenMAX/IL/)
+#include_directories (${PROJECT_SOURCE_DIR}/Bin/${CMAKE_BUILD_TYPE}/)
 
 #UT
-include_directories (${PROJECT_SOURCE_DIR}/Source/API/)
-include_directories (${PROJECT_SOURCE_DIR}/Source/API/OpenMAX/IL/)
-include_directories (${PROJECT_SOURCE_DIR}/Source/Lib/SRM/)
-include_directories (${PROJECT_SOURCE_DIR}/Source/Lib/System/)
-include_directories (${PROJECT_SOURCE_DIR}/Source/Lib/Codec/)
-include_directories (${PROJECT_SOURCE_DIR}/Source/Lib/Utility/)
+#include_directories (${PROJECT_SOURCE_DIR}/Source/API/)
+#include_directories (${PROJECT_SOURCE_DIR}/Source/API/OpenMAX/IL/)
+#include_directories (${PROJECT_SOURCE_DIR}/Source/Lib/SRM/)
+#include_directories (${PROJECT_SOURCE_DIR}/Source/Lib/System/)
+#include_directories (${PROJECT_SOURCE_DIR}/Source/Lib/Codec/)
+#include_directories (${PROJECT_SOURCE_DIR}/Source/Lib/Utility/)
 
-include_directories (${PROJECT_SOURCE_DIR}/Source/Lib/C_DEFAULT/)
-include_directories (${PROJECT_SOURCE_DIR}/Source/Lib/ASM_SSE2/)
-include_directories (${PROJECT_SOURCE_DIR}/Source/Lib/ASM_SSSE3/)
-include_directories (${PROJECT_SOURCE_DIR}/Source/Lib/ASM_SSE4_1/)
-include_directories (${PROJECT_SOURCE_DIR}/Source/Lib/ASM_AVX2/)
+##include_directories (${PROJECT_SOURCE_DIR}/Source/Lib/C_DEFAULT/)
+#include_directories (${PROJECT_SOURCE_DIR}/Source/Lib/ASM_SSE2/)
+#include_directories (${PROJECT_SOURCE_DIR}/Source/Lib/ASM_SSSE3/)
+#include_directories (${PROJECT_SOURCE_DIR}/Source/Lib/ASM_SSE4_1/)
+#include_directories (${PROJECT_SOURCE_DIR}/Source/Lib/ASM_AVX2/)
 
-link_directories (${PROJECT_SOURCE_DIR}/Source/Lib/ASM_SSE2/)
-link_directories (${PROJECT_SOURCE_DIR}/Source/Lib/C_DEFAULT/)
-link_directories (${PROJECT_SOURCE_DIR}/Source/Lib/ASM_SSSE3/)
-link_directories (${PROJECT_SOURCE_DIR}/Source/Lib/ASM_SSE4_1/)
+#link_directories (${PROJECT_SOURCE_DIR}/Source/Lib/ASM_SSE2/)
+#link_directories (${PROJECT_SOURCE_DIR}/Source/Lib/C_DEFAULT/)
+#link_directories (${PROJECT_SOURCE_DIR}/Source/Lib/ASM_SSSE3/)
+#link_directories (${PROJECT_SOURCE_DIR}/Source/Lib/ASM_SSE4_1/)
 
-link_directories (${PROJECT_SOURCE_DIR}/Source/Lib/ASM_SSE2/)
-link_directories (${PROJECT_SOURCE_DIR}/Source/Lib/C_DEFAULT/)
-link_directories (${PROJECT_SOURCE_DIR}/Source/Lib/ASM_SSSE3/)
-link_directories (${PROJECT_SOURCE_DIR}/Source/Lib/ASM_SSE4_1/)
-link_directories (${PROJECT_SOURCE_DIR}/Source/Lib/ASM_AVX2/)
+#link_directories (${PROJECT_SOURCE_DIR}/Source/Lib/ASM_SSE2/)
+#link_directories (${PROJECT_SOURCE_DIR}/Source/Lib/C_DEFAULT/)
+#link_directories (${PROJECT_SOURCE_DIR}/Source/Lib/ASM_SSSE3/)
+#link_directories (${PROJECT_SOURCE_DIR}/Source/Lib/ASM_SSE4_1/)
+#link_directories (${PROJECT_SOURCE_DIR}/Source/Lib/ASM_AVX2/)
 
 link_directories (${PROJECT_SOURCE_DIR}/Bin/${CMAKE_BUILD_TYPE}/)
 
@@ -71,9 +71,9 @@ file(GLOB SOURCES_FILES
     "*.c"
 )
 
-file(GLOB SOURCES_CODEC
-    "../Lib/Codec/*.c"
-)
+#file(GLOB SOURCES_CODEC
+#    "../Lib/Codec/*.c"
+#)
 
 # App Source Files
 add_executable (SvtAv1Tests 
@@ -89,14 +89,14 @@ target_link_libraries(SvtAv1Tests LINK_PUBLIC
 endif(UNIX)
 
 
-target_link_libraries(SvtAv1Tests LINK_PUBLIC
-#    SvtAv1EncLib
-	C_DEFAULT
-	ASM_SSE2
-	ASM_SSSE3
-	ASM_SSE4_1
-	ASM_AVX2
-   )
+#target_link_libraries(SvtAv1Tests LINK_PUBLIC
+##    SvtAv1EncLib#
+#	C_DEFAULT
+#	ASM_SSE2
+#	ASM_SSSE3
+#	ASM_SSE4_1
+#	ASM_AVX2
+ #  )
 
    #run -tests -perf -pause
    

@@ -27,8 +27,7 @@
 #include <Windows.h>
 #endif
 #include <immintrin.h>
-
-#include "aom_dsp_rtcd.h"
+#include <assert.h>
 #include "TestCore.h"
 
 #if defined (_MSC_VER)
