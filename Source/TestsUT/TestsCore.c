@@ -262,6 +262,11 @@ int main(int argc, char* argv[])
         }
     }
 
+    if (!runUT && !runPerf) {
+        runUT = runPerf = 1;
+    }
+
+
     if (runUT) {
         ret = TestAll(1, 0);
         printf("Test UT return: %i\n", ret);

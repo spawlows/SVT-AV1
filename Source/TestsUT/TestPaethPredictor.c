@@ -71,38 +71,6 @@ static /*INLINE*/ void  fill_rect_avx2(uint16_t *dst, int32_t dstride, int32_t v
 
         }
     }
-    else if(h >= 8){
-        for (i = 0; i < v/2; i++) {
-            _mm256_storeu2_m128i((__m128i*)(dst + i*2 * dstride),
-                (__m128i*)(dst + (i*2+1) * dstride), x_avx2);
-            for (j=8; j < h; j++) {
-                dst[i*2 * dstride + j] = x;
-                dst[(i*2+1) * dstride + j] = x;
-            }
-        }
-        if (v % 2) {
-            i*=2;
-             _mm_storeu_si128((__m128i*)(dst+ i * dstride), x_avx);
-            for (j=8; j < h; j++) {
-                dst[i * dstride + j] = x;
-            }
-        }
-    }
-    else if (h >= 4) {
-        for (i = 0; i < v; i++) {
-            _mm_maskstore_epi64((uint64_t*)(dst + i * dstride), mask, x_avx);
-            for (j=4; j < h; j++) {
-                dst[i * dstride + j] = x;
-            }
-        }
-    }
-    else {
-        for (i = 0; i < v; i++) {
-            for (j = 0; j < h; j++) {
-                dst[i * dstride + j] = x;
-            }
-        }
-    }
 }
 
 
@@ -128,38 +96,6 @@ static /*INLINE*/ void  fill_rect_avx2_fast(uint16_t *dst, int32_t dstride, int3
                 dst[i * dstride + j] = x;
             }
 
-        }
-    }
-    else if (h >= 8) {
-        for (i = 0; i < v / 2; i++) {
-            _mm256_storeu2_m128i((__m128i*)(dst + i * 2 * dstride),
-                (__m128i*)(dst + (i * 2 + 1) * dstride), x_avx2);
-            for (j = 8; j < h; j++) {
-                dst[i * 2 * dstride + j] = x;
-                dst[(i * 2 + 1) * dstride + j] = x;
-            }
-        }
-        if (v % 2) {
-            i *= 2;
-            _mm_storeu_si128((__m128i*)(dst + i * dstride), x_avx);
-            for (j = 8; j < h; j++) {
-                dst[i * dstride + j] = x;
-            }
-        }
-    }
-    else if (h >= 4) {
-        for (i = 0; i < v; i++) {
-            _mm_maskstore_epi64((uint64_t*)(dst + i * dstride), mask, x_avx);
-            for (j = 4; j < h; j++) {
-                dst[i * dstride + j] = x;
-            }
-        }
-    }
-    else {
-        for (i = 0; i < v; i++) {
-            for (j = 0; j < h; j++) {
-                dst[i * dstride + j] = x;
-            }
         }
     }
 }
@@ -199,17 +135,30 @@ int TestCase_fill_rect(void** context, enum TEST_STAGE stage, int test_id, int v
         cnt->stride = 100;
 
 
-        printf("Create test: %s case %i/%i %s\n", __FUNCTION__, test_id + 1, (TestCase_fill_rect)(NULL, STAGE_GET_ID_MAX, 0, 0), "AA");
-
-
-        cnt->a = fill_rect_avx2;
-        cnt->b = fill_rect_avx2_fast;
+       
 
         cnt->rand = 0;
         cnt->tx_type = test_id;
 
         cnt->bw = 81;
         cnt->bh = 17;
+        
+        char *name;
+
+        if (!test_id) {
+            cnt->a = fill_rect;
+            cnt->b = fill_rect_avx2;
+            name = "C and SLOW";
+        }
+        else {
+            cnt->a = fill_rect_avx2;
+            cnt->b = fill_rect_avx2_fast;
+            name = "SLOW and FAST";
+        }
+
+       // name[2] = 'X';
+        printf("Create test: %s case %i/%i %s\n", __FUNCTION__, test_id + 1, (TestCase_fill_rect)(NULL, STAGE_GET_ID_MAX, 0, 0), name);
+
 
         return 0;
     }
