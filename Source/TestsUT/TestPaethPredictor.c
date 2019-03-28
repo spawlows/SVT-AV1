@@ -812,28 +812,51 @@ static INLINE void fill_rect(uint16_t *dst, int32_t dstride, int32_t v, int32_t 
     }
 }
 
-static INLINE void fill_rect_avx2(uint16_t *dst, int32_t dstride, int32_t v, int32_t h,
+static /*INLINE*/ void  fill_rect_avx2(uint16_t *dst, int32_t dstride, int32_t v, int32_t h,
     uint16_t x) {
     int32_t i, j;
+    __m256i x_avx2 = _mm256_set1_epi16(x);
+    __m128i x_avx = _mm_set1_epi16(x);
+    __m128i mask = _mm_set_epi64x(0, UINT64_MAX);
+
+    //if (h >= 32) { //uncoment this section for good performance
+    //    for (i = 0; i < v; i++) { //wrong code here, fix it
+    //        for (j; j < h; j++) {
+    //            dst[i * dstride + j] = x;
+    //        }
+    //    }
+    //}
 
     if (h >= 16) {
-        __m256i x_avx2 = _mm256_set1_epi16(x);
         for (i = 0; i < v; i++) {
-            for (j = 0; j < h; j+=16) {
-                _mm256_storeu_si256((__m256i*)(dst + i * dstride + j), x_avx2);
+            _mm256_storeu_si256((__m256i*)(dst + i * dstride), x_avx2);
+            for (j=16; j < h; j++) {
+                dst[i * dstride + j] = x;
             }
-            for (j; j < h; j++) {
+
+        }
+    }
+    else if(h >= 8){
+        for (i = 0; i < v/2; i++) {
+            _mm256_storeu2_m128i((__m128i*)(dst + i*2 * dstride),
+                (__m128i*)(dst + (i*2+1) * dstride), x_avx2);
+            for (j=8; j < h; j++) {
+                dst[i*2 * dstride + j] = x;
+                dst[(i*2+1) * dstride + j] = x;
+            }
+        }
+        if (v % 2) {
+            i*=2;
+             _mm_storeu_si128((__m128i*)(dst+ i * dstride), x_avx);
+            for (j=8; j < h; j++) {
                 dst[i * dstride + j] = x;
             }
         }
     }
-    else if(h >= 8){
-        __m128i x_avx = _mm_set1_epi16(x);
+    else if (h >= 4) {
         for (i = 0; i < v; i++) {
-            for (j = 0; j < h; j+=8) {
-                _mm_storeu_si128((__m128i*)(dst+ i * dstride + j), x_avx);
-            }
-            for (j; j < h; j++) {
+            _mm_maskstore_epi64((uint64_t*)(dst + i * dstride), mask, x_avx);
+            for (j=4; j < h; j++) {
                 dst[i * dstride + j] = x;
             }
         }
@@ -846,6 +869,8 @@ static INLINE void fill_rect_avx2(uint16_t *dst, int32_t dstride, int32_t v, int
         }
     }
 }
+
+
 int TestCase_fill_rect(void** context, enum TEST_STAGE stage, int test_id, int verbose)
 {
     struct contextX {
@@ -973,6 +998,8 @@ int TestCase_fill_rect(void** context, enum TEST_STAGE stage, int test_id, int v
             break;
         }
 
+        cnt->bw = 81;
+        cnt->bh = 17;
 
         return 0;
     }
