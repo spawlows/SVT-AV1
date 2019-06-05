@@ -1929,7 +1929,7 @@ EB_API EbErrorType eb_deinit_encoder(EbComponentType *svt_enc_component){
         if (memory_map) {
             // Loop through the ptr table and free all malloc'd pointers per channel
             EbMemoryMapEntry*    memory_entry = memory_map;
-            if (memory_entry){
+            if (memory_entry) {
                 do {
                     switch (memory_entry->ptr_type) {
                         case EB_N_PTR:
@@ -1960,6 +1960,8 @@ EB_API EbErrorType eb_deinit_encoder(EbComponentType *svt_enc_component){
                     if (tmp_memory_entry) free(tmp_memory_entry);
                 } while(memory_entry != enc_handle_ptr->memory_map_init_address && memory_entry);
                 if (enc_handle_ptr->memory_map_init_address) free(enc_handle_ptr->memory_map_init_address);
+
+                memory_map = NULL;
             }
         }
     }
