@@ -24,7 +24,7 @@ EbErrorType mode_decision_context_ctor(
     (void)color_format;
 
     ModeDecisionContext *context_ptr;
-    EB_MALLOC(ModeDecisionContext*, context_ptr, sizeof(ModeDecisionContext), EB_N_PTR);
+    EB_CALLOC(ModeDecisionContext*, context_ptr, sizeof(ModeDecisionContext), EB_N_PTR);
     *context_dbl_ptr = context_ptr;
 
     // Input/Output System Resource Manager FIFOs

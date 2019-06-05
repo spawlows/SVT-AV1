@@ -2547,8 +2547,8 @@ app_malloc_count++;
         lib_malloc_count++; \
     }
 
-#define EB_CALLOC(type, pointer, n_elements, size, pointer_class) \
-    pointer = (type) calloc(n_elements, size); \
+#define EB_CALLOC(type, pointer, n_elements, pointer_class) \
+    pointer = (type) calloc(1, n_elements); \
     if (pointer == (type)EB_NULL) \
         return EB_ErrorInsufficientResources; \
     else { \
@@ -2666,8 +2666,8 @@ if (*(memory_map_index) >= MAX_NUM_PTR) { \
 } \
 lib_malloc_count++;
 
-#define EB_CALLOC(type, pointer, count, size, pointer_class) \
-pointer = (type) calloc(count, size); \
+#define EB_CALLOC(type, pointer, count, pointer_class) \
+pointer = (type) calloc(1, count); \
 if (pointer == (type)EB_NULL) { \
     return EB_ErrorInsufficientResources; \
 } \
