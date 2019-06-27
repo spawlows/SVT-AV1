@@ -1845,6 +1845,8 @@ EB_API EbErrorType eb_deinit_encoder(EbComponentType *svt_enc_component){
                     if (tmp_memory_entry) free(tmp_memory_entry);
                 } while(memory_entry != enc_handle_ptr->memory_map_init_address && memory_entry);
                 if (enc_handle_ptr->memory_map_init_address) free(enc_handle_ptr->memory_map_init_address);
+
+                memory_map = NULL;
             }
         }
     }
