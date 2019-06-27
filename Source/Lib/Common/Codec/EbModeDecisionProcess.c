@@ -24,7 +24,7 @@ EbErrorType mode_decision_context_ctor(
     (void)color_format;
 
     ModeDecisionContext *context_ptr;
-    EB_MALLOC(ModeDecisionContext*, context_ptr, sizeof(ModeDecisionContext), EB_N_PTR);
+    EB_CALLOC(ModeDecisionContext*, context_ptr, 1, sizeof(ModeDecisionContext), EB_N_PTR);
     *context_dbl_ptr = context_ptr;
 
     // Input/Output System Resource Manager FIFOs
@@ -38,7 +38,7 @@ EbErrorType mode_decision_context_ctor(
     EB_MALLOC(MdRateEstimationContext*, context_ptr->md_rate_estimation_ptr, sizeof(MdRateEstimationContext), EB_N_PTR);
 
     // Fast Candidate Array
-    EB_MALLOC(ModeDecisionCandidate*, context_ptr->fast_candidate_array, sizeof(ModeDecisionCandidate) * MODE_DECISION_CANDIDATE_MAX_COUNT, EB_N_PTR);
+    EB_CALLOC(ModeDecisionCandidate*, context_ptr->fast_candidate_array, MODE_DECISION_CANDIDATE_MAX_COUNT, sizeof(ModeDecisionCandidate), EB_N_PTR);
 
     EB_MALLOC(ModeDecisionCandidate**, context_ptr->fast_candidate_ptr_array, sizeof(ModeDecisionCandidate*) * MODE_DECISION_CANDIDATE_MAX_COUNT, EB_N_PTR);
 

@@ -926,7 +926,7 @@ EbErrorType picture_parent_control_set_ctor(
     uint32_t regionInPictureWidthIndex;
     uint32_t regionInPictureHeightIndex;
 
-    EB_MALLOC(PictureParentControlSet*, object_ptr, sizeof(PictureParentControlSet), EB_N_PTR);
+    EB_CALLOC(PictureParentControlSet*, object_ptr, 1, sizeof(PictureParentControlSet), EB_N_PTR);
 
     *object_dbl_ptr = (EbPtr)object_ptr;
     object_ptr->sequence_control_set_wrapper_ptr = (EbObjectWrapper *)EB_NULL;

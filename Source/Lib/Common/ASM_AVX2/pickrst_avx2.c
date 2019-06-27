@@ -3364,6 +3364,9 @@ void av1_compute_stats_avx2(int32_t wiener_win, const uint8_t *dgd,
     // paddings.
     d = aom_memalign(32,
             sizeof(*d) * 6 * RESTORATION_UNITSIZE_MAX * RESTORATION_UNITSIZE_MAX);
+    memset(d, 0,
+            sizeof(*d) * 6 * RESTORATION_UNITSIZE_MAX * RESTORATION_UNITSIZE_MAX);
+
     s = d + 3 * RESTORATION_UNITSIZE_MAX * RESTORATION_UNITSIZE_MAX;
 
     assert(!(height % 2));

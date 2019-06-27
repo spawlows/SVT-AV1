@@ -898,6 +898,8 @@ static void update_a_sep_sym(int32_t wiener_win, int64_t **Mc, int64_t **Hc,
     const int32_t wiener_halfwin1 = (wiener_win >> 1) + 1;
     memset(A, 0, sizeof(A));
     memset(B, 0, sizeof(B));
+    memset(S, 0, sizeof(S));
+
     for (i = 0; i < wiener_win; i++) {
         for (j = 0; j < wiener_win; ++j) {
             const int32_t jj = wrap_index(j, wiener_win);
