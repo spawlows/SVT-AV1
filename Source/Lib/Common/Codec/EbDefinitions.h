@@ -106,6 +106,7 @@ extern "C" {
 #define FIRST_FULL_LOOP_INTERPOLATION_SEARCH   1
 
 #endif
+#define STDLIB_SORT                     1 //Use sort from std::lib Possible different output linux/windows for array with the same elements
 #define BUG_FIXES                       1
 #if BUG_FIXES
 #define SHUT_TX_SIZE_RATE               1 // To fix a bug @ tx size rate estimation

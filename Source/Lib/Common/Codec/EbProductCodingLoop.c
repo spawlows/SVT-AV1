@@ -13,7 +13,7 @@
 * Media Patent License 1.0 was not distributed with this source code in the
 * PATENTS file, you can obtain it at www.aomedia.org/license/patent.
 */
-
+#define _GNU_SOURCE
 #include <stdlib.h>
 
 #include "EbDefinitions.h"
@@ -2657,6 +2657,24 @@ void sort_stage0_fast_candidates(
 }
 #if FULL_LOOP_SPLIT
 
+#if STDLIB_SORT
+#if defined(__linux__) || defined(__APPLE__)
+static int compare_sorted_fast_cost_ptr_abc(const void *a, const void *b, void *context)
+#else
+static int compare_sorted_fast_cost_ptr_cab(void *context, const void *a, const void *b)
+#endif
+{
+    const ModeDecisionCandidateBuffer **best_candidate_index_array = context;
+    int64_t res = (*(best_candidate_index_array[*(uint32_t*)a]->fast_cost_ptr)
+        - *(best_candidate_index_array[*(uint32_t*)b]->fast_cost_ptr));
+
+    /* Safe cast result (positive, negative, 0) from int64_t to int */
+    if (res < 0)
+        return -1;
+    return !!res;
+}
+#endif
+
 void construct_best_sorted_arrays_md_stage_2(
     struct ModeDecisionContext   *context_ptr,
     ModeDecisionCandidateBuffer **buffer_ptr_array,
@@ -2665,52 +2683,63 @@ void construct_best_sorted_arrays_md_stage_2(
     uint64_t                       *ref_fast_cost
 )
 {
-
     //best = union from all classes
     uint32_t best_candi = 0;
     for (CAND_CLASS class_i = CAND_CLASS_0; class_i < CAND_CLASS_TOTAL; class_i++)
         for (uint32_t candi = 0; candi < context_ptr->md_stage_2_count[class_i]; candi++)
-            best_candidate_index_array[best_candi++] = context_ptr->cand_buff_indices[class_i][candi];
-
-
-
+            sorted_candidate_index_array[best_candi++] = context_ptr->cand_buff_indices[class_i][candi];
 
     assert(best_candi == context_ptr->md_stage_2_total_count);
 
-    uint32_t i, j, index;
     uint32_t fullReconCandidateCount = context_ptr->md_stage_2_total_count;
-    //sort best: inter, then intra
-    for (i = 0; i < fullReconCandidateCount - 1; ++i) {
-        for (j = i + 1; j < fullReconCandidateCount; ++j) {
-            if ((buffer_ptr_array[best_candidate_index_array[i]]->candidate_ptr->type == INTRA_MODE) &&
-                (buffer_ptr_array[best_candidate_index_array[j]]->candidate_ptr->type == INTER_MODE)) {
-                index = best_candidate_index_array[i];
-                best_candidate_index_array[i] = (uint32_t)best_candidate_index_array[j];
-                best_candidate_index_array[j] = (uint32_t)index;
 
-            }
+    //sort best: inter, then intra
+    uint32_t i, id;
+    uint32_t id_inter = 0;
+    uint32_t id_intra = fullReconCandidateCount - 1;
+    for (i = 0; i < fullReconCandidateCount; ++i) {
+        id = sorted_candidate_index_array[i];
+        if (buffer_ptr_array[id]->candidate_ptr->type == INTER_MODE) {
+            best_candidate_index_array[id_inter++] = id;
+        }
+        else {
+            assert(buffer_ptr_array[id]->candidate_ptr->type == INTRA_MODE);
+            best_candidate_index_array[id_intra--] = id;
         }
     }
 
-
-    //sorted
-    for (i = 0; i < fullReconCandidateCount; ++i)
-        sorted_candidate_index_array[i] = best_candidate_index_array[i];
-
+#if STDLIB_SORT
+    //sorted: *fast_cost_ptr
+#if defined(__linux__) || defined(__APPLE__)
+    qsort_r(sorted_candidate_index_array,
+        fullReconCandidateCount,
+        sizeof(sorted_candidate_index_array[0]),
+        compare_sorted_fast_cost_ptr_abc,
+        (void *)buffer_ptr_array
+    );
+#else
+    qsort_s(sorted_candidate_index_array,
+        fullReconCandidateCount,
+        sizeof(sorted_candidate_index_array[0]),
+        compare_sorted_fast_cost_ptr_cab,
+        (void *)buffer_ptr_array
+    );
+#endif
+#else
+    uint32_t j, index;
     for (i = 0; i < fullReconCandidateCount - 1; ++i) {
         for (j = i + 1; j < fullReconCandidateCount; ++j) {
             if (*(buffer_ptr_array[sorted_candidate_index_array[j]]->fast_cost_ptr) < *(buffer_ptr_array[sorted_candidate_index_array[i]]->fast_cost_ptr)) {
                 index = sorted_candidate_index_array[i];
                 sorted_candidate_index_array[i] = (uint32_t)sorted_candidate_index_array[j];
                 sorted_candidate_index_array[j] = (uint32_t)index;
-
             }
         }
     }
+#endif
 
     // tx search
     *ref_fast_cost = *(buffer_ptr_array[sorted_candidate_index_array[0]]->fast_cost_ptr);
-
 }
 
 
@@ -2725,33 +2754,46 @@ void construct_best_sorted_arrays_md_stage_3(
     uint32_t best_candi = 0;
     for (CAND_CLASS class_i = CAND_CLASS_0; class_i < CAND_CLASS_TOTAL; class_i++)
         for (uint32_t candi = 0; candi < context_ptr->md_stage_3_count[class_i]; candi++)
-            best_candidate_index_array[best_candi++] = context_ptr->cand_buff_indices[class_i][candi];
-
-
-
+            sorted_candidate_index_array[best_candi++] = context_ptr->cand_buff_indices[class_i][candi];
 
     assert(best_candi == context_ptr->md_stage_3_total_count);
 
-    uint32_t i, j, index;
     uint32_t fullReconCandidateCount = context_ptr->md_stage_3_total_count;
-    //sort best: inter, then intra
-    for (i = 0; i < fullReconCandidateCount - 1; ++i) {
-        for (j = i + 1; j < fullReconCandidateCount; ++j) {
-            if ((buffer_ptr_array[best_candidate_index_array[i]]->candidate_ptr->type == INTRA_MODE) &&
-                (buffer_ptr_array[best_candidate_index_array[j]]->candidate_ptr->type == INTER_MODE)) {
-                index = best_candidate_index_array[i];
-                best_candidate_index_array[i] = (uint32_t)best_candidate_index_array[j];
-                best_candidate_index_array[j] = (uint32_t)index;
 
-            }
+    //sort best: inter, then intra
+    uint32_t i, id;
+    uint32_t id_inter = 0;
+    uint32_t id_intra = fullReconCandidateCount - 1;
+    for (i = 0; i < fullReconCandidateCount; ++i) {
+        id = sorted_candidate_index_array[i];
+        if (buffer_ptr_array[id]->candidate_ptr->type == INTER_MODE) {
+            best_candidate_index_array[id_inter++] = id;
+        }
+        else {
+            assert(buffer_ptr_array[id]->candidate_ptr->type == INTRA_MODE);
+            best_candidate_index_array[id_intra--] = id;
         }
     }
 
-
-    //sorted
-    for (i = 0; i < fullReconCandidateCount; ++i)
-        sorted_candidate_index_array[i] = best_candidate_index_array[i];
-
+#if STDLIB_SORT
+    //sorted: *fast_cost_ptr
+#if defined(__linux__) || defined(__APPLE__)
+    qsort_r(sorted_candidate_index_array,
+        fullReconCandidateCount,
+        sizeof(sorted_candidate_index_array[0]),
+        compare_sorted_fast_cost_ptr_abc,
+        (void *)buffer_ptr_array
+    );
+#else
+    qsort_s(sorted_candidate_index_array,
+        fullReconCandidateCount,
+        sizeof(sorted_candidate_index_array[0]),
+        compare_sorted_fast_cost_ptr_cab,
+        (void *)buffer_ptr_array
+    );
+#endif
+#else
+    uint32_t j, index;
     for (i = 0; i < fullReconCandidateCount - 1; ++i) {
         for (j = i + 1; j < fullReconCandidateCount; ++j) {
             if (*(buffer_ptr_array[sorted_candidate_index_array[j]]->fast_cost_ptr) < *(buffer_ptr_array[sorted_candidate_index_array[i]]->fast_cost_ptr)) {
@@ -2762,6 +2804,7 @@ void construct_best_sorted_arrays_md_stage_3(
             }
         }
     }
+#endif
 }
 #else
 void construct_best_sorted_arrays(
