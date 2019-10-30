@@ -6176,11 +6176,8 @@ EbErrorType warped_motion_prediction(
     uint16_t                                dst_origin_y,
     EbWarpedMotionParams                   *wm_params,
     uint8_t                                 bit_depth,
-    EbBool                                  perform_chroma,
-    EbAsm                                   asm_type)
+    EbBool                                  perform_chroma)
 {
-    (void)asm_type;
-
     EbErrorType  return_error = EB_ErrorNone;
     uint8_t is_compound = (mv_unit->pred_direction == BI_PRED) ? 1 : 0;
     assert(!is_compound);
@@ -7256,8 +7253,7 @@ static const int32_t filter_sets[DUAL_FILTER_SET_SIZE][2] = {
 EbErrorType inter_pu_prediction_av1(
     ModeDecisionContext                  *md_context_ptr,
     PictureControlSet                    *picture_control_set_ptr,
-    ModeDecisionCandidateBuffer          *candidate_buffer_ptr,
-    EbAsm                                   asm_type)
+    ModeDecisionCandidateBuffer          *candidate_buffer_ptr)
 {
     EbErrorType            return_error = EB_ErrorNone;
     EbPictureBufferDesc  *ref_pic_list0 = (EbPictureBufferDesc*)EB_NULL;
@@ -7384,8 +7380,8 @@ EbErrorType inter_pu_prediction_av1(
             md_context_ptr->blk_geom->origin_y,
             &candidate_ptr->wm_params,
             bit_depth,
-            md_context_ptr->chroma_level <= CHROMA_MODE_1 && md_context_ptr->md_staging_skip_inter_chroma_pred == EB_FALSE,
-            asm_type);
+            md_context_ptr->chroma_level <= CHROMA_MODE_1 && md_context_ptr->md_staging_skip_inter_chroma_pred == EB_FALSE);
+
         return return_error;
     }
 
