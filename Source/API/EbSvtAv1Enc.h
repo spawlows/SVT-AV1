@@ -32,6 +32,8 @@ extern "C" {
 #define EB_BUFFERFLAG_IS_ALT_REF    0x00000008  // signals that the packet contains an ALT_REF frame
 #define EB_BUFFERFLAG_ERROR_MASK    0xFFFFFFF0  // mask for signalling error assuming top flags fit in 4 bits. To be changed, if more flags are added.
 
+
+
 // Will contain the EbEncApi which will live in the EncHandle class
 // Only modifiable during config-time.
 typedef struct EbSvtAv1EncConfiguration
@@ -349,13 +351,10 @@ typedef struct EbSvtAv1EncConfiguration
      * Default is 0. */
     uint32_t                 level;
 
-    /* Assembly instruction set used by encoder.
-    *
-    * 0 = non-AVX2, C only.
-    * 1 = up to AVX512, auto-select highest assembly instruction set supported.
-    *
-    * Default is 1. */
-    uint32_t                 asm_type;
+    /* CPU FLAGS to limit assembly instruction set used by encoder.
+    * Default is CPU_FLAGS_ALL. */
+    CPU_FLAGS            use_cpu_flags;
+
     // Application Specific parameters
 
     /* ID assigned to each channel when multiple instances are running within the
