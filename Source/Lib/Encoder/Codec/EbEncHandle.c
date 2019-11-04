@@ -109,24 +109,34 @@ typedef struct logicalProcessorGroup {
 #define INITIAL_PROCESSOR_GROUP 16
 processorGroup                  *lp_group = NULL;
 #endif
-static int32_t CanUseIntelCore4thGenFeatures()
-{
-    static int32_t the_4th_gen_features_available = -1;
-    /* test is performed once */
-    if (the_4th_gen_features_available < 0)
-        the_4th_gen_features_available = Check4thGenIntelCoreFeatures();
-    return the_4th_gen_features_available;
-}
-EbAsm GetCpuAsmType()
-{
-    EbAsm asm_type = ASM_NON_AVX2;
 
-    if (CanUseIntelCore4thGenFeatures() == 1)
-        asm_type = ASM_AVX2;
-    else
-        // Need to change to support lower CPU Technologies
-        asm_type = ASM_NON_AVX2;
-    return asm_type;
+static void print_used_cpu_flags(CPU_FLAGS cpu_flags, CPU_FLAGS use_cpu_flags) {
+
+#define PRINT_CPU_FEATURE(FLAG, name) \
+    if (cpu_flags & FLAG) printf(" %s%s%s", \
+        !(use_cpu_flags & FLAG)?"[":"", name, \
+        !(use_cpu_flags & FLAG) ? "]" : "")
+
+    printf("CPU Flags%s:", (use_cpu_flags == cpu_flags) ? "" : "[ignored]");
+    PRINT_CPU_FEATURE(CPU_FLAGS_MMX, "mmx");
+    PRINT_CPU_FEATURE(CPU_FLAGS_SSE, "sse");
+    PRINT_CPU_FEATURE(CPU_FLAGS_SSE2, "sse2");
+    PRINT_CPU_FEATURE(CPU_FLAGS_SSE3, "sss3");
+    PRINT_CPU_FEATURE(CPU_FLAGS_SSSE3, "ssse3");
+    PRINT_CPU_FEATURE(CPU_FLAGS_SSE4_1, "sse4_1");
+    PRINT_CPU_FEATURE(CPU_FLAGS_SSE4_2, "sse4_2");
+    PRINT_CPU_FEATURE(CPU_FLAGS_AVX, "avx");
+    PRINT_CPU_FEATURE(CPU_FLAGS_AVX2, "avx2");
+    PRINT_CPU_FEATURE(CPU_FLAGS_AVX512F, "avx512f");
+    PRINT_CPU_FEATURE(CPU_FLAGS_AVX512CD, "avx512cd");
+    PRINT_CPU_FEATURE(CPU_FLAGS_AVX512DQ, "avx512dq");
+    PRINT_CPU_FEATURE(CPU_FLAGS_AVX512ER, "avx512er");
+    PRINT_CPU_FEATURE(CPU_FLAGS_AVX512PF, "avx512pf");
+    PRINT_CPU_FEATURE(CPU_FLAGS_AVX512BW, "avx512bw");
+    PRINT_CPU_FEATURE(CPU_FLAGS_AVX512VL, "avx512vl");
+    printf("\n");
+
+#undef PRINT_CPU_FEATURE
 }
 
 //Get Number of logical processors
@@ -509,6 +519,14 @@ EbErrorType load_default_buffer_configuration_settings(
     sequence_control_set_ptr->total_process_init_count += 6; // single processes count
     printf("Number of logical cores available: %u\nNumber of PPCS %u\n", core_count, sequence_control_set_ptr->picture_control_set_pool_init_count);
 
+    /******************************************************************
+    * Platform detection, limit cpu flags to hardware available CPU
+    ******************************************************************/
+    const CPU_FLAGS cpu_flags = get_cpu_flags();
+    const CPU_FLAGS cpu_flags_to_use = get_cpu_flags_to_use();
+    sequence_control_set_ptr->static_config.use_cpu_flags &= cpu_flags_to_use;
+    print_used_cpu_flags(cpu_flags, sequence_control_set_ptr->static_config.use_cpu_flags);
+
     return return_error;
 }
  // Rate Control
@@ -830,14 +848,7 @@ EB_API EbErrorType eb_init_encoder(EbComponentType *svt_enc_component)
     EbColorFormat color_format = enc_handle_ptr->sequence_control_set_instance_array[0]->sequence_control_set_ptr->static_config.encoder_color_format;
     SequenceControlSet* control_set_ptr;
 
-    /************************************
-    * Plateform detection
-    ************************************/
-    if (enc_handle_ptr->sequence_control_set_instance_array[0]->sequence_control_set_ptr->static_config.asm_type == 1)
-        enc_handle_ptr->sequence_control_set_instance_array[0]->encode_context_ptr->asm_type = GetCpuAsmType();
-    else
-        enc_handle_ptr->sequence_control_set_instance_array[0]->encode_context_ptr->asm_type = enc_handle_ptr->sequence_control_set_instance_array[0]->sequence_control_set_ptr->static_config.asm_type;
-    setup_rtcd_internal(enc_handle_ptr->sequence_control_set_instance_array[0]->encode_context_ptr->asm_type);
+    setup_rtcd_internal(enc_handle_ptr->sequence_control_set_instance_array[0]->sequence_control_set_ptr->static_config.use_cpu_flags);
     asmSetConvolveAsmTable();
 
     init_intra_dc_predictors_c_internal();
@@ -2204,7 +2215,7 @@ void CopyApiFromApp(
     sequence_control_set_ptr->static_config.speed_control_flag = ((EbSvtAv1EncConfiguration*)pComponentParameterStructure)->speed_control_flag;
 
     // Buffers - Hardcoded(Cleanup)
-    sequence_control_set_ptr->static_config.asm_type = ((EbSvtAv1EncConfiguration*)pComponentParameterStructure)->asm_type;
+    sequence_control_set_ptr->static_config.use_cpu_flags = ((EbSvtAv1EncConfiguration*)pComponentParameterStructure)->use_cpu_flags;
 
     sequence_control_set_ptr->static_config.channel_id = ((EbSvtAv1EncConfiguration*)pComponentParameterStructure)->channel_id;
     sequence_control_set_ptr->static_config.active_channel_count = ((EbSvtAv1EncConfiguration*)pComponentParameterStructure)->active_channel_count;
@@ -2558,9 +2569,9 @@ static EbErrorType VerifySettings(
         return_error = EB_ErrorBadParameter;
     }
 
-    if (((int32_t)(config->asm_type) < -1) || ((int32_t)(config->asm_type) != 1)) {
-       // SVT_LOG("Error Instance %u: Invalid asm type value [0: C Only, 1: Auto] .\n", channelNumber + 1);
-        SVT_LOG("Error Instance %u: Asm 0 is not supported in this build .\n", channelNumber + 1);
+    if (config->use_cpu_flags & CPU_FLAGS_INVALID) {
+        SVT_LOG("Error Instance %u: param '-opt-level' have invalid value.\n"
+            "Value should be [c, mmx, sse, sse2, sse3, ssse3, sse4_1, sse4_2, avx, avx2, avx512, max]\n", channelNumber + 1);
         return_error = EB_ErrorBadParameter;
     }
 
@@ -2687,8 +2698,8 @@ EbErrorType eb_svt_enc_init_parameter(
     config_ptr->speed_control_flag = 0;
     config_ptr->film_grain_denoise_strength = 0;
 
-    // ASM Type
-    config_ptr->asm_type = 1;
+    // CPU Flags
+    config_ptr->use_cpu_flags = CPU_FLAGS_ALL;
 
     // Channel info
     config_ptr->logical_processors = 0;

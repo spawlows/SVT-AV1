@@ -114,7 +114,7 @@
 #define INJECTOR_TOKEN                  "-inj"  // no Eval
 #define INJECTOR_FRAMERATE_TOKEN        "-inj-frm-rt" // no Eval
 #define SPEED_CONTROL_TOKEN             "-speed-ctrl"
-#define ASM_TYPE_TOKEN                  "-asm"
+#define OPT_LEVEL_TOKEN                 "-opt-level"
 #define THREAD_MGMNT                    "-lp"
 #define TARGET_SOCKET                   "-ss"
 #define UNRESTRICTED_MOTION_VECTOR      "-umv"
@@ -302,7 +302,47 @@ static void SetInjectorFrameRate                (const char *value, EbConfig *cf
         cfg->injector_frame_rate = cfg->injector_frame_rate << 16;
 }
 static void SetLatencyMode                      (const char *value, EbConfig *cfg)  {cfg->latency_mode               = (uint8_t)strtol(value, NULL, 0);};
-static void SetAsmType                          (const char *value, EbConfig *cfg)  {cfg->asm_type                   = (uint32_t)strtoul(value, NULL, 0);};
+static void SetOptLevel                         (const char *value, EbConfig *cfg)  {
+    if (EB_STRCMP(value, "c") == 0) {
+        cfg->cpu_flags_limit = 0;
+    }
+    else if(EB_STRCMP(value, "mmx") == 0) {
+        cfg->cpu_flags_limit = (CPU_FLAGS_MMX << 1) -1;
+    }
+    else if (EB_STRCMP(value, "sse") == 0) {
+        cfg->cpu_flags_limit = (CPU_FLAGS_SSE << 1) - 1;
+    }
+    else if (EB_STRCMP(value, "sse2") == 0) {
+        cfg->cpu_flags_limit = (CPU_FLAGS_SSE2 << 1) - 1;
+    }
+    else if (EB_STRCMP(value, "sse3") == 0) {
+        cfg->cpu_flags_limit = (CPU_FLAGS_SSE3 << 1) - 1;
+    }
+    else if (EB_STRCMP(value, "ssse3") == 0) {
+        cfg->cpu_flags_limit = (CPU_FLAGS_SSSE3 << 1) - 1;
+    }
+    else if (EB_STRCMP(value, "sse4_1") == 0) {
+        cfg->cpu_flags_limit = (CPU_FLAGS_SSE4_1 << 1) - 1;
+    }
+    else if (EB_STRCMP(value, "sse4_2") == 0) {
+        cfg->cpu_flags_limit = (CPU_FLAGS_SSE4_2 << 1) - 1;
+    }
+    else if (EB_STRCMP(value, "avx") == 0) {
+        cfg->cpu_flags_limit = (CPU_FLAGS_AVX << 1) - 1;
+    }
+    else if (EB_STRCMP(value, "avx2") == 0) {
+        cfg->cpu_flags_limit = (CPU_FLAGS_AVX2 << 1) - 1;
+    }
+    else if (EB_STRCMP(value, "avx512") == 0) {
+        cfg->cpu_flags_limit = (CPU_FLAGS_AVX512VL << 1) - 1;
+    }
+    else if (EB_STRCMP(value, "max") == 0) {
+        cfg->cpu_flags_limit = CPU_FLAGS_ALL;
+    }
+    else {
+        cfg->cpu_flags_limit = CPU_FLAGS_INVALID;
+    }
+};
 static void SetLogicalProcessors                (const char *value, EbConfig *cfg)  {cfg->logical_processors         = (uint32_t)strtoul(value, NULL, 0);};
 static void SetTargetSocket                     (const char *value, EbConfig *cfg)  {cfg->target_socket              = (int32_t)strtol(value, NULL, 0);};
 static void SetUnrestrictedMotionVector         (const char *value, EbConfig *cfg)  {cfg->unrestricted_motion_vector = (EbBool)strtol(value, NULL, 0);};
@@ -428,8 +468,8 @@ config_entry_t config_entry[] = {
     { SINGLE_INPUT, LEVEL_TOKEN, "Level", SetLevel },
     { SINGLE_INPUT, LATENCY_MODE, "LatencyMode", SetLatencyMode },
     { SINGLE_INPUT, FILM_GRAIN_TOKEN, "FilmGrain", SetCfgFilmGrain },
-    // Asm Type
-    { SINGLE_INPUT, ASM_TYPE_TOKEN, "AsmType", SetAsmType },
+    // CPU Flags
+    { SINGLE_INPUT, OPT_LEVEL_TOKEN, "OptLevel", SetOptLevel },
     // HME
     { ARRAY_INPUT,HME_LEVEL0_WIDTH, "HmeLevel0SearchAreaInWidth", SetHmeLevel0SearchAreaInWidthArray },
     { ARRAY_INPUT,HME_LEVEL0_HEIGHT, "HmeLevel0SearchAreaInHeight", SetHmeLevel0SearchAreaInHeightArray },
@@ -588,8 +628,8 @@ void eb_config_ctor(EbConfig *config_ptr)
     config_ptr->performance_context.sum_cb_sse          = 0;
     config_ptr->performance_context.sum_qp              = 0;
 
-    // ASM Type
-    config_ptr->asm_type                              = 1;
+    // CPU FLAGS
+    config_ptr->cpu_flags_limit                         = CPU_FLAGS_ALL;
 
     config_ptr->stop_encoder                          = 0;
     config_ptr->logical_processors                    = 0;

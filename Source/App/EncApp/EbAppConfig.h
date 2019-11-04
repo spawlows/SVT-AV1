@@ -333,9 +333,9 @@ typedef struct EbConfig
     EbBool                   eos_flag;
 
     /****************************************
-    * Optimization Type
+    * CPU FLAGS available
     ****************************************/
-    uint32_t                  asm_type;
+    CPU_FLAGS                cpu_flags_limit;
 
     /****************************************
      * Computational Performance Data
