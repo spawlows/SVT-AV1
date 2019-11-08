@@ -128,7 +128,7 @@ TEST(ComputeMeanTest, run_compute_mean_squared_values_test) {
                 compute_mean_of_squared_values8x8_sse2_intrin(
                     input_data, 8, 8, 8);
             uint64_t output_c_ref =
-                compute_mean_squared_values(input_data, 8, 8, 8);
+                compute_mean_squared_values_c(input_data, 8, 8, 8);
 
             // compare results
             ASSERT_EQ(output_sse2_tst, output_c_ref)

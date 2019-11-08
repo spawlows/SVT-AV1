@@ -1909,7 +1909,7 @@ void setup_rtcd_internal(CPU_FLAGS flags)
                   compute_mean8x8_sse2_intrin,
                   compute_mean8x8_avx2_intrin);
     SET_SSE2(compute_mean_square_values_8x8,
-             compute_mean_of_squared_values8x8_sse2_intrin, //Add C
+             compute_mean_squared_values_c,
              compute_mean_of_squared_values8x8_sse2_intrin);
     SET_SSE2_AVX2(pack2d_16_bit_src_mul4,
                   eb_enc_msb_pack2_d,
