@@ -1918,9 +1918,6 @@ void setup_rtcd_internal(CPU_FLAGS flags)
     SET_SSE2(un_pack2d_16_bit_src_mul4,
              eb_enc_msb_un_pack2_d,
              eb_enc_msb_un_pack2d_sse2_intrin);
-    SET_SSE2(picture_addition,
-             picture_addition_sse2, //Add C
-             picture_addition_sse2);
     SET_SSE2_AVX2(compute_interm_var_four8x8,
              compute_interm_var_four8x8_c,
              compute_interm_var_four8x8_helper_sse2,
