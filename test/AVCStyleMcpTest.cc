@@ -92,47 +92,51 @@ typedef void (*MCP_TEST_FUNC)(EbByte ref_pic, uint32_t src_stride, EbByte dst,
                               uint32_t dst_stride, uint32_t pu_width,
                               uint32_t pu_height, EbByte temp_buf, EbBool skip,
                               uint32_t frac_pos);
-const int NUM_FUNCS = 12;
+
 typedef struct {
     const char *name;
     MCP_REF_FUNC ref_func;
     MCP_TEST_FUNC test_func;
 } AVCStyleMcpFuncPair;
-static const AVCStyleMcpFuncPair AVC_style_c_sse3_func_pairs[NUM_FUNCS] = {
-    {"posA", avc_style_copy, avc_style_copy_sse2},
+static const AVCStyleMcpFuncPair AVC_style_c_sse3_func_pairs[] = {
+    {"posA", avc_style_copy_c, avc_style_copy_sse2},
     {"pose",
-     avc_style_luma_interpolation_filter_pose,
+     avc_style_luma_interpolation_filter_pose_c,
      avc_style_luma_interpolation_filter_pose_ssse3},
     {"posf",
-     avc_style_luma_interpolation_filter_posf,
+     avc_style_luma_interpolation_filter_posf_c,
      avc_style_luma_interpolation_filter_posf_ssse3},
     {"posg",
-     avc_style_luma_interpolation_filter_posg,
+     avc_style_luma_interpolation_filter_posg_c,
      avc_style_luma_interpolation_filter_posg_ssse3},
     {"posi",
-     avc_style_luma_interpolation_filter_posi,
+     avc_style_luma_interpolation_filter_posi_c,
      avc_style_luma_interpolation_filter_posi_ssse3},
     {"posj",
-     avc_style_luma_interpolation_filter_posj,
+     avc_style_luma_interpolation_filter_posj_c,
      avc_style_luma_interpolation_filter_posj_ssse3},
     {"posk",
-     avc_style_luma_interpolation_filter_posk,
+     avc_style_luma_interpolation_filter_posk_c,
      avc_style_luma_interpolation_filter_posk_ssse3},
     {"posp",
-     avc_style_luma_interpolation_filter_posp,
+     avc_style_luma_interpolation_filter_posp_c,
      avc_style_luma_interpolation_filter_posp_ssse3},
     {"posq",
-     avc_style_luma_interpolation_filter_posq,
+     avc_style_luma_interpolation_filter_posq_c,
      avc_style_luma_interpolation_filter_posq_ssse3},
     {"posr",
-     avc_style_luma_interpolation_filter_posr,
+     avc_style_luma_interpolation_filter_posr_c,
      avc_style_luma_interpolation_filter_posr_ssse3},
     {"vertical",
-     avc_style_luma_interpolation_filter_vertical,
+     avc_style_luma_interpolation_filter_vertical_c,
      avc_style_luma_interpolation_filter_vertical_ssse3_intrin},
     {"horizontal",
-     avc_style_luma_interpolation_filter_horizontal,
-     avc_style_luma_interpolation_filter_horizontal_ssse3_intrin}};
+     avc_style_luma_interpolation_filter_horizontal_c,
+     avc_style_luma_interpolation_filter_horizontal_ssse3_intrin}
+};
+
+const int NUM_FUNCS = sizeof(AVC_style_c_sse3_func_pairs)
+                    / sizeof(AVC_style_c_sse3_func_pairs[0]);
 
 typedef std::tuple<PUSize, TestPattern> TestPUParam;
 typedef std::tuple<SearchArea, TestPattern> TestSearchRegionParam;
