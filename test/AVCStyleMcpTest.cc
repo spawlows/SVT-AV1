@@ -84,6 +84,8 @@ SearchArea TEST_AREAS[] = {SearchArea(64, 64),
                            SearchArea(64, 48),
                            SearchArea(80, 80)};
 
+PUSize TEST_PU_HELPER[] = {PUSize(64, 64)};
+
 typedef void (*MCP_REF_FUNC)(EbByte refPic, uint32_t srcStride, EbByte dst,
                              uint32_t dstStride, uint32_t puWidth,
                              uint32_t puHeight, EbByte tempBuf,
@@ -92,47 +94,51 @@ typedef void (*MCP_TEST_FUNC)(EbByte ref_pic, uint32_t src_stride, EbByte dst,
                               uint32_t dst_stride, uint32_t pu_width,
                               uint32_t pu_height, EbByte temp_buf, EbBool skip,
                               uint32_t frac_pos);
-const int NUM_FUNCS = 12;
+
 typedef struct {
     const char *name;
     MCP_REF_FUNC ref_func;
     MCP_TEST_FUNC test_func;
 } AVCStyleMcpFuncPair;
-static const AVCStyleMcpFuncPair AVC_style_c_sse3_func_pairs[NUM_FUNCS] = {
-    {"posA", avc_style_copy, avc_style_copy_sse2},
+static const AVCStyleMcpFuncPair AVC_style_c_sse3_func_pairs[] = {
+    {"posA", avc_style_copy_c, avc_style_copy_sse2},
     {"pose",
-     avc_style_luma_interpolation_filter_pose,
+     avc_style_luma_interpolation_filter_pose_c,
      avc_style_luma_interpolation_filter_pose_ssse3},
     {"posf",
-     avc_style_luma_interpolation_filter_posf,
+     avc_style_luma_interpolation_filter_posf_c,
      avc_style_luma_interpolation_filter_posf_ssse3},
     {"posg",
-     avc_style_luma_interpolation_filter_posg,
+     avc_style_luma_interpolation_filter_posg_c,
      avc_style_luma_interpolation_filter_posg_ssse3},
     {"posi",
-     avc_style_luma_interpolation_filter_posi,
+     avc_style_luma_interpolation_filter_posi_c,
      avc_style_luma_interpolation_filter_posi_ssse3},
     {"posj",
-     avc_style_luma_interpolation_filter_posj,
+     avc_style_luma_interpolation_filter_posj_c,
      avc_style_luma_interpolation_filter_posj_ssse3},
     {"posk",
-     avc_style_luma_interpolation_filter_posk,
+     avc_style_luma_interpolation_filter_posk_c,
      avc_style_luma_interpolation_filter_posk_ssse3},
     {"posp",
-     avc_style_luma_interpolation_filter_posp,
+     avc_style_luma_interpolation_filter_posp_c,
      avc_style_luma_interpolation_filter_posp_ssse3},
     {"posq",
-     avc_style_luma_interpolation_filter_posq,
+     avc_style_luma_interpolation_filter_posq_c,
      avc_style_luma_interpolation_filter_posq_ssse3},
     {"posr",
-     avc_style_luma_interpolation_filter_posr,
+     avc_style_luma_interpolation_filter_posr_c,
      avc_style_luma_interpolation_filter_posr_ssse3},
     {"vertical",
-     avc_style_luma_interpolation_filter_vertical,
+     avc_style_luma_interpolation_filter_vertical_c,
      avc_style_luma_interpolation_filter_vertical_ssse3_intrin},
     {"horizontal",
-     avc_style_luma_interpolation_filter_horizontal,
-     avc_style_luma_interpolation_filter_horizontal_ssse3_intrin}};
+     avc_style_luma_interpolation_filter_horizontal_c,
+     avc_style_luma_interpolation_filter_horizontal_ssse3_intrin}
+};
+
+const int NUM_FUNCS = sizeof(AVC_style_c_sse3_func_pairs)
+                    / sizeof(AVC_style_c_sse3_func_pairs[0]);
 
 typedef std::tuple<PUSize, TestPattern> TestPUParam;
 typedef std::tuple<SearchArea, TestPattern> TestSearchRegionParam;
@@ -253,6 +259,53 @@ class AVCStyleMcpTestBase : public ::testing::Test {
         }
     }
 
+    virtual void run_Mcp_test_helper() {
+        prepare_data();
+
+        // Skip the avc_style_copy_sse2 for search area test cases;
+        // Since the function requires that the width should be
+        // 4, 8, 12, 16, 24, 32, 48, 64 or 128, and it can not
+        // be meet in the search area test cases.
+        uint32_t i = is_PU_block_ ? 0 : 1;
+        for (; i < 16; i++) {
+            avc_style_luma_interpolation_filter_helper_c(src_ + src_offset_,
+                                                src_stride_,
+                                                dst1_,
+                                                dst_stride_,
+                                                block_width_,
+                                                block_height_,
+                                                tmp_buf_,
+                                                EB_FALSE,
+                                                2,
+                                                i);
+
+            avc_style_luma_interpolation_filter_helper_ssse3(
+                                                src_ + src_offset_,
+                                                src_stride_,
+                                                dst2_,
+                                                dst_stride_,
+                                                block_width_,
+                                                block_height_,
+                                                tmp_buf_,
+                                                EB_FALSE,
+                                                2,
+                                                i);
+
+            int fail_pixel_Count = 0;
+            for (uint32_t j = 0; j < block_height_; j++) {
+                for (uint32_t k = 0; k < block_width_; k++) {
+                    if (dst1_[k + j * dst_stride_] !=
+                        dst2_[k + j * dst_stride_])
+                        fail_pixel_Count++;
+                }
+            }
+            EXPECT_EQ(0, fail_pixel_Count)
+                << "Mcp test failed, "
+                << " failed count: " << fail_pixel_Count << " at func: ["
+                << AVC_style_c_sse3_func_pairs[i].name << "] ";
+        }
+    }
+
   protected:
     virtual void prepare_data() {
         const int32_t mask = (1 << 8) - 1;
@@ -330,6 +383,45 @@ TEST_P(AVCStyleMcpSearchRegionTest, AVCStyleMcpSearchRegionTest) {
 
 INSTANTIATE_TEST_CASE_P(AVCMCPSearchRegion, AVCStyleMcpSearchRegionTest,
                         ::testing::Combine(::testing::ValuesIn(TEST_AREAS),
+                                           ::testing::ValuesIn(TEST_PATTERNS)));
+
+class AVCStyleMcpPUTestHelper
+    : public AVCStyleMcpTestBase,
+      public ::testing::WithParamInterface<TestPUParam> {
+  public:
+    AVCStyleMcpPUTestHelper()
+        : AVCStyleMcpTestBase(std::get<0>(TEST_GET_PARAM(0)),
+                              std::get<1>(TEST_GET_PARAM(0)), TEST_GET_PARAM(1),
+                              true) {
+    }
+};
+
+TEST_P(AVCStyleMcpPUTestHelper, AVCStyleMcpPUTestHelper) {
+    run_Mcp_test_helper();
+};
+
+INSTANTIATE_TEST_CASE_P(AVCMCPPU_HELPER, AVCStyleMcpPUTestHelper,
+                        ::testing::Combine(::testing::ValuesIn(TEST_PU_HELPER),
+                                           ::testing::ValuesIn(TEST_PATTERNS)));
+
+class AVCStyleMcpSearchRegionTestHelper
+    : public AVCStyleMcpTestBase,
+      public ::testing::WithParamInterface<TestSearchRegionParam> {
+  public:
+    AVCStyleMcpSearchRegionTestHelper()
+        : AVCStyleMcpTestBase(std::get<0>(TEST_GET_PARAM(0)),
+                              std::get<1>(TEST_GET_PARAM(0)), TEST_GET_PARAM(1),
+                              false) {
+    }
+};
+
+TEST_P(AVCStyleMcpSearchRegionTestHelper, AVCStyleMcpSearchRegionTestHelper) {
+    run_Mcp_test_helper();
+};
+
+INSTANTIATE_TEST_CASE_P(AVCMCPSearchRegionHelper,
+                        AVCStyleMcpSearchRegionTestHelper,
+                        ::testing::Combine(::testing::ValuesIn(TEST_PU_HELPER),
                                            ::testing::ValuesIn(TEST_PATTERNS)));
 
 }  // namespace

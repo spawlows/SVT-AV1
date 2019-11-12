@@ -174,55 +174,67 @@ extern "C" {
         EbBool                sub_sample_pred_flag,
         EbBool                subSamplePredFlagChroma);
 
-    void avc_style_copy(EbByte refPic, uint32_t srcStride, EbByte dst,
+    void avc_style_copy_c(EbByte refPic, uint32_t srcStride, EbByte dst,
                     uint32_t dstStride, uint32_t puWidth, uint32_t puHeight,
                     EbByte tempBuf, uint32_t fracPos);
-    void avc_style_luma_interpolation_filter_horizontal(
+    void avc_style_luma_interpolation_filter_horizontal_c(
         EbByte ref_pic, uint32_t src_stride,
         EbByte dst, uint32_t dst_stride,
         uint32_t pu_width, uint32_t pu_height,
         EbByte temp_buf, uint32_t frac_pos);
-    void avc_style_luma_interpolation_filter_vertical(
+    void avc_style_luma_interpolation_filter_vertical_c(
         EbByte ref_pic, uint32_t src_stride,
         EbByte dst, uint32_t dst_stride,
         uint32_t pu_width, uint32_t pu_height,
         EbByte temp_buf, uint32_t frac_pos);
-    void avc_style_luma_interpolation_filter_pose(EbByte ref_pic, uint32_t src_stride,
+    void avc_style_luma_interpolation_filter_pose_c(EbByte ref_pic, uint32_t src_stride,
         EbByte dst, uint32_t dst_stride,
         uint32_t pu_width, uint32_t pu_height,
         EbByte temp_buf, uint32_t frac_pos);
-    void avc_style_luma_interpolation_filter_posf(EbByte ref_pic, uint32_t src_stride,
+    void avc_style_luma_interpolation_filter_posf_c(EbByte ref_pic, uint32_t src_stride,
         EbByte dst, uint32_t dst_stride,
         uint32_t pu_width, uint32_t pu_height,
         EbByte temp_buf, uint32_t frac_pos);
-    void avc_style_luma_interpolation_filter_posg(EbByte ref_pic, uint32_t src_stride,
+    void avc_style_luma_interpolation_filter_posg_c(EbByte ref_pic, uint32_t src_stride,
         EbByte dst, uint32_t dst_stride,
         uint32_t pu_width, uint32_t pu_height,
         EbByte temp_buf, uint32_t frac_pos);
-    void avc_style_luma_interpolation_filter_posi(EbByte ref_pic, uint32_t src_stride,
+    void avc_style_luma_interpolation_filter_posi_c(EbByte ref_pic, uint32_t src_stride,
         EbByte dst, uint32_t dst_stride,
         uint32_t pu_width, uint32_t pu_height,
         EbByte temp_buf, uint32_t frac_pos);
-    void avc_style_luma_interpolation_filter_posj(EbByte ref_pic, uint32_t src_stride,
+    void avc_style_luma_interpolation_filter_posj_c(EbByte ref_pic, uint32_t src_stride,
         EbByte dst, uint32_t dst_stride,
         uint32_t pu_width, uint32_t pu_height,
         EbByte temp_buf, uint32_t frac_pos);
-    void avc_style_luma_interpolation_filter_posk(EbByte ref_pic, uint32_t src_stride,
+    void avc_style_luma_interpolation_filter_posk_c(EbByte ref_pic, uint32_t src_stride,
         EbByte dst, uint32_t dst_stride,
         uint32_t pu_width, uint32_t pu_height,
         EbByte temp_buf, uint32_t frac_pos);
-    void avc_style_luma_interpolation_filter_posp(EbByte ref_pic, uint32_t src_stride,
+    void avc_style_luma_interpolation_filter_posp_c(EbByte ref_pic, uint32_t src_stride,
         EbByte dst, uint32_t dst_stride,
         uint32_t pu_width, uint32_t pu_height,
         EbByte temp_buf, uint32_t frac_pos);
-    void avc_style_luma_interpolation_filter_posq(EbByte ref_pic, uint32_t src_stride,
+    void avc_style_luma_interpolation_filter_posq_c(EbByte ref_pic, uint32_t src_stride,
         EbByte dst, uint32_t dst_stride,
         uint32_t pu_width, uint32_t pu_height,
         EbByte temp_buf, uint32_t frac_pos);
-    void avc_style_luma_interpolation_filter_posr(EbByte ref_pic, uint32_t src_stride,
+    void avc_style_luma_interpolation_filter_posr_c(EbByte ref_pic, uint32_t src_stride,
         EbByte dst, uint32_t dst_stride,
         uint32_t pu_width, uint32_t pu_height,
         EbByte temp_buf, uint32_t frac_pos);
+
+    void avc_style_luma_interpolation_filter_helper_c(
+        EbByte ref_pic,
+        uint32_t src_stride,
+        EbByte dst,
+        uint32_t dst_stride,
+        uint32_t pu_width,
+        uint32_t pu_height,
+        EbByte temp_buf,
+        EbBool skip,
+        uint32_t frac_pos,
+        uint8_t fractional_position);
 
 #ifdef __cplusplus
 }
