@@ -1323,3 +1323,57 @@ void avc_style_luma_interpolation_filter_posr_c(
     picture_average_kernel_c(temp_buf, pu_width, temp_buf + temp_buf_size, pu_width, dst,
                          dst_stride, pu_width, pu_height);
 }
+
+void avc_style_luma_interpolation_filter_helper_c(
+    EbByte ref_pic,
+    uint32_t src_stride,
+    EbByte dst,
+    uint32_t dst_stride,
+    uint32_t pu_width,
+    uint32_t pu_height,
+    EbByte temp_buf,
+    EbBool skip,
+    uint32_t frac_pos,
+    uint8_t fractional_position)
+{
+    /* Code with 'skip' true are not used. Cleanup should remove 'skip' parameter. */
+    (void)skip;
+    assert(!skip);
+
+    switch (fractional_position) {
+    case 0:
+        avc_style_copy_c(ref_pic, src_stride, dst, dst_stride, pu_width, pu_height, temp_buf, frac_pos); break;
+    case 1:
+        avc_style_luma_interpolation_filter_horizontal_c(ref_pic, src_stride, dst, dst_stride, pu_width, pu_height, temp_buf, frac_pos); break;
+    case 2:
+        avc_style_luma_interpolation_filter_horizontal_c(ref_pic, src_stride, dst, dst_stride, pu_width, pu_height, temp_buf, frac_pos); break;
+    case 3:
+        avc_style_luma_interpolation_filter_horizontal_c(ref_pic, src_stride, dst, dst_stride, pu_width, pu_height, temp_buf, frac_pos); break;
+    case 4:
+        avc_style_luma_interpolation_filter_vertical_c(ref_pic, src_stride, dst, dst_stride, pu_width, pu_height, temp_buf, frac_pos); break;
+    case 5:
+        avc_style_luma_interpolation_filter_pose_c(ref_pic, src_stride, dst, dst_stride, pu_width, pu_height, temp_buf, frac_pos); break;
+    case 6:
+        avc_style_luma_interpolation_filter_posf_c(ref_pic, src_stride, dst, dst_stride, pu_width, pu_height, temp_buf, frac_pos); break;
+    case 7:
+        avc_style_luma_interpolation_filter_posg_c(ref_pic, src_stride, dst, dst_stride, pu_width, pu_height, temp_buf, frac_pos); break;
+    case 8:
+        avc_style_luma_interpolation_filter_vertical_c(ref_pic, src_stride, dst, dst_stride, pu_width, pu_height, temp_buf, frac_pos); break;
+    case 9:
+        avc_style_luma_interpolation_filter_posi_c(ref_pic, src_stride, dst, dst_stride, pu_width, pu_height, temp_buf, frac_pos); break;
+    case 10:
+        avc_style_luma_interpolation_filter_posj_c(ref_pic, src_stride, dst, dst_stride, pu_width, pu_height, temp_buf, frac_pos); break;
+    case 11:
+        avc_style_luma_interpolation_filter_posk_c(ref_pic, src_stride, dst, dst_stride, pu_width, pu_height, temp_buf, frac_pos); break;
+    case 12:
+        avc_style_luma_interpolation_filter_vertical_c(ref_pic, src_stride, dst, dst_stride, pu_width, pu_height, temp_buf, frac_pos); break;
+    case 13:
+        avc_style_luma_interpolation_filter_posp_c(ref_pic, src_stride, dst, dst_stride, pu_width, pu_height, temp_buf, frac_pos); break;
+    case 14:
+        avc_style_luma_interpolation_filter_posq_c(ref_pic, src_stride, dst, dst_stride, pu_width, pu_height, temp_buf, frac_pos); break;
+    case 15:
+        avc_style_luma_interpolation_filter_posr_c(ref_pic, src_stride, dst, dst_stride, pu_width, pu_height, temp_buf, frac_pos); break;
+    default:
+        assert(0);
+    }
+}

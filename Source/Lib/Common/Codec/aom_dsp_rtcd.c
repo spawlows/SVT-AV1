@@ -34,6 +34,7 @@
 #include "EbComputeMean_SSE2.h"
 #include "EbCombinedAveragingSAD_Intrinsic_AVX2.h"
 #include "EbComputeMean.h"
+#include "EbAvcStyleMcp.h"
 
 
 
@@ -1902,7 +1903,7 @@ void setup_rtcd_internal(CPU_FLAGS flags)
              nxm_sad_avg_kernel_helper_c,
              nxm_sad_avg_kernel_helper_avx2);
     SET_SSSE3(avc_style_luma_interpolation_filter,
-              avc_style_luma_interpolation_filter_helper_ssse3, //Add C
+              avc_style_luma_interpolation_filter_helper_c,
               avc_style_luma_interpolation_filter_helper_ssse3);
     SET_SSE2_AVX2(compute_mean_8x8,
                   compute_mean_c,

@@ -84,6 +84,8 @@ SearchArea TEST_AREAS[] = {SearchArea(64, 64),
                            SearchArea(64, 48),
                            SearchArea(80, 80)};
 
+PUSize TEST_PU_HELPER[] = {PUSize(64, 64)};
+
 typedef void (*MCP_REF_FUNC)(EbByte refPic, uint32_t srcStride, EbByte dst,
                              uint32_t dstStride, uint32_t puWidth,
                              uint32_t puHeight, EbByte tempBuf,
@@ -257,6 +259,54 @@ class AVCStyleMcpTestBase : public ::testing::Test {
         }
     }
 
+    virtual void run_Mcp_test_helper() {
+        prepare_data();
+
+        // Skip the avc_style_copy_sse2 for search area test cases;
+        // Since the function requires that the width should be
+        // 4, 8, 12, 16, 24, 32, 48, 64 or 128, and it can not
+        // be meet in the search area test cases.
+        uint32_t i = is_PU_block_ ? 0 : 1;
+        i = 0;
+        for (; i < 16; i++) {
+            avc_style_luma_interpolation_filter_helper_c(src_ + src_offset_,
+                                                src_stride_,
+                                                dst1_,
+                                                dst_stride_,
+                                                block_width_,
+                                                block_height_,
+                                                tmp_buf_,
+                                                EB_FALSE,
+                                                2,
+                                                i);
+
+            avc_style_luma_interpolation_filter_helper_ssse3(
+                                                src_ + src_offset_,
+                                                src_stride_,
+                                                dst2_,
+                                                dst_stride_,
+                                                block_width_,
+                                                block_height_,
+                                                tmp_buf_,
+                                                EB_FALSE,
+                                                2,
+                                                i);
+
+            int fail_pixel_Count = 0;
+            for (uint32_t j = 0; j < block_height_; j++) {
+                for (uint32_t k = 0; k < block_width_; k++) {
+                    if (dst1_[k + j * dst_stride_] !=
+                        dst2_[k + j * dst_stride_])
+                        fail_pixel_Count++;
+                }
+            }
+            EXPECT_EQ(0, fail_pixel_Count)
+                << "Mcp test failed, "
+                << " failed count: " << fail_pixel_Count << " at func: ["
+                << AVC_style_c_sse3_func_pairs[i].name << "] ";
+        }
+    }
+
   protected:
     virtual void prepare_data() {
         const int32_t mask = (1 << 8) - 1;
@@ -334,6 +384,45 @@ TEST_P(AVCStyleMcpSearchRegionTest, AVCStyleMcpSearchRegionTest) {
 
 INSTANTIATE_TEST_CASE_P(AVCMCPSearchRegion, AVCStyleMcpSearchRegionTest,
                         ::testing::Combine(::testing::ValuesIn(TEST_AREAS),
+                                           ::testing::ValuesIn(TEST_PATTERNS)));
+
+class AVCStyleMcpPUTestHelper
+    : public AVCStyleMcpTestBase,
+      public ::testing::WithParamInterface<TestPUParam> {
+  public:
+    AVCStyleMcpPUTestHelper()
+        : AVCStyleMcpTestBase(std::get<0>(TEST_GET_PARAM(0)),
+                              std::get<1>(TEST_GET_PARAM(0)), TEST_GET_PARAM(1),
+                              true) {
+    }
+};
+
+TEST_P(AVCStyleMcpPUTestHelper, AVCStyleMcpPUTestHelper) {
+    run_Mcp_test_helper();
+};
+
+INSTANTIATE_TEST_CASE_P(AVCMCPPU_HELPER, AVCStyleMcpPUTestHelper,
+                        ::testing::Combine(::testing::ValuesIn(TEST_PU_HELPER),
+                                           ::testing::ValuesIn(TEST_PATTERNS)));
+
+class AVCStyleMcpSearchRegionTestHelper
+    : public AVCStyleMcpTestBase,
+      public ::testing::WithParamInterface<TestSearchRegionParam> {
+  public:
+    AVCStyleMcpSearchRegionTestHelper()
+        : AVCStyleMcpTestBase(std::get<0>(TEST_GET_PARAM(0)),
+                              std::get<1>(TEST_GET_PARAM(0)), TEST_GET_PARAM(1),
+                              false) {
+    }
+};
+
+TEST_P(AVCStyleMcpSearchRegionTestHelper, AVCStyleMcpSearchRegionTestHelper) {
+    run_Mcp_test_helper();
+};
+
+INSTANTIATE_TEST_CASE_P(AVCMCPSearchRegionHelper,
+                        AVCStyleMcpSearchRegionTestHelper,
+                        ::testing::Combine(::testing::ValuesIn(TEST_PU_HELPER),
                                            ::testing::ValuesIn(TEST_PATTERNS)));
 
 }  // namespace
