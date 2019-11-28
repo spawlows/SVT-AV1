@@ -155,6 +155,8 @@ EbErrorType InitThreadManagmentParams() {
     // Initialize group_affinity structure with Current thread info
     GetThreadGroupAffinity(GetCurrentThread(), &group_affinity);
     num_groups = (uint8_t)GetActiveProcessorGroupCount();
+
+	group_affinity.Mask *= num_groups;
 #elif defined(__linux__)
     const char* PROCESSORID = "processor";
     const char* PHYSICALID = "physical id";
@@ -396,9 +398,9 @@ EbErrorType load_default_buffer_configuration_settings(
 #ifdef _WIN32
     //Handle special case on Windows
     //By default, on Windows an application is constrained to a single group
-    if (sequence_control_set_ptr->static_config.target_socket == -1 &&
-        sequence_control_set_ptr->static_config.logical_processors == 0)
-        core_count /= num_groups;
+    //if (sequence_control_set_ptr->static_config.target_socket == -1 &&
+    //    sequence_control_set_ptr->static_config.logical_processors == 0)
+    //    core_count /= num_groups;
 
     //Affininty can only be set by group on Windows.
     //Run on both sockets if -lp is larger than logical processor per group.

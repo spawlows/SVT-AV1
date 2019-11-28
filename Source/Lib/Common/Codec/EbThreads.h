@@ -78,18 +78,26 @@ extern "C" {
     extern    uint8_t           num_groups;
     extern    EbBool            alternate_groups;
 
+//#define EB_CREATE_THREAD(pointer, thread_function, thread_context) \
+//    do { \
+//        pointer = eb_create_thread(thread_function, thread_context); \
+//        EB_ADD_MEM(pointer, 1, EB_THREAD); \
+//        if(num_groups == 1) \
+//            SetThreadAffinityMask(pointer, group_affinity.Mask);\
+//        else if (num_groups == 2 && alternate_groups){ \
+//            group_affinity.Group = 1 - group_affinity.Group; \
+//            SetThreadGroupAffinity(pointer,&group_affinity,NULL); \
+//        } \
+//        else if (num_groups == 2 && !alternate_groups) \
+//            SetThreadGroupAffinity(pointer,&group_affinity,NULL); \
+//    } while (0)
+
+
+
 #define EB_CREATE_THREAD(pointer, thread_function, thread_context) \
     do { \
         pointer = eb_create_thread(thread_function, thread_context); \
         EB_ADD_MEM(pointer, 1, EB_THREAD); \
-        if(num_groups == 1) \
-            SetThreadAffinityMask(pointer, group_affinity.Mask);\
-        else if (num_groups == 2 && alternate_groups){ \
-            group_affinity.Group = 1 - group_affinity.Group; \
-            SetThreadGroupAffinity(pointer,&group_affinity,NULL); \
-        } \
-        else if (num_groups == 2 && !alternate_groups) \
-            SetThreadGroupAffinity(pointer,&group_affinity,NULL); \
     } while (0)
 
 #elif defined(__linux__)
