@@ -1903,6 +1903,9 @@ void setup_rtcd_internal(EbAsm asm_type)
     SET_AVX2(sad_16b_kernel,
              sad_16b_kernel_c,
              sad_16bit_kernel_avx2);
+    SET_AVX2(av1_compute_cross_correlation,
+             av1_compute_cross_correlation_c,
+             av1_compute_cross_correlation_avx2);
 
 }
 
