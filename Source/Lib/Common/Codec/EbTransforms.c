@@ -4586,6 +4586,9 @@ void eb_av1_fwd_txfm2d_32x16_c(
     uint8_t          bit_depth) {
     int32_t intermediateTransformBuffer[32 * 16];
     Txfm2DFlipCfg cfg;
+
+    printf("ABC\n");
+
     /*av1_get_fwd_txfm_cfg*/Av1TransformConfig(transform_type, TX_32X16, &cfg);
     /*fwd_txfm2d_c*/Av1TranformTwoDCore_c(
         input,

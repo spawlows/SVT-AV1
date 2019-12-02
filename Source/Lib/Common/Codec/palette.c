@@ -73,9 +73,9 @@ static inline void av1_k_means(const int *data, int *centroids,
 }
 
 
-#define AV1_K_MEANS_DIM 1
-#include "k_means_template.h"
-#undef AV1_K_MEANS_DIM
+//#define AV1_K_MEANS_DIM 1
+//#include "k_means_template.h"
+//#undef AV1_K_MEANS_DIM
 #define AV1_K_MEANS_DIM 2
 #include "k_means_template.h"
 #undef AV1_K_MEANS_DIM
