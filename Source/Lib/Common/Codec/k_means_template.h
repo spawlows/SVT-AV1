@@ -202,6 +202,13 @@ extern "C" {
         int pre_centroids[2 * PALETTE_MAX_SIZE];
         uint8_t pre_indices[MAX_SB_SQUARE];
 
+
+        //static int max_k = 0;
+        //if (k > max_k) {
+        //    max_k = k;
+        //    printf("max k: %i\n", k);
+        //}
+
         av1_calc_indices_dim1(data, centroids, indices, n, k);
         int64_t this_dist = calc_total_dist_1(data, centroids, indices, n, k);
 
@@ -237,9 +244,11 @@ extern "C" {
 
  //WERSJA BBBB
 
- void av1_calc_indices_dim1_b(const int *data, const int *centroids,
+int64_t av1_calc_indices_dim1_b(const int *data, const int *centroids,
      uint8_t *indices, int n, int k) {
      int diff;
+
+     int64_t diff_total = 0;;
 
 
      for (int i = 0; i < n; ++i) {
@@ -256,28 +265,31 @@ extern "C" {
                  indices[i] = j;
              }
          }
+         diff_total += min_dist;
      }
+
+     return diff_total;
  }
 
- static int64_t calc_total_dist_1_b(const int *data, const int *centroids,
-     const uint8_t *indices, int n, int k) {
-     int64_t dist = 0;
-     (void)k;
-     int diff;
+ //static int64_t calc_total_dist_1_b(const int *data, const int *centroids,
+ //    const uint8_t *indices, int n, int k) {
+ //    int64_t dist = 0;
+ //    (void)k;
+ //    int diff;
 
-     for (int i = 0; i < n; ++i) {
-         diff = *(data + i) - *(centroids + indices[i]);
-         dist += SQR(diff);
-     }
-     return dist;
- }
+ //    for (int i = 0; i < n; ++i) {
+ //        diff = *(data + i) - *(centroids + indices[i]);
+ //        dist += SQR(diff);
+ //    }
+ //    return dist;
+ //}
 
 
  static void calc_centroids_1_b(const int *data, int *centroids,
-     const uint8_t *indices, int n, int k) {
-     int i, j;
+     const uint8_t *indices, int n, int k, int *rand_array) {
+     int i/*, j*/;
      int count[PALETTE_MAX_SIZE] = { 0 };
-     unsigned int rand_state = (unsigned int)data[0];
+    // unsigned int rand_state = (unsigned int)data[0];
      assert(n <= 32768);
      memset(centroids, 0, sizeof(centroids[0]) * k * 1);
 
@@ -285,21 +297,17 @@ extern "C" {
          const int index = indices[i];
          assert(index < k);
          ++count[index];
-         for (j = 0; j < 1; ++j) {
-             centroids[index * 1 + j] += data[i * 1 + j];
-         }
+
+         centroids[index] += data[i];
      }
 
      for (i = 0; i < k; ++i) {
          if (count[i] == 0) {
-             *(centroids + i) = *(data + (lcg_rand16(&rand_state) % n));
-             //memcpy(centroids + i, data + (lcg_rand16(&rand_state) % n), sizeof(centroids[0]));
+             centroids[i] = *(data + *(rand_array)/*(lcg_rand16(&rand_state) % n)*/);
+             ++rand_array;
          }
          else {
-             for (j = 0; j < 1; ++j) {
-                 centroids[i + j] =
-                     DIVIDE_AND_ROUND(centroids[i + j], count[i]);
-             }
+             centroids[i] = DIVIDE_AND_ROUND(centroids[i], count[i]);
          }
      }
  }
@@ -313,29 +321,77 @@ extern "C" {
          int pre_centroids[2 * PALETTE_MAX_SIZE];
          uint8_t pre_indices[MAX_SB_SQUARE];
 
-         av1_calc_indices_dim1_b(data, centroids, indices, n, k);
-         int64_t this_dist = calc_total_dist_1_b(data, centroids, indices, n, k);
 
-         for (int i = 0; i < max_itr; ++i) {
+         int *centroidsArr[2];
+         uint8_t *pre_indicesArr[2];
+         int arr_idx = 0;
+         centroidsArr[0] = centroids;
+         pre_indicesArr[0] = indices;
+         centroidsArr[1] = pre_centroids;
+         pre_indicesArr[1] = pre_indices;
+
+
+         ////////////
+         /*PREPARE RAND*/
+         assert(k <= PALETTE_MAX_SIZE);
+         int rand_array[PALETTE_MAX_SIZE];
+         unsigned int rand_state = (unsigned int)data[0];
+         for (int i = 0; i < k; ++i) {
+             rand_array[i] = lcg_rand16(&rand_state) % n;
+         }
+         /////////////
+
+
+         int64_t this_dist = av1_calc_indices_dim1_b(data, centroids, indices, n, k);   //SET indices from data and centroids
+         //int64_t this_dist = calc_total_dist_1_b(data, centroids, indices, n, k);  //CALC DIFF
+
+
+         int i;
+         for (i = 0; i < max_itr; ++i) {
              const int64_t pre_dist = this_dist;
-             memcpy(pre_centroids, centroids,
-                 sizeof(pre_centroids[0]) * k * 1);
-             memcpy(pre_indices, indices, sizeof(pre_indices[0]) * n);
+             
+             int arr_idx_old = arr_idx;
+             arr_idx = (arr_idx + 1) % 2;
+             
+             
+           /*  memcpy(pre_centroids, centroids, sizeof(pre_centroids[0]) * k);
+             memcpy(pre_indices, indices, sizeof(pre_indices[0]) * n);*/
 
-             calc_centroids_1_b(data, centroids, indices, n, k);
-             av1_calc_indices_dim1_b(data, centroids, indices, n, k);
-             this_dist = calc_total_dist_1_b(data, centroids, indices, n, k);
+
+
+
+             calc_centroids_1_b(data, centroidsArr[arr_idx], pre_indicesArr[arr_idx_old], n, k, rand_array);  //SET centroids from data and indices and RAND
+
+
+             if (!memcmp(centroidsArr[0], centroidsArr[1], sizeof(pre_centroids[0]) * k * 1))
+                 break;
+
+             this_dist =  av1_calc_indices_dim1_b(data, centroidsArr[arr_idx], pre_indicesArr[arr_idx], n, k);         //SET indices from data and centroids
+             //this_dist = calc_total_dist_1_b(data, centroidsArr[arr_idx], pre_indicesArr[arr_idx], n, k);  //CALC DIFF
 
              if (this_dist > pre_dist) {
-                 memcpy(centroids, pre_centroids,
-                     sizeof(pre_centroids[0]) * k * 1);
-                 memcpy(indices, pre_indices, sizeof(pre_indices[0]) * n);
+                 if (arr_idx == 0) {
+                     memcpy(centroids, pre_centroids, sizeof(pre_centroids[0]) * k);
+                     memcpy(indices, pre_indices, sizeof(pre_indices[0]) * n);
+                 }
+                 else {
+                  //   printf("ZZ\n", i);
+                 }
+
+                 
                  break;
              }
-             if (!memcmp(centroids, pre_centroids,
-                 sizeof(pre_centroids[0]) * k * 1))
-                 break;
+          /*   if (!memcmp(centroids, pre_centroids, sizeof(pre_centroids[0]) * k * 1))
+                 break;*/
          }
+
+
+     //    printf("%i\n", i);
+
+
+
+
+
      }
 #ifdef __cplusplus
 }

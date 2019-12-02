@@ -274,7 +274,7 @@ class Av1KMeansDim : public ::testing::WithParamInterface<Av1KMeansDimParam>,
         if (pattern_ == MIN || pattern_ == MAX)
             test_num = 1;
 
-        for (size_t k = 2; k <= 8; k++) {
+        for (int k = 2; k <= 8; k++) {
             for (size_t i = 0; i < test_num; i++) {
                 prepare_data();
                 func_ref_(data_, centroids_ref_, indices_ref_, n_, k, max_itr_);
