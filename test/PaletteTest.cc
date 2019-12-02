@@ -9,6 +9,7 @@
 #include "EbUtility.h"
 #include "gtest/gtest.h"
 #include "random.h"
+#include "EbTime.h"
 
 using std::make_tuple;
 using std::tuple;
@@ -38,9 +39,9 @@ static INLINE unsigned int lcg_rand16(unsigned int* state) {
 #undef AV1_K_MEANS_DIM
 
 /***************************************************************************************/
-void av1_calc_indices_1(const int* data, const int* centroids,
-                              uint8_t* indices, int n, int k) {
-    for (int i = 0; i < n; ++i) {
+void av1_calc_indices_1(const int* data, const int* centroids, uint8_t* indices,
+                        int n, int k) {
+     for (int i = 0; i < n; ++i) {
         int min_dist = (int)SQR((int)data[i] - centroids[0]);
         indices[i] = 0;
         for (int j = 1; j < k; ++j) {
@@ -51,10 +52,57 @@ void av1_calc_indices_1(const int* data, const int* centroids,
             }
         }
     }
+
+
+//    int i = 0;
+//    __m256i centroids_0 = _mm256_set1_epi32(centroids[0]);
+//    int this_dist_arr[8];
+//    int min_dist_arr[8];
+//
+//    memset(indices, 0, n * sizeof(uint8_t));
+//
+//    for (i = 0; i + 8 < n; i += 8) {
+//        __m256i data_8 = _mm256_loadu_si256((__m256i*)(data + i));
+//        __m256i sub = _mm256_sub_epi32(data_8, centroids_0);
+//        const __m256i min_dist = _mm256_mullo_epi32(sub, sub);
+//
+//        _mm256_storeu_si256((__m256i*)(min_dist_arr), min_dist);
+//
+//        // lets assume k is up to 8
+//        const __m256i centroids_8 = _mm256_loadu_si256((__m256i*)(centroids+1));
+//
+//        for (int ddd = 0; ddd < 8; ddd++) {
+//            //int dsfsdf = _mm256_extract_epi32(data_8, ddd);
+//            const __m256i data_0 = _mm256_set1_epi32(data[i + ddd]);
+//            sub = _mm256_sub_epi32(data_0, centroids_8);
+//            const __m256i this_dist = _mm256_mullo_epi32(sub, sub);
+//            _mm256_storeu_si256((__m256i*)(this_dist_arr), this_dist);
+//
+//            for (int j = 0; j < (k-1); ++j) {
+//                if (this_dist_arr[j] < min_dist_arr[ddd]) {
+//                    min_dist_arr[ddd] = this_dist_arr[j];
+//                    indices[i + ddd] = j+1;
+//                }
+//            }
+//        }
+//
+//    }
+//
+//    for (; i < n; i++) {
+//        int min_dist = (int)SQR((int)data[i] - centroids[0]);
+//        indices[i] = 0;
+//        for (int j = 1; j < k; ++j) {
+//            const int this_dist = (int)SQR((int)data[i] - centroids[j]);
+//            if (this_dist < min_dist) {
+//                min_dist = this_dist;
+//                indices[i] = j;
+//            }
+//        }
+//    }
 }
 
 static int64_t calc_total_dist_1(const int* data, const int* centroids,
-                                       const uint8_t* indices, int n, int k) {
+                                 const uint8_t* indices, int n, int k) {
     int64_t dist = 0;
     (void)k;
     for (int i = 0; i < n; ++i) {
@@ -64,7 +112,7 @@ static int64_t calc_total_dist_1(const int* data, const int* centroids,
 }
 
 static void calc_centroids_1(const int* data, int* centroids,
-                                   const uint8_t* indices, int n, int k) {
+                             const uint8_t* indices, int n, int k) {
     int i;
     int count[PALETTE_MAX_SIZE] = {0};
     unsigned int rand_state = (unsigned int)data[0];
@@ -81,15 +129,16 @@ static void calc_centroids_1(const int* data, int* centroids,
     for (i = 0; i < k; ++i) {
         if (count[i] == 0) {
             memcpy(centroids + i,
-                   data + (lcg_rand16(&rand_state) % n), sizeof(centroids[0]));
+                   data + (lcg_rand16(&rand_state) % n),
+                   sizeof(centroids[0]));
         } else {
             centroids[i] = DIVIDE_AND_ROUND(centroids[i], count[i]);
         }
     }
 }
 
-void av1_k_means_dim1_avx2(const int* data, int* centroids, uint8_t* indices, int n,
-                      int k, int max_itr) {
+void av1_k_means_dim1_avx2(const int* data, int* centroids, uint8_t* indices,
+                           int n, int k, int max_itr) {
     int pre_centroids[2 * PALETTE_MAX_SIZE];
     uint8_t pre_indices[MAX_SB_SQUARE];
 
@@ -118,149 +167,198 @@ void av1_k_means_dim1_avx2(const int* data, int* centroids, uint8_t* indices, in
 
 namespace {
 
-    using av1_k_means_func = void (*)(const int* data, int* centroids,
-                                      uint8_t* indices, int n, int k, int max_itr);
+using av1_k_means_func = void (*)(const int* data, int* centroids,
+                                  uint8_t* indices, int n, int k, int max_itr);
 
-    #define MAX_BLOCK_SIZE (MAX_SB_SIZE * MAX_SB_SIZE)
-    typedef std::tuple<int, int> BlockSize;
-    typedef enum { MIN, MAX, RANDOM } TestPattern;
-    BlockSize TEST_BLOCK_SIZES[] = {
-        BlockSize(4, 4),    BlockSize(4, 8),    BlockSize(4, 16),
-        BlockSize(8, 4),    BlockSize(8, 8),    BlockSize(8, 16),
-        BlockSize(8, 32),   BlockSize(16, 4),   BlockSize(16, 8),
-        BlockSize(16, 16),  BlockSize(16, 32),  BlockSize(16, 64),
-        BlockSize(32, 8),   BlockSize(32, 16),  BlockSize(32, 32),
-        BlockSize(32, 64),  BlockSize(64, 16),  BlockSize(64, 32),
-        BlockSize(64, 64),  BlockSize(64, 128), BlockSize(128, 64),
-        BlockSize(128, 128)};
-    TestPattern TEST_PATTERNS[] = {MIN, MAX, RANDOM};
+#define MAX_BLOCK_SIZE (MAX_SB_SIZE * MAX_SB_SIZE)
+typedef std::tuple<int, int> BlockSize;
+typedef enum { MIN, MAX, RANDOM } TestPattern;
+BlockSize TEST_BLOCK_SIZES[] = {
+    BlockSize(4, 4),    BlockSize(4, 8),    BlockSize(4, 16),
+    BlockSize(8, 4),    BlockSize(8, 8),    BlockSize(8, 16),
+    BlockSize(8, 32),   BlockSize(16, 4),   BlockSize(16, 8),
+    BlockSize(16, 16),  BlockSize(16, 32),  BlockSize(16, 64),
+    BlockSize(32, 8),   BlockSize(32, 16),  BlockSize(32, 32),
+    BlockSize(32, 64),  BlockSize(64, 16),  BlockSize(64, 32),
+    BlockSize(64, 64),  BlockSize(64, 128), BlockSize(128, 64),
+    BlockSize(128, 128)};
+TestPattern TEST_PATTERNS[] = {MIN, MAX, RANDOM};
 
-    typedef std::tuple<av1_k_means_func, av1_k_means_func> FuncPair;
-    FuncPair TEST_FUNC_PAIRS[] = {FuncPair(AV1_K_MEANS_RENAME(av1_k_means, 1), av1_k_means_dim1_avx2),
-                                  FuncPair(AV1_K_MEANS_RENAME(av1_k_means, 2),
-                                           AV1_K_MEANS_RENAME(av1_k_means, 2))};
+typedef std::tuple<av1_k_means_func, av1_k_means_func> FuncPair;
+FuncPair TEST_FUNC_PAIRS[] = {
+    FuncPair(AV1_K_MEANS_RENAME(av1_k_means, 1), av1_k_means_dim1_avx2),
+    FuncPair(AV1_K_MEANS_RENAME(av1_k_means, 2),
+             AV1_K_MEANS_RENAME(av1_k_means, 2))};
 
-    typedef std::tuple<TestPattern, BlockSize, FuncPair> Av1KMeansDimParam;
+typedef std::tuple<TestPattern, BlockSize, FuncPair> Av1KMeansDimParam;
 
-    class Av1KMeansDim : public ::testing::WithParamInterface<Av1KMeansDimParam>,
-                         public ::testing::Test {
-      public:
-        Av1KMeansDim() {
-            rnd8_ = new SVTRandom(0, ((1 << 8) - 1));
-            rnd32_ = new SVTRandom(-((1 << 30) - 1), ((1 << 30) - 1));
-            pattern_ = TEST_GET_PARAM(0);
-            block_ = TEST_GET_PARAM(1);
-            func_ref_ = std::get<0>(TEST_GET_PARAM(2));
-            func_tst_ = std::get<1>(TEST_GET_PARAM(2));
+class Av1KMeansDim : public ::testing::WithParamInterface<Av1KMeansDimParam>,
+                     public ::testing::Test {
+  public:
+    Av1KMeansDim() {
+        rnd8_ = new SVTRandom(0, ((1 << 8) - 1));
+        rnd32_ = new SVTRandom(-((1 << 30) - 1), ((1 << 30) - 1));
+        pattern_ = TEST_GET_PARAM(0);
+        block_ = TEST_GET_PARAM(1);
+        func_ref_ = std::get<0>(TEST_GET_PARAM(2));
+        func_tst_ = std::get<1>(TEST_GET_PARAM(2));
 
-            n_ = std::get<0>(block_) * std::get<1>(block_);
+        n_ = std::get<0>(block_) * std::get<1>(block_);
 
-            // Additonal *2 to account possibility of write into extra memory
-            centroids_size_ = 2 * PALETTE_MAX_SIZE * 2;
-            indices_size_ = MAX_SB_SQUARE * 2;
+        // Additonal *2 to account possibility of write into extra memory
+        centroids_size_ = 2 * PALETTE_MAX_SIZE * 2;
+        indices_size_ = MAX_SB_SQUARE * 2;
 
-            //*2 to account of AV1_K_MEANS_DIM = 2
-            data_ = new int[n_ * 2];
-            centroids_ref_ = new int[centroids_size_];
-            centroids_tst_ = new int[centroids_size_];
-            indices_ref_ = new uint8_t[indices_size_];
-            indices_tst_ = new uint8_t[indices_size_];
+        //*2 to account of AV1_K_MEANS_DIM = 2
+        data_ = new int[n_ * 2];
+        centroids_ref_ = new int[centroids_size_];
+        centroids_tst_ = new int[centroids_size_];
+        indices_ref_ = new uint8_t[indices_size_];
+        indices_tst_ = new uint8_t[indices_size_];
+    }
+
+    void TearDown() override {
+        if (rnd32_)
+            delete rnd32_;
+        if (rnd8_)
+            delete rnd8_;
+        if (data_)
+            delete data_;
+        if (centroids_ref_)
+            delete centroids_ref_;
+        if (centroids_tst_)
+            delete centroids_tst_;
+        if (indices_ref_)
+            delete indices_ref_;
+        if (indices_tst_)
+            delete indices_tst_;
+    }
+
+  protected:
+    void prepare_data() {
+        if (pattern_ == MIN) {
+            memset(data_, 0, n_ * sizeof(int));
+            memset(centroids_ref_, 0, centroids_size_ * sizeof(int));
+            memset(centroids_tst_, 0, centroids_size_ * sizeof(int));
+            memset(indices_ref_, 0, indices_size_ * sizeof(uint8_t));
+            memset(indices_tst_, 0, indices_size_ * sizeof(uint8_t));
+        } else if (pattern_ == MAX) {
+            memset(data_, 0xff, n_ * sizeof(int));
+            memset(centroids_ref_, 0xff, centroids_size_ * sizeof(int));
+            memset(centroids_tst_, 0xff, centroids_size_ * sizeof(int));
+            memset(indices_ref_, 0xff, indices_size_ * sizeof(uint8_t));
+            memset(indices_tst_, 0xff, indices_size_ * sizeof(uint8_t));
+        } else {  // pattern_= == RANDOM
+            for (size_t i = 0; i < n_; i++)
+                data_[i] = rnd32_->random();
+            for (size_t i = 0; i < centroids_size_; i++)
+                centroids_ref_[i] = centroids_tst_[i] = rnd32_->random();
+            for (size_t i = 0; i < indices_size_; i++)
+                indices_ref_[i] = indices_tst_[i] = rnd8_->random();
         }
+    }
 
-        void TearDown() override {
-            if (rnd32_)
-                delete rnd32_;
-            if (rnd8_)
-                delete rnd8_;
-            if (data_)
-                delete data_;
-            if (centroids_ref_)
-                delete centroids_ref_;
-            if (centroids_tst_)
-                delete centroids_tst_;
-            if (indices_ref_)
-                delete indices_ref_;
-            if (indices_tst_)
-                delete indices_tst_;
-        }
+    void check_output() {
+        int res = memcmp(
+            centroids_ref_, centroids_tst_, centroids_size_ * sizeof(int));
+        ASSERT_EQ(res, 0) << "Compare Centroids array error";
 
-      protected:
-        void prepare_data() {
-            if (pattern_ == MIN) {
-                memset(data_, 0, n_ * sizeof(int));
-                memset(centroids_ref_, 0, centroids_size_ * sizeof(int));
-                memset(centroids_tst_, 0, centroids_size_ * sizeof(int));
-                memset(indices_ref_, 0, indices_size_ * sizeof(uint8_t));
-                memset(indices_tst_, 0, indices_size_ * sizeof(uint8_t));
+        res =
+            memcmp(indices_ref_, indices_tst_, indices_size_ * sizeof(uint8_t));
+        ASSERT_EQ(res, 0) << "Compare indices array error";
+    }
+
+    void run_test() {
+        size_t test_num = 1000;
+        if (pattern_ == MIN || pattern_ == MAX)
+            test_num = 1;
+
+        for (size_t k = 2; k <= 8; k++) {
+            for (size_t i = 0; i < test_num; i++) {
+                prepare_data();
+                func_ref_(data_, centroids_ref_, indices_ref_, n_, k, max_itr_);
+                func_tst_(data_, centroids_tst_, indices_tst_, n_, k, max_itr_);
+                check_output();
             }
-            else if (pattern_ == MAX) {
-                memset(data_, 0xff, n_ * sizeof(int));
-                memset(centroids_ref_, 0xff, centroids_size_ * sizeof(int));
-                memset(centroids_tst_, 0xff, centroids_size_ * sizeof(int));
-                memset(indices_ref_, 0xff, indices_size_ * sizeof(uint8_t));
-                memset(indices_tst_, 0xff, indices_size_ * sizeof(uint8_t));
-            }
-            else { //pattern_= == RANDOM
-                for (size_t i = 0; i < n_; i++)
-                    data_[i] = rnd32_->random();
-                for (size_t i = 0; i < centroids_size_; i++)
-                    centroids_ref_[i] = centroids_tst_[i] = rnd32_->random();
-                for (size_t i = 0; i < indices_size_; i++)
-                    indices_ref_[i] = indices_tst_[i] = rnd8_->random();
-            }
         }
+    }
 
-        void check_output() {
-            int res = memcmp(centroids_ref_, centroids_tst_, centroids_size_* sizeof(int));
-            ASSERT_EQ(res, 0) << "Compare Centroids array error";
+    void speed() {
+        const uint64_t num_loop = 10000;
+        double time_c, time_o;
+        uint64_t start_time_seconds, start_time_useconds;
+        uint64_t middle_time_seconds, middle_time_useconds;
+        uint64_t finish_time_seconds, finish_time_useconds;
 
-            res = memcmp(indices_ref_, indices_tst_, indices_size_* sizeof(uint8_t));
-            ASSERT_EQ(res, 0) << "Compare indices array error";
-        }
+        prepare_data();
 
-        void run_test() {
-            size_t test_num = 1000;
-            if (pattern_ == MIN || pattern_ == MAX)
-                test_num = 1;
+        EbStartTime(&start_time_seconds, &start_time_useconds);
 
+        for (uint64_t i = 0; i < num_loop; i++) {
             for (size_t k = 2; k <= 8; k++) {
-                for (size_t i = 0; i < test_num; i++) {
-                    prepare_data();
-                    func_ref_(data_, centroids_ref_, indices_ref_, n_, k, max_itr_);
-                    func_tst_(data_, centroids_tst_, indices_tst_, n_, k, max_itr_);
-                    check_output();
-                }
+                func_ref_(data_, centroids_ref_, indices_ref_, n_, k, max_itr_);
             }
         }
 
-      protected:
-        SVTRandom* rnd32_;
-        SVTRandom* rnd8_;
-        av1_k_means_func func_ref_;
-        av1_k_means_func func_tst_;
-        int* data_;
-        int* centroids_ref_;
-        int* centroids_tst_;
-        uint8_t* indices_ref_;
-        uint8_t* indices_tst_;
+        EbStartTime(&middle_time_seconds, &middle_time_useconds);
 
-        uint32_t centroids_size_;
-        uint32_t indices_size_;
-        TestPattern pattern_;
-        BlockSize block_;
+        for (uint64_t i = 0; i < num_loop; i++) {
+            for (size_t k = 2; k <= 8; k++) {
+                func_tst_(data_, centroids_tst_, indices_tst_, n_, k, max_itr_);
+            }
+        }
 
-        const int max_itr_ = 50;
-        int n_;
-    };
+        EbStartTime(&finish_time_seconds, &finish_time_useconds);
 
-    TEST_P(Av1KMeansDim, RunCheckOutput) {
-        run_test();
-    };
+        check_output();
 
-    INSTANTIATE_TEST_CASE_P(
-        Av1KMeansDim, Av1KMeansDim,
-        ::testing::Combine(::testing::ValuesIn(TEST_PATTERNS),
-                           ::testing::ValuesIn(TEST_BLOCK_SIZES),
-                           ::testing::ValuesIn(TEST_FUNC_PAIRS)));
+        EbComputeOverallElapsedTimeMs(start_time_seconds,
+                                      start_time_useconds,
+                                      middle_time_seconds,
+                                      middle_time_useconds,
+                                      &time_c);
+        EbComputeOverallElapsedTimeMs(middle_time_seconds,
+                                      middle_time_useconds,
+                                      finish_time_seconds,
+                                      finish_time_useconds,
+                                      &time_o);
+
+        printf("    speedup %5.2fx)\n", time_c / time_o);
+    }
+
+
+  protected:
+    SVTRandom* rnd32_;
+    SVTRandom* rnd8_;
+    av1_k_means_func func_ref_;
+    av1_k_means_func func_tst_;
+    int* data_;
+    int* centroids_ref_;
+    int* centroids_tst_;
+    uint8_t* indices_ref_;
+    uint8_t* indices_tst_;
+
+    uint32_t centroids_size_;
+    uint32_t indices_size_;
+    TestPattern pattern_;
+    BlockSize block_;
+
+    const int max_itr_ = 50;
+    int n_;
+};
+
+TEST_P(Av1KMeansDim, RunCheckOutput) {
+    run_test();
+};
+
+TEST_P(Av1KMeansDim, speed) {
+    speed();
+};
+
+INSTANTIATE_TEST_CASE_P(
+    Av1KMeansDim, Av1KMeansDim,
+    ::testing::Combine(::testing::ValuesIn(TEST_PATTERNS),
+                       ::testing::ValuesIn(TEST_BLOCK_SIZES),
+                       ::testing::ValuesIn(TEST_FUNC_PAIRS)));
 
 }  // namespace
