@@ -137,8 +137,8 @@ static AOM_FORCE_INLINE void integral_images(const uint8_t *src,
 
         /* Clean memory used in calc_abc and calc_abc_fast, when calcuate out of box. */
         for (int line = 0; line <8; ++line) {
-            memset(CT + width + line * buf_stride, 0, sizeof(*C) * (6));
-            memset(DT + width + line * buf_stride, 0, sizeof(*C) * (6));
+            memset(CT + width + line * buf_stride, 0, sizeof(*C) * (8));
+            memset(DT + width + line * buf_stride, 0, sizeof(*C) * (8));
         }
 
         srcT += 8 * src_stride;
@@ -224,8 +224,8 @@ static AOM_FORCE_INLINE void integral_images_highbd(const uint16_t *src,
 
         /* Clean memory used in calc_abc and calc_abc_fast, when calcuate out of box. */
         for (int line = 0; line < 8; ++line) {
-            memset(CT + width + line * buf_stride, 0, sizeof(*C) * (6));
-            memset(DT + width + line * buf_stride, 0, sizeof(*C) * (6));
+            memset(CT + width + line * buf_stride, 0, sizeof(*C) * (8));
+            memset(DT + width + line * buf_stride, 0, sizeof(*C) * (8));
         }
 
         srcT += 8 * src_stride;
@@ -463,7 +463,7 @@ static AOM_FORCE_INLINE void final_filter(int32_t *dst, int32_t dst_stride,
 // Assumes that C, D are integral images for the original buffer which has been
 // extended to have a padding of SGRPROJ_BORDER_VERT/SGRPROJ_BORDER_HORZ pixels
 // on the sides. A, B, C, D point at logical position (0, 0).
-static AOM_FORCE_INLINE void calc_ab_fast(int32_t *A, int32_t *B,
+static /*AOM_FORCE_INLINE*/ void calc_ab_fast(int32_t *A, int32_t *B,
     const int32_t *C, const int32_t *D, int32_t width, int32_t height,
     int32_t buf_stride, int32_t bit_depth, int32_t sgr_params_idx,
     int32_t radius_idx) {
@@ -625,7 +625,7 @@ static INLINE __m256i cross_sum_fast_odd_row(const int32_t *buf) {
 // The final filter for the self-guided restoration. Computes a
 // weighted average across A, B with "cross sums" (see cross_sum_...
 // implementations above).
-static AOM_FORCE_INLINE void final_filter_fast(int32_t *dst, int32_t dst_stride,
+static /*AOM_FORCE_INLINE*/ void final_filter_fast(int32_t *dst, int32_t dst_stride,
     const int32_t *A, const int32_t *B, int32_t buf_stride, const uint8_t *dgd8,
     int32_t dgd_stride, int32_t width, int32_t height, int32_t highbd) {
     const int32_t nb0 = 5;
@@ -732,7 +732,7 @@ void eb_av1_selfguided_restoration_avx2(const uint8_t *dgd8, int32_t width,
 
     DECLARE_ALIGNED(32, int32_t,
     buf[4 * ALIGN_POWER_OF_TWO(RESTORATION_PROC_UNIT_PELS, 3)]);
-   // memset(buf, 0xfe, 4 * ALIGN_POWER_OF_TWO(RESTORATION_PROC_UNIT_PELS, 3) * 4);
+    memset(buf, 0xbc, 4 * ALIGN_POWER_OF_TWO(RESTORATION_PROC_UNIT_PELS, 3) * 4);
 
     const int32_t width_ext = width + 2 * SGRPROJ_BORDER_HORZ;
     const int32_t height_ext = height + 2 * SGRPROJ_BORDER_VERT;
