@@ -135,6 +135,12 @@ static AOM_FORCE_INLINE void integral_images(const uint8_t *src,
             x += 8;
         } while (x < width);
 
+        /* Clean memory used in calc_abc and calc_abc_fast, when calcuate out of box. */
+        for (int line = 0; line <8; ++line) {
+            memset(CT + width + line * buf_stride, 0, sizeof(*C) * (6));
+            memset(DT + width + line * buf_stride, 0, sizeof(*C) * (6));
+        }
+
         srcT += 8 * src_stride;
         CT += 8 * buf_stride;
         DT += 8 * buf_stride;
@@ -215,6 +221,12 @@ static AOM_FORCE_INLINE void integral_images_highbd(const uint16_t *src,
             store_32bit_8x8(r32, DT + x, buf_stride);
             x += 8;
         } while (x < width);
+
+        /* Clean memory used in calc_abc and calc_abc_fast, when calcuate out of box. */
+        for (int line = 0; line < 8; ++line) {
+            memset(CT + width + line * buf_stride, 0, sizeof(*C) * (6));
+            memset(DT + width + line * buf_stride, 0, sizeof(*C) * (6));
+        }
 
         srcT += 8 * src_stride;
         CT += 8 * buf_stride;
@@ -720,6 +732,7 @@ void eb_av1_selfguided_restoration_avx2(const uint8_t *dgd8, int32_t width,
 
     DECLARE_ALIGNED(32, int32_t,
     buf[4 * ALIGN_POWER_OF_TWO(RESTORATION_PROC_UNIT_PELS, 3)]);
+   // memset(buf, 0xfe, 4 * ALIGN_POWER_OF_TWO(RESTORATION_PROC_UNIT_PELS, 3) * 4);
 
     const int32_t width_ext = width + 2 * SGRPROJ_BORDER_HORZ;
     const int32_t height_ext = height + 2 * SGRPROJ_BORDER_VERT;
