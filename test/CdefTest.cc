@@ -677,11 +677,15 @@ TEST(CdefToolTest, ComputeCdefDist8bitMatchTest) {
 typedef uint64_t (*search_one_dual_func)(int *lev0, int *lev1, int nb_strengths,
                                          uint64_t (**mse)[64], int sb_count,
                                          int fast, int start_gi, int end_gi);
+struct search_one_dual_func_list {
+    search_one_dual_func func;
+    CPU_FLAGS flags;
+};
 
-static const search_one_dual_func search_one_dual_func_table[] = {
-    search_one_dual_avx2,
+static const struct search_one_dual_func_list search_one_dual_func_table[] = {
+    {search_one_dual_avx2, CPU_FLAGS_AVX2},
 #ifndef NON_AVX512_SUPPORT
-    search_one_dual_avx512
+    {search_one_dual_avx512, CPU_FLAGS_AVX512F}
 #endif
 };
 
@@ -696,6 +700,7 @@ TEST(CdefToolTest, SearchOneDualMatchTest) {
     uint64_t(*mse[2])[TOTAL_STRENGTHS];
     mse[0] = (uint64_t(*)[64])eb_aom_memalign(32, sizeof(**mse) * sb_count);
     mse[1] = (uint64_t(*)[64])eb_aom_memalign(32, sizeof(**mse) * sb_count);
+    CPU_FLAGS cpu_flags = get_cpu_flags_to_use();
 
     SVTRandom rnd_(10, false);
     for (int k = 0; k < 100; ++k) {
@@ -725,8 +730,14 @@ TEST(CdefToolTest, SearchOneDualMatchTest) {
                 for (int l = 0; l < (int) (sizeof(search_one_dual_func_table) /
                                         sizeof(*search_one_dual_func_table));
                      ++l) {
+
+                    if (!(cpu_flags & search_one_dual_func_table[l].flags)) {
+                        /* Ignore kernels not supported by CPU. */
+                        continue;
+                    }
+
                     uint64_t best_mse_tst =
-                        search_one_dual_func_table[l](lvl_luma_tst,
+                        search_one_dual_func_table[l].func(lvl_luma_tst,
                                                       lvl_chroma_tst,
                                                       j,
                                                       mse,
@@ -769,7 +780,7 @@ TEST(CdefToolTest, DISABLED_SearchOneDualSpeedTest) {
     uint64_t(*mse[2])[TOTAL_STRENGTHS];
     mse[0] = (uint64_t(*)[64])eb_aom_memalign(32, sizeof(**mse) * sb_count);
     mse[1] = (uint64_t(*)[64])eb_aom_memalign(32, sizeof(**mse) * sb_count);
-
+    CPU_FLAGS cpu_flags = get_cpu_flags_to_use();
     SVTRandom rnd_(10, false);
 
     // generate mse randomly
@@ -787,6 +798,12 @@ TEST(CdefToolTest, DISABLED_SearchOneDualSpeedTest) {
     for (int i = 0; i < (int) (sizeof(search_one_dual_func_table) /
                             sizeof(*search_one_dual_func_table));
          ++i) {
+
+        if (!(cpu_flags & search_one_dual_func_table[i].flags)) {
+            /* Ignore kernels not supported by CPU. */
+            continue;
+        }
+
         for (int j = 0; j < nb_strengths; ++j) {
             uint64_t best_mse_ref, best_mse_tst;
             double time_c, time_o;
@@ -810,7 +827,7 @@ TEST(CdefToolTest, DISABLED_SearchOneDualSpeedTest) {
             EbStartTime(&middle_time_seconds, &middle_time_useconds);
 
             for (uint64_t k = 0; k < num_loop; k++) {
-                best_mse_tst = search_one_dual_func_table[i](lvl_luma_tst,
+                best_mse_tst = search_one_dual_func_table[i].func(lvl_luma_tst,
                                                              lvl_chroma_tst,
                                                              j,
                                                              mse,
