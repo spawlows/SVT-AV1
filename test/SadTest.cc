@@ -281,6 +281,7 @@ class SADTestBase : public ::testing::Test {
             fill_buf_with_value(&sad32x32[0][0], 4 * 8, 0);
             break;
         }
+        case BUF_SMALL:
         case BUF_RANDOM: {
             for (int i = 0; i < 64; i++)
                 for (int j = 0; j < 8; j++)
@@ -1348,7 +1349,13 @@ class AllSadCalculationTest
             << "compare sad32x32 error";
     }
 
-    void check_get_nsq_sad() {
+    void check_get_nsq_sad(int check_speed) {
+        double time_c, time_o;
+        uint64_t start_time_seconds, start_time_useconds;
+        uint64_t middle_time_seconds, middle_time_useconds;
+        uint64_t finish_time_seconds, finish_time_useconds;
+        const uint64_t num_loop = check_speed ? 1000000 : 1;
+
         uint32_t best_sad64x32[2][2];
         uint32_t best_sad32x64[2][2];
         uint32_t best_sad32x16[2][8];
@@ -1384,55 +1391,85 @@ class AllSadCalculationTest
 
         prepare_nsq_sad_data();
 
-        ext_eigth_sad_calculation_nsq_c(sad8x8,
-                                        sad16x16_32b,
-                                        sad32x32,
-                                        best_sad64x32[0],
-                                        best_mv64x32[0],
-                                        best_sad32x16[0],
-                                        best_mv32x16[0],
-                                        best_sad16x8[0],
-                                        best_mv16x8[0],
-                                        best_sad32x64[0],
-                                        best_mv32x64[0],
-                                        best_sad16x32[0],
-                                        best_mv16x32[0],
-                                        best_sad8x16[0],
-                                        best_mv8x16[0],
-                                        best_sad32x8[0],
-                                        best_mv32x8[0],
-                                        best_sad8x32[0],
-                                        best_mv8x32[0],
-                                        best_sad64x16[0],
-                                        best_mv64x16[0],
-                                        best_sad16x64[0],
-                                        best_mv16x64[0],
-                                        0);
+        EbStartTime(&start_time_seconds, &start_time_useconds);
 
-        ext_eigth_sad_calculation_nsq_avx2(sad8x8,
-                                           sad16x16_32b,
-                                           sad32x32,
-                                           best_sad64x32[1],
-                                           best_mv64x32[1],
-                                           best_sad32x16[1],
-                                           best_mv32x16[1],
-                                           best_sad16x8[1],
-                                           best_mv16x8[1],
-                                           best_sad32x64[1],
-                                           best_mv32x64[1],
-                                           best_sad16x32[1],
-                                           best_mv16x32[1],
-                                           best_sad8x16[1],
-                                           best_mv8x16[1],
-                                           best_sad32x8[1],
-                                           best_mv32x8[1],
-                                           best_sad8x32[1],
-                                           best_mv8x32[1],
-                                           best_sad64x16[1],
-                                           best_mv64x16[1],
-                                           best_sad16x64[1],
-                                           best_mv16x64[1],
-                                           0);
+        for (uint64_t i = 0; i < num_loop; i++) {
+            ext_eigth_sad_calculation_nsq_c(sad8x8,
+                                            sad16x16_32b,
+                                            sad32x32,
+                                            best_sad64x32[0],
+                                            best_mv64x32[0],
+                                            best_sad32x16[0],
+                                            best_mv32x16[0],
+                                            best_sad16x8[0],
+                                            best_mv16x8[0],
+                                            best_sad32x64[0],
+                                            best_mv32x64[0],
+                                            best_sad16x32[0],
+                                            best_mv16x32[0],
+                                            best_sad8x16[0],
+                                            best_mv8x16[0],
+                                            best_sad32x8[0],
+                                            best_mv32x8[0],
+                                            best_sad8x32[0],
+                                            best_mv8x32[0],
+                                            best_sad64x16[0],
+                                            best_mv64x16[0],
+                                            best_sad16x64[0],
+                                            best_mv16x64[0],
+                                            0);
+        }
+
+        EbStartTime(&middle_time_seconds, &middle_time_useconds);
+
+        for (uint64_t i = 0; i < num_loop; i++) {
+            ext_eigth_sad_calculation_nsq_avx2(sad8x8,
+                                               sad16x16_32b,
+                                               sad32x32,
+                                               best_sad64x32[1],
+                                               best_mv64x32[1],
+                                               best_sad32x16[1],
+                                               best_mv32x16[1],
+                                               best_sad16x8[1],
+                                               best_mv16x8[1],
+                                               best_sad32x64[1],
+                                               best_mv32x64[1],
+                                               best_sad16x32[1],
+                                               best_mv16x32[1],
+                                               best_sad8x16[1],
+                                               best_mv8x16[1],
+                                               best_sad32x8[1],
+                                               best_mv32x8[1],
+                                               best_sad8x32[1],
+                                               best_mv8x32[1],
+                                               best_sad64x16[1],
+                                               best_mv64x16[1],
+                                               best_sad16x64[1],
+                                               best_mv16x64[1],
+                                               0);
+        }
+
+        EbStartTime(&finish_time_seconds, &finish_time_useconds);
+
+        if (check_speed) {
+            EbComputeOverallElapsedTimeMs(start_time_seconds,
+                                               start_time_useconds,
+                                               middle_time_seconds,
+                                               middle_time_useconds,
+                                               &time_c);
+            EbComputeOverallElapsedTimeMs(middle_time_seconds,
+                                               middle_time_useconds,
+                                               finish_time_seconds,
+                                               finish_time_useconds,
+                                               &time_o);
+            printf("Average Nanoseconds per Function Call\n");
+            printf("    ext_eigth_sad_calculation_nsq_c: %6.2f\n",
+                1000000 * time_c / num_loop);
+            printf("    ext_eigth_sad_calculation_nsq_avx2: %6.2f"
+                "   (Comparison: %5.2fx)\n",
+                1000000 * time_o / num_loop,
+                time_c / time_o);
+        }
 
         EXPECT_EQ(
             0,
@@ -1528,7 +1565,11 @@ TEST_P(AllSadCalculationTest, 32x32_64x64_Test) {
 }
 
 TEST_P(AllSadCalculationTest, nsq_sad_Test) {
-    check_get_nsq_sad();
+    check_get_nsq_sad(0);
+}
+
+TEST_P(AllSadCalculationTest, DISABLED_nsq_sad_Test_Speed) {
+    check_get_nsq_sad(1);
 }
 
 INSTANTIATE_TEST_CASE_P(
