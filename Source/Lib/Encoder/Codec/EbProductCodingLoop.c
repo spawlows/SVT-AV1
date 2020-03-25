@@ -740,8 +740,10 @@ void md_update_all_neighbour_arrays(PictureControlSet *pcs_ptr, ModeDecisionCont
     context_ptr->blk_ptr = &context_ptr->md_blk_arr_nsq[last_blk_index_mds];
     uint8_t avail_blk_flag = context_ptr->md_local_blk_unit[last_blk_index_mds].avail_blk_flag;
 
-    mode_decision_update_neighbor_arrays(
-        pcs_ptr, context_ptr, last_blk_index_mds, EB_FALSE);
+    if (avail_blk_flag) {
+        mode_decision_update_neighbor_arrays(
+            pcs_ptr, context_ptr, last_blk_index_mds, EB_FALSE);
+    }
 
     update_mi_map(context_ptr,
                   context_ptr->blk_ptr,
