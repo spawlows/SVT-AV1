@@ -550,6 +550,18 @@ static void get_color_map_params_rate(PaletteInfo *                             
 int palette_color_index_context_lookup[MAX_COLOR_CONTEXT_HASH + 1] = {
     -1, -1, 0, -1, -1, 4, 3, 2, 1};
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+
+    int av1_get_palette_color_index_context(const uint8_t *color_map, int stride, int r, int c,
+                                        int palette_size, uint8_t *color_order, int *color_idx);
+
+#ifdef __cplusplus
+}
+#endif
+
 #define NUM_PALETTE_NEIGHBORS 3 // left, top-left and top.
 int av1_get_palette_color_index_context(const uint8_t *color_map, int stride, int r, int c,
                                         int palette_size, uint8_t *color_order, int *color_idx) {
@@ -569,7 +581,9 @@ int av1_get_palette_color_index_context(const uint8_t *color_map, int stride, in
     int              i;
     static const int weights[NUM_PALETTE_NEIGHBORS] = {2, 1, 2};
     for (i = 0; i < NUM_PALETTE_NEIGHBORS; ++i) {
-        if (color_neighbors[i] >= 0) { scores[color_neighbors[i]] += weights[i]; }
+        if (color_neighbors[i] >= 0) {
+            scores[color_neighbors[i]] += weights[i];
+        }
     }
 
     int inverse_color_order[PALETTE_MAX_SIZE];
@@ -638,6 +652,12 @@ static int cost_and_tokenize_map(Av1ColorMapParam *param, TOKENEXTRA **t, int pl
 
     (void)plane;
 
+
+     printf("plane_block_width %i rows %i cols %i n %i palette_size_idx %i\n",
+           plane_block_width,
+           rows,
+         cols ,n ,palette_size_idx);
+
     for (int k = 1; k < rows + cols - 1; ++k) {
         for (int j = AOMMIN(k, cols - 1); j >= AOMMAX(0, k - rows + 1); --j) {
             int       i = k - j;
@@ -645,6 +665,10 @@ static int cost_and_tokenize_map(Av1ColorMapParam *param, TOKENEXTRA **t, int pl
             const int color_ctx = av1_get_palette_color_index_context(
                 color_map, plane_block_width, i, j, n, color_order, &color_new_idx);
             assert(color_new_idx >= 0 && color_new_idx < n);
+
+           
+
+
             if (calc_rate) {
                 this_rate += (*color_cost)[palette_size_idx][color_ctx][color_new_idx];
             } else {
