@@ -180,7 +180,7 @@ class AV1WienerConvolveTest : public ::testing::TestWithParam<ParamType> {
             hkernel[0] = vkernel[0] = WIENER_FILT_TAP0_MAXV;
             hkernel[1] = vkernel[1] = WIENER_FILT_TAP1_MAXV;
             hkernel[2] = vkernel[2] = WIENER_FILT_TAP2_MAXV;
-        } else {
+        } else if (kernel_type == 2) {
             // Randomly generated values for filter coefficients
             hkernel[0] = WIENER_FILT_TAP0_MINV +
                          pseudo_uniform(WIENER_FILT_TAP0_MAXV + 1 -
@@ -201,6 +201,19 @@ class AV1WienerConvolveTest : public ::testing::TestWithParam<ParamType> {
             vkernel[2] = WIENER_FILT_TAP2_MINV +
                          pseudo_uniform(WIENER_FILT_TAP2_MAXV + 2 -
                                         WIENER_FILT_TAP2_MINV);
+        } else if (kernel_type == 3) {
+            // Check zerocoff path
+            hkernel[0] = vkernel[0] = 0;
+            hkernel[1] = vkernel[1] = 0;
+            hkernel[2] = vkernel[2] = 0;
+        } else if (kernel_type == 4) {
+            hkernel[0] = vkernel[0] = 0;
+            hkernel[1] = vkernel[1] = 0;
+            hkernel[2] = vkernel[2] = WIENER_FILT_TAP2_MAXV;
+        } else if (kernel_type == 5) {
+            hkernel[0] = vkernel[0] = 0;
+            hkernel[1] = vkernel[1] = WIENER_FILT_TAP2_MAXV;
+            hkernel[2] = vkernel[2] = WIENER_FILT_TAP2_MAXV;
         }
 
         if (tap <= 5) {
@@ -244,7 +257,7 @@ class AV1WienerConvolveTest : public ::testing::TestWithParam<ParamType> {
         for (unsigned int tap_idx = 0;
              tap_idx < sizeof(test_tap_table) / sizeof(*test_tap_table);
              tap_idx++) {
-            for (int kernel_type = 0; kernel_type < 3; kernel_type++) {
+            for (int kernel_type = 0; kernel_type < 6; kernel_type++) {
                 generate_kernels(
                     hkernel, vkernel, test_tap_table[tap_idx], kernel_type);
                 for (int i = 0;
