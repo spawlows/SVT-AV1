@@ -171,11 +171,6 @@ EbErrorType signal_derivation_pre_analysis_oq(SequenceControlSet *     scs_ptr,
         tf_enable_hme_level2_flag[0][input_resolution][hme_me_level] ||
         tf_enable_hme_level2_flag[1][input_resolution][hme_me_level];
 
-    if (scs_ptr->static_config.enable_intra_edge_filter == DEFAULT)
-        scs_ptr->seq_header.enable_intra_edge_filter = 1;
-    else
-        scs_ptr->seq_header.enable_intra_edge_filter = (uint8_t)scs_ptr->static_config.enable_intra_edge_filter;
-
     if (scs_ptr->static_config.pic_based_rate_est == DEFAULT)
         scs_ptr->seq_header.pic_based_rate_est = 1;
     else

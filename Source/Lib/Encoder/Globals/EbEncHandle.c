@@ -1191,6 +1191,13 @@ EB_API EbErrorType svt_av1_enc_init(EbComponentType *svt_enc_component)
         else
             enc_handle_ptr->scs_instance_array[instance_index]->scs_ptr->seq_header.enable_cdef = (uint8_t)(enc_handle_ptr->scs_instance_array[instance_index]->scs_ptr->static_config.cdef_mode>0);
 
+
+        if (enc_handle_ptr->scs_instance_array[instance_index]->scs_ptr->static_config.enable_intra_edge_filter == DEFAULT)
+            enc_handle_ptr->scs_instance_array[instance_index]->scs_ptr->seq_header.enable_intra_edge_filter = 1;
+        else
+            enc_handle_ptr->scs_instance_array[instance_index]->scs_ptr->seq_header.enable_intra_edge_filter = (uint8_t)enc_handle_ptr->scs_instance_array[instance_index]->scs_ptr->static_config.enable_intra_edge_filter;
+
+
         if (enc_handle_ptr->scs_instance_array[0]->scs_ptr->static_config.enable_overlays) {
             // Overlay Input Picture Buffers
             EB_NEW(
