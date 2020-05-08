@@ -7,6 +7,8 @@
 
 #include "EbSequenceControlSet.h"
 #include "EbUtility.h"
+#include "EbUtility.h"
+#include "EbPictureAnalysisProcess.h"
 
 static void eb_sequence_control_set_dctor(EbPtr p) {
     SequenceControlSet *obj = (SequenceControlSet *)p;
@@ -45,6 +47,9 @@ EbErrorType eb_sequence_control_set_ctor(SequenceControlSet *scs_ptr, EbPtr obje
     uint32_t segment_index;
 
     scs_ptr->dctor = eb_sequence_control_set_dctor;
+
+    // Set picture parameters to account for subpicture, picture scantype, and set regions by resolutions
+    set_picture_parameters_for_statistics_gathering(scs_ptr);
 
     scs_ptr->static_config.sb_sz           = 64;
     scs_ptr->static_config.partition_depth = 4;
