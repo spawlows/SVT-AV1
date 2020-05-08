@@ -1186,6 +1186,10 @@ EB_API EbErrorType svt_av1_enc_init(EbComponentType *svt_enc_component)
         enc_handle_ptr->scs_instance_array[instance_index]->scs_ptr->static_config.scene_change_detection == 0 ? SCD_MODE_0 : SCD_MODE_1;
         // Set the block mean calculation prec
         enc_handle_ptr->scs_instance_array[instance_index]->scs_ptr->block_mean_calc_prec = BLOCK_MEAN_PREC_SUB;
+         if (enc_handle_ptr->scs_instance_array[instance_index]->scs_ptr->static_config.cdef_mode == DEFAULT)
+            enc_handle_ptr->scs_instance_array[instance_index]->scs_ptr->seq_header.enable_cdef = 1;
+        else
+            enc_handle_ptr->scs_instance_array[instance_index]->scs_ptr->seq_header.enable_cdef = (uint8_t)(enc_handle_ptr->scs_instance_array[instance_index]->scs_ptr->static_config.cdef_mode>0);
 
         if (enc_handle_ptr->scs_instance_array[0]->scs_ptr->static_config.enable_overlays) {
             // Overlay Input Picture Buffers
