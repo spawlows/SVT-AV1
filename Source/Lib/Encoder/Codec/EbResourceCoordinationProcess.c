@@ -978,12 +978,12 @@ void *resource_coordination_kernel(void *input_ptr) {
                     ? (EbEncMode)scs_ptr->static_config.snd_pass_enc_mode
                     : pcs_ptr->enc_mode;
 
-            // Set the SCD Mode
-            scs_ptr->scd_mode =
-                scs_ptr->static_config.scene_change_detection == 0 ? SCD_MODE_0 : SCD_MODE_1;
+            //// Set the SCD Mode
+            //scs_ptr->scd_mode =
+            //    scs_ptr->static_config.scene_change_detection == 0 ? SCD_MODE_0 : SCD_MODE_1;
 
-            // Set the block mean calculation prec
-            scs_ptr->block_mean_calc_prec = BLOCK_MEAN_PREC_SUB;
+            //// Set the block mean calculation prec
+            //scs_ptr->block_mean_calc_prec = BLOCK_MEAN_PREC_SUB;
 
             // Pre-Analysis Signal(s) derivation
             signal_derivation_pre_analysis_oq(scs_ptr, pcs_ptr);

@@ -1181,6 +1181,11 @@ EB_API EbErrorType svt_av1_enc_init(EbComponentType *svt_enc_component)
         // Set the SequenceControlSet Picture Pool Fifo Ptrs
         enc_handle_ptr->scs_instance_array[instance_index]->encode_context_ptr->reference_picture_pool_fifo_ptr = eb_system_resource_get_producer_fifo(enc_handle_ptr->reference_picture_pool_ptr_array[instance_index], 0);
         enc_handle_ptr->scs_instance_array[instance_index]->encode_context_ptr->pa_reference_picture_pool_fifo_ptr = eb_system_resource_get_producer_fifo(enc_handle_ptr->pa_reference_picture_pool_ptr_array[instance_index], 0);
+        // Set the SCD Mode
+        enc_handle_ptr->scs_instance_array[instance_index]->scs_ptr->scd_mode =
+        enc_handle_ptr->scs_instance_array[instance_index]->scs_ptr->static_config.scene_change_detection == 0 ? SCD_MODE_0 : SCD_MODE_1;
+        // Set the block mean calculation prec
+        enc_handle_ptr->scs_instance_array[instance_index]->scs_ptr->block_mean_calc_prec = BLOCK_MEAN_PREC_SUB;
 
         if (enc_handle_ptr->scs_instance_array[0]->scs_ptr->static_config.enable_overlays) {
             // Overlay Input Picture Buffers
@@ -1645,6 +1650,7 @@ EB_API EbErrorType svt_av1_enc_init(EbComponentType *svt_enc_component)
     eb_set_thread_management_parameters(config_ptr);
 
     control_set_ptr = enc_handle_ptr->scs_instance_array[0]->scs_ptr;
+
 
     // Resource Coordination
     EB_CREATE_THREAD(enc_handle_ptr->resource_coordination_thread_handle, resource_coordination_kernel, enc_handle_ptr->resource_coordination_context_ptr);
