@@ -11,8 +11,12 @@
 *.bin
 *.opensdf
 *.log
-Build/linux/debug/
-Build/linux/release/
-Build/VS/x64
+.vscode
 Bin
+Build
 build
+test/vectors/
+test/docs/
+!Build/linux/build.sh
+!Build/windows/build.bat
+.DS_Store
