@@ -678,19 +678,15 @@ void setup_rtcd_internal(CPU_FLAGS flags) {
              noise_extract_chroma_weak_avx2_intrin);
     SET_SSE41(
         svt_av1_apply_filtering, svt_av1_apply_filtering_c, svt_av1_apply_temporal_filter_sse4_1);
-#if TF_X86_KERNEL_FIX
+
     SET_AVX2(svt_av1_apply_temporal_filter_planewise,
              svt_av1_apply_temporal_filter_planewise_c,
              svt_av1_apply_temporal_filter_planewise_avx2);
-#else
-//MSVC fails because avx2 kernel does not exist, temporal fix by assigning C kernel instread of AVX2
-    //SET_AVX2(svt_av1_apply_temporal_filter_planewise,
-    //         svt_av1_apply_temporal_filter_planewise_c,
-    //         svt_av1_apply_temporal_filter_planewise_avx2);
-    SET_AVX2(svt_av1_apply_temporal_filter_planewise,
-             svt_av1_apply_temporal_filter_planewise_c,
-             svt_av1_apply_temporal_filter_planewise_c);
-#endif
+
+    SET_AVX2(svt_av1_apply_temporal_filter_planewise_hbd,
+            svt_av1_apply_temporal_filter_planewise_hbd_c,
+            svt_av1_apply_temporal_filter_planewise_hbd_avx2);
+
     SET_SSE41(svt_av1_apply_filtering_highbd,
               svt_av1_apply_filtering_highbd_c,
               svt_av1_highbd_apply_temporal_filter_sse4_1);

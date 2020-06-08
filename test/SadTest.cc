@@ -48,6 +48,9 @@
 
 using svt_av1_test_tool::SVTRandom;  // to generate the random
 
+#if !SHUT_ME_NSQ_SEARCH
+#if !REMOVE_ME_SUBPEL_CODE
+
 namespace {
 /**
  * @Brief Test param definition.
@@ -2491,3 +2494,6 @@ TEST_P(SADTestSubSample16bit, DISABLED_Speed) {
 }
 
 }  // namespace
+
+#endif
+#endif

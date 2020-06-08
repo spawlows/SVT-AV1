@@ -1060,6 +1060,23 @@ extern "C" {
         int ss_x, int ss_y, const double *noise_levels, const int decay_control, uint32_t *y_accum,
         uint16_t *y_count, uint32_t *u_accum, uint16_t *u_count, uint32_t *v_accum, uint16_t *v_count);
 #endif
+
+    RTCD_EXTERN void (*svt_av1_apply_temporal_filter_planewise_hbd)(
+#if TF_IMP
+        struct MeContext *context_ptr, const uint16_t *y_src, int y_src_stride, const uint16_t *y_pre,
+        int y_pre_stride, const uint16_t *u_src, const uint16_t *v_src, int uv_src_stride,
+        const uint16_t *u_pre, const uint16_t *v_pre, int uv_pre_stride, unsigned int block_width,
+        unsigned int block_height, int ss_x, int ss_y, const double *noise_levels,
+        const int decay_control, uint32_t *y_accum, uint16_t *y_count, uint32_t *u_accum,
+        uint16_t *u_count, uint32_t *v_accum, uint16_t *v_count);
+#else
+        const uint16_t *y_src, int y_src_stride, const uint16_t *y_pre, int y_pre_stride,
+        const uint16_t *u_src, const uint16_t *v_src, int uv_src_stride, const uint16_t *u_pre,
+        const uint16_t *v_pre, int uv_pre_stride, unsigned int block_width, unsigned int block_height,
+        int ss_x, int ss_y, const double *noise_levels, const int decay_control, uint32_t *y_accum,
+        uint16_t *y_count, uint32_t *u_accum, uint16_t *u_count, uint32_t *v_accum, uint16_t *v_count);
+#endif
+
 #if !REMOVE_ME_SUBPEL_CODE
     RTCD_EXTERN uint32_t(*combined_averaging_ssd)(uint8_t *src, ptrdiff_t src_stride, uint8_t *ref1, ptrdiff_t ref1_stride, uint8_t *ref2, ptrdiff_t ref2_stride, uint32_t height, uint32_t width);
 #endif

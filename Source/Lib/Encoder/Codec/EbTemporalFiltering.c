@@ -1326,6 +1326,7 @@ void svt_av1_apply_temporal_filter_planewise_c(
 *   Nothing will be returned. But the content to which `accum` and `pred`
 *   point will be modified.
 ***************************************************************************************************/
+
 void svt_av1_apply_temporal_filter_planewise_hbd_c(
 #if TF_IMP
     struct MeContext *context_ptr, const uint16_t *y_src, int y_src_stride, const uint16_t *y_pre,
@@ -1646,7 +1647,7 @@ static void apply_filtering_block_plane_wise(
 
         // Apply the temporal filtering strategy
         // TODO(any): avx2 version should also support high bit-depth.
-        svt_av1_apply_temporal_filter_planewise_hbd_c(
+        svt_av1_apply_temporal_filter_planewise_hbd(
 #if TF_IMP
             context_ptr,
 #endif
