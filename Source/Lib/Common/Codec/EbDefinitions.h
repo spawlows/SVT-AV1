@@ -489,6 +489,7 @@ extern "C" {
 #define RESTRICT_INTER_TXS_DEPTH 1 // Restrict the max tx depth for INTER TXS
 #define M0_SQ_WEIGHT_ADOPTION    1 // Change the M0 sq_weight level
 #define PR_1316            1 //AVX2 kernel svt_av1_apply_temporal_filter_planewise_hbd_avx2()
+#define PR_1311            1 //AVX2 kernel variance_highbd_avx2()
 #define NEW_MRP_SETTINGS   1 // New MRP settings for all modes
 #define NEW_TXS_SETTINGS   1 // New TXS settings
 #define ADAPTIVE_NSQ_CR 1
