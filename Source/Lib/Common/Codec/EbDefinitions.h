@@ -50,6 +50,18 @@ extern "C" {
 #define NON_AVX512_SUPPORT
 #endif
 
+#define MASTER_SYNCH   1  // based on master d9b5494b9d68df19c5d8ceb62d203cdf9b1e1b5c
+
+
+///////// START MASTER_SYNCH
+
+#if MASTER_SYNCH
+
+
+#endif
+
+///////// END MASTER_SYNCH
+
 #define MAX_TILE_CNTS 128 // Annex A.3
         // Add support for other prediction structure
 #define MR_MODE 0
