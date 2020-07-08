@@ -2024,14 +2024,41 @@ EbErrorType signal_derivation_multi_processes_oq(
         else
             pcs_ptr->tx_size_search_mode = 0;
 
+#if !INTER_COMP_REDESIGN
         // Set Wedge mode      Settings
         // 0                 FULL: Full search
         // 1                 Fast: If two predictors are very similar, skip wedge compound mode search
         // 2                 Fast: estimate Wedge sign
         // 3                 Fast: Mode 1 & Mode 2
-
+#if WEDGE_SYNCH
+#if MAR11_ADOPTIONS
+    if (pcs_ptr->sc_content_detected)
+#if MAR12_ADOPTIONS
+        if (pcs_ptr->enc_mode <= ENC_M3)
+#else
+        if (pcs_ptr->enc_mode <= ENC_M1)
+#endif
+            pcs_ptr->wedge_mode = 0;
+        else
+            pcs_ptr->wedge_mode = 1;
+#if MAR17_ADOPTIONS
+    else if (pcs_ptr->enc_mode <= ENC_M7)
+#else
+    else if (pcs_ptr->enc_mode <= ENC_M4)
+#endif
+#else
+    if (pcs_ptr->enc_mode <= ENC_M2)
+#endif
         pcs_ptr->wedge_mode = 0;
-
+    else
+        pcs_ptr->wedge_mode = 1;
+#else
+        pcs_ptr->wedge_mode = 0;
+#endif
+#if M8_NEW_REF
+    pcs_ptr->wedge_mode = 0;
+#endif
+#endif
         // inter intra pred                      Settings
         // 0                                     OFF
         // 1                                     ON

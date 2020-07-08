@@ -2481,7 +2481,17 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(SequenceControlSet * scs_ptr,
     else if (context_ptr->pd_pass == PD_PASS_1)
         context_ptr->md_stage_1_class_prune_th = 100;
 
+#if MAR12_ADOPTIONS
+    else if (pcs_ptr->enc_mode <= ENC_M3 ||
+        pcs_ptr->parent_pcs_ptr->sc_content_detected)
+#else
+#if MAR11_ADOPTIONS
+    else if (pcs_ptr->enc_mode <= ENC_M2 ||
+        pcs_ptr->parent_pcs_ptr->sc_content_detected)
+#else
     if (pcs_ptr->enc_mode <= ENC_M1 || pcs_ptr->parent_pcs_ptr->sc_content_detected)
+#endif
+#endif
         context_ptr->md_stage_1_class_prune_th = (uint64_t)~0;
     else
         context_ptr->md_stage_1_class_prune_th = scs_ptr->static_config.md_stage_1_class_prune_th;
@@ -2645,16 +2655,25 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(SequenceControlSet * scs_ptr,
 #endif
         }
     }
+#if !INTER_COMP_REDESIGN
     //comp_similar_mode
     //0: OFF
     //1: If previous similar block is not compound, do not inject compound
     //2: If previous similar block is not compound, do not inject compound
     //   else consider the compound modes up the mode for the similar block
+#if MAR17_ADOPTIONS
+    if (pcs_ptr->enc_mode <= ENC_M7)
+#else
+#if MAR11_ADOPTIONS
+    if (pcs_ptr->enc_mode <= ENC_M4)
+#else
     if (pcs_ptr->enc_mode <= ENC_M3)
+#endif
+#endif
         context_ptr->comp_similar_mode = 1;
     else
         context_ptr->comp_similar_mode = 2;
-
+#endif
     //intra_similar_mode
     //0: OFF
     //1: If previous similar block is intra, do not inject any inter

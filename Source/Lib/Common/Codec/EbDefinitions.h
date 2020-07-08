@@ -81,7 +81,8 @@ extern "C" {
 #define HME_PRUNE_BUG_FIX                 1
 #define MAR10_ADOPTIONS                   1 // Adoptions for all presets
 #define NICS_SYNCH                        1
-
+#define MAR11_ADOPTIONS                   1 // Adoptions for M2, M3, M4, M5
+#define WEDGE_SYNCH                       1
 #endif
 
 ///////// END MASTER_SYNCH

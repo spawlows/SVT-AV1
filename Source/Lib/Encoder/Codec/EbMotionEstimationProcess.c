@@ -211,9 +211,15 @@ EbErrorType signal_derivation_me_kernel_oq(SequenceControlSet *       scs_ptr,
         max_me_search_width[sc_content_detected][input_resolution][hme_me_level];
     context_ptr->me_context_ptr->max_me_search_height =
         max_me_search_height[sc_content_detected][input_resolution][hme_me_level];
+#if !REMOVE_ME_SUBPEL_CODE
     if (sc_content_detected)
+#if MAR11_ADOPTIONS
+        // fractional_search_method is not used if subpel is OFF
+        context_ptr->me_context_ptr->fractional_search_method = FULL_SAD_SEARCH;
+#else
         context_ptr->me_context_ptr->fractional_search_method =
             (enc_mode <= ENC_M1) ? FULL_SAD_SEARCH : SUB_SAD_SEARCH;
+#endif
     else
 #if MAR2_M8_ADOPTIONS
         context_ptr->me_context_ptr->fractional_search_method = SSD_SEARCH;
@@ -222,6 +228,7 @@ EbErrorType signal_derivation_me_kernel_oq(SequenceControlSet *       scs_ptr,
         context_ptr->me_context_ptr->fractional_search_method = SSD_SEARCH;
     else
         context_ptr->me_context_ptr->fractional_search_method = FULL_SAD_SEARCH;
+#endif
 #endif
     // Set HME flags
     context_ptr->me_context_ptr->enable_hme_flag        = pcs_ptr->enable_hme_flag;
@@ -519,11 +526,17 @@ EbErrorType tf_signal_derivation_me_kernel_oq(SequenceControlSet *       scs_ptr
         max_metf_search_width[sc_content_detected][input_resolution][hme_me_level];
     context_ptr->me_context_ptr->max_me_search_height =
         max_metf_search_height[sc_content_detected][input_resolution][hme_me_level];
+#if !REMOVE_ME_SUBPEL_CODE
     if (sc_content_detected)
+#if MAR11_ADOPTIONS
+        // fractional_search_method is irrelevant if subpel is OFF
+        context_ptr->me_context_ptr->fractional_search_method = FULL_SAD_SEARCH;
+#else
         if (enc_mode <= ENC_M1)
             context_ptr->me_context_ptr->fractional_search_method = FULL_SAD_SEARCH;
         else
             context_ptr->me_context_ptr->fractional_search_method = SUB_SAD_SEARCH;
+#endif
     else
 #if MAR2_M8_ADOPTIONS
         context_ptr->me_context_ptr->fractional_search_method = SSD_SEARCH;
@@ -532,6 +545,7 @@ EbErrorType tf_signal_derivation_me_kernel_oq(SequenceControlSet *       scs_ptr
         context_ptr->me_context_ptr->fractional_search_method = SSD_SEARCH;
     else
         context_ptr->me_context_ptr->fractional_search_method = FULL_SAD_SEARCH;
+#endif
 #endif
     // Set HME flags
     context_ptr->me_context_ptr->enable_hme_flag        = pcs_ptr->tf_enable_hme_flag;
