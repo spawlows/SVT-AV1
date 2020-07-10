@@ -6709,6 +6709,20 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
     else
         context_ptr->skip_intra = 0;
 #endif
+    // skip cfl based on inter/intra cost deviation (skip if intra_cost is
+    // skip_cfl_cost_dev_th % greater than inter_cost)
+    if (MR_MODE)
+        context_ptr->skip_cfl_cost_dev_th = (uint16_t)~0;
+    else
+        context_ptr->skip_cfl_cost_dev_th = 30;
+
+    // set intra count to zero for md stage 3 if intra_cost is
+    // mds3_intra_prune_th % greater than inter_cost
+    if (MR_MODE)
+        context_ptr->mds3_intra_prune_th = (uint16_t)~0;
+    else
+        context_ptr->mds3_intra_prune_th = 30;
+
     return return_error;
 }
 #else

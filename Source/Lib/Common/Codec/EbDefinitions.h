@@ -121,7 +121,7 @@ extern "C" {
 #define MAR20_M4_ADOPTIONS         1 // Adoptions in M4
 #define ADOPT_SQ_ME_SEARCH_AREA    1 // Adopt a square search area for ME (all modes)
 #define MAR20_ADOPTIONS            1 // Adoptions affecting all modes
-#define MD_CONFIG_SB               0
+#define MD_CONFIG_SB               1
 #endif
 
 ///////// END MASTER_SYNCH
