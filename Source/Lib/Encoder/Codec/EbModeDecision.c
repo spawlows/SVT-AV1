@@ -4124,7 +4124,7 @@ void inject_predictive_me_candidates(
                         if (is_reference_best_pme(context_ptr , 0 ,ref_pic_index ,1)  == 0)
                             is_ii_allowed = 0;
 #endif
-        
+
                     uint8_t tot_inter_types = is_ii_allowed ? II_COUNT : 1;
                     uint8_t is_obmc_allowed = obmc_motion_mode_allowed(pcs_ptr,
                                                                        context_ptr,
@@ -6185,7 +6185,7 @@ EbErrorType generate_md_stage_0_cand(
         fast_accum += context_ptr->md_stage_0_count[cand_class_it];
     }
     assert(fast_accum == cand_total_cnt);
-    
+
 #if LOG_MV_VALIDITY
 
     //check if final MV is within AV1 limits

@@ -9015,7 +9015,7 @@ void set_inter_comp_controls(ModeDecisionContext *mdctxt, uint8_t inter_comp_mod
 ******************************************************/
 EbErrorType signal_derivation_block(PictureControlSet *pcs, ModeDecisionContext *context_ptr) {
     EbErrorType return_error = EB_ErrorNone;
-    
+
 
 #if INTER_COMP_REDESIGN
 #if SOFT_CYCLES_REDUCTION
@@ -9143,7 +9143,7 @@ EbErrorType signal_derivation_block(PictureControlSet *pcs, ModeDecisionContext 
         else
             context_ptr->compound_types_to_try = MD_COMP_AVG;
     }
-    
+
 #endif
     BlkStruct *similar_cu = &context_ptr->md_blk_arr_nsq[context_ptr->similar_blk_mds];
     if (context_ptr->compound_types_to_try > MD_COMP_AVG && context_ptr->similar_blk_avail) {
@@ -9475,7 +9475,7 @@ void search_best_independent_uv_mode(PictureControlSet *  pcs_ptr,
             context_ptr->candidate_buffer_ptr_array[uv_mode_count + start_full_buffer_index];
         candidate_buffer->candidate_ptr =
             &context_ptr->fast_candidate_array[uv_mode_count + start_fast_buffer_index];
-        
+
 #if CLEAN_UP_SKIP_CHROMA_PRED_SIGNAL
         context_ptr->md_staging_skip_chroma_pred = EB_FALSE;
 #else
@@ -10181,7 +10181,7 @@ void md_encode_block(PictureControlSet *pcs_ptr, ModeDecisionContext *context_pt
     } else {
         mvp_bypass_init(pcs_ptr, context_ptr);
     }
-    
+
 #if ADD_MD_NSQ_SEARCH
     if (pcs_ptr->slice_type != I_SLICE)
 #endif
@@ -11817,7 +11817,7 @@ EB_EXTERN EbErrorType mode_decision_sb(SequenceControlSet *scs_ptr, PictureContr
             // skip until we reach the next block @ the parent block depth
             if (blk_ptr->mds_idx >= next_non_skip_blk_idx_mds && skip_next_sq == 1)
                 skip_next_sq = 0;
-            
+
 #if !REMOVE_SQ_WEIGHT_QP_CHECK && !SHUT_SQ_WEIGHT_INTRA_FILTER
             uint8_t sq_weight_based_nsq_skip = update_skip_nsq_shapes(
                 scs_ptr, pcs_ptr, context_ptr);

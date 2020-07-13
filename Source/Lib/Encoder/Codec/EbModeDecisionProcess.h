@@ -687,7 +687,7 @@ typedef struct ModeDecisionContext {
 #endif
     // Signal to control initial and final pass PD setting(s)
     PdPass pd_pass;
-    
+
 #if ADDED_CFL_OFF
     EbBool        md_disable_cfl;
 #endif

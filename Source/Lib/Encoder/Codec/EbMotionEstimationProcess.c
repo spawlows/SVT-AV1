@@ -111,7 +111,7 @@ void *set_me_hme_params_oq(MeContext *me_context_ptr, PictureParentControlSet *p
     // HME/ME default settings
     me_context_ptr->number_hme_search_region_in_width  = 2;
     me_context_ptr->number_hme_search_region_in_height = 2;
-    
+
 #if !UNIFY_SC_NSC
     uint8_t sc_content_detected = pcs_ptr->sc_content_detected;
 #endif
@@ -704,7 +704,7 @@ void *set_me_hme_params_oq(MeContext *me_context_ptr, PictureParentControlSet *p
 #endif
 
     me_context_ptr->update_hme_search_center_flag = 1;
-    
+
 #if NEW_RESOLUTION_RANGES
     if (input_resolution <= INPUT_SIZE_480p_RANGE)
 #else
@@ -834,7 +834,7 @@ EbErrorType signal_derivation_me_kernel_oq(SequenceControlSet *       scs_ptr,
 
     else
         set_me_hme_params_from_config(scs_ptr, context_ptr->me_context_ptr);
-    
+
 #if !REFACTOR_ME_HME
     // ME
     context_ptr->me_context_ptr->max_me_search_width =
