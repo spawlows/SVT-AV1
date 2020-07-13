@@ -1460,7 +1460,6 @@ void bipred_3x3_candidates_injection(const SequenceControlSet *scs_ptr, PictureC
                                 best_pred_mv[1].as_mv.col;
                             cand_array[cand_total_cnt].motion_vector_pred_y[REF_LIST_1] =
                                 best_pred_mv[1].as_mv.row;
-                                best_pred_mv[1].as_mv.row;
 #if INTER_COMP_REDESIGN
                             if (cur_type == MD_COMP_AVG && tot_comp_types > MD_COMP_AVG)
                                 calc_pred_masked_compound(
