@@ -511,12 +511,16 @@ EbErrorType load_default_buffer_configuration_settings(
 #if PR_1275
     if ((core_count != SINGLE_CORE_COUNT) && (core_count < (CONS_CORE_COUNT >> 2)))
     {
+#if !PR_1353
         //check on tiles to be removed when crash is fixed
         if ((scs_ptr->static_config.tile_rows == 0) && (scs_ptr->static_config.tile_columns == 0))
         {
+#endif
             enc_dec_seg_h = MAX(1, enc_dec_seg_h / 2);
             enc_dec_seg_w = MAX(1, enc_dec_seg_w / 2);
+#if !PR_1353
         }
+#endif
         me_seg_h = MAX(1, me_seg_h / 2);
         me_seg_w = MAX(1, me_seg_w / 2);
     }
@@ -2507,8 +2511,15 @@ void copy_api_from_app(
     // Intra Edge Filter
     scs_ptr->static_config.enable_intra_edge_filter = ((EbSvtAv1EncConfiguration*)config_struct)->enable_intra_edge_filter;
 
-    // Picture based rate estimation
+    // Picture based rate estimation, only active with lp 1
+#if PR_1353
+    if(((EbSvtAv1EncConfiguration*)config_struct)->logical_processors > 1)
+        scs_ptr->static_config.pic_based_rate_est = 0;
+    else
+        scs_ptr->static_config.pic_based_rate_est = ((EbSvtAv1EncConfiguration*)config_struct)->pic_based_rate_est;
+#else
     scs_ptr->static_config.pic_based_rate_est = ((EbSvtAv1EncConfiguration*)config_struct)->pic_based_rate_est;
+#endif
 
     // ME Tools
     scs_ptr->static_config.use_default_me_hme = ((EbSvtAv1EncConfiguration*)config_struct)->use_default_me_hme;
