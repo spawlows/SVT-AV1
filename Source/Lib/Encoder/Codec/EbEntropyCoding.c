@@ -3035,7 +3035,11 @@ static void encode_loopfilter(PictureParentControlSet *pcs_ptr, struct AomWriteB
 static void encode_cdef(const PictureParentControlSet *pcs_ptr, struct AomWriteBitBuffer *wb) {
     //assert(!cm->coded_lossless);
     // moved out side
+#if CDEF_CLI
+    //if (!cm->seq_params.cdef_level) return;
+#else
     //if (!cm->seq_params.enable_cdef) return;
+#endif
 
     const FrameHeader *frm_hdr = &pcs_ptr->frm_hdr;
 
@@ -3559,7 +3563,11 @@ void write_sequence_header(SequenceControlSet *scs_ptr, struct AomWriteBitBuffer
     }
 
     eb_aom_wb_write_bit(wb, scs_ptr->seq_header.enable_superres);
+#if CDEF_CLI
+    eb_aom_wb_write_bit(wb, scs_ptr->seq_header.cdef_level);
+#else
     eb_aom_wb_write_bit(wb, scs_ptr->seq_header.enable_cdef);
+#endif
     eb_aom_wb_write_bit(wb, scs_ptr->seq_header.enable_restoration);
 }
 
@@ -4207,7 +4215,11 @@ static void write_uncompressed_header_obu(SequenceControlSet *     scs_ptr /*Av1
     } else {
         if (!frm_hdr->coded_lossless) {
             encode_loopfilter(pcs_ptr, wb);
+#if CDEF_CLI
+            if (scs_ptr->seq_header.cdef_level) encode_cdef(pcs_ptr, wb);
+#else
             if (scs_ptr->seq_header.enable_cdef) encode_cdef(pcs_ptr, wb);
+#endif
         }
 
         if (scs_ptr->seq_header.enable_restoration) encode_restoration_mode(pcs_ptr, wb);

@@ -617,6 +617,7 @@ extern "C" {
 #define ALTREF_CLI         1 // CLI Support for ALTREFA
 #define IMPROVE_GMV        1 // Make GMV params/candidates derivation multi-ref aware, and set multi-ref to be considered = f(input_complexity)
 #define ENABLE_GM_LIST1    1 // Enable GM_LIST1
+#define CDEF_CLI           1 // Improve CLI Support for CDEF
 #endif
 // END  SVT_02_TEMP /////////////////////////////////////////////////////////
 

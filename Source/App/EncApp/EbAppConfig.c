@@ -64,7 +64,11 @@
 #define FILM_GRAIN_TOKEN "-film-grain"
 #define INTRA_REFRESH_TYPE_TOKEN "-irefresh-type" // no Eval
 #define LOOP_FILTER_DISABLE_TOKEN "-dlf"
+#if 1 // CDEF_CLI
+#define CDEF_LEVEL_TOKEN "-cdef-level"
+#else
 #define CDEF_MODE_TOKEN "-cdef-mode"
+#endif
 #define RESTORATION_ENABLE_TOKEN "-restoration-filtering"
 #define SG_FILTER_MODE_TOKEN "-sg-filter-mode"
 #define WN_FILTER_MODE_TOKEN "-wn-filter-mode"
@@ -403,9 +407,15 @@ static void set_enable_local_warped_motion_flag(const char *value, EbConfig *cfg
 static void set_enable_global_motion_flag(const char *value, EbConfig *cfg) {
     cfg->enable_global_motion = (EbBool)strtoul(value, NULL, 0);
 };
+#if 1 // CDEF_CLI
+static void set_cdef_level(const char *value, EbConfig *cfg) {
+    cfg->cdef_level = strtol(value, NULL, 0);
+};
+#else
 static void set_cdef_mode(const char *value, EbConfig *cfg) {
     cfg->cdef_mode = strtol(value, NULL, 0);
 };
+#endif
 static void set_enable_restoration_filter_flag(const char *value, EbConfig *cfg) {
     cfg->enable_restoration_filtering = strtol(value, NULL, 0);
 };
@@ -992,10 +1002,17 @@ ConfigEntry config_entry_specific[] = {
      "Disable loop filter(0: loop filter enabled[default] ,1: loop filter disabled)",
      set_disable_dlf_flag},
      // CDEF
+#if 1 // CDEF_CLI
+     {SINGLE_INPUT,
+     CDEF_LEVEL_TOKEN,
+     "CDEF Level, 0: OFF, 1-5: ON with 64,16,8,4,1 step refinement, -1: DEFAULT",
+     set_cdef_level},
+#else
     {SINGLE_INPUT,
      CDEF_MODE_TOKEN,
      "CDEF Mode, 0: OFF, 1-5: ON with 2,4,8,16,64 step refinement, -1: DEFAULT",
      set_cdef_mode},
+#endif
     // RESTORATION
     {SINGLE_INPUT,
      RESTORATION_ENABLE_NEW_TOKEN,
@@ -1332,10 +1349,17 @@ ConfigEntry config_entry_specific[] = {
       set_md_stage_2_3_cand_prune_th},
 
      {SINGLE_INPUT, STAT_REPORT_NEW_TOKEN, "Stat Report", set_stat_report},
+#if 1 // CDEF_CLI
+     {SINGLE_INPUT,
+     INTRA_ANGLE_DELTA_NEW_TOKEN,
+     "Enable skipping the angle intra mode (0: OFF, 1: ON, -1: DEFAULT)",
+     set_intra_angle_delta_flag},
+#else
      {SINGLE_INPUT,
      INTRA_ANGLE_DELTA_NEW_TOKEN,
      "Enable skipping the angle intra mode (0: OFF, 1: ON, -1: DEFAULT)",
      set_cdef_mode},
+#endif
 
     // double dash
     //{SINGLE_INPUT,
@@ -1407,7 +1431,11 @@ ConfigEntry config_entry[] = {
     {SINGLE_INPUT, LOOP_FILTER_DISABLE_TOKEN, "LoopFilterDisable", set_disable_dlf_flag},
 
     // CDEF
+#if 1 // CDEF_CLI
+    {SINGLE_INPUT, CDEF_LEVEL_TOKEN, "CDEFLevel", set_cdef_level},
+#else
     {SINGLE_INPUT, CDEF_MODE_TOKEN, "CDEFMode", set_cdef_mode},
+#endif
 
     // RESTORATION
     {SINGLE_INPUT, RESTORATION_ENABLE_TOKEN, "RestorationFilter", set_enable_restoration_filter_flag},
@@ -1730,7 +1758,11 @@ void eb_config_ctor(EbConfig *config_ptr) {
     config_ptr->pred_structure                            = 2;
     config_ptr->enable_global_motion                      = EB_TRUE;
     config_ptr->enable_warped_motion                      = DEFAULT;
+#if 1 // CDEF_CLI
+    config_ptr->cdef_level                                = DEFAULT;
+#else
     config_ptr->cdef_mode                                 = DEFAULT;
+#endif
     config_ptr->enable_restoration_filtering              = DEFAULT;
     config_ptr->sg_filter_mode                            = DEFAULT;
     config_ptr->wn_filter_mode                            = DEFAULT;
