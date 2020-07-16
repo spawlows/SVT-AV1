@@ -618,6 +618,7 @@ extern "C" {
 #define IMPROVE_GMV        1 // Make GMV params/candidates derivation multi-ref aware, and set multi-ref to be considered = f(input_complexity)
 #define ENABLE_GM_LIST1    1 // Enable GM_LIST1
 #define CDEF_CLI           1 // Improve CLI Support for CDEF
+#define REF_PRUNE_CAT_TUNE 1 // Tune the allowable references per category to improve trade-offs
 #endif
 // END  SVT_02_TEMP /////////////////////////////////////////////////////////
 

@@ -1572,7 +1572,11 @@ void set_inter_inter_distortion_based_reference_pruning_controls(
         ref_pruning_ctrls->inter_to_inter_pruning_enabled = 1;
 
         ref_pruning_ctrls->best_refs[PA_ME_GROUP]         = 7;
+#if REF_PRUNE_CAT_TUNE
+        ref_pruning_ctrls->best_refs[UNI_3x3_GROUP]       = 7;
+#else
         ref_pruning_ctrls->best_refs[UNI_3x3_GROUP]       = 2;
+#endif
         ref_pruning_ctrls->best_refs[BI_3x3_GROUP]        = 2;
 #if JUNE23_ADOPTIONS
         ref_pruning_ctrls->best_refs[NRST_NEW_NEAR_GROUP] = 0;
@@ -1589,6 +1593,16 @@ void set_inter_inter_distortion_based_reference_pruning_controls(
 #if IMPROVE_GMV
         ref_pruning_ctrls->best_refs[GLOBAL_GROUP]        = 7;
 #endif
+#if REF_PRUNE_CAT_TUNE
+        ref_pruning_ctrls->closest_refs[PA_ME_GROUP]         = 1;
+        ref_pruning_ctrls->closest_refs[UNI_3x3_GROUP]       = 1;
+        ref_pruning_ctrls->closest_refs[BI_3x3_GROUP]        = 1;
+        ref_pruning_ctrls->closest_refs[NRST_NEW_NEAR_GROUP] = 1;
+        ref_pruning_ctrls->closest_refs[WARP_GROUP]          = 1;
+        ref_pruning_ctrls->closest_refs[NRST_NEAR_GROUP]     = 1;
+        ref_pruning_ctrls->closest_refs[PRED_ME_GROUP]       = 1;
+        ref_pruning_ctrls->closest_refs[GLOBAL_GROUP]        = 1;
+#else
         ref_pruning_ctrls->closest_refs[PA_ME_GROUP]         = 0;
         ref_pruning_ctrls->closest_refs[UNI_3x3_GROUP]       = 0;
         ref_pruning_ctrls->closest_refs[BI_3x3_GROUP]        = 1;
@@ -1603,19 +1617,28 @@ void set_inter_inter_distortion_based_reference_pruning_controls(
 #if IMPROVE_GMV
         ref_pruning_ctrls->closest_refs[GLOBAL_GROUP]        = 0;
 #endif
+#endif
         break;
     case 2:
         ref_pruning_ctrls->inter_to_inter_pruning_enabled = 1;
-
+#if REF_PRUNE_CAT_TUNE
+        ref_pruning_ctrls->best_refs[PA_ME_GROUP]         = 7;
+        ref_pruning_ctrls->best_refs[UNI_3x3_GROUP]       = 7;
+#else
         ref_pruning_ctrls->best_refs[PA_ME_GROUP]         = 6;
         ref_pruning_ctrls->best_refs[UNI_3x3_GROUP]       = 2;
+#endif
         ref_pruning_ctrls->best_refs[BI_3x3_GROUP]        = 2;
 #if OPTIMIZE_NEAREST_NEW_NEAR
         ref_pruning_ctrls->best_refs[NRST_NEW_NEAR_GROUP] = 0;
 #else
         ref_pruning_ctrls->best_refs[NRST_NEW_NEAR_GROUP] = 6;
 #endif
+#if REF_PRUNE_CAT_TUNE
+        ref_pruning_ctrls->best_refs[WARP_GROUP]          = 7;
+#else
         ref_pruning_ctrls->best_refs[WARP_GROUP]          = 6;
+#endif
         ref_pruning_ctrls->best_refs[NRST_NEAR_GROUP]     = 6;
         ref_pruning_ctrls->best_refs[PRED_ME_GROUP]       = 6;
 #if IMPROVE_GMV
@@ -1623,6 +1646,16 @@ void set_inter_inter_distortion_based_reference_pruning_controls(
 #else
         ref_pruning_ctrls->best_refs[GLOBAL_GROUP]        = 6;
 #endif
+#if REF_PRUNE_CAT_TUNE
+        ref_pruning_ctrls->closest_refs[PA_ME_GROUP]         = 1;
+        ref_pruning_ctrls->closest_refs[UNI_3x3_GROUP]       = 1;
+        ref_pruning_ctrls->closest_refs[BI_3x3_GROUP]        = 1;
+        ref_pruning_ctrls->closest_refs[NRST_NEW_NEAR_GROUP] = 1;
+        ref_pruning_ctrls->closest_refs[WARP_GROUP]          = 1;
+        ref_pruning_ctrls->closest_refs[NRST_NEAR_GROUP]     = 1;
+        ref_pruning_ctrls->closest_refs[PRED_ME_GROUP]       = 1;
+        ref_pruning_ctrls->closest_refs[GLOBAL_GROUP]        = 1;
+#else
         ref_pruning_ctrls->closest_refs[PA_ME_GROUP]         = 0;
         ref_pruning_ctrls->closest_refs[UNI_3x3_GROUP]       = 0;
         ref_pruning_ctrls->closest_refs[BI_3x3_GROUP]        = 1;
@@ -1637,19 +1670,28 @@ void set_inter_inter_distortion_based_reference_pruning_controls(
 #if IMPROVE_GMV
         ref_pruning_ctrls->closest_refs[GLOBAL_GROUP]        = 0;
 #endif
+#endif
         break;
     case 3:
         ref_pruning_ctrls->inter_to_inter_pruning_enabled = 1;
-
+#if REF_PRUNE_CAT_TUNE
+        ref_pruning_ctrls->best_refs[PA_ME_GROUP]         = 7;
+        ref_pruning_ctrls->best_refs[UNI_3x3_GROUP]       = 7;
+#else
         ref_pruning_ctrls->best_refs[PA_ME_GROUP]         = 5;
         ref_pruning_ctrls->best_refs[UNI_3x3_GROUP]       = 2;
+#endif
         ref_pruning_ctrls->best_refs[BI_3x3_GROUP]        = 2;
 #if OPTIMIZE_NEAREST_NEW_NEAR
         ref_pruning_ctrls->best_refs[NRST_NEW_NEAR_GROUP] = 0;
 #else
         ref_pruning_ctrls->best_refs[NRST_NEW_NEAR_GROUP] = 5;
 #endif
+#if REF_PRUNE_CAT_TUNE
+        ref_pruning_ctrls->best_refs[WARP_GROUP]          = 7;
+#else
         ref_pruning_ctrls->best_refs[WARP_GROUP]          = 5;
+#endif
         ref_pruning_ctrls->best_refs[NRST_NEAR_GROUP]     = 5;
         ref_pruning_ctrls->best_refs[PRED_ME_GROUP]       = 5;
 #if IMPROVE_GMV
@@ -1657,6 +1699,16 @@ void set_inter_inter_distortion_based_reference_pruning_controls(
 #else
         ref_pruning_ctrls->best_refs[GLOBAL_GROUP]        = 5;
 #endif
+#if REF_PRUNE_CAT_TUNE
+        ref_pruning_ctrls->closest_refs[PA_ME_GROUP]         = 1;
+        ref_pruning_ctrls->closest_refs[UNI_3x3_GROUP]       = 1;
+        ref_pruning_ctrls->closest_refs[BI_3x3_GROUP]        = 1;
+        ref_pruning_ctrls->closest_refs[NRST_NEW_NEAR_GROUP] = 1;
+        ref_pruning_ctrls->closest_refs[WARP_GROUP]          = 1;
+        ref_pruning_ctrls->closest_refs[NRST_NEAR_GROUP]     = 1;
+        ref_pruning_ctrls->closest_refs[PRED_ME_GROUP]       = 1;
+        ref_pruning_ctrls->closest_refs[GLOBAL_GROUP]        = 1;
+#else
         ref_pruning_ctrls->closest_refs[PA_ME_GROUP]         = 0;
         ref_pruning_ctrls->closest_refs[UNI_3x3_GROUP]       = 0;
         ref_pruning_ctrls->closest_refs[BI_3x3_GROUP]        = 1;
@@ -1671,19 +1723,28 @@ void set_inter_inter_distortion_based_reference_pruning_controls(
 #if IMPROVE_GMV
         ref_pruning_ctrls->closest_refs[GLOBAL_GROUP]        = 0;
 #endif
+#endif
         break;
     case 4:
         ref_pruning_ctrls->inter_to_inter_pruning_enabled = 1;
-
+#if REF_PRUNE_CAT_TUNE
+        ref_pruning_ctrls->best_refs[PA_ME_GROUP]         = 7;
+        ref_pruning_ctrls->best_refs[UNI_3x3_GROUP]       = 7;
+#else
         ref_pruning_ctrls->best_refs[PA_ME_GROUP]         = 4;
         ref_pruning_ctrls->best_refs[UNI_3x3_GROUP]       = 2;
+#endif
         ref_pruning_ctrls->best_refs[BI_3x3_GROUP]        = 2;
 #if OPTIMIZE_NEAREST_NEW_NEAR
         ref_pruning_ctrls->best_refs[NRST_NEW_NEAR_GROUP] = 0;
 #else
         ref_pruning_ctrls->best_refs[NRST_NEW_NEAR_GROUP] = 4;
 #endif
+#if REF_PRUNE_CAT_TUNE
+        ref_pruning_ctrls->best_refs[WARP_GROUP]          = 7;
+#else
         ref_pruning_ctrls->best_refs[WARP_GROUP]          = 4;
+#endif
         ref_pruning_ctrls->best_refs[NRST_NEAR_GROUP]     = 4;
         ref_pruning_ctrls->best_refs[PRED_ME_GROUP]       = 4;
 #if IMPROVE_GMV
@@ -1691,6 +1752,16 @@ void set_inter_inter_distortion_based_reference_pruning_controls(
 #else
         ref_pruning_ctrls->best_refs[GLOBAL_GROUP]        = 4;
 #endif
+#if REF_PRUNE_CAT_TUNE
+        ref_pruning_ctrls->closest_refs[PA_ME_GROUP]         = 1;
+        ref_pruning_ctrls->closest_refs[UNI_3x3_GROUP]       = 1;
+        ref_pruning_ctrls->closest_refs[BI_3x3_GROUP]        = 1;
+        ref_pruning_ctrls->closest_refs[NRST_NEW_NEAR_GROUP] = 1;
+        ref_pruning_ctrls->closest_refs[WARP_GROUP]          = 1;
+        ref_pruning_ctrls->closest_refs[NRST_NEAR_GROUP]     = 1;
+        ref_pruning_ctrls->closest_refs[PRED_ME_GROUP]       = 1;
+        ref_pruning_ctrls->closest_refs[GLOBAL_GROUP]        = 1;
+#else
         ref_pruning_ctrls->closest_refs[PA_ME_GROUP]         = 0;
         ref_pruning_ctrls->closest_refs[UNI_3x3_GROUP]       = 0;
         ref_pruning_ctrls->closest_refs[BI_3x3_GROUP]        = 1;
@@ -1704,6 +1775,7 @@ void set_inter_inter_distortion_based_reference_pruning_controls(
         ref_pruning_ctrls->closest_refs[PRED_ME_GROUP]       = 0;
 #if IMPROVE_GMV
         ref_pruning_ctrls->closest_refs[GLOBAL_GROUP]        = 0;
+#endif
 #endif
         break;
     case 5:
