@@ -111,7 +111,7 @@ class RefDecoder {
         int enable_ref_frame_mvs;
         int enable_warped_motion;
 #if 1 // CDEF_CLI
-        int cdef_level
+        int cdef_level;
 #else
         int enable_cdef;
 #endif
