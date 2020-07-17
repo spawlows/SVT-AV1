@@ -79,6 +79,7 @@ extern "C" {
 #define DISABLE_HME_L0_FOR_240P           1
 #endif
 #define HME_PRUNE_BUG_FIX                 1
+#define RATE_MEM_OPT                      0 //lossless memory optimization of rate estimation
 #define MAR10_ADOPTIONS                   1 // Adoptions for all presets
 #define NICS_SYNCH                        1
 #define MAR11_ADOPTIONS                   1 // Adoptions for M2, M3, M4, M5
@@ -99,7 +100,7 @@ extern "C" {
 #define MAR16_M8_ADOPTIONS                1 // M8 adoption for TH value
 #define ADDED_CFL_OFF                     1
 #define ADOPT_CHROMA_MODE1_CFL_OFF        1
-#define PIC_BASED_RE_OFF                  0 //-------------------------------------------------------
+#define PIC_BASED_RE_OFF                  1 //-------------------------------------------------------
 #define MR_MODE_FOR_PIC_MULTI_PASS_PD_MODE_1 1 // shut SQ vs. NSQ if MR (for multi_pass_pd_level = PIC_MULTI_PASS_PD_MODE_1 or PIC_MULTI_PASS_PD_MODE_2 or PIC_MULTI_PASS_PD_MODE_3)
 #define ADD_SAD_AT_PME_SIGNAL      1 // Add signal for using SAD at PME
 #define MAR17_ADOPTIONS            1 // Push features with bad slope to M8 & beyond.
@@ -277,7 +278,7 @@ extern "C" {
 
 
 
-#define REU_MEM_OPT                 0 // Memory reduction for rate estimation tables ///////////////////////
+#define REU_MEM_OPT                 1 // Memory reduction for rate estimation tables ///////////////////////
 #define SB_MEM_OPT                  1 // memory reduction for SB array. Removing memory allocation for av1xd per blk
 
 #define MD_FRAME_CONTEXT_MEM_OPT    1 // Memory reduction for frame context used in MD
