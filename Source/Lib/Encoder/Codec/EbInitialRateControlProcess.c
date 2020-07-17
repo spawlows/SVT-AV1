@@ -206,8 +206,11 @@ void check_for_non_uniform_motion_vector_field(PictureParentControlSet *pcs_ptr)
 void detect_global_motion(PictureParentControlSet *pcs_ptr) {
     //initilize global motion to be OFF for all references frames.
     memset(pcs_ptr->is_global_motion, EB_FALSE, MAX_NUM_OF_REF_PIC_LIST * REF_LIST_MAX_DEPTH);
-
+#if GM_DOWN_16
+    if (pcs_ptr->gm_level <= GM_DOWN16) {
+#else
     if (pcs_ptr->gm_level <= GM_DOWN) {
+#endif
         uint32_t num_of_list_to_search =
             (pcs_ptr->slice_type == P_SLICE) ? (uint32_t)REF_LIST_0 : (uint32_t)REF_LIST_1;
 

@@ -1315,7 +1315,7 @@ EbErrorType signal_derivation_multi_processes_oq(
     // Set sb_64x64_simulated - only allow when SB size is not already 64x64
 #if MAR23_ADOPTIONS
     if (scs_ptr->static_config.super_block_size != 64) {
-        if (sc_content_detected)
+        if (pcs_ptr->sc_content_detected)
 #if APR08_ADOPTIONS
             pcs_ptr->sb_64x64_simulated = EB_FALSE;
 #else

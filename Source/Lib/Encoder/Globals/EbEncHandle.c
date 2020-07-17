@@ -1985,7 +1985,9 @@ void set_param_based_on_input(SequenceControlSet *scs_ptr)
 {
     uint16_t subsampling_x = scs_ptr->subsampling_x;
     uint16_t subsampling_y = scs_ptr->subsampling_y;
-
+#if ON_OFF_FEATURE_MRP
+    scs_ptr->reference_count        = (uint8_t)scs_ptr->static_config.mrp_level == 0 ? 1: 4;
+#endif
     // Update picture width, and picture height
     if (scs_ptr->max_input_luma_width % MIN_BLOCK_SIZE) {
         scs_ptr->max_input_pad_right = MIN_BLOCK_SIZE - (scs_ptr->max_input_luma_width % MIN_BLOCK_SIZE);
@@ -2277,6 +2279,10 @@ void copy_api_from_app(
 #endif
     // motion field motion vector
     scs_ptr->static_config.enable_mfmv                  = ((EbSvtAv1EncConfiguration*)config_struct)->enable_mfmv;
+#if ON_OFF_FEATURE_MRP
+    // multi reference frame
+    scs_ptr->static_config.mrp_level                    = ((EbSvtAv1EncConfiguration*)config_struct)->mrp_level;
+#endif
     // redundant block
     scs_ptr->static_config.enable_redundant_blk         = ((EbSvtAv1EncConfiguration*)config_struct)->enable_redundant_blk;
     // spatial sse in full loop
@@ -2895,8 +2901,13 @@ static EbErrorType verify_settings(
     }
 
     // HBD mode decision
+#if CHANGE_HBD_MODE
+    if (config->enable_hbd_mode_decision < (int8_t)(-1) || config->enable_hbd_mode_decision > 2) {
+         SVT_LOG("Error instance %u: Invalid HBD mode decision flag [-1 - 2], your input: %d\n", channel_number + 1, config->enable_hbd_mode_decision);
+#else
     if (config->enable_hbd_mode_decision != 0 && config->enable_hbd_mode_decision != 1 && config->enable_hbd_mode_decision != 2) {
     SVT_LOG("Error instance %u: Invalid HBD mode decision flag [0 - 2], your input: %d\n", channel_number + 1, config->enable_hbd_mode_decision);
+#endif
     return_error = EB_ErrorBadParameter;
     }
 
@@ -2991,7 +3002,12 @@ static EbErrorType verify_settings(
         SVT_LOG("Error instance %u: Invalid Smooth flag [0/1 or -1 for auto], your input: %d\n", channel_number + 1, config->enable_smooth);
         return_error = EB_ErrorBadParameter;
     }
-
+#if ON_OFF_FEATURE_MRP
+    if (config->mrp_level < (int32_t)(-1) || config->mrp_level > 9) {
+      SVT_LOG("Error instance %u: Invalid mrp level [0..9 or -1 for auto], your input: %d\n", channel_number + 1, config->mrp_level);
+      return_error = EB_ErrorBadParameter;
+    }
+#endif
     if (config->enable_mfmv != 0 && config->enable_mfmv != 1 && config->enable_mfmv != -1) {
       SVT_LOG("Error instance %u: Invalid motion field motion vector flag [0/1 or -1 for auto], your input: %d\n", channel_number + 1, config->enable_mfmv);
       return_error = EB_ErrorBadParameter;
@@ -3172,6 +3188,9 @@ EbErrorType eb_svt_enc_init_parameter(
     config_ptr->enable_paeth = DEFAULT;
     config_ptr->enable_smooth = DEFAULT;
     config_ptr->enable_mfmv = DEFAULT;
+#if ON_OFF_FEATURE_MRP
+    config_ptr->mrp_level = DEFAULT;
+#endif
     config_ptr->enable_redundant_blk = DEFAULT;
     config_ptr->spatial_sse_fl = DEFAULT;
     config_ptr->enable_subpel = DEFAULT;
@@ -3215,7 +3234,11 @@ EbErrorType eb_svt_enc_init_parameter(
     config_ptr->hme_level2_search_area_in_width_array[1] = 1;
     config_ptr->hme_level2_search_area_in_height_array[0] = 1;
     config_ptr->hme_level2_search_area_in_height_array[1] = 1;
+#if CHANGE_HBD_MODE
+    config_ptr->enable_hbd_mode_decision = DEFAULT;
+#else
     config_ptr->enable_hbd_mode_decision = 1;
+#endif
     config_ptr->enable_palette = -1;
     config_ptr->enable_manual_pred_struct = EB_FALSE;
     config_ptr->encoder_color_format = EB_YUV420;

@@ -4831,6 +4831,17 @@ static int get_active_quality(int q, int gfu_boost, int low, int high, int *low_
         return low_motion_minq[q] + adjustment;
     }
 }
+#if TPL_IMP
+static int get_kf_active_quality_tpl(const RATE_CONTROL *const rc, int q,
+    AomBitDepth bit_depth) {
+    int *kf_low_motion_minq_cqp;
+    int *kf_high_motion_minq;
+    ASSIGN_MINQ_TABLE(bit_depth, kf_low_motion_minq_cqp);
+    ASSIGN_MINQ_TABLE(bit_depth, kf_high_motion_minq);
+    return get_active_quality(q, rc->kf_boost, kf_low, kf_high,
+        kf_low_motion_minq_cqp, kf_high_motion_minq);
+}
+#endif
 static int get_kf_active_quality_cqp(const RATE_CONTROL *const rc, int q,
     AomBitDepth bit_depth) {
     int *kf_low_motion_minq_cqp;
