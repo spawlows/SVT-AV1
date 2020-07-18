@@ -2796,19 +2796,16 @@ void full_loop_r(SuperBlock *sb_ptr, ModeDecisionCandidateBuffer *candidate_buff
 
         // NADER - TU
 #if CAND_MEM_OPT
-        txb_origin_index =
-            txb_origin_x + txb_origin_y * context_ptr->residual_quant_coeff_ptr->stride_y;
-        tu_cb_origin_index = (((txb_origin_x >> 3) << 3) +
+        uint32_t tu_cb_origin_index = (((txb_origin_x >> 3) << 3) +
             (((txb_origin_y >> 3) << 3) *
                 context_ptr->residual_quant_coeff_ptr->stride_cb)) >>
             1;
-        tu_cr_origin_index = (((txb_origin_x >> 3) << 3) +
+        uint32_t tu_cr_origin_index = (((txb_origin_x >> 3) << 3) +
             (((txb_origin_y >> 3) << 3) *
                 context_ptr->residual_quant_coeff_ptr->stride_cr)) >>
             1;
 #else
-        txb_origin_index =
-            txb_origin_x + txb_origin_y * candidate_buffer->residual_quant_coeff_ptr->stride_y;
+
         tu_cb_origin_index = (((txb_origin_x >> 3) << 3) +
                               (((txb_origin_y >> 3) << 3) *
                                candidate_buffer->residual_quant_coeff_ptr->stride_cb)) >>
@@ -3067,13 +3064,13 @@ void cu_full_distortion_fast_txb_mode_r(
                 pcs_ptr->parent_pcs_ptr->aligned_height / 2 -
                     ((context_ptr->sb_origin_y + ((txb_origin_y >> 3) << 3)) >> 1));
 #if CAND_MEM_OPT
-        txb_origin_index =
+        const uint32_t txb_origin_index =
             txb_origin_x + txb_origin_y * context_ptr->residual_quant_coeff_ptr->stride_y;
 #else
-        txb_origin_index =
+        const uint32_t txb_origin_index =
             txb_origin_x + txb_origin_y * candidate_buffer->residual_quant_coeff_ptr->stride_y;
 #endif
-        txb_chroma_origin_index = txb_1d_offset;
+        const uint32_t  txb_chroma_origin_index = txb_1d_offset;
         // Reset the Bit Costs
         uint64_t y_txb_coeff_bits  = 0;
         uint64_t cb_txb_coeff_bits = 0;
@@ -3356,7 +3353,7 @@ void compute_depth_costs(ModeDecisionContext *context_ptr, SequenceControlSet *s
         context_ptr->full_lambda_md[EB_10_BIT_MD] :
         context_ptr->full_lambda_md[EB_8_BIT_MD];
 #endif
-    uint64_t above_non_split_rate = 0;
+
     uint64_t above_split_rate     = 0;
 
     /*
@@ -3549,7 +3546,7 @@ void compute_depth_costs_md_skip(ModeDecisionContext *context_ptr, SequenceContr
         context_ptr->full_lambda_md[EB_10_BIT_MD] :
         context_ptr->full_lambda_md[EB_8_BIT_MD];
 #endif
-    uint64_t above_non_split_rate = 0;
+
     uint64_t above_split_rate     = 0;
     *curr_depth_cost              = 0;
     // sum the previous ones

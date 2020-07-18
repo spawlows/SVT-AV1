@@ -574,12 +574,12 @@ void update_bea_info_over_time(EncodeContext *          encode_context_ptr,
     // SB Loop
     for (uint16_t sb_idx = 0; sb_idx < pcs_ptr->sb_total_count; ++sb_idx) {
         uint16_t non_moving_index_over_sliding_window = pcs_ptr->non_moving_index_array[sb_idx];
+        uint16_t frames_to_check_index;
 #if QPS_UPDATE
         SbParams *sb_params = &pcs_ptr->sb_params_array[sb_idx];
         complete_sb_count++;
 #endif
 
-        uint16_t frames_to_check_index;
         // Walk the first N entries in the sliding window starting picture + 1
         uint32_t input_queue_index =
             encode_context_ptr->initial_rate_control_reorder_queue_head_index ==
@@ -2035,7 +2035,7 @@ void *initial_rate_control_kernel(void *input_ptr) {
             if (scs_ptr->static_config.look_ahead_distance == 0) {
 
 
-                for (temporal_layer_index = 0; temporal_layer_index < EB_MAX_TEMPORAL_LAYERS;
+                for (uint8_t temporal_layer_index = 0; temporal_layer_index < EB_MAX_TEMPORAL_LAYERS;
                     temporal_layer_index++)
                     pcs_ptr->frames_in_interval[temporal_layer_index] = 0;
 
@@ -2066,7 +2066,8 @@ void *initial_rate_control_kernel(void *input_ptr) {
                     context_ptr->initialrate_control_results_output_fifo_ptr,
                     &out_results_wrapper_ptr);
 
-                out_results_ptr =
+                
+                InitialRateControlResults * out_results_ptr =
                     (InitialRateControlResults *)out_results_wrapper_ptr->object_ptr;
 
                 out_results_ptr->pcs_wrapper_ptr = pcs_ptr->p_pcs_wrapper_ptr;

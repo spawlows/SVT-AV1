@@ -1016,7 +1016,7 @@ void unipred_3x3_candidates_injection(const SequenceControlSet *scs_ptr, Picture
         if (!context_ptr->ref_filtering_res[REF_LIST_0][list0_ref_index].do_ref) continue;
 #endif
 #endif
-        if (list0_ref_index > context_ptr->md_max_ref_count - 1) continue;
+
         if (inter_direction == 0) {
             if (list0_ref_index > context_ptr->md_max_ref_count - 1)
                 continue;
@@ -1192,7 +1192,7 @@ void unipred_3x3_candidates_injection(const SequenceControlSet *scs_ptr, Picture
         if (!context_ptr->ref_filtering_res[REF_LIST_1][list1_ref_index].do_ref) continue;
 #endif
 #endif
-        if (list1_ref_index > context_ptr->md_max_ref_count - 1) continue;
+
         if (inter_direction == 1) {
             if (list1_ref_index > context_ptr->md_max_ref_count - 1)
                 continue;
@@ -4292,6 +4292,11 @@ void inject_predictive_me_candidates(
                         context_ptr, to_inject_mv_x, to_inject_mv_y, to_inject_ref_type) ==
                         EB_FALSE) {
                     uint8_t inter_type;
+#if INTRA_COMPOUND_OPT
+                    MvReferenceFrame rf[2];
+                    rf[0] = to_inject_ref_type;
+                    rf[1] = -1;
+#endif
                     uint8_t is_ii_allowed =
 #if INTRA_COMPOUND_OPT
                         svt_is_interintra_allowed(context_ptr->md_enable_inter_intra == 1, bsize, NEWMV, rf);
@@ -4403,6 +4408,11 @@ void inject_predictive_me_candidates(
                             context_ptr, to_inject_mv_x, to_inject_mv_y, to_inject_ref_type) ==
                             EB_FALSE) {
                         uint8_t inter_type;
+#if INTRA_COMPOUND_OPT
+                        MvReferenceFrame rf[2];
+                        rf[0] = to_inject_ref_type;
+                        rf[1] = -1;
+#endif
                         uint8_t is_ii_allowed =
 #if INTRA_COMPOUND_OPT
                         svt_is_interintra_allowed(context_ptr->md_enable_inter_intra == 1, bsize, NEWMV, rf);
