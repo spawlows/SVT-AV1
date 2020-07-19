@@ -6213,7 +6213,7 @@ void *rate_control_kernel(void *input_ptr) {
                     const int32_t qindex = quantizer_to_qindex[(uint8_t)scs_ptr->static_config.qp];
                     // if there are need enough pictures in the LAD/SlidingWindow, the adaptive QP scaling is not used
                     int32_t new_qindex;
-                    if (!scs_ptr->use_output_stat_file 
+                    if (!scs_ptr->use_output_stat_file
 #if !TPL_SW_UPDATE
                         &&
                         pcs_ptr->parent_pcs_ptr->frames_in_sw >= QPS_SW_THRESH

@@ -728,7 +728,7 @@ EbErrorType update_base_layer_reference_queue_dependent_count(
 
         while (input_queue_index != encode_context_ptr->picture_decision_pa_reference_queue_tail_index) {
             input_entry_ptr = encode_context_ptr->picture_decision_pa_reference_queue[input_queue_index];
-            
+
 #if DECOUPLE_ME_RES
             int32_t diff_n = 0;
 #endif
@@ -2302,7 +2302,7 @@ EbErrorType signal_derivation_multi_processes_oq(
 #endif
         else
             pcs_ptr->tx_size_search_mode = 0;
-    
+
 #if APR22_ADOPTIONS
     // Assign whether to use TXS in inter classes (if TXS is ON)
     // 0 OFF - TXS in intra classes only

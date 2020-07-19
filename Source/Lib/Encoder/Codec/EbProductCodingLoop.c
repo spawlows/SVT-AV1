@@ -4762,7 +4762,7 @@ void md_sub_pel_search(PictureControlSet *pcs_ptr, ModeDecisionContext *context_
 #endif
                        int16_t mvx, int16_t mvy, int16_t search_position_start_x,
                        int16_t search_position_end_x, int16_t search_position_start_y,
-                       int16_t search_position_end_y, int16_t search_step, 
+                       int16_t search_position_end_y, int16_t search_step,
 #if IMPROVE_QUARTER_PEL
                        uint8_t track_best_pos,
 #endif
@@ -5245,7 +5245,7 @@ void md_nsq_motion_search(PictureControlSet *pcs_ptr, ModeDecisionContext *conte
     // Round-up the search center to the closest integer
     search_center_mvx = (search_center_mvx + 4) & ~0x07;
     search_center_mvy = (search_center_mvy + 4) & ~0x07;
-#endif 
+#endif
 
     md_full_pel_search(context_ptr,
         input_picture_ptr,
@@ -8853,7 +8853,7 @@ void tx_type_search(PictureControlSet *pcs_ptr, ModeDecisionContext *context_ptr
             tx_type,
             PLANE_TYPE_Y,
             DEFAULT_SHAPE);
-        
+
 #if UNIFY_TXT
         quantized_dc_txt[tx_type] = av1_quantize_inv_quantize(
 #else

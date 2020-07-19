@@ -2066,7 +2066,7 @@ void *initial_rate_control_kernel(void *input_ptr) {
                     context_ptr->initialrate_control_results_output_fifo_ptr,
                     &out_results_wrapper_ptr);
 
-                
+
                 InitialRateControlResults * out_results_ptr =
                     (InitialRateControlResults *)out_results_wrapper_ptr->object_ptr;
 

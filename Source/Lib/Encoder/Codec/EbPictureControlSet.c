@@ -489,7 +489,7 @@ EbErrorType picture_control_set_ctor(PictureControlSet *object_ptr, EbPtr object
 #else
     EB_NEW(object_ptr->bitstream_ptr, bitstream_ctor, PACKETIZATION_PROCESS_BUFFER_SIZE);
 #endif
-    
+
 #if !MD_FRAME_CONTEXT_MEM_OPT
     // Rate estimation entropy coder
     EB_NEW(

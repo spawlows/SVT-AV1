@@ -52,7 +52,7 @@ extern "C" {
 #define MULTI_STAGE_PD_NEIGHBOR_ARRAY_INDEX 4
 #define NEIGHBOR_ARRAY_TOTAL_COUNT 5
 #define AOM_QM_BITS 5
-    
+
 #if DECOUPLE_ME_RES
 typedef struct DepCntPicInfo {
     uint64_t      pic_num;
