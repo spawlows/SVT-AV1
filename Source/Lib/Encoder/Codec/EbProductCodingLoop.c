@@ -109,15 +109,20 @@ const EbAv1FullCostFunc av1_product_full_cost_func_table[3] = {
 * Update Recon Samples Neighbor Arrays
 ***************************************************/
 void mode_decision_update_neighbor_arrays(PictureControlSet *  pcs_ptr,
+#if REMOVE_UNUSED_CODE_PH2
+                                          ModeDecisionContext *context_ptr, uint32_t index_mds) {
+#else
                                           ModeDecisionContext *context_ptr, uint32_t index_mds,
                                           EbBool intra4x4Selected) {
+#endif
     uint32_t bwdith  = context_ptr->blk_geom->bwidth;
     uint32_t bheight = context_ptr->blk_geom->bheight;
 
     uint32_t origin_x = context_ptr->blk_origin_x;
     uint32_t origin_y = context_ptr->blk_origin_y;
+#if !REMOVE_UNUSED_CODE_PH2
     (void)intra4x4Selected;
-
+#endif
     uint32_t blk_origin_x_uv = context_ptr->round_origin_x >> 1;
     uint32_t blk_origin_y_uv = context_ptr->round_origin_y >> 1;
     uint32_t bwdith_uv       = context_ptr->blk_geom->bwidth_uv;
@@ -665,7 +670,12 @@ void md_update_all_neighbour_arrays(PictureControlSet *pcs_ptr, ModeDecisionCont
     uint8_t avail_blk_flag = context_ptr->md_local_blk_unit[last_blk_index_mds].avail_blk_flag;
 
     if (avail_blk_flag) {
+#if REMOVE_UNUSED_CODE_PH2
+        mode_decision_update_neighbor_arrays(
+            pcs_ptr, context_ptr, last_blk_index_mds);
+#else
         mode_decision_update_neighbor_arrays(pcs_ptr, context_ptr, last_blk_index_mds, EB_FALSE);
+#endif
 
         update_mi_map(context_ptr,
                       context_ptr->blk_ptr,
@@ -754,6 +764,7 @@ static INLINE uint16_t highbd_clip_pixel_add(uint16_t dest, TranHigh trans, int3
     return clip_pixel_highbd(dest + (int32_t)trans, bd);
 }
 
+#if !REMOVE_UNUSED_CODE
 /*********************************
 * Picture Single Channel Kernel
 *********************************/
@@ -825,7 +836,7 @@ void picture_addition_kernel16_bit(uint16_t *pred_ptr, uint32_t pred_stride, int
     //    SVT_LOG("\n");
     return;
 }
-
+#endif
 void av1_perform_inverse_transform_recon_luma(ModeDecisionContext *        context_ptr,
                                               ModeDecisionCandidateBuffer *candidate_buffer) {
     uint32_t txb_width;
@@ -7234,6 +7245,7 @@ void md_cfl_rd_pick_alpha(PictureControlSet *pcs_ptr, ModeDecisionCandidateBuffe
     }
 }
 #endif
+#if !REMOVE_UNUSED_CODE_PH2
 void cfl_rd_pick_alpha(PictureControlSet *pcs_ptr, ModeDecisionCandidateBuffer *candidate_buffer,
                        SuperBlock *sb_ptr, ModeDecisionContext *context_ptr,
                        EbPictureBufferDesc *input_picture_ptr, uint32_t input_cb_origin_in_index,
@@ -7399,7 +7411,7 @@ void cfl_rd_pick_alpha(PictureControlSet *pcs_ptr, ModeDecisionCandidateBuffer *
         candidate_buffer->candidate_ptr->cfl_alpha_signs = best_joint_sign;
     }
 }
-
+#endif
 // If mode is CFL:
 // 1: recon the Luma
 // 2: Form the pred_buf_q3
@@ -11543,6 +11555,8 @@ EbErrorType signal_derivation_block(PictureControlSet *pcs, ModeDecisionContext 
 
     return return_error;
 }
+
+#if !REMOVE_UNUSED_CODE_PH2
 /****************************************************
 * generate the the size in pixel for partition code
 ****************************************************/
@@ -11620,6 +11634,7 @@ Part get_partition_shape(PartitionContextType above, PartitionContextType left, 
         SVT_LOG("error: unsupported above_size && left_size\n");
     return part;
 };
+#endif
 void init_chroma_mode(ModeDecisionContext *context_ptr) {
 #if !REFACTOR_SIGNALS
     context_ptr->uv_search_path = EB_TRUE;

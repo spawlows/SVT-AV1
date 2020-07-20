@@ -1660,8 +1660,16 @@ int32_t av1_quantize_inv_quantize(
 #else
                            ? quantizer_to_qindex[qp]
 #endif
+#if QP63_MISMATCH_FIX
+                           : (uint32_t)CLIP3(
+                              0,
+                              255,
+                              (int32_t)pcs_ptr->parent_pcs_ptr->frm_hdr.quantization_params.base_q_idx +
+                                       segmentation_qp_offset);
+#else
                            : pcs_ptr->parent_pcs_ptr->frm_hdr.quantization_params.base_q_idx +
                                  segmentation_qp_offset;
+#endif
     if (bit_depth == EB_8BIT) {
         if (component_type == COMPONENT_LUMA) {
             candidate_plane.quant_qtx = pcs_ptr->parent_pcs_ptr->quants_8bit.y_quant[q_index];
