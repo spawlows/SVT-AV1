@@ -1462,7 +1462,7 @@ void setup_common_rtcd_internal(CPU_FLAGS flags) {
         if (flags & HAS_AVX2) eb_aom_highbd_h_predictor_64x32 = eb_aom_highbd_h_predictor_64x32_avx2;
         if (flags & HAS_AVX2) eb_aom_highbd_h_predictor_64x64 = eb_aom_highbd_h_predictor_64x64_avx2;
         if (flags & HAS_SSE2) eb_log2f = Log2f_ASM;
-        if (flags & HAS_SSE2) eb_memcpy = eb_memcpy_intrin_sse;
+  //      if (flags & HAS_SSE2) eb_memcpy = eb_memcpy_intrin_sse;
 #ifndef NON_AVX512_SUPPORT
         if (flags & HAS_AVX512F) {
             eb_aom_highbd_h_predictor_32x16 = aom_highbd_h_predictor_32x16_avx512;
