@@ -4182,7 +4182,6 @@ void get_eight_horizontal_search_point_results_8x8_16x16_pu_avx2_intrin(
     best_mv_128 = _mm_or_si128(best_mv_128, mv_128);
     _mm_storeu_si128((__m128i *)p_best_mv8x8, best_mv_128);
 }
-#endif
 static INLINE __m256i add_4_sad_avx2(const uint16_t *const p_sad16x16) {
     const __m128i s0 = _mm_loadu_si128((__m128i *)(p_sad16x16 + 0 * 8));
     const __m128i s1 = _mm_loadu_si128((__m128i *)(p_sad16x16 + 1 * 8));
@@ -4200,6 +4199,7 @@ static INLINE __m256i add_4_sad_avx2(const uint16_t *const p_sad16x16) {
     return _mm256_add_epi32(s_256[0], s_256[2]);
 }
 
+#endif
 #if !REMOVE_UNUSED_CODE
 static INLINE void update_best_sse2(const __m128i sad, const uint32_t mv,
                                     uint32_t *const p_best_sad_32x32,

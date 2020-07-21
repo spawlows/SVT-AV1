@@ -163,7 +163,7 @@ uint8_t get_list_idx(uint8_t ref_type) {
     else if (ref_type == BWDREF_FRAME || ref_type == ALTREF_FRAME || ref_type == ALTREF2_FRAME)
         return 1;
     else
-        return (INVALID_REF);
+        return (0);
 };
 
 uint8_t get_ref_frame_idx(uint8_t ref_type) {
@@ -176,7 +176,7 @@ uint8_t get_ref_frame_idx(uint8_t ref_type) {
     else if (ref_type == GOLDEN_FRAME)
         return 3;
     else
-        return (INVALID_REF);
+        return (0);
 };
 MvReferenceFrame svt_get_ref_frame_type(uint8_t list, uint8_t ref_idx) {
     switch (list) {
