@@ -497,6 +497,11 @@ extern "C" {
 
 #define MEM_OPT_UV_MODE     1 // Memory optimization for independant uv mode
 #define SYNCH_LAMBDA        1
+#define REMOVE_MR_MACRO               1  // Change MR_MODE to -enc-mode -1 (ENC_MR) and MRS_MODE to -enc-mode -2 (ENC_MRS)
+
+
+#define OBMC_CLI            1 // Improve CLI support for OBMC (OFF / Fully ON / Other Levels).
+#define FILTER_INTRA_CLI    1 // Improve CLI support for Filter Intra (OFF / Fully ON / Other Levels)
 #endif
 
 ///////// END MASTER_SYNCH
@@ -2512,7 +2517,15 @@ typedef enum EbIntraRefreshType
 /** The EbEncMode type is used to describe the encoder mode .
 */
 
+#if REMOVE_MR_MACRO
+#define EbEncMode     int8_t
+#else
 #define EbEncMode     uint8_t
+#endif
+#if REMOVE_MR_MACRO
+#define ENC_MRS         -2 // Highest quality research mode (slowest)
+#define ENC_MR          -1 //Research mode with higher quality than M0
+#endif
 #define ENC_M0          0
 #define ENC_M1          1
 #define ENC_M2          2
