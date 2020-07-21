@@ -605,7 +605,7 @@ static void set_superres_qthres(const char *value, EbConfig *cfg) {
 };
 // --- end: SUPER-RESOLUTION SUPPORT
 static void set_enable_hbd_mode_decision(const char *value, EbConfig *cfg) {
-#if 0 //CHANGE_HBD_MODE
+#if 1 //CHANGE_HBD_MODE
     cfg->enable_hbd_mode_decision = (uint8_t)strtoul(value, NULL, 0);
 #else
     cfg->enable_hbd_mode_decision = (int8_t)strtoul(value, NULL, 0);

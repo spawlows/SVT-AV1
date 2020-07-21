@@ -467,6 +467,7 @@ extern "C" {
 #define M6_LOOP_FILTER_MODE 1 // Use M5_LOOP_FILTER in M6
 #endif
 #define  ON_OFF_FEATURE_MRP     0 // ON/OFF Feature MRP //---------------------------------
+#define  SYNCH_MRP              1 // ON/OFF Feature MRP //---------------------------------
 #define UNIFY_SC_NSC        1 // Unify the SC/NSC settings, except for Palette, IBC, and ME
 #define REMOVE_PRINT_STATEMENTS 1 // remove print statements
 #define SOFT_CYCLES_M6M7        1
