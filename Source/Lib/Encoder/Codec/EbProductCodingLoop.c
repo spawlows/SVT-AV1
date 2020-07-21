@@ -6370,7 +6370,7 @@ void predictive_me_search(PictureControlSet *pcs_ptr, ModeDecisionContext *conte
             uint8_t          ref_idx    = get_ref_frame_idx(rf[0]);
 #if PRED_ME_REF_MASKING
 #if PRUNING_PER_INTER_TYPE
-            if (!is_valid_unipred_ref(context_ptr, PRED_ME_GROUP, list_idx, ref_idx)) continue;
+            if (!is_valid_unipred_ref(context_ptr, MIN(TOT_INTER_GROUP-1,PRED_ME_GROUP), list_idx, ref_idx)) continue;
 #else
             if (!context_ptr->ref_filtering_res[list_idx][ref_idx].do_ref) continue;
 #endif
