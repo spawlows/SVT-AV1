@@ -927,6 +927,11 @@ typedef struct PictureParentControlSet {
     EbObjectWrapper *me_data_wrapper_ptr;
     MotionEstimationData *pa_me_data;
 #endif
+#if NEW_DELAY
+    void* tpl_group[MAX_TPL_GROUP_SIZE]; //stores pcs pictures needed for tpl algorithm
+    uint32_t tpl_group_size;             //size of above buffer
+    void* pd_window[SCD_LAD]; //stores previous, current, future pictures from pd-reord-queue. empty for first I.
+#endif
 } PictureParentControlSet;
 
 typedef struct PictureControlSetInitData {

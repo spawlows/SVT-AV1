@@ -619,8 +619,17 @@ extern "C" {
 #define ENABLE_GM_LIST1    1 // Enable GM_LIST1
 #define CDEF_CLI           1 // Improve CLI Support for CDEF
 #define REF_PRUNE_CAT_TUNE 1 // Tune the allowable references per category to improve trade-offs
+
+#define FIX_MV_BOUND       1 //Clip inherited ME MVs to stay within pic boundaries
+#define NEW_DELAY          1 //Change delay some sorts of I in PicDecision
+
 #endif
 // END  SVT_02_TEMP /////////////////////////////////////////////////////////
+
+#if NEW_DELAY
+#define SCD_LAD            6  //number of future frames
+#define MAX_TPL_GROUP_SIZE 64 //enough to cover 6L gop
+#endif
 
 #if DECOUPLE_ME_RES
 #define UPDATED_LINKS 100 //max number of pictures a dep-Cnt-cleanUp triggering picture can process

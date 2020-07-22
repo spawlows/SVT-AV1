@@ -94,10 +94,13 @@
 #define ENCDEC_INPUT_PORT_MDC                                0
 #define ENCDEC_INPUT_PORT_ENCDEC                             1
 #define ENCDEC_INPUT_PORT_INVALID                           -1
+
+#if !NEW_DELAY
 #if NOISE_BASED_TF_FRAMES
 #define SCD_LAD                                             12
 #else
 #define SCD_LAD                                              6
+#endif
 #endif
 /**************************************
  * Globals

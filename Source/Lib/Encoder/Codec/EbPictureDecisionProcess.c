@@ -98,8 +98,15 @@ typedef struct PictureDecisionContext
     uint8_t tf_level;
     TfControls tf_ctrls;
 #endif
+#if NEW_DELAY
+    PictureParentControlSet* prev_delayed_intra; //Key frame or I of LDP short MG
+#endif
 #if DECOUPLE_ME_RES
     PictureParentControlSet* mg_pictures_array[1<<MAX_TEMPORAL_LAYERS];
+#if NEW_DELAY
+    uint32_t                 mg_size;//number of active pictures in above array
+    PictureParentControlSet* mg_pictures_array_disp_order[1 << MAX_TEMPORAL_LAYERS];
+#endif
     DepCntPicInfo updated_links_arr[UPDATED_LINKS];//if not empty, this picture is a depn-cnt-cleanUp triggering picture (I frame; or MG size change )
                                                       //this array will store all others pictures needing a dep-cnt clean up.
     uint32_t other_updated_links_cnt; //how many other pictures in the above array needing a dep-cnt clean-up
@@ -267,10 +274,22 @@ uint8_t  circ_inc(uint8_t max, uint8_t off, uint8_t input)
 #define POC_CIRCULAR_ADD(base, offset/*, bits*/)             (/*(((int32_t) (base)) + ((int32_t) (offset)) > ((int32_t) (1 << (bits))))   ? ((base) + (offset) - (1 << (bits))) : \
                                                              (((int32_t) (base)) + ((int32_t) (offset)) < 0)                           ? ((base) + (offset) + (1 << (bits))) : \
                                                                                                                                        */((base) + (offset)))
+#if NEW_DELAY
+EbErrorType derive_tf_window_params(
+    SequenceControlSet *scs_ptr,
+    EncodeContext *encode_context_ptr,
+    PictureParentControlSet *pcs_ptr,
+#if TF_LEVELS
+    PictureDecisionContext *context_ptr,
+#endif
+    uint32_t out_stride_diff64);
+#else
+
 #if NOISE_BASED_TF_FRAMES
 #define FUTURE_WINDOW_WIDTH                 12
 #else
 #define FUTURE_WINDOW_WIDTH                 6
+#endif
 #endif
 #define FLASH_TH                            5
 #define FADE_TH                             3
@@ -2911,6 +2930,9 @@ EbErrorType signal_derivation_multi_processes_oq(
 #endif
 #endif
 #endif
+#if NEW_DELAY
+    (void)context_ptr;
+#else
 #if TF_LEVELS
 #if UNIFY_SC_NSC
 #if ALTREF_CLI
@@ -3133,6 +3155,7 @@ EbErrorType signal_derivation_multi_processes_oq(
         context_ptr->tf_level = 3;
 #endif
     set_tf_controls(context_ptr, context_ptr->tf_level);
+#endif
 #endif
 #endif
 #if ON_OFF_FEATURE_MRP
@@ -5916,6 +5939,457 @@ void initialize_overlay_frame(PictureParentControlSet     *pcs_ptr) {
     perform_simple_picture_analysis_for_overlay(pcs_ptr);
  }
 
+
+#if NEW_DELAY
+/*
+  ret number of past picture(not including current) in mg buffer.
+
+*/
+int32_t avail_past_pictures(PictureParentControlSet**buf, uint32_t buf_size, uint64_t input_pic)
+{
+    //buffer has at least curr picture
+    int32_t tot_past = 0;
+    for (uint32_t pic = 0; pic < buf_size; pic++) {
+        if (buf[pic]->picture_number < input_pic) {
+            tot_past++;
+        }
+    }
+    return tot_past;
+}
+
+
+/*
+  searches a picture in a given pcs buffer
+*/
+int32_t search_this_pic(PictureParentControlSet**buf, uint32_t buf_size, uint64_t input_pic)
+{
+    int32_t index = -1;
+    for (uint32_t pic = 0; pic < buf_size; pic++) {
+        if (buf[pic]->picture_number == input_pic) {
+            index = (int32_t)pic;
+            break;
+        }
+    }
+    return index;
+}
+
+/*
+  Tells if an Intra picture should be delayed to get next mini-gop
+*/
+EbBool is_delayed_intra(PictureParentControlSet *pcs) {
+    return(
+        (pcs->end_of_sequence_flag == EB_FALSE && pcs->idr_flag) ||
+        (pcs->cra_flag && pcs->pre_assignment_buffer_count < pcs->pred_struct_ptr->pred_struct_period)
+        );
+}
+
+/*
+  Performs Motion Compensated Temporal Filtering in ME process
+*/
+void mctf_frame(
+    SequenceControlSet      *scs_ptr,
+    PictureParentControlSet *pcs_ptr,
+    PictureDecisionContext  *context_ptr,
+    uint32_t               out_stride_diff64
+)
+{
+
+#if TF_LEVELS
+#if UNIFY_SC_NSC
+#if ALTREF_CLI
+    uint8_t perform_filtering =
+        (scs_ptr->tf_level && scs_ptr->static_config.pred_structure == EB_PRED_RANDOM_ACCESS && scs_ptr->static_config.hierarchical_levels >= 1)
+        ? 1 : 0;
+#else
+    uint8_t perform_filtering =
+        (scs_ptr->enable_altrefs == EB_TRUE && scs_ptr->static_config.pred_structure == EB_PRED_RANDOM_ACCESS && scs_ptr->static_config.hierarchical_levels >= 1)
+        ? 1 : 0;
+#endif
+#else
+#if UPGRADE_M6_M7_M8
+    uint8_t perform_filtering =
+        (scs_ptr->enable_altrefs == EB_TRUE && scs_ptr->static_config.pred_structure == EB_PRED_RANDOM_ACCESS && pcs_ptr->sc_content_detected == 0 && scs_ptr->static_config.hierarchical_levels >= 1)
+        ? 1 : 0;
+#else
+    uint8_t perform_filtering =
+        (scs_ptr->enable_altrefs == EB_TRUE && scs_ptr->static_config.pred_structure == EB_PRED_RANDOM_ACCESS && pcs_ptr->sc_content_detected == 0 && scs_ptr->static_config.hierarchical_levels >= 1) &&
+        (pcs_ptr->temporal_layer_index == 0 || (pcs_ptr->temporal_layer_index == 1 && scs_ptr->static_config.hierarchical_levels >= 3))
+        ? 1 : 0;
+#endif
+#endif
+
+
+#if ALTREF_CLI
+    // tf_level is used to indicate whether temporal filtering is to be used,
+    // and if so, what level of the feature to consider.
+
+    // tf_level controls through the function set_tf_controls whether the feature is enabled or not,
+    // and the total number of pictures (window_size) to consider in temporal filtering, including the current frame,
+    // and whether to adjust the window size based on noise characteristics.
+    // Level 0 corresponds to temporal filtering being OFF.
+    // Levels 1, 2 and 3 correspond to feature active with fewer pictures considered in the temporal filtering operations.
+
+    // In the table below, ON refers to temporal filtering performed for temporal layer 0 pictures
+    // and (for pictures in temporal layer 1 in at least a 4-layer prediction structure)
+
+    //    tf_level   |                  Default Encoder Settings                   |  Command Line Settings
+    //       0       | OFF subject to possible constraints                         |  OFF
+    //       1       | ON subject to possible constraints                          |  ON
+    //       2       | ON with smaller window_size subject to possible constraints |  ON with smaller window_size
+    //       3       | ON with smaller window_size subject to possible constraints |  ON with even smaller window_size
+#if IMPROVED_TF_LEVELS
+    if (perform_filtering) {
+        if (scs_ptr->static_config.tf_level == DEFAULT) {
+#if JUNE26_ADOPTIONS
+            if (pcs_ptr->enc_mode <= ENC_M5) {
+#else
+#if JUNE25_ADOPTIONS
+            if (pcs_ptr->enc_mode <= ENC_M4) {
+#else
+            if (pcs_ptr->enc_mode <= ENC_M5) {
+#endif
+#endif
+                if (pcs_ptr->temporal_layer_index == 0 || (pcs_ptr->temporal_layer_index == 1 && scs_ptr->static_config.hierarchical_levels >= 3))
+                    context_ptr->tf_level = 1;
+                else
+                    context_ptr->tf_level = 0;
+            }
+            else if (pcs_ptr->enc_mode <= ENC_M6) {
+                if (pcs_ptr->temporal_layer_index == 0 || (pcs_ptr->temporal_layer_index == 1 && scs_ptr->static_config.hierarchical_levels >= 3))
+                    context_ptr->tf_level = 2;
+                else
+                    context_ptr->tf_level = 0;
+            }
+            else {
+                if (pcs_ptr->temporal_layer_index == 0 || (pcs_ptr->temporal_layer_index == 1 && scs_ptr->static_config.hierarchical_levels >= 3))
+                    context_ptr->tf_level = 3;
+                else
+                    context_ptr->tf_level = 0;
+            }
+            }
+        else {
+            if (pcs_ptr->temporal_layer_index == 0 || (pcs_ptr->temporal_layer_index == 1 && scs_ptr->static_config.hierarchical_levels >= 3))
+                context_ptr->tf_level = scs_ptr->static_config.tf_level;
+            else
+                context_ptr->tf_level = 0;
+        }
+            }
+    else
+        context_ptr->tf_level = 0;
+#else
+    if (perform_filtering) {
+#if UPGRADE_M6_M7_M8
+#if PRESET_SHIFITNG
+        if (pcs_ptr->enc_mode <= ENC_M5) {
+#else
+        if (pcs_ptr->enc_mode <= ENC_M7) {
+#endif
+            if (pcs_ptr->temporal_layer_index == 0 || (pcs_ptr->temporal_layer_index == 1 && scs_ptr->static_config.hierarchical_levels >= 3))
+                context_ptr->tf_level = 0;
+            else
+                context_ptr->tf_level = 3;
+        }
+        else {
+#if ADD_SKIP_INTRA_SIGNAL
+            if (pcs_ptr->enc_mode <= ENC_M6) {
+                if (pcs_ptr->temporal_layer_index == 0)
+                    context_ptr->tf_level = 0;
+                else
+                    context_ptr->tf_level = 3;
+            }
+            else
+                context_ptr->tf_level = 3;
+#else
+            if (pcs_ptr->temporal_layer_index == 0)
+#if REVERT_YELLOW // tf_level
+                context_ptr->tf_level = 2;
+#else
+                context_ptr->tf_level = 0;
+#endif
+            else
+                context_ptr->tf_level = 3;
+#endif
+        }
+#else
+#if UPGRADE_M8
+        if (pcs_ptr->enc_mode <= ENC_M8) {
+#else
+        if (pcs_ptr->enc_mode <= ENC_M5) {
+#endif
+            context_ptr->tf_level = 0;
+        }
+        else {
+            context_ptr->tf_level = 2;
+        }
+#endif
+#if SHUT_LAYER_BASED_FEATURES
+        context_ptr->tf_level = 0;
+#endif
+        }
+    else
+        context_ptr->tf_level = 3;
+#endif
+
+
+    set_tf_controls(context_ptr, context_ptr->tf_level);
+#else
+#if IMPROVED_TF_LEVELS
+    if (perform_filtering) {
+#if JUNE26_ADOPTIONS
+        if (pcs_ptr->enc_mode <= ENC_M5) {
+#else
+#if JUNE25_ADOPTIONS
+        if (pcs_ptr->enc_mode <= ENC_M4) {
+#else
+        if (pcs_ptr->enc_mode <= ENC_M5) {
+#endif
+#endif
+            if (pcs_ptr->temporal_layer_index == 0 || (pcs_ptr->temporal_layer_index == 1 && scs_ptr->static_config.hierarchical_levels >= 3))
+                context_ptr->tf_level = 1;
+            else
+                context_ptr->tf_level = 0;
+        }
+        else if (pcs_ptr->enc_mode <= ENC_M6) {
+            if (pcs_ptr->temporal_layer_index == 0 || (pcs_ptr->temporal_layer_index == 1 && scs_ptr->static_config.hierarchical_levels >= 3))
+                context_ptr->tf_level = 2;
+            else
+                context_ptr->tf_level = 0;
+        }
+        else {
+            if (pcs_ptr->temporal_layer_index == 0 || (pcs_ptr->temporal_layer_index == 1 && scs_ptr->static_config.hierarchical_levels >= 3))
+                context_ptr->tf_level = 3;
+            else
+                context_ptr->tf_level = 0;
+        }
+        }
+    else
+        context_ptr->tf_level = 0;
+#else
+    if (perform_filtering) {
+#if UPGRADE_M6_M7_M8
+#if PRESET_SHIFITNG
+        if (pcs_ptr->enc_mode <= ENC_M5) {
+#else
+        if (pcs_ptr->enc_mode <= ENC_M7) {
+#endif
+            if (pcs_ptr->temporal_layer_index == 0 || (pcs_ptr->temporal_layer_index == 1 && scs_ptr->static_config.hierarchical_levels >= 3))
+                context_ptr->tf_level = 0;
+            else
+                context_ptr->tf_level = 3;
+        }
+        else {
+#if ADD_SKIP_INTRA_SIGNAL
+            if (pcs_ptr->enc_mode <= ENC_M6) {
+                if (pcs_ptr->temporal_layer_index == 0)
+                    context_ptr->tf_level = 0;
+                else
+                    context_ptr->tf_level = 3;
+            }
+            else
+                context_ptr->tf_level = 3;
+#else
+            if (pcs_ptr->temporal_layer_index == 0)
+#if REVERT_YELLOW // tf_level
+                context_ptr->tf_level = 2;
+#else
+                context_ptr->tf_level = 0;
+#endif
+            else
+                context_ptr->tf_level = 3;
+#endif
+            }
+#else
+#if UPGRADE_M8
+        if (pcs_ptr->enc_mode <= ENC_M8) {
+#else
+        if (pcs_ptr->enc_mode <= ENC_M5) {
+#endif
+            context_ptr->tf_level = 0;
+        }
+        else {
+            context_ptr->tf_level = 2;
+        }
+#endif
+#if SHUT_LAYER_BASED_FEATURES
+        context_ptr->tf_level = 0;
+#endif
+        }
+    else
+        context_ptr->tf_level = 3;
+#endif
+    set_tf_controls(context_ptr, context_ptr->tf_level);
+#endif
+
+#endif
+
+
+    if (context_ptr->tf_ctrls.enabled) {
+
+        derive_tf_window_params(
+            scs_ptr,
+            scs_ptr->encode_context_ptr,
+            pcs_ptr,
+#if TF_LEVELS
+            context_ptr,
+#endif
+            out_stride_diff64);
+        pcs_ptr->temp_filt_prep_done = 0;
+
+        // Start Filtering in ME processes
+        {
+            int16_t seg_idx;
+
+            // Initialize Segments
+            pcs_ptr->tf_segments_column_count = scs_ptr->tf_segment_column_count;
+            pcs_ptr->tf_segments_row_count = scs_ptr->tf_segment_row_count;
+            pcs_ptr->tf_segments_total_count = (uint16_t)(pcs_ptr->tf_segments_column_count  * pcs_ptr->tf_segments_row_count);
+            pcs_ptr->temp_filt_seg_acc = 0;
+            if (pcs_ptr->temporal_layer_index == 0)
+                pcs_ptr->altref_strength = scs_ptr->static_config.altref_strength;
+            else
+                pcs_ptr->altref_strength = 2;
+
+            for (seg_idx = 0; seg_idx < pcs_ptr->tf_segments_total_count; ++seg_idx) {
+
+                EbObjectWrapper               *out_results_wrapper_ptr;
+                PictureDecisionResults        *out_results_ptr;
+
+                eb_get_empty_object(
+                    context_ptr->picture_decision_results_output_fifo_ptr,
+                    &out_results_wrapper_ptr);
+                out_results_ptr = (PictureDecisionResults*)out_results_wrapper_ptr->object_ptr;
+                out_results_ptr->pcs_wrapper_ptr = pcs_ptr->p_pcs_wrapper_ptr;
+                out_results_ptr->segment_index = seg_idx;
+                out_results_ptr->task_type = 1;
+                eb_post_full_object(out_results_wrapper_ptr);
+            }
+
+            eb_block_on_semaphore(pcs_ptr->temp_filt_done_semaphore);
+        }
+
+    }
+    else
+        pcs_ptr->temporal_filtering_on = EB_FALSE; // set temporal filtering flag OFF for current picture
+}
+
+/*
+   construct list of pictures needed for TPL
+*/
+void store_tpl_pictures(
+    PictureParentControlSet *pcs,
+    PictureDecisionContext  *ctx,
+    uint32_t                 mg_size)
+{
+    if (pcs->idr_flag ||
+        (pcs->cra_flag && pcs->pre_assignment_buffer_count < pcs->pred_struct_ptr->pred_struct_period)
+        ) {
+        pcs->tpl_group[0] = (void*)pcs;
+        memcpy(&pcs->tpl_group[1], ctx->mg_pictures_array, mg_size * sizeof(PictureParentControlSet*));
+        pcs->tpl_group_size = 1 + mg_size;
+
+        //for (uint32_t pic_i = 0; pic_i < pcs->tpl_group_size; ++pic_i)
+        //    printf("TPL group Delayed-I  %I64u  \n", ((PictureParentControlSet *)pcs->tpl_group[pic_i])->picture_number);
+
+    }
+    else {
+        memcpy(&pcs->tpl_group[0], ctx->mg_pictures_array, mg_size * sizeof(PictureParentControlSet*));
+        pcs->tpl_group_size = mg_size;
+        //add 3 future pictures from PD future window
+        for (uint32_t pic_i = 0; pic_i < 3; ++pic_i) {
+            if (pcs->pd_window[2 + pic_i]) {
+                pcs->tpl_group[mg_size + pic_i] = pcs->pd_window[2 + pic_i];
+                pcs->tpl_group_size++;
+            }
+        }
+
+        //for (uint32_t pic_i = 0; pic_i < pcs->tpl_group_size; ++pic_i)
+        //    printf("TPL group Base %I64u  \n", ((PictureParentControlSet *)pcs->tpl_group[pic_i])->picture_number);
+    }
+}
+/* Sends a picture out from Picture Decision
+*/
+void send_picture_out(
+    SequenceControlSet      *scs,
+    PictureParentControlSet *pcs,
+    PictureDecisionContext  *ctx)
+{
+    EbObjectWrapper               *me_wrapper;
+    EbObjectWrapper               *out_results_wrapper;
+    PictureDecisionResults        *out_results;
+
+    if (scs->static_config.look_ahead_distance == 0) {
+
+        EbObjectWrapper* reference_picture_wrapper;
+        // Get Empty Reference Picture Object
+        eb_get_empty_object(
+            scs->encode_context_ptr->reference_picture_pool_fifo_ptr,
+            &reference_picture_wrapper);
+        pcs->reference_picture_wrapper_ptr = reference_picture_wrapper;
+        // Give the new Reference a nominal live_count of 1
+        eb_object_inc_live_count(pcs->reference_picture_wrapper_ptr, 1);
+    }
+    //get a new ME data buffer
+    eb_get_empty_object(ctx->me_fifo_ptr, &me_wrapper);
+    pcs->me_data_wrapper_ptr = me_wrapper;
+
+    pcs->pa_me_data = (MotionEstimationData *)me_wrapper->object_ptr;
+
+    //char stype[] = { 'B','P','I' };
+    //printf("PD-OUT  POC:%I64u  %c L%i\n", pcs->picture_number, stype[pcs->slice_type], pcs->temporal_layer_index);
+
+    for (uint32_t segment_index = 0; segment_index < pcs->me_segments_total_count; ++segment_index) {
+        // Get Empty Results Object
+        eb_get_empty_object(
+            ctx->picture_decision_results_output_fifo_ptr,
+            &out_results_wrapper);
+
+        out_results = (PictureDecisionResults*)out_results_wrapper->object_ptr;
+        out_results->pcs_wrapper_ptr = pcs->p_pcs_wrapper_ptr;
+        out_results->segment_index = segment_index;
+        out_results->task_type = 0;
+        //Post the Full Results Object
+        eb_post_full_object(out_results_wrapper);
+    }
+
+}
+
+void print_pre_ass(EncodeContext *ctxt)
+{
+
+    SVT_LOG("\n Pre-Assign(%i):  ", ctxt->pre_assignment_buffer_count);
+    for (uint32_t pic = 0; pic < ctxt->pre_assignment_buffer_count; pic++) {
+
+        PictureParentControlSet *pcs = (PictureParentControlSet*)ctxt->pre_assignment_buffer[pic]->object_ptr;
+        SVT_LOG("%I64u ", pcs->picture_number);
+    }
+    SVT_LOG("\n");
+}
+void print_pd_reord_queue(EncodeContext *ctxt)
+{
+    uint32_t idx = ctxt->picture_decision_reorder_queue_head_index;
+    PictureDecisionReorderEntry   *queue_entry = ctxt->picture_decision_reorder_queue[idx];
+
+    while (queue_entry->parent_pcs_wrapper_ptr != EB_NULL) {
+
+        PictureParentControlSet *pcs = (PictureParentControlSet*)queue_entry->parent_pcs_wrapper_ptr->object_ptr;
+        SVT_LOG("%I64u  ", pcs->picture_number);
+        queue_entry = ctxt->picture_decision_reorder_queue[++idx];
+    }
+    SVT_LOG("\n");
+}
+
+uint32_t  get_reord_q_size(EncodeContext *ctxt)
+{
+    uint32_t size = 0;
+    uint32_t idx = ctxt->picture_decision_reorder_queue_head_index;
+    PictureDecisionReorderEntry   *queue_entry = ctxt->picture_decision_reorder_queue[idx];
+    while (queue_entry->parent_pcs_wrapper_ptr != EB_NULL) {
+        queue_entry = ctxt->picture_decision_reorder_queue[++idx];
+        size++;
+    }
+    return size;
+}
+#endif
 /***************************************************************************************************
  * Helper function. Compare two frames: center frame and target frame. Return the summation of
  * absolute difference between the two frames from a histogram of luma values
@@ -6100,6 +6574,46 @@ void derive_tf_window_params(
 #else
     int altref_nframes = scs_ptr->static_config.altref_nframes;
 #endif
+
+
+#if NEW_DELAY
+    (void)out_stride_diff64;
+    if (is_delayed_intra(pcs_ptr)) {
+        //initilize list
+        for (int pic_itr = 0; pic_itr < ALTREF_MAX_NFRAMES; pic_itr++)
+            pcs_ptr->temp_filt_pcs_list[pic_itr] = NULL;
+
+        pcs_ptr->temp_filt_pcs_list[0] = pcs_ptr;
+        uint32_t num_future_pics = altref_nframes - 1;
+
+        uint32_t pic_i;
+        for (pic_i = 0; pic_i < num_future_pics; pic_i++) {
+            int32_t idx = search_this_pic(context_ptr->mg_pictures_array, context_ptr->mg_size, pcs_ptr->picture_number + pic_i + 1);
+            if (idx >= 0)
+                pcs_ptr->temp_filt_pcs_list[pic_i + 1] = context_ptr->mg_pictures_array[idx];
+            else
+                break;
+        }
+
+        pcs_ptr->past_altref_nframes = 0;
+        pcs_ptr->future_altref_nframes = pic_i;
+        int index_center = 0;
+        uint32_t actual_future_pics = pcs_ptr->future_altref_nframes;
+        int pic_itr, ahd;
+
+        int ahd_th = (((pcs_ptr->aligned_width * pcs_ptr->aligned_height) * AHD_TH_WEIGHT) / 100);
+
+        // Accumulative histogram absolute differences between the central and future frame
+        for (pic_itr = (index_center + actual_future_pics); pic_itr > index_center; pic_itr--) {
+            ahd = compute_luma_sad_between_center_and_target_frame(index_center, pic_itr, pcs_ptr, scs_ptr);
+
+            if (ahd < ahd_th)
+               break;
+        }
+        pcs_ptr->future_altref_nframes = pic_itr - index_center;
+    }
+    else
+#endif
     if (pcs_ptr->idr_flag) {
 
         //initilize list
@@ -6152,14 +6666,29 @@ void derive_tf_window_params(
         //initilize list
         for (int pic_itr = 0; pic_itr < ALTREF_MAX_NFRAMES; pic_itr++)
             pcs_ptr->temp_filt_pcs_list[pic_itr] = NULL;
+
+
+#if  NEW_DELAY
         // limit the number of pictures to make sure there are enough pictures in the buffer. i.e. Intra CRA case
+        num_past_pics = MIN(num_past_pics, avail_past_pictures(context_ptr->mg_pictures_array, context_ptr->mg_size, pcs_ptr->picture_number));
+#else
         num_past_pics = MIN(MIN(num_past_pics, (int)encode_context_ptr->pre_assignment_buffer_count - 1), (int)out_stride_diff64);
+#endif
+
 
         //get previous+current pictures from the the pre-assign buffer
+#if  NEW_DELAY
+        for (int pic_itr = 0; pic_itr <= num_past_pics; pic_itr++) {
+            int32_t idx = search_this_pic(context_ptr->mg_pictures_array, context_ptr->mg_size, pcs_ptr->picture_number - num_past_pics + pic_itr);
+            if (idx >= 0)
+                pcs_ptr->temp_filt_pcs_list[pic_itr] = context_ptr->mg_pictures_array[idx];
+        }
+#else
         for (int pic_itr = 0; pic_itr <= num_past_pics; pic_itr++) {
             PictureParentControlSet* pcs_itr = (PictureParentControlSet*)encode_context_ptr->pre_assignment_buffer[out_stride_diff64 - num_past_pics + pic_itr]->object_ptr;
             pcs_ptr->temp_filt_pcs_list[pic_itr] = pcs_itr;
         }
+#endif
         int actual_past_pics = num_past_pics;
         int actual_future_pics = 0;
         int pic_i;
@@ -6227,6 +6756,16 @@ void derive_tf_window_params(
             }
         }
     }
+
+#if NEW_DELAY
+    //SVT_LOG("\n**TF** POC %d\t PAST %d\t FUTURE %d\n", pcs_ptr->picture_number, pcs_ptr->past_altref_nframes, pcs_ptr->future_altref_nframes);
+    //for (int i = 0; i < (pcs_ptr->past_altref_nframes + pcs_ptr->future_altref_nframes + 1); i++)
+    //    SVT_LOG("  %d  ", pcs_ptr->temp_filt_pcs_list[i]->picture_number);
+    //SVT_LOG("\n");
+#endif
+
+
+
 #if NOISE_BASED_TF_FRAMES
     return EB_ErrorNone;
 #endif
@@ -6426,16 +6965,18 @@ void* picture_decision_kernel(void *input_ptr)
 
     EncodeContext                 *encode_context_ptr;
     SequenceControlSet            *scs_ptr;
+#if !NEW_DELAY
 #if DECOUPLE_ME_RES
     EbObjectWrapper               *me_wrapper_ptr;
+#endif
 #endif
 
     EbObjectWrapper               *in_results_wrapper_ptr;
     PictureAnalysisResults        *in_results_ptr;
-
+#if !NEW_DELAY
     EbObjectWrapper               *out_results_wrapper_ptr;
     PictureDecisionResults        *out_results_ptr;
-
+#endif
     PredictionStructureEntry      *pred_position_ptr;
 
     EbBool                          pre_assignment_buffer_first_pass_flag;
@@ -6467,8 +7008,9 @@ void* picture_decision_kernel(void *input_ptr)
     EbBool                          window_avail, frame_passthrough;
     uint32_t                           window_index;
     uint32_t                           entry_index;
+#if ! NEW_DELAY
     PictureParentControlSet        *parent_pcs_window[FUTURE_WINDOW_WIDTH + 2];
-
+#endif
     // Debug
     uint64_t                           loop_count = 0;
 
@@ -6506,6 +7048,11 @@ void* picture_decision_kernel(void *input_ptr)
 
             pcs_ptr->pic_decision_reorder_queue_idx = queue_entry_index;
         }
+
+#if  NEW_DELAY
+        //printf("\nPD Queue size:(%i)  ", get_reord_q_size(encode_context_ptr));
+        //print_pd_reord_queue(encode_context_ptr);
+#endif
         // Process the head of the Picture Decision Reordering Queue (Entry N)
         // P.S. The Picture Decision Reordering Queue should be parsed in the display order to be able to construct a pred structure
         queue_entry_ptr = encode_context_ptr->picture_decision_reorder_queue[encode_context_ptr->picture_decision_reorder_queue_head_index];
@@ -6519,9 +7066,13 @@ void* picture_decision_kernel(void *input_ptr)
             window_avail = EB_TRUE;
             previous_entry_index = QUEUE_GET_PREVIOUS_SPOT(encode_context_ptr->picture_decision_reorder_queue_head_index);
 #if NOISE_BASED_TF_FRAMES
+#if NEW_DELAY
+            memset(pcs_ptr->pd_window, 0, SCD_LAD * sizeof(PictureParentControlSet*));
+#else
             parent_pcs_window[ 0] = parent_pcs_window[ 1] = parent_pcs_window[ 2] = parent_pcs_window[ 3] = parent_pcs_window[ 4] = parent_pcs_window[ 5] =
             parent_pcs_window[ 6] = parent_pcs_window[ 7] = parent_pcs_window[ 8] = parent_pcs_window[ 9] = parent_pcs_window[10] = parent_pcs_window[11] =
             parent_pcs_window[12] = parent_pcs_window[13] = NULL;
+#endif
 #else
             parent_pcs_window[0] = parent_pcs_window[1] = parent_pcs_window[2] = parent_pcs_window[3] = parent_pcs_window[4] = parent_pcs_window[5] = NULL;
 #endif
@@ -6529,9 +7080,15 @@ void* picture_decision_kernel(void *input_ptr)
             if (queue_entry_ptr->picture_number > 0 && encode_context_ptr->picture_decision_reorder_queue[previous_entry_index]->parent_pcs_wrapper_ptr == NULL)
                 window_avail = EB_FALSE;
             else {
-
+#if NEW_DELAY
+                //TODO: risk of a race condition accessing prev(pcs0 is released, and pcs1 still doing sc).
+                //Actually we dont need to keep prev, just keep previous copy of histograms.
+                pcs_ptr->pd_window[0] = queue_entry_ptr->picture_number > 0 ? (PictureParentControlSet *)encode_context_ptr->picture_decision_reorder_queue[previous_entry_index]->parent_pcs_wrapper_ptr->object_ptr : NULL;
+                pcs_ptr->pd_window[1] = (PictureParentControlSet *)encode_context_ptr->picture_decision_reorder_queue[encode_context_ptr->picture_decision_reorder_queue_head_index]->parent_pcs_wrapper_ptr->object_ptr;
+#else
                 parent_pcs_window[0] = queue_entry_ptr->picture_number > 0 ? (PictureParentControlSet *)encode_context_ptr->picture_decision_reorder_queue[previous_entry_index]->parent_pcs_wrapper_ptr->object_ptr : NULL;
                 parent_pcs_window[1] = (PictureParentControlSet *)encode_context_ptr->picture_decision_reorder_queue[encode_context_ptr->picture_decision_reorder_queue_head_index]->parent_pcs_wrapper_ptr->object_ptr;
+#endif
                 for (window_index = 0; window_index < scs_ptr->scd_delay; window_index++) {
                     entry_index = QUEUE_GET_NEXT_SPOT(encode_context_ptr->picture_decision_reorder_queue_head_index, window_index + 1);
                     if (encode_context_ptr->picture_decision_reorder_queue[entry_index]->parent_pcs_wrapper_ptr == NULL) {
@@ -6543,7 +7100,11 @@ void* picture_decision_kernel(void *input_ptr)
                         frame_passthrough = EB_TRUE;
                         break;
                     }else {
+#if NEW_DELAY
+                        pcs_ptr->pd_window[2 + window_index] = (PictureParentControlSet *)encode_context_ptr->picture_decision_reorder_queue[entry_index]->parent_pcs_wrapper_ptr->object_ptr;
+#else
                         parent_pcs_window[2 + window_index] = (PictureParentControlSet *)encode_context_ptr->picture_decision_reorder_queue[entry_index]->parent_pcs_wrapper_ptr->object_ptr;
+#endif
                     }
                 }
             }
@@ -6560,8 +7121,13 @@ void* picture_decision_kernel(void *input_ptr)
                     pcs_ptr->scene_change_flag = scene_transition_detector(
                         context_ptr,
                         scs_ptr,
+#if NEW_DELAY
+                        (PictureParentControlSet **)pcs_ptr->pd_window,
+                        SCD_LAD);
+#else
                         parent_pcs_window,
                         FUTURE_WINDOW_WIDTH);
+#endif
                 }
                 else
                     pcs_ptr->scene_change_flag = EB_FALSE;
@@ -6597,6 +7163,11 @@ void* picture_decision_kernel(void *input_ptr)
 #if DECOUPLE_ME_RES
                 pcs_ptr->self_updated_links = 0;
                 pcs_ptr->other_updated_links_cnt = 0;
+#endif
+#if NEW_DELAY
+                pcs_ptr->tpl_group_size = 0;
+                if (pcs_ptr->picture_number == 0)
+                    context_ptr->prev_delayed_intra = NULL;
 #endif
                 release_prev_picture_from_reorder_queue(
                     encode_context_ptr);
@@ -6639,6 +7210,9 @@ void* picture_decision_kernel(void *input_ptr)
                     encode_context_ptr->intra_period_position = ((encode_context_ptr->intra_period_position == (uint32_t)scs_ptr->intra_period_length) || (pcs_ptr->scene_change_flag == EB_TRUE)) ? 0 : encode_context_ptr->intra_period_position + 1;
                 }
 
+#if NEW_DELAY
+                //print_pre_ass(encode_context_ptr);
+#endif
                 // Determine if Pictures can be released from the Pre-Assignment Buffer
                 if ((encode_context_ptr->pre_assignment_buffer_intra_count > 0) ||
                     (encode_context_ptr->pre_assignment_buffer_count == (uint32_t)(1 << scs_ptr->static_config.hierarchical_levels)) ||
@@ -6646,6 +7220,15 @@ void* picture_decision_kernel(void *input_ptr)
                     (pcs_ptr->pred_structure == EB_PRED_LOW_DELAY_P) ||
                     (pcs_ptr->pred_structure == EB_PRED_LOW_DELAY_B))
                 {
+
+#if NEW_DELAY
+                    //if (encode_context_ptr->pre_assignment_buffer_intra_count > 0)
+                    //    printf("PRE-ASSIGN INTRA   (%i pictures)  POC:%I64u \n", encode_context_ptr->pre_assignment_buffer_count, pcs_ptr->picture_number);
+                    //if (encode_context_ptr->pre_assignment_buffer_count == (uint32_t)(1 << scs_ptr->static_config.hierarchical_levels))
+                    //    printf("PRE-ASSIGN COMPLETE   (%i pictures)  POC:%I64u \n", encode_context_ptr->pre_assignment_buffer_count, pcs_ptr->picture_number);
+                    //if ((encode_context_ptr->pre_assignment_buffer_eos_flag == EB_TRUE))
+                    //    printf("PRE-ASSIGN EOS   (%i pictures)  POC:%I64u \n", encode_context_ptr->pre_assignment_buffer_count, pcs_ptr->picture_number);
+#endif
                     // Initialize Picture Block Params
                     context_ptr->mini_gop_start_index[0] = 0;
                     context_ptr->mini_gop_end_index[0] = encode_context_ptr->pre_assignment_buffer_count - 1;
@@ -7362,6 +7945,9 @@ void* picture_decision_kernel(void *input_ptr)
                                 EB_MEMSET(pcs_ptr->ref_pic_poc_array[REF_LIST_1], 0, REF_LIST_MAX_DEPTH * sizeof(uint64_t));
                             }
                             pcs_ptr = cur_picture_control_set_ptr;
+
+#if ! NEW_DELAY
+
 #if TF_LEVELS
                             if(context_ptr->tf_ctrls.enabled) {
 #else
@@ -7416,6 +8002,8 @@ void* picture_decision_kernel(void *input_ptr)
 
                             }else
                                 pcs_ptr->temporal_filtering_on = EB_FALSE; // set temporal filtering flag OFF for current picture
+
+#endif
 
                         }
                         if(scs_ptr->static_config.enable_manual_pred_struct){
@@ -7642,6 +8230,8 @@ void* picture_decision_kernel(void *input_ptr)
                                 // Increment the Decode Base Number
                                 encode_context_ptr->decode_base_number += context_ptr->mini_gop_length[mini_gop_index] + has_overlay;
                             }
+
+#if ! NEW_DELAY
                             if (out_stride_diff64 == encode_context_ptr->pre_assignment_buffer_count - 1 + has_overlay) {
 
                                 // Reset the Pre-Assignment Buffer
@@ -7651,10 +8241,17 @@ void* picture_decision_kernel(void *input_ptr)
                                 encode_context_ptr->pre_assignment_buffer_scene_change_count = 0;
                                 encode_context_ptr->pre_assignment_buffer_eos_flag = EB_FALSE;
                             }
+#endif
                         }
+
+
+
 #if DECOUPLE_ME_RES
                         uint32_t mg_size = context_ptr->mini_gop_end_index[mini_gop_index] + has_overlay - context_ptr->mini_gop_start_index[mini_gop_index]+1;
-
+#if NEW_DELAY
+                        context_ptr->mg_size = mg_size;
+                        memcpy(context_ptr->mg_pictures_array_disp_order, context_ptr->mg_pictures_array, mg_size * sizeof(PictureParentControlSet*));
+#endif
                         //sort based on decoder order
                         {
                             uint32_t  num_of_cand_to_sort = mg_size;
@@ -7670,11 +8267,47 @@ void* picture_decision_kernel(void *input_ptr)
                             }
                         }
 
+#if NEW_DELAY
+                        //Process previous delayed Intra if we have one
+                        if (context_ptr->prev_delayed_intra) {
+                            pcs_ptr = context_ptr->prev_delayed_intra;
+                            context_ptr->prev_delayed_intra = NULL;
+                            //if (scs_ptr->static_config.enable_tpl_la)
+                            store_tpl_pictures(pcs_ptr, context_ptr, mg_size);
+
+                            mctf_frame(scs_ptr, pcs_ptr, context_ptr, out_stride_diff64);
+
+                            send_picture_out(scs_ptr, pcs_ptr, context_ptr);
+                        }
+
+                        //Do TF loop in display order
+                        for (uint32_t pic_i = 0; pic_i < mg_size; ++pic_i) {
+                            pcs_ptr = context_ptr->mg_pictures_array_disp_order[pic_i];
+                            if (is_delayed_intra(pcs_ptr)) {
+                                context_ptr->prev_delayed_intra = pcs_ptr;
+                            }
+                            else {
+
+                                if (pcs_ptr->end_of_sequence_flag == EB_FALSE &&
+                                    /*scs_ptr->static_config.enable_tpl_la &&*/ pcs_ptr->temporal_layer_index == 0 /*Add more TPL conditions*/)
+                                    store_tpl_pictures(pcs_ptr, context_ptr, mg_size);
+
+                                mctf_frame(scs_ptr, pcs_ptr, context_ptr, out_stride_diff64);
+                            }
+                        }
+#endif
+
 
                         for (uint32_t pic_i = 0; pic_i < mg_size; ++pic_i){
 
                             pcs_ptr = context_ptr->mg_pictures_array[pic_i];
 
+#if NEW_DELAY
+                            //Delay some kind of I frames to next pre-ass event
+                            if (is_delayed_intra(pcs_ptr) == EB_FALSE) {
+                                send_picture_out(scs_ptr, pcs_ptr, context_ptr);
+                            }
+#else
                             if (scs_ptr->static_config.look_ahead_distance == 0) {
 
                                 EbObjectWrapper* reference_picture_wrapper_ptr;
@@ -7710,11 +8343,22 @@ void* picture_decision_kernel(void *input_ptr)
                                 // Post the Full Results Object
                                 eb_post_full_object(out_results_wrapper_ptr);
                             }
+#endif
 
 
                         }
 #endif
                     } // End MINI GOPs loop
+
+#if  NEW_DELAY
+                    // Reset the Pre-Assignment Buffer
+                    encode_context_ptr->pre_assignment_buffer_count = 0;
+                    encode_context_ptr->pre_assignment_buffer_idr_count = 0;
+                    encode_context_ptr->pre_assignment_buffer_intra_count = 0;
+                    encode_context_ptr->pre_assignment_buffer_scene_change_count = 0;
+                    encode_context_ptr->pre_assignment_buffer_eos_flag = EB_FALSE;
+#endif
+
                 }
 
                 // Walk the picture_decision_pa_reference_queue and remove entries that have been completely referenced.
@@ -7753,7 +8397,11 @@ void* picture_decision_kernel(void *input_ptr)
                 // Get the next entry from the Picture Decision Reordering Queue (Entry N+1)
                 queue_entry_ptr = encode_context_ptr->picture_decision_reorder_queue[encode_context_ptr->picture_decision_reorder_queue_head_index];
             }
+#if NEW_DELAY
+            else
+#else
             if (window_avail == EB_FALSE && frame_passthrough == EB_FALSE)
+#endif
                 break;
         }
 
