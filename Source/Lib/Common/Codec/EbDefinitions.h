@@ -485,7 +485,7 @@ extern "C" {
 #define ADMDTM5_TUNE 1
 #endif
 #define MEM_OPT_PALETTE     1 // Memory optimization for palette
-#define MEM_OPT_MV_STACK    1 // Memory optimization for ed_ref_mv_stack
+#define MEM_OPT_MV_STACK    0 // Memory optimization for ed_ref_mv_stack
 #define MEM_OPT_MD_BUF_DESC 1 // Memory optimization for buf_desc used in MDContext
 #define CHANGE_HBD_MODE     1 // Change 10bit MD for MR and M0
 #define JUNE25_ADOPTIONS    1 // Adoptions in M3-M8
