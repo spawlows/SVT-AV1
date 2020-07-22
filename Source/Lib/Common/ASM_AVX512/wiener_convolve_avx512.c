@@ -334,7 +334,9 @@ void eb_av1_wiener_convolve_add_src_avx512(const uint8_t* const src, const ptrdi
 
     (void)conv_params;
     assert(!(w % 8));
+#if !PR_1238
     assert(!(h % 2));
+#endif
     assert(conv_params->round_0 == round_0);
     assert(conv_params->round_1 == round_1);
 
@@ -515,8 +517,17 @@ void eb_av1_wiener_convolve_add_src_avx512(const uint8_t* const src, const ptrdi
                     src_p += 2 * src_stride;
                     const __m512i r0 = wiener_convolve_v16x2_tap7(coeffs_v_512, round_v_512, s[0]);
                     const __m512i r1 = wiener_convolve_v16x2_tap7(coeffs_v_512, round_v_512, s[1]);
+#if PR_1238
+                    if (y == 1) {
+                        const __m512i d  = _mm512_packus_epi16(r0, r1);
+                        const __m256i d0 = _mm512_castsi512_si256(d);
+                        _mm256_storeu_si256((__m256i*)dst_p, d0);
+                    } else {
+                        pack_store_32x2_avx512(r0, r1, dst_p, dst_stride);
+                    }
+#else
                     pack_store_32x2_avx512(r0, r1, dst_p, dst_stride);
-
+#endif
                     dst_p += 2 * dst_stride;
                     y -= 2;
                 } while (y > 0);
@@ -605,8 +616,17 @@ void eb_av1_wiener_convolve_add_src_avx512(const uint8_t* const src, const ptrdi
                 src_p += 2 * src_stride;
                 const __m256i r0 = wiener_convolve_v8x2_tap7(coeffs_v, round_v, s[0]);
                 const __m256i r1 = wiener_convolve_v8x2_tap7(coeffs_v, round_v, s[1]);
+#if PR_1238
+                if (y == 1) {
+                    const __m256i d  = _mm256_packus_epi16(r0, r1);
+                    const __m128i d0 = _mm256_castsi256_si128(d);
+                    _mm_storeu_si128((__m128i*)dst_p, d0);
+                } else {
+                    pack_store_16x2_avx2(r0, r1, dst_p, dst_stride);
+                }
+#else
                 pack_store_16x2_avx2(r0, r1, dst_p, dst_stride);
-
+#endif
                 dst_p += 2 * dst_stride;
                 y -= 2;
             } while (y > 0);
@@ -645,8 +665,17 @@ void eb_av1_wiener_convolve_add_src_avx512(const uint8_t* const src, const ptrdi
                                          _mm256_castsi256_si128(s[6]));
                 src_p += 2 * src_stride;
                 const __m256i r = wiener_convolve_v8x2_tap7(coeffs_v, round_v, s);
+#if PR_1238
+                if (y == 1) {
+                    const __m256i d  = _mm256_packus_epi16(r, r);
+                    const __m128i d0 = _mm256_castsi256_si128(d);
+                    _mm_storel_epi64((__m128i*)dst_ptr, d0);
+                } else {
+                    pack_store_8x2_avx2(r, dst_ptr, dst_stride);
+                }
+#else
                 pack_store_8x2_avx2(r, dst_ptr, dst_stride);
-
+#endif
                 dst_ptr += 2 * dst_stride;
                 y -= 2;
             } while (y > 0);
@@ -791,8 +820,17 @@ void eb_av1_wiener_convolve_add_src_avx512(const uint8_t* const src, const ptrdi
                     src_p += 2 * src_stride;
                     const __m512i r0 = wiener_convolve_v16x2_tap5(coeffs_v_512, round_v_512, s[0]);
                     const __m512i r1 = wiener_convolve_v16x2_tap5(coeffs_v_512, round_v_512, s[1]);
+#if PR_1238
+                    if (y == 1) {
+                        const __m512i d  = _mm512_packus_epi16(r0, r1);
+                        const __m256i d0 = _mm512_castsi512_si256(d);
+                        _mm256_storeu_si256((__m256i*)dst_p, d0);
+                    } else {
+                        pack_store_32x2_avx512(r0, r1, dst_p, dst_stride);
+                    }
+#else
                     pack_store_32x2_avx512(r0, r1, dst_p, dst_stride);
-
+#endif
                     dst_p += 2 * dst_stride;
                     y -= 2;
                 } while (y > 0);
@@ -866,8 +904,17 @@ void eb_av1_wiener_convolve_add_src_avx512(const uint8_t* const src, const ptrdi
                 src_p += 2 * src_stride;
                 const __m256i r0 = wiener_convolve_v8x2_tap5(coeffs_v, round_v, s[0]);
                 const __m256i r1 = wiener_convolve_v8x2_tap5(coeffs_v, round_v, s[1]);
+#if PR_1238
+                if (y == 1) {
+                    const __m256i d  = _mm256_packus_epi16(r0, r1);
+                    const __m128i d0 = _mm256_castsi256_si128(d);
+                    _mm_storeu_si128((__m128i*)dst_p, d0);
+                } else {
+                    pack_store_16x2_avx2(r0, r1, dst_p, dst_stride);
+                }
+#else
                 pack_store_16x2_avx2(r0, r1, dst_p, dst_stride);
-
+#endif
                 dst_p += 2 * dst_stride;
                 y -= 2;
             } while (y > 0);
@@ -901,8 +948,17 @@ void eb_av1_wiener_convolve_add_src_avx512(const uint8_t* const src, const ptrdi
                                          _mm256_castsi256_si128(s[4]));
                 src_p += 2 * src_stride;
                 const __m256i r = wiener_convolve_v8x2_tap5(coeffs_v, round_v, s);
+#if PR_1238
+                if (y == 1) {
+                    const __m256i d  = _mm256_packus_epi16(r, r);
+                    const __m128i d0 = _mm256_castsi256_si128(d);
+                    _mm_storel_epi64((__m128i*)dst_ptr, d0);
+                } else {
+                    pack_store_8x2_avx2(r, dst_ptr, dst_stride);
+                }
+#else
                 pack_store_8x2_avx2(r, dst_ptr, dst_stride);
-
+#endif
                 dst_ptr += 2 * dst_stride;
                 y -= 2;
             } while (y > 0);
@@ -1008,8 +1064,17 @@ void eb_av1_wiener_convolve_add_src_avx512(const uint8_t* const src, const ptrdi
                     src_p += 2 * src_stride;
                     const __m512i r0 = wiener_convolve_v16x2_tap3(coeffs_v_512, round_v_512, s[0]);
                     const __m512i r1 = wiener_convolve_v16x2_tap3(coeffs_v_512, round_v_512, s[1]);
+#if PR_1238
+                    if (y == 1) {
+                        const __m512i d  = _mm512_packus_epi16(r0, r1);
+                        const __m256i d0 = _mm512_castsi512_si256(d);
+                        _mm256_storeu_si256((__m256i*)dst_p, d0);
+                    } else {
+                        pack_store_32x2_avx512(r0, r1, dst_p, dst_stride);
+                    }
+#else
                     pack_store_32x2_avx512(r0, r1, dst_p, dst_stride);
-
+#endif
                     dst_p += 2 * dst_stride;
                     y -= 2;
                 } while (y > 0);
@@ -1065,8 +1130,17 @@ void eb_av1_wiener_convolve_add_src_avx512(const uint8_t* const src, const ptrdi
                 src_p += 2 * src_stride;
                 const __m256i r0 = wiener_convolve_v8x2_tap3(coeffs_v, round_v, s[0]);
                 const __m256i r1 = wiener_convolve_v8x2_tap3(coeffs_v, round_v, s[1]);
+#if PR_1238
+                if (y == 1) {
+                    const __m256i d  = _mm256_packus_epi16(r0, r1);
+                    const __m128i d0 = _mm256_castsi256_si128(d);
+                    _mm_storeu_si128((__m128i*)dst_p, d0);
+                } else {
+                    pack_store_16x2_avx2(r0, r1, dst_p, dst_stride);
+                }
+#else
                 pack_store_16x2_avx2(r0, r1, dst_p, dst_stride);
-
+#endif
                 dst_p += 2 * dst_stride;
                 y -= 2;
             } while (y > 0);
@@ -1094,8 +1168,17 @@ void eb_av1_wiener_convolve_add_src_avx512(const uint8_t* const src, const ptrdi
                                          _mm256_castsi256_si128(s[2]));
                 src_p += 2 * src_stride;
                 const __m256i r = wiener_convolve_v8x2_tap3(coeffs_v, round_v, s);
+#if PR_1238
+                if (y == 1) {
+                    const __m256i d  = _mm256_packus_epi16(r, r);
+                    const __m128i d0 = _mm256_castsi256_si128(d);
+                    _mm_storel_epi64((__m128i*)dst_ptr, d0);
+                } else {
+                    pack_store_8x2_avx2(r, dst_ptr, dst_stride);
+                }
+#else
                 pack_store_8x2_avx2(r, dst_ptr, dst_stride);
-
+#endif
                 dst_ptr += 2 * dst_stride;
                 y -= 2;
             } while (y > 0);
