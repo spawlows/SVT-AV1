@@ -3283,7 +3283,11 @@ void eb_av1_compute_stats_highbd_avx512(int32_t wiener_win, const uint8_t *dgd8,
     eb_aom_free(d);
 }
 
+#if PR_1349
+static INLINE __m512i pair_set_epi16_avx512(int32_t a, int32_t b) {
+#else
 static INLINE __m512i pair_set_epi16_avx512(uint16_t a, uint16_t b) {
+#endif
     return _mm512_set1_epi32((int32_t)(((uint16_t)(a)) | (((uint32_t)(b)) << 16)));
 }
 

@@ -623,6 +623,7 @@ extern "C" {
 #define FIX_MV_BOUND       1 //Clip inherited ME MVs to stay within pic boundaries
 #define NEW_DELAY          1 //Change delay some sorts of I in PicDecision
 
+#define PR_1349 1
 #endif
 // END  SVT_02_TEMP /////////////////////////////////////////////////////////
 
