@@ -1,4 +1,4 @@
 branches:
   except:
-    - svt-01
+    - svt-02-temp
 
