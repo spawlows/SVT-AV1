@@ -623,7 +623,8 @@ extern "C" {
 #define FIX_MV_BOUND       1 //Clip inherited ME MVs to stay within pic boundaries
 #define NEW_DELAY          1 //Change delay some sorts of I in PicDecision
 
-#define PR_1349 1
+#define PR_1349 1 //Port fixes for SIMD kernels from AOM
+#define PR_1359 1 //Valgrind fix
 #endif
 // END  SVT_02_TEMP /////////////////////////////////////////////////////////
 

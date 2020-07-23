@@ -1010,8 +1010,13 @@ void unipred_3x3_candidates_injection(const SequenceControlSet *scs_ptr, Picture
         if (!context_ptr->ref_filtering_res[REF_LIST_0][list0_ref_index].do_ref) continue;
 #endif
 #endif
+#if !PR_1359
         if (list0_ref_index > context_ptr->md_max_ref_count - 1) continue;
+#endif
         if (inter_direction == 0) {
+#if PR_1359
+            if (list0_ref_index > context_ptr->md_max_ref_count - 1) continue;
+#endif
             for (bipred_index = 0; bipred_index < BIPRED_3x3_REFINMENT_POSITIONS; ++bipred_index) {
                 /**************
         NEWMV L0
@@ -1191,8 +1196,13 @@ void unipred_3x3_candidates_injection(const SequenceControlSet *scs_ptr, Picture
         if (!context_ptr->ref_filtering_res[REF_LIST_1][list1_ref_index].do_ref) continue;
 #endif
 #endif
+#if !PR_1359
         if (list1_ref_index > context_ptr->md_max_ref_count - 1) continue;
+#endif
         if (inter_direction == 1) {
+#if PR_1359
+            if (list1_ref_index > context_ptr->md_max_ref_count - 1) continue;
+#endif
             for (bipred_index = 0; bipred_index < BIPRED_3x3_REFINMENT_POSITIONS; ++bipred_index) {
                 if (is_compound_enabled) {
                     /**************
