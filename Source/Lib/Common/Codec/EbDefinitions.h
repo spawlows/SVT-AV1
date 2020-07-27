@@ -631,6 +631,8 @@ extern "C" {
 #define RENAME_ENCPASS      1 //rename enc pass function
 #define RENAME_ENCDEC_KRNL  1 //rename enc dec process
 
+#define INCREASE_WM_CANDS 1 // Use WM for PME candidates; increase number of NEW_MV cands used for WM
+
 #endif
 // END  SVT_02_TEMP /////////////////////////////////////////////////////////
 

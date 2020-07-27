@@ -102,6 +102,14 @@ uint8_t is_me_data_present(
 static INLINE int is_inter_mode(PredictionMode mode) {
     return mode >= SINGLE_INTER_MODE_START && mode < SINGLE_INTER_MODE_END;
 }
+#if INCREASE_WM_CANDS
+EbBool warped_motion_mode_allowed(PictureControlSet* pcs, ModeDecisionContext* ctx) {
+    FrameHeader *frm_hdr = &pcs->parent_pcs_ptr->frm_hdr;
+    return frm_hdr->allow_warped_motion && has_overlappable_candidates(ctx->blk_ptr) &&
+        ctx->blk_geom->bwidth >= 8 && ctx->blk_geom->bheight >= 8 &&
+        ctx->warped_motion_injection;
+}
+#endif
 MotionMode obmc_motion_mode_allowed(const PictureControlSet *   pcs_ptr,
                                     struct ModeDecisionContext *context_ptr, const BlockSize bsize,
                                     MvReferenceFrame rf0, MvReferenceFrame rf1,
@@ -3363,8 +3371,13 @@ void inject_warped_motion_candidates(
         }
     }
     // NEWMV L0
+#if INCREASE_WM_CANDS
+    const MV neighbors[13] = {
+        {0, 0}, {0, -1}, {1, 0}, {0, 1}, {-1, 0}, {0, -2}, {2, 0}, {0, 2}, {-2, 0}, {1, 1}, {-1, 1}, {1, -1}, {-1, 1} };
+#else
     const MV neighbors[9] = {
         {0, 0}, {0, -1}, {1, 0}, {0, 1}, {-1, 0}, {0, -2}, {2, 0}, {0, 2}, {-2, 0} };
+#endif
     IntMv  best_pred_mv[2] = { {0}, {0} };
 
     uint8_t total_me_cnt = me_results->total_me_candidate_index[context_ptr->me_block_offset];
@@ -3406,7 +3419,11 @@ void inject_warped_motion_candidates(
                 context_ptr->blk_geom->shape);
 
             if (!skip_cand) {
+#if INCREASE_WM_CANDS
+                for (int i = 0; i < 13; i++) {
+#else
                 for (int i = 0; i < 9; i++) {
+#endif
 
                     cand_array[can_idx].type = INTER_MODE;
                     cand_array[can_idx].distortion_ready = 0;
@@ -3508,7 +3525,11 @@ void inject_warped_motion_candidates(
                 to_inject_ref_type,
                 context_ptr->blk_geom->shape);
             if (!skip_cand) {
+#if INCREASE_WM_CANDS
+                for (int i = 0; i < 13; i++) {
+#else
                 for (int i = 0; i < 9; i++) {
+#endif
 
                     cand_array[can_idx].type = INTER_MODE;
                     cand_array[can_idx].distortion_ready = 0;
@@ -4770,6 +4791,10 @@ void inject_predictive_me_candidates(
     if (context_ptr->source_variance < context_ptr->inter_comp_ctrls.wedge_variance_th)
         tot_comp_types = MIN(tot_comp_types, MD_COMP_DIFF0);
 #endif
+#if INCREASE_WM_CANDS
+    Mv mv_0;
+    MvUnit mv_unit;
+#endif
     uint8_t list_index;
     uint8_t ref_pic_index;
     list_index = REF_LIST_0;
@@ -4810,6 +4835,10 @@ void inject_predictive_me_candidates(
                         if(context_ptr->pme_res[0][0].list_i!= list_index ||
                            context_ptr->pme_res[0][0].ref_i != ref_pic_index )
                              is_obmc_allowed = 0;
+#endif
+#if INCREASE_WM_CANDS
+                    uint8_t is_warp_allowed = warped_motion_mode_allowed(pcs_ptr, context_ptr);
+                    tot_inter_types = is_warp_allowed ? tot_inter_types + 1 : tot_inter_types;
 #endif
                     tot_inter_types = is_obmc_allowed ? tot_inter_types + 1 : tot_inter_types;
                     for (inter_type = 0; inter_type < tot_inter_types; inter_type++) {
@@ -4862,6 +4891,28 @@ void inject_predictive_me_candidates(
                             cand_array[cand_total_cnt].is_interintra_used = 0;
                             cand_array[cand_total_cnt].motion_mode        = SIMPLE_TRANSLATION;
                         } else {
+#if INCREASE_WM_CANDS
+                            if (is_warp_allowed && inter_type == (tot_inter_types - (1 + is_obmc_allowed))) {
+                                cand_array[cand_total_cnt].is_interintra_used = 0;
+                                cand_array[cand_total_cnt].motion_mode = WARPED_CAUSAL;
+                                cand_array[cand_total_cnt].wm_params_l0.wmtype = AFFINE;
+
+                                mv_0.x = to_inject_mv_x;
+                                mv_0.y = to_inject_mv_y;
+                                mv_unit.mv[list_index] = mv_0;
+                                mv_unit.pred_direction = cand_array[cand_total_cnt].prediction_direction[0];
+                                cand_array[cand_total_cnt].local_warp_valid = warped_motion_parameters(
+                                    pcs_ptr,
+                                    context_ptr->blk_ptr,
+                                    &mv_unit,
+                                    context_ptr->blk_geom,
+                                    context_ptr->blk_origin_x,
+                                    context_ptr->blk_origin_y,
+                                    cand_array[cand_total_cnt].ref_frame_type,
+                                    &cand_array[cand_total_cnt].wm_params_l0,
+                                    &cand_array[cand_total_cnt].num_proj_ref);
+                            }
+#endif
                             if (is_obmc_allowed && inter_type == tot_inter_types - 1) {
                                 cand_array[cand_total_cnt].is_interintra_used = 0;
                                 cand_array[cand_total_cnt].motion_mode        = OBMC_CAUSAL;
@@ -4871,7 +4922,14 @@ void inject_predictive_me_candidates(
                             }
                         }
 
+#if INCREASE_WM_CANDS
+                        if (!(is_warp_allowed && inter_type == (tot_inter_types - (1 + is_obmc_allowed))))
+                            INCRMENT_CAND_TOTAL_COUNT(cand_total_cnt);
+                        else if (cand_array[cand_total_cnt].local_warp_valid)
+                            INCRMENT_CAND_TOTAL_COUNT(cand_total_cnt);
+#else
                         INCRMENT_CAND_TOTAL_COUNT(cand_total_cnt);
+#endif
                         context_ptr->injected_mv_x_l0_array[context_ptr->injected_mv_count_l0] =
                             to_inject_mv_x;
                         context_ptr->injected_mv_y_l0_array[context_ptr->injected_mv_count_l0] =
@@ -4927,6 +4985,10 @@ void inject_predictive_me_candidates(
                                 context_ptr->pme_res[0][0].ref_i != ref_pic_index)
                                     is_obmc_allowed = 0;
 #endif
+#if INCREASE_WM_CANDS
+                        uint8_t is_warp_allowed = warped_motion_mode_allowed(pcs_ptr, context_ptr);
+                        tot_inter_types = is_warp_allowed ? tot_inter_types + 1 : tot_inter_types;
+#endif
                         tot_inter_types = is_obmc_allowed ? tot_inter_types + 1 : tot_inter_types;
                         for (inter_type = 0; inter_type < tot_inter_types; inter_type++) {
                             cand_array[cand_total_cnt].type                    = INTER_MODE;
@@ -4979,6 +5041,28 @@ void inject_predictive_me_candidates(
                                 cand_array[cand_total_cnt].is_interintra_used = 0;
                                 cand_array[cand_total_cnt].motion_mode        = SIMPLE_TRANSLATION;
                             } else {
+#if INCREASE_WM_CANDS
+                                if (is_warp_allowed && inter_type == (tot_inter_types - (1 + is_obmc_allowed))) {
+                                    cand_array[cand_total_cnt].is_interintra_used = 0;
+                                    cand_array[cand_total_cnt].motion_mode = WARPED_CAUSAL;
+                                    cand_array[cand_total_cnt].wm_params_l0.wmtype = AFFINE;
+
+                                    mv_0.x = to_inject_mv_x;
+                                    mv_0.y = to_inject_mv_y;
+                                    mv_unit.mv[list_index] = mv_0;
+                                    mv_unit.pred_direction = cand_array[cand_total_cnt].prediction_direction[0];
+                                    cand_array[cand_total_cnt].local_warp_valid = warped_motion_parameters(
+                                        pcs_ptr,
+                                        context_ptr->blk_ptr,
+                                        &mv_unit,
+                                        context_ptr->blk_geom,
+                                        context_ptr->blk_origin_x,
+                                        context_ptr->blk_origin_y,
+                                        cand_array[cand_total_cnt].ref_frame_type,
+                                        &cand_array[cand_total_cnt].wm_params_l0,
+                                        &cand_array[cand_total_cnt].num_proj_ref);
+                                }
+#endif
                                 if (is_obmc_allowed && inter_type == tot_inter_types - 1) {
                                     cand_array[cand_total_cnt].is_interintra_used = 0;
                                     cand_array[cand_total_cnt].motion_mode        = OBMC_CAUSAL;
@@ -4990,7 +5074,14 @@ void inject_predictive_me_candidates(
                                 }
                             }
 
+#if INCREASE_WM_CANDS
+                            if (!(is_warp_allowed && inter_type == (tot_inter_types - (1 + is_obmc_allowed))) )
+                                INCRMENT_CAND_TOTAL_COUNT(cand_total_cnt);
+                            else if (cand_array[cand_total_cnt].local_warp_valid)
+                                INCRMENT_CAND_TOTAL_COUNT(cand_total_cnt);
+#else
                             INCRMENT_CAND_TOTAL_COUNT(cand_total_cnt);
+#endif
                             context_ptr->injected_mv_x_l1_array[context_ptr->injected_mv_count_l1] =
                                 to_inject_mv_x;
                             context_ptr->injected_mv_y_l1_array[context_ptr->injected_mv_count_l1] =
@@ -5761,9 +5852,13 @@ void inject_inter_candidates(PictureControlSet *pcs_ptr, ModeDecisionContext *co
     }
 
     // Warped Motion
+#if INCREASE_WM_CANDS
+    if (warped_motion_mode_allowed(pcs_ptr, context_ptr)) {
+#else
     if (frm_hdr->allow_warped_motion && has_overlappable_candidates(context_ptr->blk_ptr) &&
         context_ptr->blk_geom->bwidth >= 8 && context_ptr->blk_geom->bheight >= 8 &&
         context_ptr->warped_motion_injection) {
+#endif
         inject_warped_motion_candidates(
             pcs_ptr, context_ptr, context_ptr->blk_ptr, &cand_total_cnt, me_results);
     }
