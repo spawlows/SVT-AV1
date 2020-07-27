@@ -627,6 +627,10 @@ extern "C" {
 #define PR_1359 1 //Valgrind fix
 #define PR_1238 1 //Fix for AVX2/AVX512 kernels when non-multiple of 8 resolution is used
 #define PR_1353 1 //Fix crash when when tile is enbaled and enc_dec segment number is reduced
+
+#define RENAME_ENCPASS      1 //rename enc pass function
+#define RENAME_ENCDEC_KRNL  1 //rename enc dec process
+
 #endif
 // END  SVT_02_TEMP /////////////////////////////////////////////////////////
 

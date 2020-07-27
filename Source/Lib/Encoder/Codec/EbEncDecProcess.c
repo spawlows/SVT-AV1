@@ -10642,7 +10642,11 @@ void set_pic_complexity_controls(PictureControlSet * pcs_ptr, ModeDecisionContex
 *  elements to be sent to the entropy coding engine
 *
 ********************************************************************************/
+#if RENAME_ENCDEC_KRNL
+void *mode_decision_kernel(void *input_ptr) {
+#else
 void *enc_dec_kernel(void *input_ptr) {
+#endif
     // Context & SCS & PCS
     EbThreadContext *   thread_context_ptr = (EbThreadContext *)input_ptr;
     EncDecContext *     context_ptr        = (EncDecContext *)thread_context_ptr->priv;
@@ -11218,7 +11222,11 @@ void *enc_dec_kernel(void *input_ptr) {
                                     context_ptr);
 #else
                     // Encode Pass
+#if RENAME_ENCPASS
+                    av1_encode_decode(
+#else
                     av1_encode_pass(
+#endif
                         scs_ptr, pcs_ptr, sb_ptr, sb_index, sb_origin_x, sb_origin_y, context_ptr);
 #endif
 

@@ -1898,10 +1898,15 @@ EB_API EbErrorType eb_init_encoder(EbComponentType *svt_enc_component)
 
 
     // EncDec Process
+#if RENAME_ENCDEC_KRNL
+    EB_CREATE_THREAD_ARRAY(enc_handle_ptr->enc_dec_thread_handle_array, control_set_ptr->enc_dec_process_init_count,
+        mode_decision_kernel,
+        enc_handle_ptr->enc_dec_context_ptr_array);
+#else
     EB_CREATE_THREAD_ARRAY(enc_handle_ptr->enc_dec_thread_handle_array, control_set_ptr->enc_dec_process_init_count,
         enc_dec_kernel,
         enc_handle_ptr->enc_dec_context_ptr_array);
-
+#endif
     // Dlf Process
     EB_CREATE_THREAD_ARRAY(enc_handle_ptr->dlf_thread_handle_array, control_set_ptr->dlf_process_init_count,
         dlf_kernel,

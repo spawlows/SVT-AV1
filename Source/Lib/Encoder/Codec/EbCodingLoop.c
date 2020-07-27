@@ -2656,9 +2656,15 @@ EB_EXTERN void no_enc_dec_pass(SequenceControlSet *scs_ptr, PictureControlSet *p
 *   Coefficient Samples
 *
 *******************************************/
+#if RENAME_ENCPASS
+EB_EXTERN void av1_encode_decode(SequenceControlSet *scs_ptr, PictureControlSet *pcs_ptr,
+    SuperBlock *sb_ptr, uint32_t sb_addr, uint32_t sb_origin_x,
+    uint32_t sb_origin_y, EncDecContext *context_ptr) {
+#else
 EB_EXTERN void av1_encode_pass(SequenceControlSet *scs_ptr, PictureControlSet *pcs_ptr,
     SuperBlock *sb_ptr, uint32_t sb_addr, uint32_t sb_origin_x,
     uint32_t sb_origin_y, EncDecContext *context_ptr) {
+#endif
     EbBool               is_16bit = context_ptr->is_16bit;
     EbPictureBufferDesc *recon_buffer = (is_16bit)
         ? pcs_ptr->recon_picture16bit_ptr

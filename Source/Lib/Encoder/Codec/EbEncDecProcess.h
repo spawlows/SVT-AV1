@@ -117,8 +117,11 @@ extern EbErrorType enc_dec_context_ctor(EbThreadContext *  thread_context_ptr,
                                         const EbEncHandle *enc_handle_ptr, int index,
                                         int tasks_index, int demux_index);
 
+#if RENAME_ENCDEC_KRNL
+extern void *mode_decision_kernel(void *input_ptr);
+#else
 extern void *enc_dec_kernel(void *input_ptr);
-
+#endif
 #ifdef __cplusplus
 }
 #endif
