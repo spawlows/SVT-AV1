@@ -7066,8 +7066,8 @@ void* picture_decision_kernel(void *input_ptr)
             window_avail = EB_TRUE;
             previous_entry_index = QUEUE_GET_PREVIOUS_SPOT(encode_context_ptr->picture_decision_reorder_queue_head_index);
 #if NOISE_BASED_TF_FRAMES
-#if NEW_DELAY
-            memset(pcs_ptr->pd_window, 0, SCD_LAD * sizeof(PictureParentControlSet*));
+#if  NEW_DELAY
+            memset(pcs_ptr->pd_window, 0, PD_WINDOW_SIZE * sizeof(PictureParentControlSet*));
 #else
             parent_pcs_window[ 0] = parent_pcs_window[ 1] = parent_pcs_window[ 2] = parent_pcs_window[ 3] = parent_pcs_window[ 4] = parent_pcs_window[ 5] =
             parent_pcs_window[ 6] = parent_pcs_window[ 7] = parent_pcs_window[ 8] = parent_pcs_window[ 9] = parent_pcs_window[10] = parent_pcs_window[11] =

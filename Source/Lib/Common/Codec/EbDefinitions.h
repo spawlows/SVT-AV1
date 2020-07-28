@@ -639,6 +639,7 @@ extern "C" {
 
 #if NEW_DELAY
 #define SCD_LAD            6  //number of future frames
+#define PD_WINDOW_SIZE     SCD_LAD +2 //adding previous+current to future
 #define MAX_TPL_GROUP_SIZE 64 //enough to cover 6L gop
 #endif
 
