@@ -1985,6 +1985,68 @@ void md_sq_motion_search_controls(ModeDecisionContext *mdctxt, uint8_t md_sq_mv_
 }
 #endif
 #if PERFORM_SUB_PEL_MD
+#if UPGRADE_SUBPEL
+void md_subpel_me_controls(ModeDecisionContext *mdctxt, uint8_t md_subpel_me_level) {
+    MdSubPelSearchCtrls *md_subpel_me_ctrls = &mdctxt->md_subpel_me_ctrls;
+
+    switch (md_subpel_me_level) {
+    case 0: md_subpel_me_ctrls->enabled = 0; break;
+    case 1:
+        md_subpel_me_ctrls->enabled = 1;
+        md_subpel_me_ctrls->subpel_search_type = USE_8_TAPS;
+        md_subpel_me_ctrls->subpel_iters_per_step = 2;
+        md_subpel_me_ctrls->eight_pel_search_enabled = 1;
+        md_subpel_me_ctrls->sub_search_pos_cnt = 1;
+        break;
+    case 2:
+        md_subpel_me_ctrls->enabled = 1;
+        md_subpel_me_ctrls->subpel_search_type = USE_4_TAPS;
+        md_subpel_me_ctrls->subpel_iters_per_step = 2;
+        md_subpel_me_ctrls->eight_pel_search_enabled = 0;
+        md_subpel_me_ctrls->sub_search_pos_cnt = 1;
+        break;
+    case 3:
+        md_subpel_me_ctrls->enabled = 1;
+        md_subpel_me_ctrls->subpel_search_type = USE_4_TAPS;
+        md_subpel_me_ctrls->subpel_iters_per_step = 1;
+        md_subpel_me_ctrls->eight_pel_search_enabled = 0;
+        md_subpel_me_ctrls->sub_search_pos_cnt = 1;
+        break;
+    default: assert(0); break;
+    }
+}
+
+
+void md_subpel_pme_controls(ModeDecisionContext *mdctxt, uint8_t md_subpel_pme_level) {
+    MdSubPelSearchCtrls *md_subpel_pme_ctrls = &mdctxt->md_subpel_pme_ctrls;
+
+    switch (md_subpel_pme_level) {
+    case 0: md_subpel_pme_ctrls->enabled = 0; break;
+    case 1:
+        md_subpel_pme_ctrls->enabled = 1;
+        md_subpel_pme_ctrls->subpel_search_type = USE_8_TAPS;
+        md_subpel_pme_ctrls->subpel_iters_per_step = 2;
+        md_subpel_pme_ctrls->eight_pel_search_enabled = 1;
+        md_subpel_pme_ctrls->sub_search_pos_cnt = 1;
+        break;
+    case 2:
+        md_subpel_pme_ctrls->enabled = 1;
+        md_subpel_pme_ctrls->subpel_search_type = USE_4_TAPS;
+        md_subpel_pme_ctrls->subpel_iters_per_step = 2;
+        md_subpel_pme_ctrls->eight_pel_search_enabled = 0;
+        md_subpel_pme_ctrls->sub_search_pos_cnt = 1;
+        break;
+    case 3:
+        md_subpel_pme_ctrls->enabled = 1;
+        md_subpel_pme_ctrls->subpel_search_type = USE_4_TAPS;
+        md_subpel_pme_ctrls->subpel_iters_per_step = 1;
+        md_subpel_pme_ctrls->eight_pel_search_enabled = 0;
+        md_subpel_pme_ctrls->sub_search_pos_cnt = 1;
+        break;
+    default: assert(0); break;
+    }
+}
+#else
 #if REMOVE_MR_MACRO
 void md_subpel_search_controls(ModeDecisionContext *mdctxt, uint8_t md_subpel_search_level, EbEncMode enc_mode) {
 #else
@@ -2119,6 +2181,7 @@ void md_subpel_search_controls(ModeDecisionContext *mdctxt, uint8_t md_subpel_se
     md_subpel_search_ctrls->eight_pel_interpolation = 0;
 
 }
+#endif
 #endif
 #if SB_CLASSIFIER
 /******************************************************
@@ -4511,6 +4574,12 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
         context_ptr->bipred3x3_injection =
         sequence_control_set_ptr->static_config.bipred_3x3_inject;
 
+#if UPGRADE_SUBPEL
+    // Level                Settings
+    // 0                    Level 0: OFF
+    // 1                    Level 1: pme_distortion to me_distortion deviation on, and search restricted to 1 ref per list
+    // 2                    Level 2: pme_distortion to me_distortion deviation off
+#else
     // Level                Settings
     // 0                    Level 0: OFF
     // 1                    Level 1: sub-pel refinement off
@@ -4519,16 +4588,19 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
     // 4                    Level 4: (H + V + D) 1/2 & 1/4 refinement = 8 half-pel + 8 quarter-pel = 16 positions + pred_me_distortion to pa_me_distortion deviation on
     // 5                    Level 5: (H + V + D) 1/2 & 1/4 refinement = 8 half-pel + 8 quarter-pel = 16 positions + pred_me_distortion to pa_me_distortion deviation off
     // 6                    Level 6: (H + V + D) 1/2 & 1/4 refinement = 8 half-pel + 8 quarter-pel = 16 positions + pred_me_distortion to pa_me_distortion deviation off
-
     // NB: if PME_UP_TO_4_REF is ON, levels 1-5 are restricted to using max 4 ref frames, and 1/8 Pel refinement is always performed for the 8 positions for levels 1-6
+#endif
+
     if (pcs_ptr->slice_type != I_SLICE) {
 
         if (pd_pass == PD_PASS_0)
             context_ptr->predictive_me_level = 0;
         else if (pd_pass == PD_PASS_1)
-
+#if UPGRADE_SUBPEL
+            context_ptr->predictive_me_level = 1;
+#else
             context_ptr->predictive_me_level = 2;
-
+#endif
         else
 
             if (sequence_control_set_ptr->static_config.pred_me == DEFAULT) {
@@ -4596,11 +4668,17 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
 #endif
 #endif
 #endif
+#if UPGRADE_SUBPEL
+                        context_ptr->predictive_me_level = 2;
+#else
                         context_ptr->predictive_me_level = 6;
+#endif
 #if MAR12_M8_ADOPTIONS
 #if REVERT_WHITE // Pred_ME
 #if JUNE26_ADOPTIONS
+#if !UPGRADE_SUBPEL
                     else if (enc_mode <= ENC_M5)
+#endif
 #else
 #if JUNE25_ADOPTIONS
                     else if (enc_mode <= ENC_M6)
@@ -4626,7 +4704,9 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
                             context_ptr->predictive_me_level = 0;
 #else
 #if M1_C3_ADOPTIONS
+#if !UPGRADE_SUBPEL
                         context_ptr->predictive_me_level = 4;
+#endif
 #else
                         context_ptr->predictive_me_level = 5;
 #endif
@@ -4641,7 +4721,11 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
                 else if (enc_mode <= ENC_M6)
 #endif
 #endif
+#if UPGRADE_SUBPEL
+                    context_ptr->predictive_me_level = 1;
+#else
                     context_ptr->predictive_me_level = 2;
+#endif
 #endif
 #if REVERT_WHITE // Pred_ME
             else
@@ -6689,6 +6773,31 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
     md_nsq_motion_search_controls(context_ptr, context_ptr->md_nsq_mv_search_level);
 #endif
 #if PERFORM_SUB_PEL_MD
+#if UPGRADE_SUBPEL
+    if (pd_pass == PD_PASS_0)
+        context_ptr->md_subpel_me_level = 3;
+    else if (pd_pass == PD_PASS_1)
+        context_ptr->md_subpel_me_level = 3;
+    else
+        if (enc_mode <= ENC_M7)
+            context_ptr->md_subpel_me_level = 1;
+        else
+            context_ptr->md_subpel_me_level = 2;
+
+    md_subpel_me_controls(context_ptr, context_ptr->md_subpel_me_level);
+
+    if (pd_pass == PD_PASS_0)
+        context_ptr->md_subpel_pme_level = 3;
+    else if (pd_pass == PD_PASS_1)
+        context_ptr->md_subpel_pme_level = 3;
+    else
+        if (enc_mode <= ENC_M7)
+            context_ptr->md_subpel_pme_level = 1;
+        else
+            context_ptr->md_subpel_pme_level = 2;
+
+    md_subpel_pme_controls(context_ptr, context_ptr->md_subpel_pme_level);
+#else
     if (pd_pass == PD_PASS_0)
 #if ADD_SKIP_INTRA_SIGNAL
 #if JUNE26_ADOPTIONS
@@ -6730,6 +6839,7 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
     md_subpel_search_controls(context_ptr, context_ptr->md_subpel_search_level,enc_mode);
 #else
     md_subpel_search_controls(context_ptr, context_ptr->md_subpel_search_level);
+#endif
 #endif
 #endif
     // Set max_ref_count @ MD

@@ -351,6 +351,15 @@ typedef struct MdSqMotionSearchCtrls {
 #endif
 
 #if PERFORM_SUB_PEL_MD
+#if UPGRADE_SUBPEL
+typedef struct MdSubPelSearchCtrls {
+    uint8_t enabled;                             // 0: subpel search @ MD OFF; 1: subpel search @ MD ON
+    SUBPEL_SEARCH_TYPE subpel_search_type;       // USE_8_TAPS | USE_4_TAPS | USE_2_TAPS | USE_2_TAPS_ORIG (not supported)
+    int subpel_iters_per_step;                   // Maximum number of steps in logarithmic subpel search before giving up.
+    uint8_t eight_pel_search_enabled;            // 0: OFF; 1: ON
+    uint8_t sub_search_pos_cnt;                  // [1:MD_MOTION_SEARCH_MAX_BEST_MV] total number of full-pel position(s) to search
+}MdSubPelSearchCtrls;
+#else
 typedef struct MdSubPelSearchCtrls {
     uint8_t enabled;                             // 0: subpel search @ MD OFF; 1: subpel search @ MD ON
     uint8_t use_ssd;                             // 0: search using SAD; 1: search using SSD
@@ -382,6 +391,7 @@ typedef struct MdSubPelSearchCtrls {
     uint8_t eight_pel_search_pos_cnt;           // [1:MD_MOTION_SEARCH_MAX_BEST_MV] total number of eight-pel position(s) to search (i.e. perform 1/8 Pel for the top quarter_pel_search_pos_cnt best MV)
 #endif
 }MdSubPelSearchCtrls;
+#endif
 #if SEARCH_TOP_N
 typedef struct MdMotionSearchResults {
     uint32_t dist; // distortion
@@ -644,8 +654,13 @@ typedef struct ModeDecisionContext {
 #endif
 
     int16_t              sb_me_mv[BLOCK_MAX_COUNT_SB_128][2][4][2];
+#if UPGRADE_SUBPEL
+    int16_t              best_pme_mv[2][4][2];
+    int8_t               valid_pme_mv[2][4];
+#else
     int16_t              best_spatial_pred_mv[2][4][2];
     int8_t               valid_refined_mv[2][4];
+#endif
     EbPictureBufferDesc *input_sample16bit_buffer;
     uint16_t             tile_index;
     DECLARE_ALIGNED(16, uint8_t, pred0[2 * MAX_SB_SQUARE]);
@@ -792,8 +807,15 @@ typedef struct ModeDecisionContext {
     MdNsqMotionSearchCtrls md_nsq_motion_search_ctrls;
 #endif
 #if PERFORM_SUB_PEL_MD
+#if UPGRADE_SUBPEL
+    uint8_t md_subpel_me_level;
+    MdSubPelSearchCtrls md_subpel_me_ctrls;
+    uint8_t md_subpel_pme_level;
+    MdSubPelSearchCtrls md_subpel_pme_ctrls;
+#else
     uint8_t md_subpel_search_level;
     MdSubPelSearchCtrls md_subpel_search_ctrls;
+#endif
 #if SEARCH_TOP_N
     MdMotionSearchResults md_motion_search_best_mv[MD_MOTION_SEARCH_MAX_BEST_MV];
 #endif

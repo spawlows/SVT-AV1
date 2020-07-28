@@ -9,8 +9,8 @@
  * PATENTS file, you can obtain it at www.aomedia.org/license/patent.
  */
 
-#ifndef AOM_AV1_ENCODER_MCOMP_H_
-#define AOM_AV1_ENCODER_MCOMP_H_
+#ifndef AOM_AV1_ENCODER_ME_H_
+#define AOM_AV1_ENCODER_ME_H_
 
 #include "EbDefinitions.h"
 #include "EbCodingUnit.h"
@@ -65,14 +65,13 @@ typedef void (*AomSadMultiDFn)(const uint8_t *a, int a_stride, const uint8_t *co
                                      int b_stride, unsigned int *sad_array);
 
 typedef struct aom_variance_vtable {
-    AomSadFn                 sdf;
-    AomVarianceFn            vf;
-    AomVarianceFn        vf_hbd_10;
-    AomSadMultiDFn         sdx4df;
+    AomSadFn                sdf;
+    AomVarianceFn           vf;
+    AomVarianceFn           vf_hbd_10;
+    AomSadMultiDFn          sdx4df;
     AomObmcSadFn            osdf;
     AomObmcVarianceFn       ovf;
     AomObmcSubpixvarianceFn osvf;
-
 } AomVarianceFnPtr;
 
 void av1_init_dsmotion_compensation(SearchSiteConfig *cfg, int stride);
