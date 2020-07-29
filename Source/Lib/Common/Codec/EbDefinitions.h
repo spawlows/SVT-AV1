@@ -634,6 +634,8 @@ extern "C" {
 #define INCREASE_WM_CANDS 1 // Use WM for PME candidates; increase number of NEW_MV cands used for WM
 #define UPGRADE_SUBPEL    1 // Upgrade subpel of me and of pme to use libaom subpel search
 #define TX_EARLY_EXIT     1 // Variance/cost_depth_1-to-cost_depth_0 based early txs exit
+#define FAST_M8_V1        1 // > 2x faster than M7
+#define ADD_M9            1 // Create a spot for M9; M9 = M8
 #endif
 // END  SVT_02_TEMP /////////////////////////////////////////////////////////
 

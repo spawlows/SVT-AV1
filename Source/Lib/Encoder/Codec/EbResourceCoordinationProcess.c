@@ -1080,7 +1080,11 @@ void *resource_coordination_kernel(void *input_ptr) {
             // 1                  ON
             if (scs_ptr->static_config.compound_level == DEFAULT) {
 #if MAR11_ADOPTIONS
+#if ADD_M9
+                scs_ptr->compound_mode = (scs_ptr->static_config.enc_mode <= ENC_M9) ? 1 : 0;
+#else
                 scs_ptr->compound_mode = (scs_ptr->static_config.enc_mode <= ENC_M8) ? 1 : 0;
+#endif
 #else
                 scs_ptr->compound_mode = (scs_ptr->static_config.enc_mode <= ENC_M4) ? 1 : 0;
 #endif

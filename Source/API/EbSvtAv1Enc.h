@@ -21,8 +21,7 @@ extern "C" {
 #define EB_HME_SEARCH_AREA_ROW_MAX_COUNT 2
 #define MAX_HIERARCHICAL_LEVEL 6
 #define REF_LIST_MAX_DEPTH 4
-
-#define MAX_ENC_PRESET 8
+#define MAX_ENC_PRESET 9 // ADD_M9
 
 #define DEFAULT -1
 

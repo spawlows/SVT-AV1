@@ -3915,6 +3915,34 @@ void set_md_stage_counts(PictureControlSet *pcs_ptr, ModeDecisionContext *contex
         }
     }
 #endif
+
+#if FAST_M8_V1 // Move nic=1 before bypass generation (lossless towards the adaptive bypass)
+    uint8_t use_nic_1_last_stage;
+    if (pcs_ptr->enc_mode <= ENC_M6) {
+        use_nic_1_last_stage = 0;
+    }
+    else {
+        use_nic_1_last_stage = 1;
+    }
+
+    if (use_nic_1_last_stage) {
+        for (uint8_t cidx = 0; cidx < CAND_CLASS_TOTAL; ++cidx) {
+            if (context_ptr->bypass_md_stage_2[cidx]) {
+                context_ptr->md_stage_2_count[cidx] = 1;
+                context_ptr->md_stage_2_count[cidx] = 1;
+                context_ptr->md_stage_2_count[cidx] = 1;
+                context_ptr->md_stage_2_count[cidx] = 1;
+            }
+            else {
+                context_ptr->md_stage_3_count[cidx] = 1;
+                context_ptr->md_stage_3_count[cidx] = 1;
+                context_ptr->md_stage_3_count[cidx] = 1;
+                context_ptr->md_stage_3_count[cidx] = 1;
+            }
+        }
+    }
+#endif
+
     // Step 3: update count for md_stage_1 and d_stage_2 if bypassed (no NIC
     // setting should be done beyond this point)
     context_ptr->md_stage_2_count[CAND_CLASS_0] = context_ptr->bypass_md_stage_1[CAND_CLASS_0]
@@ -3965,6 +3993,7 @@ void set_md_stage_counts(PictureControlSet *pcs_ptr, ModeDecisionContext *contex
     context_ptr->md_stage_3_count[CAND_CLASS_3] = context_ptr->bypass_md_stage_2[CAND_CLASS_3]
                                                       ? context_ptr->md_stage_2_count[CAND_CLASS_3]
                                                       : context_ptr->md_stage_3_count[CAND_CLASS_3];
+#if !FAST_M8_V1 // Move nic=1 before bypass generation (lossless towards the adaptive bypass)
 #if M6_M7_NIC
     uint8_t use_nic_1_last_stage;
 #if JUNE26_ADOPTIONS
@@ -3984,6 +4013,7 @@ void set_md_stage_counts(PictureControlSet *pcs_ptr, ModeDecisionContext *contex
         context_ptr->md_stage_3_count[CAND_CLASS_2] = 1;
         context_ptr->md_stage_3_count[CAND_CLASS_3] = 1;
     }
+#endif
 #endif
 #if !CLASS_MERGING
     context_ptr->md_stage_3_count[CAND_CLASS_4] = context_ptr->bypass_md_stage_2[CAND_CLASS_4]
@@ -13267,7 +13297,11 @@ void class_pruning(PictureControlSet *pcs_ptr, ModeDecisionContext *context_ptr,
         class_pruning_scaling_level = 0;
     else
 #endif
+#if ADD_M9
+    if (pcs_ptr->enc_mode <= ENC_M9)
+#else
     if (pcs_ptr->enc_mode <= ENC_M8)
+#endif
 #else
 #if JUNE23_ADOPTIONS
     if (pcs_ptr->enc_mode <= ENC_M4)
