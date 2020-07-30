@@ -638,6 +638,7 @@ extern "C" {
 #define ADD_M9            1 // Create a spot for M9; M9 = M8
 #define SHUT_SIMILARITY_FEATURES 1 // turn off features related to similar blocks
 #define MERGE_SQW_FEATURES 1 // Merge nsq_hv_level and sq_weight; if sq_weight on, so is nsq_hv_level
+#define SHUT_EDGE_BASED_SKIP_ANGLE_INTRA 1 // Turn off disable_edge_based_skip_angle_intra_feature
 #endif
 // END  SVT_02_TEMP /////////////////////////////////////////////////////////
 
