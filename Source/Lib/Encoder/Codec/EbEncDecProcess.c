@@ -6194,6 +6194,13 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
     // 0: OFF
     // 1: ON 10% + skip HA/HB/H4  or skip VA/VB/V4
     // 2: ON 10% + skip HA/HB  or skip VA/VB   ,  5% + skip H4  or skip V4
+#if MERGE_SQW_FEATURES
+    // Always use nsq_hv_level when sq_weight is on, else keep off
+    if (context_ptr->sq_weight != (uint32_t)~0)
+        context_ptr->nsq_hv_level = 1;
+    else
+        context_ptr->nsq_hv_level = 0;
+#else
 #if JUNE17_ADOPTIONS
     if (pd_pass < PD_PASS_2 || enc_mode <= ENC_M2)
 #else
@@ -6258,6 +6265,7 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
     }
 #if SHUT_FEATURE_INTERACTIONS
     context_ptr->nsq_hv_level = 0;
+#endif
 #endif
     // Set pred ME full search area
 #if UNIFY_SC_NSC
@@ -6544,7 +6552,11 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
     // intra_similar_mode
     // 0: OFF
     // 1: If previous similar block is intra, do not inject any inter
+#if SHUT_SIMILARITY_FEATURES
+    context_ptr->intra_similar_mode = 0;
+#else
     context_ptr->intra_similar_mode = 1;
+#endif
 
 #if MD_REFERENCE_MASKING
 #if !SOFT_CYCLES_REDUCTION

@@ -636,6 +636,8 @@ extern "C" {
 #define TX_EARLY_EXIT     1 // Variance/cost_depth_1-to-cost_depth_0 based early txs exit
 #define FAST_M8_V1        1 // > 2x faster than M7
 #define ADD_M9            1 // Create a spot for M9; M9 = M8
+#define SHUT_SIMILARITY_FEATURES 1 // turn off features related to similar blocks
+#define MERGE_SQW_FEATURES 1 // Merge nsq_hv_level and sq_weight; if sq_weight on, so is nsq_hv_level
 #endif
 // END  SVT_02_TEMP /////////////////////////////////////////////////////////
 
