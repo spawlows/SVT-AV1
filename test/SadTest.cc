@@ -46,6 +46,175 @@
 #include "random.h"
 #include "util.h"
 
+
+
+SIMD_INLINE void sad_loop_kernel_line(const uint8_t *const src,
+                                        const uint8_t *const ref,
+                                      uint32_t *const sum,
+                                        int16_t width,
+                                        int16_t search_area_width) {
+    int x;
+    for (x = 0; x < width; x++) {
+        uint8_t src_x = src[x];
+        for (int i = 0; i < search_area_width; ++i) {
+           sum[i] += EB_ABS_DIFF(/*src[x]*/ src_x, ref[x + i]);
+        }
+    }
+
+
+    // for (x = 0; x < width; x++) {
+    //    //uint8_t src_x = src[x];
+    //    for (int i = 0; i < search_area_width; ++i) {
+    //        sum[i] += EB_ABS_DIFF(src[x] /*src_x*/, ref[x + i]);
+    //    }
+    //}
+}
+
+
+
+
+void sad_loop_kernel_c_testy(
+    uint8_t *src,           // input parameter, source samples Ptr
+    uint32_t src_stride,    // input parameter, source stride
+    uint8_t *ref,           // input parameter, reference samples Ptr
+    uint32_t ref_stride,    // input parameter, reference stride
+    uint32_t block_height,  // input parameter, block height (M)
+    uint32_t block_width,   // input parameter, block width (N)
+    uint64_t *best_sad, int16_t *x_search_center, int16_t *y_search_center,
+    uint32_t
+        src_stride_raw,  // input parameter, source stride (no line skipping)
+    int16_t search_area_width, int16_t search_area_height) {
+    int16_t x_search_index;
+    int16_t y_search_index;
+
+    *best_sad = 0xffffff;
+
+    //for (y_search_index = 0; y_search_index < search_area_height;
+    //     y_search_index++) {
+    //    for (x_search_index = 0; x_search_index < search_area_width;
+    //         x_search_index++) {
+    //        uint32_t x, y;
+    //        uint32_t sad = 0;
+
+    //        for (y = 0; y < block_height; y++) {
+    //            for (x = 0; x < block_width; x++) {
+    //                sad +=
+    //                    EB_ABS_DIFF(src[y * src_stride + x],
+
+    //                                ref[src_stride_raw * y_search_index +
+    //                                    y * ref_stride + x_search_index + x]);
+    //            }
+    //        }
+
+    //        // Update results
+    //        if (sad < *best_sad) {
+    //            *best_sad = sad;
+    //            *x_search_center = x_search_index;
+    //            *y_search_center = y_search_index;
+    //        }
+    //    }
+
+    //    //  ref += src_stride_raw;
+    //}
+
+    uint32_t sum[16];
+   
+
+    for (y_search_index = 0; y_search_index < search_area_height; y_search_index++) {
+        x_search_index = 0;
+
+
+        ///////
+        for (;search_area_width - x_search_index >= 16; x_search_index+=16) {
+            uint32_t x, y;
+            uint32_t sad = 0;
+            memset(sum, 0, sizeof(sum));
+
+            for (y = 0; y < block_height; y++) {
+
+                 sad_loop_kernel_line(&src[y * src_stride],
+                                     &ref[src_stride_raw * y_search_index +
+                                         y * ref_stride + x_search_index],
+                                     sum,
+                                     block_width,
+                                     /*int16_t search_area_width*/ 16);
+            }
+            for (x = 0; x < 16; x++) {
+  
+                  // Update results
+                if (sum[x] < *best_sad) {
+                    *best_sad = sum[x];
+                    *x_search_center = x_search_index + x;
+                    *y_search_center = y_search_index;
+                }
+
+            }
+        }
+        ///////
+
+          ///////
+        for (; search_area_width - x_search_index >= 8; x_search_index += 8) {
+            uint32_t x, y;
+            uint32_t sad = 0;
+            memset(sum, 0, sizeof(sum));
+
+            for (y = 0; y < block_height; y++) {
+                sad_loop_kernel_line(&src[y * src_stride],
+                                     &ref[src_stride_raw * y_search_index +
+                                          y * ref_stride + x_search_index],
+                                     sum,
+                                     block_width,
+                                     /*int16_t search_area_width*/ 8);
+            }
+            for (x = 0; x < 8; x++) {
+                // Update results
+                if (sum[x] < *best_sad) {
+                    *best_sad = sum[x];
+                    *x_search_center = x_search_index + x;
+                    *y_search_center = y_search_index;
+                }
+            }
+        }
+        ///////
+     
+       
+
+        for (/*x_search_index = start_x_search_index*/; x_search_index < search_area_width;
+             x_search_index++) {
+            uint32_t x, y;
+            uint32_t sad = 0;
+
+            for (y = 0; y < block_height; y++) {
+                for (x = 0; x < block_width; x++) {
+                    sad +=
+                        EB_ABS_DIFF(src[y * src_stride + x],
+
+                                    ref[src_stride_raw * y_search_index +
+                                        y * ref_stride + x_search_index + x]);
+                }
+            }
+
+            // Update results
+            if (sad < *best_sad) {
+                *best_sad = sad;
+                *x_search_center = x_search_index;
+                *y_search_center = y_search_index;
+            }
+        }
+
+        //  ref += src_stride_raw;
+    }
+}
+
+
+
+
+
+
+
+
+
+
 using svt_av1_test_tool::SVTRandom;  // to generate the random
 extern "C" void ext_all_sad_calculation_8x8_16x16_c(
     uint8_t *src, uint32_t src_stride, uint8_t *ref, uint32_t ref_stride,
@@ -632,9 +801,14 @@ typedef void (*Ebsad_LoopKernelNxMType)(
 
 typedef std::tuple<Ebsad_LoopKernelNxMType, Ebsad_LoopKernelNxMType> FuncPair;
 
+
+
 FuncPair TEST_FUNC_PAIRS[] = {
-    FuncPair(sad_loop_kernel_c, sad_loop_kernel_sse4_1_intrin),
-    FuncPair(sad_loop_kernel_c, sad_loop_kernel_avx2_intrin),
+ //   FuncPair(sad_loop_kernel_c, sad_loop_kernel_sse4_1_intrin),
+    FuncPair(sad_loop_kernel_c, sad_loop_kernel_c_testy),
+
+   //  FuncPair(sad_loop_kernel_c, sad_loop_kernel_avx2_intrin),
+
 #if !REMOVE_ME_SUBPEL_CODE
     FuncPair(sad_loop_kernel_sparse_c, sad_loop_kernel_sparse_sse4_1_intrin),
     FuncPair(sad_loop_kernel_sparse_c, sad_loop_kernel_sparse_avx2_intrin),
@@ -764,13 +938,21 @@ class sad_LoopTest : public ::testing::WithParamInterface<sad_LoopTestParam>,
     }
 
     void speed_sad_loop() {
-        const uint64_t num_loop = 100000;
+        const uint64_t num_loop = 1000/*00*/;
         double time_c, time_o;
         uint64_t start_time_seconds, start_time_useconds;
         uint64_t middle_time_seconds, middle_time_useconds;
         uint64_t finish_time_seconds, finish_time_useconds;
 
+        Ebsad_LoopKernelNxMType func_c__old = func_c_;
+        func_c_ = sad_loop_kernel_c;
+        check_sad_loop();
+        func_c_ = func_c__old;
+
         prepare_data();
+
+
+
 
         uint64_t best_sad0 = UINT64_MAX;
         uint64_t best_sad1 = UINT64_MAX;
@@ -851,11 +1033,9 @@ class sad_LoopTest : public ::testing::WithParamInterface<sad_LoopTestParam>,
     }
 };
 
-TEST_P(sad_LoopTest, sad_LoopTest) {
-    check_sad_loop();
-}
+//TEST_P(sad_LoopTest, sad_LoopTest) {  check_sad_loop(); }
 
-TEST_P(sad_LoopTest, DISABLED_sad_LoopSpeedTest) {
+TEST_P(sad_LoopTest, /*DISABLED_*/sad_LoopSpeedTest) {
     speed_sad_loop();
 }
 
