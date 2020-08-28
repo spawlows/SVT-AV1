@@ -129,11 +129,11 @@ static AOM_FORCE_INLINE int32_t xx_mask_and_hadd(__m256i vsum, int i) {
     return _mm_extract_epi32(v128a, 0);
 }
 
-static void apply_temporal_filter_planewise(
+static void apply_temporal_filter_planewise_part(
 #if TF_IMP
     struct MeContext *context_ptr, const uint8_t *frame1, const unsigned int stride,
     const uint8_t *frame2, const unsigned int stride2, const int block_width,
-    const int block_height, const double sigma, const int decay_control, unsigned int *accumulator,
+    const int block_height, const double sigma, const int decay_control, uint32_t *accumulator,
     uint16_t *count, uint16_t *luma_sq_error, uint16_t *chroma_sq_error, int plane, int ss_x_shift,
     int ss_y_shift) {
 #else
@@ -151,11 +151,11 @@ static void apply_temporal_filter_planewise(
     uint32_t acc_5x5_sse[BH][BW];
 #if TF_IMP
     // Larger noise -> larger filtering weight.
-    const float n_decay           = (float)decay_control * (0.7f + logf((float)sigma + 1.0f));
-    const float n_decay_qr_inv    = 1.0f / (2 * n_decay * n_decay);
-    const float block_balacne_inv = 1.0f / (TF_WINDOW_BLOCK_BALANCE_WEIGHT + 1);
-    const float distance_threshold_inv =
-        1.0f / (float)AOMMAX(context_ptr->min_frame_size * TF_SEARCH_DISTANCE_THRESHOLD, 1);
+    const double n_decay           = (double)decay_control * (0.7 + log((double)sigma + 1.0));
+    const double n_decay_qr_inv    = 1.0 / (2 * n_decay * n_decay);
+    const double block_balacne_inv = 1.0 / (TF_WINDOW_BLOCK_BALANCE_WEIGHT + 1);
+    const double distance_threshold_inv =
+        1.0f / (double)AOMMAX(context_ptr->min_frame_size * TF_SEARCH_DISTANCE_THRESHOLD, 1);
 
 #else
     const double h = decay_control * (0.7 + log(sigma + 1.0));
@@ -241,19 +241,19 @@ static void apply_temporal_filter_planewise(
             }
 #if TF_IMP
             // Combine window error and block error, and normalize it.
-            float     window_error = (float)diff_sse / num_ref_pixels;
+            double     window_error = (double)diff_sse / num_ref_pixels;
             const int subblock_idx = (i >= block_height / 2) * 2 + (j >= block_width / 2);
-            float     block_error;
+            double     block_error;
             int       idx_32x32 = context_ptr->tf_block_col + context_ptr->tf_block_row * 2;
             if (context_ptr->tf_32x32_block_split_flag[idx_32x32])
                 // 16x16
                 block_error =
-                    (float)context_ptr->tf_16x16_block_error[idx_32x32 * 4 + subblock_idx] / 256.0f;
+                    (double)context_ptr->tf_16x16_block_error[idx_32x32 * 4 + subblock_idx] / 256.0f;
             else
                 //32x32
-                block_error = (float)context_ptr->tf_32x32_block_error[idx_32x32] / 1024.0f;
+                block_error = (double)context_ptr->tf_32x32_block_error[idx_32x32] / 1024.0f;
 
-            float combined_error =
+            double combined_error =
                 (TF_WINDOW_BLOCK_BALANCE_WEIGHT * window_error + block_error) * block_balacne_inv;
 
             // Decay factors for non-local mean approach.
@@ -273,12 +273,12 @@ static void apply_temporal_filter_planewise(
                 mv.col = context_ptr->tf_32x32_mv_x[idx_32x32];
                 mv.row = context_ptr->tf_32x32_mv_y[idx_32x32];
             }
-            const float distance = sqrtf(powf(mv.row, 2) + powf(mv.col, 2));
-            const float d_factor = AOMMAX(distance * distance_threshold_inv, 1);
+            const double distance = sqrt(pow(mv.row, 2) + pow(mv.col, 2));
+            const double d_factor = AOMMAX(distance * distance_threshold_inv, 1);
 
             // Compute filter weight.
-            float scaled_diff     = AOMMIN(combined_error * d_factor * n_decay_qr_inv, 7);
-            int   adjusted_weight = (int)(expf(-scaled_diff) * TF_WEIGHT_SCALE);
+            double scaled_diff     = AOMMIN(combined_error * d_factor * n_decay_qr_inv, 7);
+            int   adjusted_weight = (int)(exp(-scaled_diff) * TF_WEIGHT_SCALE);
 #else
             const double scaled_diff =
                 AOMMAX(-(double)(diff_sse / num_ref_pixels) / (2 * h * h), -15.0);
@@ -331,7 +331,7 @@ void svt_av1_apply_temporal_filter_planewise_avx2(
         uint32_t *accum = plane == 0 ? y_accum : plane == 1 ? u_accum : v_accum;
         uint16_t *count = plane == 0 ? y_count : plane == 1 ? u_count : v_count;
 
-        apply_temporal_filter_planewise(
+        apply_temporal_filter_planewise_part(
 #if TF_IMP
             context_ptr, ref, src_stride, pred, pre_stride, plane_w, plane_h,
             noise_levels[plane], decay_control, accum, count, luma_sq_error,
@@ -472,11 +472,11 @@ static void apply_temporal_filter_planewise_hbd(
     uint32_t     acc_5x5_sse[BH][BW];
 #if TF_IMP
     // Larger noise -> larger filtering weight.
-    const float n_decay           = (float)decay_control * (0.7f + logf((float)sigma + 1.0f));
-    const float n_decay_qr_inv    = 1.0f / (2 * n_decay * n_decay);
-    const float block_balacne_inv = 1.0f / (TF_WINDOW_BLOCK_BALANCE_WEIGHT + 1);
-    const float distance_threshold_inv =
-        1.0f / (float)AOMMAX(context_ptr->min_frame_size * TF_SEARCH_DISTANCE_THRESHOLD, 1);
+    const double n_decay           = (double)decay_control * (0.7 + log((double)sigma + 1.0));
+    const double n_decay_qr_inv    = 1.0 / (2.0 * n_decay * n_decay);
+    const double block_balacne_inv = 1.0 / (TF_WINDOW_BLOCK_BALANCE_WEIGHT + 1.0);
+    const double distance_threshold_inv =
+        1.0 / (double)AOMMAX(context_ptr->min_frame_size * TF_SEARCH_DISTANCE_THRESHOLD, 1);
 #else
     const double h         = decay_control * (0.7 + log(sigma + 1.0));
 #endif
@@ -553,20 +553,20 @@ static void apply_temporal_filter_planewise_hbd(
             diff_sse >>= 4;
 #if TF_IMP
             // Combine window error and block error, and normalize it.
-            float     window_error = (float)diff_sse / num_ref_pixels;
+            double     window_error = (double)diff_sse / num_ref_pixels;
             const int subblock_idx = (i >= block_height / 2) * 2 + (j >= block_width / 2);
-            float     block_error;
+            double     block_error;
             int       idx_32x32 = context_ptr->tf_block_col + context_ptr->tf_block_row * 2;
             if (context_ptr->tf_32x32_block_split_flag[idx_32x32])
                 // 16x16
                 block_error =
-                    (float)(context_ptr->tf_16x16_block_error[idx_32x32 * 4 + subblock_idx] >> 4) /
-                    256.0f;
+                    (double)(context_ptr->tf_16x16_block_error[idx_32x32 * 4 + subblock_idx] >> 4) /
+                    256.0;
             else
                 //32x32
-                block_error = (float)(context_ptr->tf_32x32_block_error[idx_32x32] >> 4) / 1024.0f;
+                block_error = (double)(context_ptr->tf_32x32_block_error[idx_32x32] >> 4) / 1024.0;
 
-            float combined_error =
+            double combined_error =
                 (TF_WINDOW_BLOCK_BALANCE_WEIGHT * window_error + block_error) * block_balacne_inv;
 
             // Decay factors for non-local mean approach.
@@ -586,12 +586,12 @@ static void apply_temporal_filter_planewise_hbd(
                 mv.col = context_ptr->tf_32x32_mv_x[idx_32x32];
                 mv.row = context_ptr->tf_32x32_mv_y[idx_32x32];
             }
-            const float distance = sqrtf(powf(mv.row, 2) + powf(mv.col, 2));
-            const float d_factor = AOMMAX(distance * distance_threshold_inv, 1);
+            const double distance = sqrt(pow(mv.row, 2) + pow(mv.col, 2));
+            const double d_factor = AOMMAX(distance * distance_threshold_inv, 1);
 
             // Compute filter weight.
-            float scaled_diff     = AOMMIN(combined_error * d_factor * n_decay_qr_inv, 7.0f);
-            int   adjusted_weight = (int)(expf(-scaled_diff) * TF_WEIGHT_SCALE);
+            double scaled_diff     = AOMMIN(combined_error * d_factor * n_decay_qr_inv, 7.0);
+            int   adjusted_weight = (int)(exp(-scaled_diff) * TF_WEIGHT_SCALE);
 #else
             const double scaled_diff  = AOMMAX(-(double)(diff_sse / num_ref_pixels) / (2 * h * h),
                                               -15.0);
