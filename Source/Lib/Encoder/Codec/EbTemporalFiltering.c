@@ -953,6 +953,20 @@ static void apply_filtering_central_highbd(uint16_t **pred_16bit, uint32_t **acc
 *   Nothing will be returned. But the content to which `accum` and `pred`
 *   point will be modified.
 ***************************************************************************************************/
+
+int check_error(char *ptr1, char *ptr2, int width, int line_size, int stride) {
+	int error = 0;
+
+	for (int i=0; i<width; ++i)
+	if(memcmp(ptr1 + i * stride, ptr2 + i * stride, line_size))
+	{
+		return 1;
+	}
+	return 0;
+}
+
+
+
 void svt_av1_apply_temporal_filter_planewise_c(
 #if TF_IMP
     struct MeContext *context_ptr, const uint8_t *y_src, int y_src_stride, const uint8_t *y_pre,
@@ -980,6 +994,55 @@ void svt_av1_apply_temporal_filter_planewise_c(
     memset(y_diff_se, 0, BLK_PELS * sizeof(uint16_t));
     memset(u_diff_se, 0, BLK_PELS * sizeof(uint16_t));
     memset(v_diff_se, 0, BLK_PELS * sizeof(uint16_t));
+
+
+//	printf("(%i)\n", decay_control);
+
+
+	int sizey =  (block_width+y_pre_stride)*block_height;
+	int sizeuv =  (block_width+uv_pre_stride)*block_height;
+	uint32_t *y_accumr = malloc(sizey*sizeof(uint32_t));
+	uint16_t *y_countr = malloc(sizey*sizeof(uint16_t));
+	uint32_t *u_accumr = malloc(sizeuv*sizeof(uint32_t));
+	uint16_t *u_countr = malloc(sizeuv*sizeof(uint16_t));
+	uint32_t *v_accumr = malloc(sizeuv*sizeof(uint32_t));
+	uint16_t *v_countr = malloc(sizeuv*sizeof(uint16_t));
+	uint32_t *y_accumc = malloc(sizey*sizeof(uint32_t));
+	uint16_t *y_countc = malloc(sizey*sizeof(uint16_t));
+	uint32_t *u_accumc = malloc(sizeuv*sizeof(uint32_t));
+	uint16_t *u_countc = malloc(sizeuv*sizeof(uint16_t));
+	uint32_t *v_accumc = malloc(sizeuv*sizeof(uint32_t));
+	uint16_t *v_countc = malloc(sizeuv*sizeof(uint16_t));
+
+
+	memcpy(y_accumc, y_accum, sizey*sizeof(uint32_t));
+	memcpy(y_countc, y_count, sizey*sizeof(uint16_t));
+	memcpy(u_accumc, u_accum, sizeuv*sizeof(uint32_t));
+	memcpy(u_countc, u_count, sizeuv*sizeof(uint16_t));
+	memcpy(v_accumc, v_accum, sizeuv*sizeof(uint32_t));
+	memcpy(v_countc, v_count, sizeuv*sizeof(uint16_t));
+
+
+	memcpy(y_accumr, y_accumc, sizey*sizeof(uint32_t));
+	memcpy(y_countr, y_countc, sizey*sizeof(uint16_t));
+	memcpy(u_accumr, u_accumc, sizeuv*sizeof(uint32_t));
+	memcpy(u_countr, u_countc, sizeuv*sizeof(uint16_t));
+	memcpy(v_accumr, v_accumc, sizeuv*sizeof(uint32_t));
+	memcpy(v_countr, v_countc, sizeuv*sizeof(uint16_t));
+
+
+
+	svt_av1_apply_temporal_filter_planewise_avx2(
+    context_ptr, y_src, y_src_stride, y_pre,
+    y_pre_stride, u_src, v_src, uv_src_stride,
+    u_pre, v_pre, uv_pre_stride, block_width,
+    block_height, ss_x, ss_y, noise_levels,
+    decay_control, y_accumr, y_countr, u_accumr,
+    u_countr, v_accumr, v_countr);
+
+
+	if (block_width != 32 && block_height != 32)
+    printf("(%ix%i)\n", block_width, block_height);
 
     // Calculate squared differences for each pixel of the block (pred-orig)
     calculate_squared_errors(
@@ -1153,6 +1216,93 @@ void svt_av1_apply_temporal_filter_planewise_c(
             }
         }
     }
+
+	int error = 0;
+	 //check_error(char *ptr1, char *ptr2, int width, int line_size, int stride) {
+	if(check_error((char*)y_accumr, (char*)y_accum, 32, 32*sizeof(uint32_t), y_pre_stride*sizeof(uint32_t)))
+	{
+		printf("ERROIR1 (%ix%i)\n", block_width, block_height);
+		error++;
+	}
+	
+	if(check_error((char*)y_countr, (char*)y_count, 32, 32*sizeof(uint16_t), y_pre_stride*sizeof(uint16_t)))
+	{
+		printf("ERROIR2 (%ix%i)\n", block_width, block_height);
+		error++;
+	}
+
+	if(check_error((char*)u_accumr, (char*)u_accum, 32, 32*sizeof(uint32_t), uv_pre_stride*sizeof(uint32_t)))
+	{
+		printf("ERROIR3 (%ix%i)\n", block_width, block_height);
+		error++;
+	}
+		if(check_error((char*)u_countr, (char*)u_count, 32, 32*sizeof(uint16_t), uv_pre_stride*sizeof(uint16_t)))
+	{
+		printf("ERROIR4 (%ix%i)\n", block_width, block_height);
+		error++;
+	}
+
+	if(check_error((char*)v_accumr, (char*)v_accum, 32, 32*sizeof(uint32_t), uv_pre_stride*sizeof(uint32_t)))
+	{
+		printf("ERROIR5 (%ix%i)\n", block_width, block_height);
+		error++;
+	}
+		if(check_error((char*)v_countr, (char*)v_count, 32, 32*sizeof(uint16_t), uv_pre_stride*sizeof(uint16_t)))
+	{
+		printf("ERROIR6 (%ix%i)\n", block_width, block_height);
+		error++;
+	}
+
+	if (error)
+	{
+		memcpy(y_accumr, y_accumc, sizey*sizeof(uint32_t));
+		memcpy(y_countr, y_countc, sizey*sizeof(uint16_t));
+		memcpy(u_accumr, u_accumc, sizeuv*sizeof(uint32_t));
+		memcpy(u_countr, u_countc, sizeuv*sizeof(uint16_t));
+		memcpy(v_accumr, v_accumc, sizeuv*sizeof(uint32_t));
+		memcpy(v_countr, v_countc, sizeuv*sizeof(uint16_t));
+
+
+		svt_av1_apply_temporal_filter_planewise_avx2(
+    context_ptr, y_src, y_src_stride, y_pre,
+    y_pre_stride, u_src, v_src, uv_src_stride,
+    u_pre, v_pre, uv_pre_stride, block_width,
+    block_height, ss_x, ss_y, noise_levels,
+    decay_control, y_accumr, y_countr, u_accumr,
+    u_countr, v_accumr, v_countr);
+
+
+
+		/*memcpy(y_accum, y_accumc, sizeyuv*sizeof(uint32_t));
+		memcpy(y_count, y_countc, sizeyuv*sizeof(uint16_t));
+		memcpy(u_accum, u_accumc, sizeyuv*sizeof(uint32_t));
+		memcpy(u_count, u_countc, sizeyuv*sizeof(uint16_t));
+		memcpy(v_accum, v_accumc, sizeyuv*sizeof(uint32_t));
+		memcpy(v_count, v_countc, sizeyuv*sizeof(uint16_t));
+*/
+
+
+
+
+
+	}
+
+
+	free(y_accumr);
+	free(y_countr);
+	free(u_accumr);
+	free(u_countr);
+	free(v_accumr);
+	free(v_countr);
+
+	free(y_accumc);
+	free(y_countc);
+	free(u_accumc);
+	free(u_countc);
+	free(v_accumc);
+	free(v_countc);
+
+
 }
 /***************************************************************************************************
 * Applies temporal filter plane by plane for hbd

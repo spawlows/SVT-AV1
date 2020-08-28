@@ -59,7 +59,7 @@ typedef void (*TemporalFilterFuncHbd)(
     uint32_t *v_accum, uint16_t *v_count);
 #endif
 
-#define MAX_STRIDE 256
+#define MAX_STRIDE 400
 
 typedef std::tuple<TemporalFilterFunc, TemporalFilterFunc>
     TemporalFilterWithParam;
@@ -190,11 +190,23 @@ class TemporalFilterTestPlanewise
                    0,
                    MAX_STRIDE * MAX_STRIDE * sizeof(uint16_t));
 
-            stride[color_channel] = MAX_STRIDE;
-            stride_pred[color_channel] = MAX_STRIDE;
+            //stride[color_channel] = MAX_STRIDE;
+            //stride_pred[color_channel] = MAX_STRIDE/8;
 
             noise_levels[color_channel] = 2.1002103677063437;
         }
+
+
+		//stride[C_Y] = 2058;
+		//stride[C_U] = 64;
+  //      stride_pred[C_Y] = 1028;
+		//stride_pred[C_U] = 32;
+
+
+		stride[C_Y] = 270;
+		stride[C_U] = 64;
+        stride_pred[C_Y] = 130;
+		stride_pred[C_U] = 32;
 
         decay_control = 7;
     }
@@ -214,18 +226,51 @@ class TemporalFilterTestPlanewise
     }
     void RunTest(int width, int height, int run_times);
 
-    void GenRandomData(int width, int height, int stride, int stride2) {
+    void GenRandomData(int width, int height, uint32_t *stride, uint32_t *stride_pred, int mode) {
         for (int ii = 0; ii < height; ii++) {
             for (int jj = 0; jj < width; jj++) {
-                src_ptr[C_Y][ii * stride + jj] = rnd_.Rand8();
-                src_ptr[C_U][ii * stride + jj] = rnd_.Rand8();
-                src_ptr[C_V][ii * stride + jj] = rnd_.Rand8();
+                src_ptr[C_Y][ii * stride[C_Y] + jj] = rnd_.Rand8();
+                src_ptr[C_U][ii * stride[C_U] + jj] = rnd_.Rand8();
+                src_ptr[C_V][ii * stride[C_U] + jj] = rnd_.Rand8();
 
-                pred_ptr[C_Y][ii * stride2 + jj] = rnd_.Rand8();
-                pred_ptr[C_U][ii * stride2 + jj] = rnd_.Rand8();
-                pred_ptr[C_V][ii * stride2 + jj] = rnd_.Rand8();
+				if (mode == 1) {
+					pred_ptr[C_Y][ii * stride_pred[C_Y] + jj] = src_ptr[C_Y][ii * stride[C_Y] + jj];
+					pred_ptr[C_U][ii * stride_pred[C_U] + jj] = src_ptr[C_U][ii * stride[C_U] + jj];
+					pred_ptr[C_V][ii * stride_pred[C_U] + jj] = src_ptr[C_V][ii * stride[C_U] + jj];
+				} else if (mode == 0) {
+					pred_ptr[C_Y][ii * stride_pred[C_Y] + jj] = src_ptr[C_Y][ii * stride[C_Y] + jj] + rnd_.Rand8()%8 -3;
+					pred_ptr[C_U][ii * stride_pred[C_U] + jj] = src_ptr[C_U][ii * stride[C_U] + jj] + rnd_.Rand8()%8 -3;
+					pred_ptr[C_V][ii * stride_pred[C_U] + jj] = src_ptr[C_V][ii * stride[C_U] + jj] + rnd_.Rand8()%8 -3;
+				} else {
+					pred_ptr[C_Y][ii * stride_pred[C_Y] + jj] = rnd_.Rand8();
+					pred_ptr[C_U][ii * stride_pred[C_U] + jj] = rnd_.Rand8();
+					pred_ptr[C_V][ii * stride_pred[C_U] + jj] = rnd_.Rand8();
+				}
+                
             }
         }
+
+
+//		noise_levels[0]
+//0.41615547684353110
+//noise_levels[1]
+//0.26487071704020071
+//noise_levels[2]
+//0.23465014072259807
+
+        //for (int color_channel = 0; color_channel < COLOR_CHANNELS; color_channel++) {
+        // 
+        //    noise_levels[color_channel] = ((double)rnd_.Rand8())/67.0;
+        //}
+
+
+	//noise_levels[0] = 0.41615547684353110;
+	//noise_levels[1] = 0.26487071704020071;
+	//noise_levels[2] = 0.23465014072259807;
+
+
+	//     decay_control = 3;//;
+
     }
 
   private:
@@ -255,8 +300,9 @@ void TemporalFilterTestPlanewise::RunTest(int width, int height,
 #endif
 
     if (run_times <= 100) {
+		run_times = 1000;
         for (int j = 0; j < run_times; j++) {
-            GenRandomData(width, height, MAX_STRIDE, MAX_STRIDE);
+            GenRandomData(width, height, stride, stride_pred, j%3);
 #if TF_IMP
             if (j % 2 == 0) {
                 context_ptr = &context1;
@@ -320,6 +366,17 @@ void TemporalFilterTestPlanewise::RunTest(int width, int height,
 
             for (int color_channel = 0; color_channel < COLOR_CHANNELS;
                  color_channel++) {
+				if (memcmp(accum_ref_ptr[color_channel],
+                                 accum_tst_ptr[color_channel],
+                                 MAX_STRIDE * MAX_STRIDE * sizeof(uint32_t)) != 0 || memcmp(count_ref_ptr[color_channel],
+                                 count_tst_ptr[color_channel],
+                                 MAX_STRIDE * MAX_STRIDE * sizeof(uint16_t))) {
+				
+					printf("ERROR TESST");
+				
+				}
+
+
                 EXPECT_EQ(memcmp(accum_ref_ptr[color_channel],
                                  accum_tst_ptr[color_channel],
                                  MAX_STRIDE * MAX_STRIDE * sizeof(uint32_t)),
@@ -497,7 +554,7 @@ class TemporalFilterTestPlanewiseHbd
                    MAX_STRIDE * MAX_STRIDE * sizeof(uint16_t));
 
             stride[color_channel] = MAX_STRIDE;
-            stride_pred[color_channel] = MAX_STRIDE;
+            stride_pred[color_channel] = MAX_STRIDE/8;
 
             noise_levels[color_channel] = 2.1002103677063437;
         }

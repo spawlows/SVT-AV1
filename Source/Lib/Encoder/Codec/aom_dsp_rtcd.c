@@ -61,6 +61,10 @@ void setup_rtcd_internal(CPU_FLAGS flags) {
         but for safe limiting cpu flags again. */
     (void)flags;
     //to use C: flags=0
+
+
+	CPU_FLAGS flags_org = flags;
+
     eb_aom_sse = eb_aom_sse_c;
 
     eb_aom_highbd_sse = eb_aom_highbd_sse_c;
@@ -630,11 +634,30 @@ void setup_rtcd_internal(CPU_FLAGS flags) {
                         sad_loop_kernel_sparse_sse4_1_intrin,
                         sad_loop_kernel_sparse_avx2_intrin);
 #endif
+
+
+					//1 TO
+					//flags_org = flags;
+					//flags = 0; OK
+
+
                     SET_SSE41_AVX2_AVX512(sad_loop_kernel,
                         sad_loop_kernel_c,
                         sad_loop_kernel_sse4_1_intrin,
                         sad_loop_kernel_avx2_intrin,
                         sad_loop_kernel_avx512_intrin);
+
+
+
+
+					
+					//2 TO
+					//flags_org = flags;
+					//flags = 0; OK
+
+
+
+
 #if !REMOVE_UNUSED_CODE_PH2
                     SET_SSE41_AVX2(sad_loop_kernel_hme_l0,
                         sad_loop_kernel_c,
@@ -643,9 +666,19 @@ void setup_rtcd_internal(CPU_FLAGS flags) {
 #endif
                     SET_SSE41(
                         svt_av1_apply_filtering, svt_av1_apply_filtering_c, svt_av1_apply_temporal_filter_sse4_1);
+
+					flags = 0; //to musi byc to????
+					//tak to to do testow avx2 AAAAAAAAAAAAAAAAAAAAAAAAA
                     SET_AVX2(svt_av1_apply_temporal_filter_planewise,
                         svt_av1_apply_temporal_filter_planewise_c,
                         svt_av1_apply_temporal_filter_planewise_avx2);
+
+
+					//6 TO
+					flags = flags_org;// NIE OK
+					//flags = 0;
+
+
                     SET_AVX2(svt_av1_apply_temporal_filter_planewise_hbd,
                         svt_av1_apply_temporal_filter_planewise_hbd_c,
                         svt_av1_apply_temporal_filter_planewise_hbd_avx2);
@@ -658,6 +691,12 @@ void setup_rtcd_internal(CPU_FLAGS flags) {
                         combined_averaging_ssd_avx2,
                         combined_averaging_ssd_avx512);
 #endif
+
+						//5 TO
+					flags = flags_org;// NIE OK
+					//flags = 0;
+
+
                     SET_AVX2(ext_sad_calculation_8x8_16x16,
                         ext_sad_calculation_8x8_16x16_c,
                         ext_sad_calculation_8x8_16x16_avx2_intrin);
@@ -672,6 +711,14 @@ void setup_rtcd_internal(CPU_FLAGS flags) {
                         sad_calculation_32x32_64x64_c,
                         sad_calculation_32x32_64x64_sse2_intrin);
 #endif
+
+
+						//4 TO
+					flags = flags_org;//NIE OK
+					//flags = 0;
+
+
+
                     SET_AVX2(ext_all_sad_calculation_8x8_16x16,
                         ext_all_sad_calculation_8x8_16x16_c,
                         ext_all_sad_calculation_8x8_16x16_avx2);
@@ -707,6 +754,11 @@ void setup_rtcd_internal(CPU_FLAGS flags) {
                     SET_SSE2_AVX2(
                         compute_mean_8x8, compute_mean_c, compute_mean8x8_sse2_intrin, compute_mean8x8_avx2_intrin);
 #endif
+
+						//3 TO
+					flags = flags_org;// NIE OK
+
+
                     SET_SSE2(compute_mean_square_values_8x8,
                         compute_mean_squared_values_c,
                         compute_mean_of_squared_values8x8_sse2_intrin);
