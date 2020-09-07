@@ -37,6 +37,7 @@ extern "C" {
 
 // START  svt-03 /////////////////////////////////////////////////////////
 #define FEATURE_MDS2 1 // TXT @ MDS2 if CLASS_0_3, and TXS/RDOQ @ MDS2 if CLASS_1_2
+#define PR1481       1 //Fix memory leaks from valgrind
 // END  svt-03 /////////////////////////////////////////////////////////
 
 //FOR DEBUGGING - Do not remove
