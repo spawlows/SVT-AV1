@@ -52,6 +52,18 @@ extern "C" {
 #define MAX_TPL_GROUP_SIZE 64 //enough to cover 6L gop
 #endif
 
+#define INL_ME 1 //In loop me
+#if INL_ME
+#define IME_REUSE_TPL_RESULT 0 // Reuse TPL results for iLoopME
+#define INL_TPL_ME_DBG 0
+#define INL_ME_DBG 0 //In loop me for debug
+#if INL_ME_DBG
+#define INL_ME_ON_INPUT_DBG 1 //ME on original debug
+#define INL_GM_ON_INPUT_DBG 1 //GM on original debug
+#endif
+#endif
+
+
 #define MAX_TX_WEIGHT 500
 #define MAX_TPL_LA_SW 60 // Max TPL look ahead sliding window size
 #define DEPTH_PROB_PRECISION 10000

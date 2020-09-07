@@ -5979,13 +5979,36 @@ void *rate_control_kernel(void *input_ptr) {
 
         // Modify these for different temporal layers later
         switch (task_type) {
+#if !INL_ME
         case RC_PICTURE_MANAGER_RESULT:
+#else
+        case RC_INPUT:
+            pcs_ptr = (PictureControlSet *)rate_control_tasks_ptr->pcs_wrapper_ptr->object_ptr;
+
+            // Set the segment mask
+            SEGMENT_COMPLETION_MASK_SET(pcs_ptr->parent_pcs_ptr->inloop_me_segments_completion_mask,
+                    rate_control_tasks_ptr->segment_index);
+
+            // If the picture is complete, proceed
+            if (!(SEGMENT_COMPLETION_MASK_TEST(pcs_ptr->parent_pcs_ptr->inloop_me_segments_completion_mask,
+                        pcs_ptr->parent_pcs_ptr->inloop_me_segments_total_count))) {
+                eb_release_object(rate_control_tasks_wrapper_ptr);
+                continue;
+            }
+#endif
 
             pcs_ptr = (PictureControlSet *)rate_control_tasks_ptr->pcs_wrapper_ptr->object_ptr;
             scs_ptr = (SequenceControlSet *)pcs_ptr->scs_wrapper_ptr->object_ptr;
             FrameHeader *frm_hdr = &pcs_ptr->parent_pcs_ptr->frm_hdr;
             pcs_ptr->parent_pcs_ptr->blk_lambda_tuning = EB_FALSE;
 
+#if INL_ME
+            // Release the down scaled input
+            if (scs_ptr->in_loop_me) {
+                eb_release_object(pcs_ptr->parent_pcs_ptr->down_scaled_picture_wrapper_ptr);
+                pcs_ptr->parent_pcs_ptr->down_scaled_picture_wrapper_ptr = NULL;
+            }
+#endif
             if (pcs_ptr->picture_number == 0) {
                 //init rate control parameters
                 init_rc(context_ptr, pcs_ptr, scs_ptr);
