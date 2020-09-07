@@ -43,6 +43,14 @@ extern "C" {
 #endif
 
 #define PAD_CHROMA_AFTER_MCTF 1 // Padding chroma after altref
+#define NEW_DELAY             1 //Change delay some sorts of I in PicDecision
+#if NEW_DELAY
+#define FIX_LAD_DEADLOCK      1 //fix deadlock when lad>0 + iperiod>0
+#define NEW_DELAY_DBG_MSG     0
+#define SCD_LAD            6  //number of future frames
+#define PD_WINDOW_SIZE     (SCD_LAD +2) //adding previous+current to future
+#define MAX_TPL_GROUP_SIZE 64 //enough to cover 6L gop
+#endif
 
 #define MAX_TX_WEIGHT 500
 #define MAX_TPL_LA_SW 60 // Max TPL look ahead sliding window size
