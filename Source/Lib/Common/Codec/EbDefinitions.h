@@ -42,6 +42,8 @@
 extern "C" {
 #endif
 
+#define PAD_CHROMA_AFTER_MCTF 1 // Padding chroma after altref
+
 #define MAX_TX_WEIGHT 500
 #define MAX_TPL_LA_SW 60 // Max TPL look ahead sliding window size
 #define DEPTH_PROB_PRECISION 10000
