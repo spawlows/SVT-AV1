@@ -1036,7 +1036,7 @@ void svt_av1_apply_temporal_filter_planewise_c_ORG(
                 mv.col = context_ptr->tf_32x32_mv_x[idx_32x32];
                 mv.row = context_ptr->tf_32x32_mv_y[idx_32x32];
             }
-            const double distance = sqrt(pow(mv.row, 2) + pow(mv.col, 2));
+            const float distance = sqrtf(powf(mv.row, 2) + powf(mv.col, 2));
             const double distance_threshold =
                 (double)AOMMAX(context_ptr->min_frame_size * TF_SEARCH_DISTANCE_THRESHOLD, 1);
             const double d_factor = AOMMAX(distance / distance_threshold, 1);
@@ -1452,7 +1452,7 @@ void svt_av1_apply_temporal_filter_planewise_hbd_c(
                 mv.col = context_ptr->tf_32x32_mv_x[idx_32x32];
                 mv.row = context_ptr->tf_32x32_mv_y[idx_32x32];
             }
-            const double distance = sqrt(pow(mv.row, 2) + pow(mv.col, 2));
+            const float  distance = sqrtf(powf(mv.row, 2) + powf(mv.col, 2));
             const double distance_threshold =
                 (double)AOMMAX(context_ptr->min_frame_size * TF_SEARCH_DISTANCE_THRESHOLD, 1);
             const double d_factor = AOMMAX(distance / distance_threshold, 1);

@@ -260,7 +260,7 @@ static void apply_temporal_filter_planewise(
                 mv.col = context_ptr->tf_32x32_mv_x[idx_32x32];
                 mv.row = context_ptr->tf_32x32_mv_y[idx_32x32];
             }
-            const double distance = sqrt(pow(mv.row, 2) + pow(mv.col, 2));
+            const float distance = sqrtf((float)(mv.row * mv.row + mv.col * mv.col));
             const double d_factor = AOMMAX(distance * distance_threshold_inv, 1);
 
             // Compute filter weight.
