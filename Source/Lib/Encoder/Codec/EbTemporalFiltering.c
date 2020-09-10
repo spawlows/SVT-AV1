@@ -1460,7 +1460,7 @@ void svt_av1_apply_temporal_filter_planewise_hbd_c(
             // Compute filter weight.
             double scaled_diff =
                 AOMMIN(combined_error * d_factor / (2 * n_decay*n_decay) / q_decay / s_decay, 7);
-            int adjusted_weight = (int)(exp(-scaled_diff) * TF_WEIGHT_SCALE);
+            int adjusted_weight = (int)(expf((float)-scaled_diff) * TF_WEIGHT_SCALE);
             k = i * y_pre_stride + j;
             y_count[k] += adjusted_weight;
             y_accum[k] += adjusted_weight * pixel_value;
@@ -1513,7 +1513,7 @@ void svt_av1_apply_temporal_filter_planewise_hbd_c(
                 // Compute filter weight.
                 scaled_diff =
                     AOMMIN(combined_error * d_factor / (2 * n_decay*n_decay) / q_decay / s_decay, 7);
-                adjusted_weight = (int)(exp(-scaled_diff) * TF_WEIGHT_SCALE);
+                adjusted_weight = (int)(expf(-scaled_diff) * TF_WEIGHT_SCALE);
                 u_count[m] += adjusted_weight;
                 u_accum[m] += adjusted_weight * u_pixel_value;
 
@@ -1530,7 +1530,7 @@ void svt_av1_apply_temporal_filter_planewise_hbd_c(
                 // Compute filter weight.
                 scaled_diff =
                     AOMMIN(combined_error * d_factor / (2 * n_decay*n_decay) / q_decay / s_decay, 7);
-                adjusted_weight = (int)(exp(-scaled_diff) * TF_WEIGHT_SCALE);
+                adjusted_weight = (int)(expf(-scaled_diff) * TF_WEIGHT_SCALE);
                 v_count[m] += adjusted_weight;
                 v_accum[m] += adjusted_weight * v_pixel_value;
             }

@@ -129,7 +129,7 @@ static AOM_FORCE_INLINE int32_t xx_mask_and_hadd(__m256i vsum, int i) {
     return _mm_extract_epi32(v128a, 0);
 }
 
-static void apply_temporal_filter_planewise(
+static void apply_temporal_filter_planewise_part(
     struct MeContext *context_ptr, const uint8_t *frame1, const unsigned int stride,
     const uint8_t *frame2, const unsigned int stride2, const int block_width,
     const int block_height, const double sigma, const int decay_control, unsigned int *accumulator,
@@ -304,7 +304,7 @@ void svt_av1_apply_temporal_filter_planewise_avx2(
         uint32_t *accum = plane == 0 ? y_accum : plane == 1 ? u_accum : v_accum;
         uint16_t *count = plane == 0 ? y_count : plane == 1 ? u_count : v_count;
 
-        apply_temporal_filter_planewise(
+        apply_temporal_filter_planewise_part(
             context_ptr, ref, src_stride, pred, pre_stride, plane_w, plane_h,
             noise_levels[plane], decay_control, accum, count, luma_sq_error,
             chroma_sq_error, plane, ss_x_shift, ss_y_shift);
@@ -413,7 +413,7 @@ static AOM_FORCE_INLINE __m256i xx_load_and_pad_hbd(uint32_t *src, int col, int 
     return v256tmp;
 }
 
-static void apply_temporal_filter_planewise_hbd(
+static void apply_temporal_filter_planewise_hbd_part(
     struct MeContext *context_ptr, const uint16_t *frame1, const unsigned int stride,
     const uint16_t *frame2, const unsigned int stride2, const int block_width,
     const int block_height, const double sigma, const int decay_control, unsigned int *accumulator,
@@ -538,12 +538,12 @@ static void apply_temporal_filter_planewise_hbd(
                 mv.col = context_ptr->tf_32x32_mv_x[idx_32x32];
                 mv.row = context_ptr->tf_32x32_mv_y[idx_32x32];
             }
-            const double distance = sqrt(pow(mv.row, 2) + pow(mv.col, 2));
+            const float distance = sqrtf((float)(mv.row * mv.row + mv.col * mv.col));
             const double d_factor = AOMMAX(distance * distance_threshold_inv, 1);
 
             // Compute filter weight.
             double scaled_diff     = AOMMIN(combined_error * d_factor * n_decay_qr_inv, 7.0);
-            int   adjusted_weight = (int)(exp(-scaled_diff) * TF_WEIGHT_SCALE);
+            int   adjusted_weight = (int)(expf((float)-scaled_diff) * TF_WEIGHT_SCALE);
             // updated the index
             count[i * stride2 + j] += adjusted_weight;
             accumulator[i * stride2 + j] += adjusted_weight * pixel_value;
@@ -582,7 +582,7 @@ void svt_av1_apply_temporal_filter_planewise_hbd_avx2(
 
         uint32_t *accum = plane == 0 ? y_accum : plane == 1 ? u_accum : v_accum;
         uint16_t *count = plane == 0 ? y_count : plane == 1 ? u_count : v_count;
-        apply_temporal_filter_planewise_hbd(context_ptr,
+        apply_temporal_filter_planewise_hbd_part(context_ptr,
                                             ref,
                                             src_stride,
                                             pred,
