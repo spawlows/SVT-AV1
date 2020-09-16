@@ -2487,8 +2487,14 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
         context_ptr->md_staging_mode = MD_STAGING_MODE_1;
     }
     else
+#if FEATURE_MDS2
+        if (enc_mode <= ENC_M1)
+            context_ptr->md_staging_mode = MD_STAGING_MODE_2;
+        else
+            context_ptr->md_staging_mode = MD_STAGING_MODE_1;
+#else
         context_ptr->md_staging_mode = MD_STAGING_MODE_1;
-
+#endif
     // Set md staging count level
     // Level 0              minimum count = 1
     // Level 1              set towards the best possible partitioning (to further optimize)
@@ -2578,6 +2584,63 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
         else
             context_ptr->md_stage_1_class_prune_th = 100;
 
+#if FEATURE_MDS2
+   // md_stage_2_cand_prune_th (for single candidate removal per class)
+   // Remove candidate if deviation to the best is higher than
+   // md_stage_2_cand_prune_th
+    if (pd_pass == PD_PASS_0)
+        context_ptr->md_stage_2_cand_prune_th = (uint64_t)~0;
+    else if (pd_pass == PD_PASS_1)
+        context_ptr->md_stage_2_cand_prune_th = 5;
+    else
+        if (enc_mode <= ENC_MRS)
+            context_ptr->md_stage_2_cand_prune_th = (uint64_t)~0;
+        else
+            if (enc_mode <= ENC_MR)
+                context_ptr->md_stage_2_cand_prune_th = 45;
+            else if (enc_mode <= ENC_M9)
+                context_ptr->md_stage_2_cand_prune_th = 15;
+            else
+                context_ptr->md_stage_2_cand_prune_th = 5;
+
+    // md_stage_2_class_prune_th (for class removal)
+    // Remove class if deviation to the best is higher than
+    // md_stage_2_class_prune_th
+    if (pd_pass == PD_PASS_0)
+        context_ptr->md_stage_2_class_prune_th = (uint64_t)~0;
+    else if (pd_pass == PD_PASS_1)
+        context_ptr->md_stage_2_class_prune_th = 25;
+    else
+        context_ptr->md_stage_2_class_prune_th = 25;
+
+   // md_stage_3_cand_prune_th (for single candidate removal per class)
+   // Remove candidate if deviation to the best is higher than
+   // md_stage_3_cand_prune_th
+    if (pd_pass == PD_PASS_0)
+        context_ptr->md_stage_3_cand_prune_th = (uint64_t)~0;
+    else if (pd_pass == PD_PASS_1)
+        context_ptr->md_stage_3_cand_prune_th = 5;
+    else
+        if (enc_mode <= ENC_MRS)
+            context_ptr->md_stage_3_cand_prune_th = (uint64_t)~0;
+        else
+            if (enc_mode <= ENC_MR)
+                context_ptr->md_stage_3_cand_prune_th = 45;
+            else if (enc_mode <= ENC_M9)
+                context_ptr->md_stage_3_cand_prune_th = 15;
+            else
+                context_ptr->md_stage_3_cand_prune_th = 5;
+
+    // md_stage_3_class_prune_th (for class removal)
+    // Remove class if deviation to the best is higher than
+    // md_stage_3_class_prune_th
+    if (pd_pass == PD_PASS_0)
+        context_ptr->md_stage_3_class_prune_th = (uint64_t)~0;
+    else if (pd_pass == PD_PASS_1)
+        context_ptr->md_stage_3_class_prune_th = 25;
+    else
+        context_ptr->md_stage_3_class_prune_th = 25;
+#else
     // md_stage_2_3_cand_prune_th (for single candidate removal per class)
     // Remove candidate if deviation to the best is higher than
     // md_stage_2_3_cand_prune_th
@@ -2604,6 +2667,7 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
         context_ptr->md_stage_2_3_class_prune_th = 25;
     else
         context_ptr->md_stage_2_3_class_prune_th = 25;
+#endif
     // If using a mode offset, do not modify the NSQ-targeting features
     if (!mode_offset) {
         if (pd_pass == PD_PASS_0)
@@ -2655,6 +2719,7 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
                         context_ptr->sq_weight = 90;
 
     }
+
     // If using a mode offset, do not modify the NSQ-targeting features
     if (!mode_offset) {
         if (pd_pass < PD_PASS_2)
@@ -2739,13 +2804,21 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
     // 0 OFF - Use TXS for intra candidates only
     // 1 ON  - Use TXS for all candidates
     // 2 ON  - INTER TXS restricted to max 1 depth
+#if FEATURE_MDS2 //-----
+    if (enc_mode <= ENC_MRS)
+        context_ptr->md_staging_tx_size_level = 1;
+    else if (enc_mode <= ENC_M0)
+        context_ptr->md_staging_tx_size_level = 2;
+    else
+        context_ptr->md_staging_tx_size_level = 0;
+#else
     if (enc_mode <= ENC_MRS)
         context_ptr->txs_in_inter_classes = 1;
     else if (enc_mode <= ENC_M0)
         context_ptr->txs_in_inter_classes = 2;
     else
         context_ptr->txs_in_inter_classes = 0;
-
+#endif
     // Each NIC scaling level corresponds to a scaling factor, given by the below {x,y}
     // combinations, where x is the numerator, and y is the denominator.  e.g. {1,8} corresponds
     // to 1/8x scaling of the base NICs, which are set in set_md_stage_counts().

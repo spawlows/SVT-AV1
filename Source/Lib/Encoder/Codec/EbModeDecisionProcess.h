@@ -452,8 +452,15 @@ typedef struct ModeDecisionContext {
     uint32_t *   ref_best_ref_sq_table;
     uint64_t     md_stage_1_cand_prune_th;
     uint64_t     md_stage_1_class_prune_th;
+#if FEATURE_MDS2
+    uint64_t     md_stage_2_cand_prune_th;
+    uint64_t     md_stage_2_class_prune_th;
+    uint64_t     md_stage_3_cand_prune_th;
+    uint64_t     md_stage_3_class_prune_th;
+#else
     uint64_t     md_stage_2_3_cand_prune_th;
     uint64_t     md_stage_2_3_class_prune_th;
+#endif
     DECLARE_ALIGNED(16, uint8_t, obmc_buff_0[2 * 2 * MAX_MB_PLANE * MAX_SB_SQUARE]);
     DECLARE_ALIGNED(16, uint8_t, obmc_buff_1[2 * 2 * MAX_MB_PLANE * MAX_SB_SQUARE]);
     DECLARE_ALIGNED(16, uint8_t, obmc_buff_0_8b[2 * MAX_MB_PLANE * MAX_SB_SQUARE]);
@@ -538,7 +545,11 @@ typedef struct ModeDecisionContext {
     int16_t sprs_lev0_end_x;
     int16_t sprs_lev0_start_y;
     int16_t sprs_lev0_end_y;
+#if FEATURE_MDS2
+    uint8_t md_staging_tx_size_level;
+#else
     uint8_t txs_in_inter_classes;
+#endif
     uint8_t nic_scaling_level;
     uint8_t inter_compound_mode;
     uint8_t switch_md_mode_based_on_sq_coeff;
