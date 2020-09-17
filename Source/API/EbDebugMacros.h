@@ -39,6 +39,12 @@ extern "C" {
 #define FEATURE_MDS2 1 // TXT @ MDS2 if CLASS_0_3, and TXS/RDOQ @ MDS2 if CLASS_1_2
 #define PR1481       1 //Fix memory leaks from valgrind
 #define PR1485       1 //Fix mismatch C/AVX2 kernel svt_av1_apply_temporal_filter_planewise()
+
+#define FIX_RC_BUG 1 // PR:1484 Fix the one pass QP assignment using frames_to_be_encoded
+#define FIX_VBR_BUG 1 // PR:1484 Fix 1st pass bug (bug from rebasing the branch)
+#define FIX_10BIT     1 // PR:1484 fix 1st pass for 10bit input
+#define FIX_RC_TOKEN     1 // PR:1484 fix RC token check to include double dash
+
 // END  svt-03 /////////////////////////////////////////////////////////
 
 //FOR DEBUGGING - Do not remove
