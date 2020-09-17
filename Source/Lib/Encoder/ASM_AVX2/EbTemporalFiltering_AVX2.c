@@ -142,11 +142,19 @@ static void apply_temporal_filter_planewise(
 
     uint32_t acc_5x5_sse[BH][BW];
     // Larger noise -> larger filtering weight.
+#if PR1485
+    const double n_decay                = (double)decay_control * (0.7 + log1p(sigma));
+    const double n_decay_qr_inv         = 1.0 / (2 * n_decay * n_decay);
+    const double block_balacne_inv      = 1.0 / (TF_WINDOW_BLOCK_BALANCE_WEIGHT + 1);
+    const double distance_threshold_inv = 1.0 /
+        (double)AOMMAX(context_ptr->min_frame_size * TF_SEARCH_DISTANCE_THRESHOLD, 1);
+#else
     const float n_decay           = (float)decay_control * (0.7f + logf((float)sigma + 1.0f));
     const float n_decay_qr_inv    = 1.0f / (2 * n_decay * n_decay);
     const float block_balacne_inv = 1.0f / (TF_WINDOW_BLOCK_BALANCE_WEIGHT + 1);
     const float distance_threshold_inv =
         1.0f / (float)AOMMAX(context_ptr->min_frame_size * TF_SEARCH_DISTANCE_THRESHOLD, 1);
+#endif
 
     uint16_t *frame_sse =
         (plane == PLANE_TYPE_Y) ? luma_sq_error : chroma_sq_error;
@@ -228,12 +236,28 @@ static void apply_temporal_filter_planewise(
                 }
             }
             // Combine window error and block error, and normalize it.
+#if PR1485
+            double    window_error = (double)diff_sse / num_ref_pixels;
+            const int subblock_idx = (i >= block_height / 2) * 2 + (j >= block_width / 2);
+            double    block_error;
+#else
             float     window_error = (float)diff_sse / num_ref_pixels;
             const int subblock_idx = (i >= block_height / 2) * 2 + (j >= block_width / 2);
             float     block_error;
+#endif
             int       idx_32x32 = context_ptr->tf_block_col + context_ptr->tf_block_row * 2;
             if (context_ptr->tf_32x32_block_split_flag[idx_32x32])
+#if PR1485
                 // 16x16
+                block_error =
+                    (double)context_ptr->tf_16x16_block_error[idx_32x32 * 4 + subblock_idx] / 256.0;
+            else
+                //32x32
+                block_error = (double)context_ptr->tf_32x32_block_error[idx_32x32] / 1024.0;
+
+            double combined_error =
+                (TF_WINDOW_BLOCK_BALANCE_WEIGHT * window_error + block_error) * block_balacne_inv;
+#else
                 block_error =
                     (float)context_ptr->tf_16x16_block_error[idx_32x32 * 4 + subblock_idx] / 256.0f;
             else
@@ -242,6 +266,7 @@ static void apply_temporal_filter_planewise(
 
             float combined_error =
                 (TF_WINDOW_BLOCK_BALANCE_WEIGHT * window_error + block_error) * block_balacne_inv;
+#endif
 
             // Decay factors for non-local mean approach.
             // Smaller q -> smaller filtering weight. WIP
@@ -260,12 +285,21 @@ static void apply_temporal_filter_planewise(
                 mv.col = context_ptr->tf_32x32_mv_x[idx_32x32];
                 mv.row = context_ptr->tf_32x32_mv_y[idx_32x32];
             }
+#if PR1485
+            const float distance = sqrtf((float)(mv.row * mv.row + mv.col * mv.col));
+            const double d_factor = AOMMAX(distance * distance_threshold_inv, 1);
+
+            // Compute filter weight.
+            double scaled_diff     = AOMMIN(combined_error * d_factor * n_decay_qr_inv, 7);
+            int    adjusted_weight = (int)(expf((float)(-scaled_diff)) * TF_WEIGHT_SCALE);
+#else
             const float distance = sqrtf(powf(mv.row, 2) + powf(mv.col, 2));
             const float d_factor = AOMMAX(distance * distance_threshold_inv, 1);
 
             // Compute filter weight.
             float scaled_diff     = AOMMIN(combined_error * d_factor * n_decay_qr_inv, 7);
             int   adjusted_weight = (int)(expf(-scaled_diff) * TF_WEIGHT_SCALE);
+#endif
             // updated the index
             count[i * stride2 + j] += adjusted_weight;
             accumulator[i * stride2 + j] += adjusted_weight * pixel_value;
@@ -427,11 +461,19 @@ static void apply_temporal_filter_planewise_hbd(
 
     uint32_t     acc_5x5_sse[BH][BW];
     // Larger noise -> larger filtering weight.
+#if PR1485
+    const double n_decay                = (double)decay_control * (0.7 + log1p((double)sigma));
+    const double n_decay_qr_inv         = 1.0 / (2 * n_decay * n_decay);
+    const double block_balacne_inv      = 1.0 / (TF_WINDOW_BLOCK_BALANCE_WEIGHT + 1);
+    const double distance_threshold_inv = 1.0 /
+        (double)AOMMAX(context_ptr->min_frame_size * TF_SEARCH_DISTANCE_THRESHOLD, 1);
+#else
     const float n_decay           = (float)decay_control * (0.7f + logf((float)sigma + 1.0f));
     const float n_decay_qr_inv    = 1.0f / (2 * n_decay * n_decay);
     const float block_balacne_inv = 1.0f / (TF_WINDOW_BLOCK_BALANCE_WEIGHT + 1);
     const float distance_threshold_inv =
         1.0f / (float)AOMMAX(context_ptr->min_frame_size * TF_SEARCH_DISTANCE_THRESHOLD, 1);
+#endif
     uint32_t *   frame_sse = (plane == PLANE_TYPE_Y) ? luma_sq_error : chroma_sq_error;
 
     if (block_width == 32) {
@@ -504,11 +546,30 @@ static void apply_temporal_filter_planewise_hbd(
             }
             diff_sse >>= 4;
             // Combine window error and block error, and normalize it.
+#if PR1485
+            double    window_error = (double)diff_sse / num_ref_pixels;
+            const int subblock_idx = (i >= block_height / 2) * 2 + (j >= block_width / 2);
+            double    block_error;
+#else
             float     window_error = (float)diff_sse / num_ref_pixels;
             const int subblock_idx = (i >= block_height / 2) * 2 + (j >= block_width / 2);
             float     block_error;
+#endif
             int       idx_32x32 = context_ptr->tf_block_col + context_ptr->tf_block_row * 2;
             if (context_ptr->tf_32x32_block_split_flag[idx_32x32])
+#if PR1485
+                // 16x16
+                block_error =
+                    (double)(context_ptr->tf_16x16_block_error[idx_32x32 * 4 + subblock_idx] >> 4) /
+                    256.0;
+            else
+                //32x32
+                block_error = (double)(context_ptr->tf_32x32_block_error[idx_32x32] >> 4) /
+                    1024.0;
+
+            double combined_error =
+                (TF_WINDOW_BLOCK_BALANCE_WEIGHT * window_error + block_error) * block_balacne_inv;
+#else
                 // 16x16
                 block_error =
                     (float)(context_ptr->tf_16x16_block_error[idx_32x32 * 4 + subblock_idx] >> 4) /
@@ -519,6 +580,7 @@ static void apply_temporal_filter_planewise_hbd(
 
             float combined_error =
                 (TF_WINDOW_BLOCK_BALANCE_WEIGHT * window_error + block_error) * block_balacne_inv;
+#endif
 
             // Decay factors for non-local mean approach.
             // Smaller q -> smaller filtering weight. WIP
@@ -537,12 +599,21 @@ static void apply_temporal_filter_planewise_hbd(
                 mv.col = context_ptr->tf_32x32_mv_x[idx_32x32];
                 mv.row = context_ptr->tf_32x32_mv_y[idx_32x32];
             }
+#if PR1485
+            const float  distance = sqrtf((float)(mv.row * mv.row + mv.col * mv.col));
+            const double d_factor = AOMMAX(distance * distance_threshold_inv, 1);
+
+            // Compute filter weight.
+            double scaled_diff     = AOMMIN(combined_error * d_factor * n_decay_qr_inv, 7);
+            int    adjusted_weight = (int)(expf((float)(-scaled_diff)) * TF_WEIGHT_SCALE);
+#else
             const float distance = sqrtf(powf(mv.row, 2) + powf(mv.col, 2));
             const float d_factor = AOMMAX(distance * distance_threshold_inv, 1);
 
             // Compute filter weight.
             float scaled_diff     = AOMMIN(combined_error * d_factor * n_decay_qr_inv, 7.0f);
             int   adjusted_weight = (int)(expf(-scaled_diff) * TF_WEIGHT_SCALE);
+#endif
             // updated the index
             count[i * stride2 + j] += adjusted_weight;
             accumulator[i * stride2 + j] += adjusted_weight * pixel_value;
