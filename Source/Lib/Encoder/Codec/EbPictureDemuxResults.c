@@ -30,7 +30,7 @@ EbErrorType picture_results_creator(EbPtr *object_dbl_ptr, EbPtr object_init_dat
     return EB_ErrorNone;
 }
 
-#if INL_ME
+#if FEATURE_INL_ME
 EbErrorType picture_manager_result_ctor(PictureManagerResults *object_ptr,
     EbPtr                   object_init_data_ptr) {
     (void)object_ptr;

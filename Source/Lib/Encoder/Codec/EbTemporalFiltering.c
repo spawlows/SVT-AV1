@@ -344,7 +344,7 @@ static void create_me_context_and_picture_control(
     context_ptr->me_context_ptr->alt_ref_reference_ptr =
         (EbPaReferenceObject *)
             picture_control_set_ptr_frame->pa_reference_picture_wrapper_ptr->object_ptr;
-#if !INL_ME
+#if !FEATURE_INL_ME
     context_ptr->me_context_ptr->me_alt_ref = EB_TRUE;
 #else
     context_ptr->me_context_ptr->me_type = ME_MCTF;
@@ -449,7 +449,7 @@ static void create_me_context_and_picture_control(
         }
     }
 }
-#if INL_ME
+#if FEATURE_INL_ME
 static void create_me_context_and_picture_control_inl(
     MotionEstimationContext_t *context_ptr, PictureParentControlSet *picture_control_set_ptr_frame,
     PictureParentControlSet *picture_control_set_ptr_central,
@@ -2489,7 +2489,7 @@ static EbErrorType produce_temporally_filtered_pic(
     int encoder_bit_depth =
         (int)picture_control_set_ptr_central->scs_ptr->static_config.encoder_bit_depth;
 
-#if INL_ME
+#if FEATURE_INL_ME
     SequenceControlSet *scs_ptr =
         (SequenceControlSet *)picture_control_set_ptr_central->scs_ptr;
 #endif
@@ -2635,7 +2635,7 @@ static EbErrorType produce_temporally_filtered_pic(
 
                 } else {
                     // Initialize ME context
-#if !INL_ME
+#if !FEATURE_INL_ME
                     create_me_context_and_picture_control(
                         me_context_ptr,
                         list_picture_control_set_ptr[frame_index],
@@ -2948,7 +2948,7 @@ static void adjust_filter_strength(PictureParentControlSet *picture_control_set_
     // TODO: apply further refinements to the filter parameters according to 1st pass statistics
 }
 
-#if INL_ME
+#if FEATURE_INL_ME
 static void pad_and_decimate_filtered_pic_inl(
     PictureParentControlSet *picture_control_set_ptr_central) {
     // reference structures (padded pictures + downsampled versions)
@@ -3004,7 +3004,7 @@ void pad_and_decimate_filtered_pic(
                          input_picture_ptr->height,
                          input_picture_ptr->origin_x,
                          input_picture_ptr->origin_y);
-#if PAD_CHROMA_AFTER_MCTF
+#if FIX_PAD_CHROMA_AFTER_MCTF
         generate_padding(input_picture_ptr->buffer_cb,
                          input_picture_ptr->stride_cb,
                          input_picture_ptr->width >> scs_ptr->subsampling_x,
@@ -3286,7 +3286,7 @@ EbErrorType svt_av1_init_temporal_filtering(
         }
 
         // padding + decimation: even if highbd src, this is only performed on the 8 bit buffer (excluding the LSBs)
-#if INL_ME
+#if FEATURE_INL_ME
         if (picture_control_set_ptr_central->scs_ptr->in_loop_me)
             pad_and_decimate_filtered_pic_inl(picture_control_set_ptr_central);
         else

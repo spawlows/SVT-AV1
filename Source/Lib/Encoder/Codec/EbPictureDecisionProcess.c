@@ -208,7 +208,7 @@ uint8_t  circ_inc(uint8_t max, uint8_t off, uint8_t input)
 #define POC_CIRCULAR_ADD(base, offset/*, bits*/)             (/*(((int32_t) (base)) + ((int32_t) (offset)) > ((int32_t) (1 << (bits))))   ? ((base) + (offset) - (1 << (bits))) : \
                                                              (((int32_t) (base)) + ((int32_t) (offset)) < 0)                           ? ((base) + (offset) + (1 << (bits))) : \
                                                                                                                                        */((base) + (offset)))
-#if NEW_DELAY
+#if FEATURE_NEW_DELAY
 EbErrorType derive_tf_window_params(
     SequenceControlSet *scs_ptr,
     EncodeContext *encode_context_ptr,
@@ -817,7 +817,9 @@ EbErrorType signal_derivation_multi_processes_oq(
         pcs_ptr->disallow_nsq = EB_FALSE;
     else
         pcs_ptr->disallow_nsq = EB_TRUE;
+#if !TUNE_INL_TPL_ENHANCEMENT
     pcs_ptr->max_number_of_pus_per_sb = SQUARE_PU_COUNT;
+#endif
     // Set disallow_all_nsq_blocks_below_8x8: 8x4, 4x8
     if (pcs_ptr->enc_mode <= ENC_M9)
         pcs_ptr->disallow_all_nsq_blocks_below_8x8 = EB_FALSE;
@@ -1034,7 +1036,7 @@ EbErrorType signal_derivation_multi_processes_oq(
         // 0: OFF
         // 1: ON
     pcs_ptr->tx_size_early_exit = 1;
-#if NEW_DELAY
+#if FEATURE_NEW_DELAY
     (void)context_ptr;
 #else
         //Prune reference and reduce ME SR based on HME/ME distortion
@@ -3656,7 +3658,7 @@ void perform_simple_picture_analysis_for_overlay(PictureParentControlSet     *pc
         input_picture_ptr);
 
     // Pre processing operations performed on the input picture
-#if INL_ME
+#if FEATURE_INL_ME
     picture_pre_processing_operations(
         pcs_ptr,
         scs_ptr);
@@ -3739,7 +3741,7 @@ void initialize_overlay_frame(PictureParentControlSet     *pcs_ptr) {
  }
 
 
-#if NEW_DELAY
+#if FEATURE_NEW_DELAY
 /*
   ret number of past picture(not including current) in mg buffer.
 
@@ -3905,7 +3907,7 @@ void store_tpl_pictures(
         memcpy(&pcs->tpl_group[1], ctx->mg_pictures_array, mg_size * sizeof(PictureParentControlSet*));
         pcs->tpl_group_size = 1 + mg_size;
 
-#if NEW_DELAY_DBG_MSG
+#if FEATURE_NEW_DELAY_DBG_MSG
         for (uint32_t pic_i = 0; pic_i < pcs->tpl_group_size; ++pic_i)
             printf("TPL group Delayed-I  %ld  \n", ((PictureParentControlSet *)pcs->tpl_group[pic_i])->picture_number);
 #endif
@@ -3914,6 +3916,7 @@ void store_tpl_pictures(
     else {
         memcpy(&pcs->tpl_group[0], ctx->mg_pictures_array, mg_size * sizeof(PictureParentControlSet*));
         pcs->tpl_group_size = mg_size;
+#if !TUNE_TPL
         //add 3 future pictures from PD future window
         for (uint32_t pic_i = 0; pic_i < 3; ++pic_i) {
             if (pcs->pd_window[2 + pic_i]) {
@@ -3923,14 +3926,26 @@ void store_tpl_pictures(
             else
                 break;
         }
+#endif
+#if 0//TUNE_INL_TPL_ENHANCEMENT
+        //add 6 future pictures from PD future window
+        for (uint32_t pic_i = 0; pic_i < 6; ++pic_i) {
+            if (pcs->pd_window[2 + pic_i]) {
+                pcs->tpl_group[mg_size + pic_i] = pcs->pd_window[2 + pic_i];
+                pcs->tpl_group_size++;
+            }
+            else
+                break;
+        }
+#endif
 
-#if NEW_DELAY_DBG_MSG
+#if FEATURE_NEW_DELAY_DBG_MSG
         for (uint32_t pic_i = 0; pic_i < pcs->tpl_group_size; ++pic_i)
             printf("TPL group Base %ld  \n", ((PictureParentControlSet *)pcs->tpl_group[pic_i])->picture_number);
 #endif
     }
 
-#if INL_ME
+#if FEATURE_INL_ME
     for (uint32_t pic_i = 0; pic_i < pcs->tpl_group_size; ++pic_i) {
         PictureParentControlSet* pcs_tpl_ptr = (PictureParentControlSet *)pcs->tpl_group[pic_i];
 
@@ -3966,7 +3981,7 @@ void send_picture_out(
         eb_object_inc_live_count(pcs->reference_picture_wrapper_ptr, 1);
     }
     //get a new ME data buffer
-#if INL_ME
+#if FEATURE_INL_ME
     if (pcs->me_data_wrapper_ptr == NULL) {
         eb_get_empty_object(ctx->me_fifo_ptr, &me_wrapper);
         pcs->me_data_wrapper_ptr = me_wrapper;
@@ -3980,7 +3995,7 @@ void send_picture_out(
     pcs->pa_me_data = (MotionEstimationData *)me_wrapper->object_ptr;
 #endif
 
-#if NEW_DELAY_DBG_MSG
+#if FEATURE_NEW_DELAY_DBG_MSG
     char stype[] = { 'B','P','I' };
     printf("PD-OUT  POC:%ld  %c L%i\n", pcs->picture_number, stype[pcs->slice_type], pcs->temporal_layer_index);
 #endif
@@ -4190,7 +4205,7 @@ EbErrorType derive_tf_window_params(
     }
     }
     int altref_nframes = MIN(scs_ptr->static_config.altref_nframes, context_ptr->tf_ctrls.window_size + adjust_num);
-#if NEW_DELAY
+#if FEATURE_NEW_DELAY
     (void)out_stride_diff64;
     if (is_delayed_intra(pcs_ptr)) {
         //initilize list
@@ -4277,7 +4292,7 @@ EbErrorType derive_tf_window_params(
         //initilize list
         for (int pic_itr = 0; pic_itr < ALTREF_MAX_NFRAMES; pic_itr++)
             pcs_ptr->temp_filt_pcs_list[pic_itr] = NULL;
-#if NEW_DELAY
+#if FEATURE_NEW_DELAY
         // limit the number of pictures to make sure there are enough pictures in the buffer. i.e. Intra CRA case
         num_past_pics = MIN(num_past_pics, avail_past_pictures(context_ptr->mg_pictures_array, context_ptr->mg_size, pcs_ptr->picture_number));
 #else
@@ -4285,7 +4300,7 @@ EbErrorType derive_tf_window_params(
 #endif
 
         //get previous+current pictures from the the pre-assign buffer
-#if  NEW_DELAY
+#if  FEATURE_NEW_DELAY
         for (int pic_itr = 0; pic_itr <= num_past_pics; pic_itr++) {
             int32_t idx = search_this_pic(context_ptr->mg_pictures_array, context_ptr->mg_size, pcs_ptr->picture_number - num_past_pics + pic_itr);
             if (idx >= 0)
@@ -4503,13 +4518,13 @@ void* picture_decision_kernel(void *input_ptr)
 
     EncodeContext                 *encode_context_ptr;
     SequenceControlSet            *scs_ptr;
-#if !NEW_DELAY
+#if !FEATURE_NEW_DELAY
     EbObjectWrapper               *me_wrapper_ptr;
 #endif
     EbObjectWrapper               *in_results_wrapper_ptr;
     PictureAnalysisResults        *in_results_ptr;
 
-#if !NEW_DELAY
+#if !FEATURE_NEW_DELAY
     EbObjectWrapper               *out_results_wrapper_ptr;
     PictureDecisionResults        *out_results_ptr;
 #endif
@@ -4542,7 +4557,7 @@ void* picture_decision_kernel(void *input_ptr)
     EbBool                          window_avail, frame_passthrough;
     uint32_t                           window_index;
     uint32_t                           entry_index;
-#if !NEW_DELAY
+#if !FEATURE_NEW_DELAY
     PictureParentControlSet        *parent_pcs_window[FUTURE_WINDOW_WIDTH + 2];
 #endif
 
@@ -4583,7 +4598,7 @@ void* picture_decision_kernel(void *input_ptr)
             pcs_ptr->pic_decision_reorder_queue_idx = queue_entry_index;
         }
 
-#if NEW_DELAY_DBG_MSG
+#if FEATURE_NEW_DELAY_DBG_MSG
                 printf("\nPD Queue size:(%i)  ", get_reord_q_size(encode_context_ptr));
                         print_pd_reord_queue(encode_context_ptr);
 #endif
@@ -4600,9 +4615,12 @@ void* picture_decision_kernel(void *input_ptr)
                 frame_passthrough = EB_FALSE;
             window_avail = EB_TRUE;
             previous_entry_index = QUEUE_GET_PREVIOUS_SPOT(encode_context_ptr->picture_decision_reorder_queue_head_index);
-#if NEW_DELAY
+#if FEATURE_NEW_DELAY
             pcs_ptr = (PictureParentControlSet*)queue_entry_ptr->parent_pcs_wrapper_ptr->object_ptr;
             memset(pcs_ptr->pd_window, 0, PD_WINDOW_SIZE * sizeof(PictureParentControlSet*));
+#if TUNE_TPL
+            pcs_ptr->pd_window_count = 0;
+#endif
 #else
             parent_pcs_window[ 0] = parent_pcs_window[ 1] = parent_pcs_window[ 2] = parent_pcs_window[ 3] = parent_pcs_window[ 4] = parent_pcs_window[ 5] =
             parent_pcs_window[ 6] = parent_pcs_window[ 7] = parent_pcs_window[ 8] = parent_pcs_window[ 9] = parent_pcs_window[10] = parent_pcs_window[11] =
@@ -4612,7 +4630,7 @@ void* picture_decision_kernel(void *input_ptr)
             if (queue_entry_ptr->picture_number > 0 && encode_context_ptr->picture_decision_reorder_queue[previous_entry_index]->parent_pcs_wrapper_ptr == NULL)
                 window_avail = EB_FALSE;
             else {
-#if NEW_DELAY
+#if FEATURE_NEW_DELAY
                 //TODO: risk of a race condition accessing prev(pcs0 is released, and pcs1 still doing sc).
                 //Actually we dont need to keep prev, just keep previous copy of histograms.
                 pcs_ptr->pd_window[0] =
@@ -4635,7 +4653,7 @@ void* picture_decision_kernel(void *input_ptr)
                         frame_passthrough = EB_TRUE;
                         break;
                     }else {
-#if NEW_DELAY
+#if FEATURE_NEW_DELAY
                         pcs_ptr->pd_window[2 + window_index] =
                             (PictureParentControlSet *)encode_context_ptr->picture_decision_reorder_queue[entry_index]->parent_pcs_wrapper_ptr->object_ptr;
 #else
@@ -4643,6 +4661,13 @@ void* picture_decision_kernel(void *input_ptr)
 #endif
                     }
                 }
+#if TUNE_TPL
+                for (window_index = 0; window_index < scs_ptr->scd_delay; window_index++)
+                    if (pcs_ptr->pd_window[2 + window_index])
+                        pcs_ptr->pd_window_count++;
+                    else
+                        break;
+#endif
             }
 
             pcs_ptr = (PictureParentControlSet*)queue_entry_ptr->parent_pcs_wrapper_ptr->object_ptr;
@@ -4656,7 +4681,7 @@ void* picture_decision_kernel(void *input_ptr)
                     pcs_ptr->scene_change_flag = scene_transition_detector(
                         context_ptr,
                         scs_ptr,
-#if NEW_DELAY
+#if FEATURE_NEW_DELAY
                         (PictureParentControlSet **)pcs_ptr->pd_window);
 #else
                         parent_pcs_window);
@@ -4695,7 +4720,7 @@ void* picture_decision_kernel(void *input_ptr)
 
                 pcs_ptr->self_updated_links = 0;
                 pcs_ptr->other_updated_links_cnt = 0;
-#if NEW_DELAY
+#if FEATURE_NEW_DELAY
                 pcs_ptr->tpl_group_size = 0;
                 if (pcs_ptr->picture_number == 0)
                     context_ptr->prev_delayed_intra = NULL;
@@ -4752,7 +4777,7 @@ void* picture_decision_kernel(void *input_ptr)
                     encode_context_ptr->intra_period_position = ((encode_context_ptr->intra_period_position == (uint32_t)scs_ptr->intra_period_length) || (pcs_ptr->scene_change_flag == EB_TRUE)) ? 0 : encode_context_ptr->intra_period_position + 1;
                 }
 
-#if NEW_DELAY_DBG_MSG
+#if FEATURE_NEW_DELAY_DBG_MSG
                 print_pre_ass(encode_context_ptr);
 #endif
 
@@ -4763,7 +4788,7 @@ void* picture_decision_kernel(void *input_ptr)
                     (pcs_ptr->pred_structure == EB_PRED_LOW_DELAY_P) ||
                     (pcs_ptr->pred_structure == EB_PRED_LOW_DELAY_B))
                 {
-#if NEW_DELAY_DBG_MSG
+#if FEATURE_NEW_DELAY_DBG_MSG
                     if (encode_context_ptr->pre_assignment_buffer_intra_count > 0)
                         printf("PRE-ASSIGN INTRA   (%i pictures)  POC:%ld \n", encode_context_ptr->pre_assignment_buffer_count, pcs_ptr->picture_number);
                     if (encode_context_ptr->pre_assignment_buffer_count == (uint32_t)(1 << scs_ptr->static_config.hierarchical_levels))
@@ -4954,7 +4979,7 @@ void* picture_decision_kernel(void *input_ptr)
                                 }
                                 // Set the Slice type
                                 pcs_ptr->slice_type = picture_type;
-#if !INL_ME
+#if !FEATURE_INL_ME
                                 ((EbPaReferenceObject*)pcs_ptr->pa_reference_picture_wrapper_ptr->object_ptr)->slice_type = pcs_ptr->slice_type;
 #endif
 
@@ -5285,7 +5310,7 @@ void* picture_decision_kernel(void *input_ptr)
                                     input_entry_ptr->dep_list1_count = input_entry_ptr->list1.list_count;
                                     input_entry_ptr->dependent_count = input_entry_ptr->dep_list0_count + input_entry_ptr->dep_list1_count;
 
-#if !INL_ME
+#if !FEATURE_INL_ME
                                     ((EbPaReferenceObject*)pcs_ptr->pa_reference_picture_wrapper_ptr->object_ptr)->dependent_pictures_count = input_entry_ptr->dependent_count;
 #endif
                                 }
@@ -5303,7 +5328,7 @@ void* picture_decision_kernel(void *input_ptr)
                                 EB_MEMSET(pcs_ptr->ref_pic_poc_array[REF_LIST_1], 0, REF_LIST_MAX_DEPTH * sizeof(uint64_t));
                             }
                             pcs_ptr = cur_picture_control_set_ptr;
-#if ! NEW_DELAY
+#if ! FEATURE_NEW_DELAY
                             if(context_ptr->tf_ctrls.enabled) {
                                 derive_tf_window_params(
                                     scs_ptr,
@@ -5484,7 +5509,7 @@ void* picture_decision_kernel(void *input_ptr)
                             //set the ref frame types used for this picture,
                             set_all_ref_frame_type(pcs_ptr, pcs_ptr->ref_frame_type_arr, &pcs_ptr->tot_ref_frame_types);
                             // Initialize Segments
-#if !INL_ME
+#if !FEATURE_INL_ME
                             pcs_ptr->me_segments_column_count = (uint8_t)(scs_ptr->me_segment_column_count_array[pcs_ptr->temporal_layer_index]);
                             pcs_ptr->me_segments_row_count = (uint8_t)(scs_ptr->me_segment_row_count_array[pcs_ptr->temporal_layer_index]);
                             pcs_ptr->me_segments_total_count = (uint16_t)(pcs_ptr->me_segments_column_count  * pcs_ptr->me_segments_row_count);
@@ -5525,7 +5550,7 @@ void* picture_decision_kernel(void *input_ptr)
                                 // Increment the Decode Base Number
                                 encode_context_ptr->decode_base_number += context_ptr->mini_gop_length[mini_gop_index] + has_overlay;
                             }
-#if ! NEW_DELAY
+#if ! FEATURE_NEW_DELAY
                             if (out_stride_diff64 == encode_context_ptr->pre_assignment_buffer_count - 1 + has_overlay) {
 
                                 // Reset the Pre-Assignment Buffer
@@ -5538,7 +5563,7 @@ void* picture_decision_kernel(void *input_ptr)
 #endif
                         }
                         uint32_t mg_size = context_ptr->mini_gop_end_index[mini_gop_index] + has_overlay - context_ptr->mini_gop_start_index[mini_gop_index]+1;
-#if NEW_DELAY
+#if FEATURE_NEW_DELAY
                         context_ptr->mg_size = mg_size;
                         memcpy(context_ptr->mg_pictures_array_disp_order, context_ptr->mg_pictures_array, mg_size * sizeof(PictureParentControlSet*));
 #endif
@@ -5557,7 +5582,7 @@ void* picture_decision_kernel(void *input_ptr)
                             }
                         }
 
-#if NEW_DELAY
+#if FEATURE_NEW_DELAY
                         //Process previous delayed Intra if we have one
                         if (context_ptr->prev_delayed_intra) {
                             pcs_ptr = context_ptr->prev_delayed_intra;
@@ -5590,7 +5615,7 @@ void* picture_decision_kernel(void *input_ptr)
                         for (uint32_t pic_i = 0; pic_i < mg_size; ++pic_i){
 
                             pcs_ptr = context_ptr->mg_pictures_array[pic_i];
-#if NEW_DELAY
+#if FEATURE_NEW_DELAY
                             if (is_delayed_intra(pcs_ptr)) {
                                 context_ptr->prev_delayed_intra = pcs_ptr;
                             }else{
@@ -5635,7 +5660,7 @@ void* picture_decision_kernel(void *input_ptr)
 #endif
                         }
                     } // End MINI GOPs loop
-#if NEW_DELAY
+#if FEATURE_NEW_DELAY
                     // Reset the Pre-Assignment Buffer
                     encode_context_ptr->pre_assignment_buffer_count = 0;
                     encode_context_ptr->pre_assignment_buffer_idr_count = 0;
@@ -5681,7 +5706,7 @@ void* picture_decision_kernel(void *input_ptr)
                 // Get the next entry from the Picture Decision Reordering Queue (Entry N+1)
                 queue_entry_ptr = encode_context_ptr->picture_decision_reorder_queue[encode_context_ptr->picture_decision_reorder_queue_head_index];
             }
-#if NEW_DELAY
+#if FEATURE_NEW_DELAY
             else
 #else
             if (window_avail == EB_FALSE && frame_passthrough == EB_FALSE)

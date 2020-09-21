@@ -2623,7 +2623,7 @@ void set_picture_parameters_for_statistics_gathering(SequenceControlSet *scs_ptr
  ***** Borders preprocessing
  ***** Denoising
  ************************************************/
-#if INL_ME
+#if FEATURE_INL_ME
 void picture_pre_processing_operations(PictureParentControlSet *pcs_ptr,
                                        SequenceControlSet *scs_ptr) {
     if (scs_ptr->film_grain_denoise_strength) {
@@ -2739,7 +2739,7 @@ void sub_sample_luma_generate_pixel_intensity_histogram_bins(
     return;
 }
 
-#ifdef INL_ME
+#ifdef FEATURE_INL_ME
 void sub_sample_luma_generate_pixel_intensity_histogram_bins_ex(
     SequenceControlSet *scs_ptr, PictureParentControlSet *pcs_ptr,
     EbPictureBufferDesc *input_picture_ptr, uint64_t *sum_avg_intensity_ttl_regions_luma,
@@ -2827,7 +2827,7 @@ void sub_sample_luma_generate_pixel_intensity_histogram_bins_ex(
 void sub_sample_chroma_generate_pixel_intensity_histogram_bins(
     SequenceControlSet *scs_ptr, PictureParentControlSet *pcs_ptr,
     EbPictureBufferDesc *input_picture_ptr, uint64_t *sum_avg_intensity_ttl_regions_cb,
-#if INL_ME
+#if FEATURE_INL_ME
     uint64_t *sum_avg_intensity_ttl_regions_cr, uint8_t decim_step) {
 #else
     uint64_t *sum_avg_intensity_ttl_regions_cr) {
@@ -2841,7 +2841,7 @@ void sub_sample_chroma_generate_pixel_intensity_histogram_bins(
     uint32_t region_in_picture_height_index;
 
     uint16_t histogram_bin;
-#if !INL_ME
+#if !FEATURE_INL_ME
     uint8_t  decim_step = 4;
 #endif
 
@@ -3011,7 +3011,7 @@ void compute_picture_spatial_statistics(SequenceControlSet *     scs_ptr,
     return;
 }
 
-#if INL_ME
+#if FEATURE_INL_ME
 void compute_picture_spatial_statistics_ex(SequenceControlSet *     scs_ptr,
                                         PictureParentControlSet *pcs_ptr,
                                         EbPictureBufferDesc *    input_picture_ptr) {
@@ -3147,7 +3147,7 @@ void gathering_picture_statistics(SequenceControlSet *scs_ptr, PictureParentCont
                                                               pcs_ptr,
                                                               input_picture_ptr,
                                                               &sum_avg_intensity_ttl_regions_cb,
-#if INL_ME
+#if FEATURE_INL_ME
                                                               &sum_avg_intensity_ttl_regions_cr,
                                                               4);
 #else
@@ -3168,7 +3168,7 @@ void gathering_picture_statistics(SequenceControlSet *scs_ptr, PictureParentCont
     return;
 }
 
-#if INL_ME
+#if FEATURE_INL_ME
 static void gathering_picture_statistics_ex(SequenceControlSet *scs_ptr, PictureParentControlSet *pcs_ptr,
                                   EbPictureBufferDesc *input_picture_ptr) {
  uint64_t sum_avg_intensity_ttl_regions_luma = 0;
@@ -3225,6 +3225,9 @@ void pad_picture_to_multiple_of_min_blk_size_dimensions(SequenceControlSet * scs
         scs_ptr->pad_right,
         scs_ptr->pad_bottom);
 
+#if TUNE_INL_TPL_ENHANCEMENT
+    if (input_picture_ptr->buffer_cb)
+#endif
     pad_input_picture(
         &input_picture_ptr->buffer_cb[(input_picture_ptr->origin_x >> subsampling_x) +
                                       ((input_picture_ptr->origin_y >> subsampling_y) *
@@ -3235,6 +3238,9 @@ void pad_picture_to_multiple_of_min_blk_size_dimensions(SequenceControlSet * scs
         scs_ptr->pad_right >> subsampling_x,
         scs_ptr->pad_bottom >> subsampling_y);
 
+#if TUNE_INL_TPL_ENHANCEMENT
+    if (input_picture_ptr->buffer_cr)
+#endif
     pad_input_picture(
         &input_picture_ptr->buffer_cr[(input_picture_ptr->origin_x >> subsampling_x) +
                                       ((input_picture_ptr->origin_y >> subsampling_y) *
@@ -3246,6 +3252,9 @@ void pad_picture_to_multiple_of_min_blk_size_dimensions(SequenceControlSet * scs
         scs_ptr->pad_bottom >> subsampling_y);
 
     if (is16_bit_input) {
+#if TUNE_INL_TPL_ENHANCEMENT
+        if (input_picture_ptr->buffer_bit_inc_y)
+#endif
         pad_input_picture(
             &input_picture_ptr->buffer_bit_inc_y[input_picture_ptr->origin_x +
                                                  (input_picture_ptr->origin_y *
@@ -3256,6 +3265,9 @@ void pad_picture_to_multiple_of_min_blk_size_dimensions(SequenceControlSet * scs
             scs_ptr->pad_right,
             scs_ptr->pad_bottom);
 
+#if TUNE_INL_TPL_ENHANCEMENT
+        if (input_picture_ptr->buffer_bit_inc_cb)
+#endif
         pad_input_picture(
             &input_picture_ptr->buffer_bit_inc_cb[(input_picture_ptr->origin_x >> subsampling_x) +
                                                   ((input_picture_ptr->origin_y >> subsampling_y) *
@@ -3266,6 +3278,9 @@ void pad_picture_to_multiple_of_min_blk_size_dimensions(SequenceControlSet * scs
             scs_ptr->pad_right >> subsampling_x,
             scs_ptr->pad_bottom >> subsampling_y);
 
+#if TUNE_INL_TPL_ENHANCEMENT
+        if (input_picture_ptr->buffer_bit_inc_cr)
+#endif
         pad_input_picture(
             &input_picture_ptr->buffer_bit_inc_cr[(input_picture_ptr->origin_x >> subsampling_x) +
                                                   ((input_picture_ptr->origin_y >> subsampling_y) *
@@ -3710,7 +3725,7 @@ void downsample_filtering_input_picture(PictureParentControlSet *pcs_ptr,
     }
 }
 
-#if INL_ME
+#if FEATURE_INL_ME
 // Current down sampled input is not used for HME, but mainly used for GM
 // So don't do the unnecessary check here
 void downsample_filtering_input_picture_ex(
@@ -3838,6 +3853,9 @@ void pad_input_pictures(SequenceControlSet *scs_ptr,
 
     // PAD the bit inc buffer in 10bit
     if (scs_ptr->static_config.encoder_bit_depth > EB_8BIT)
+#if TUNE_INL_TPL_ENHANCEMENT
+        if (input_picture_ptr->buffer_bit_inc_y)
+#endif
         generate_padding(input_picture_ptr->buffer_bit_inc_y,
                 input_picture_ptr->stride_bit_inc_y,
                 input_picture_ptr->width,
@@ -3862,6 +3880,9 @@ void pad_input_pictures(SequenceControlSet *scs_ptr,
                 input_picture_ptr->origin_y >> scs_ptr->subsampling_y);
     // PAD the bit inc buffer in 10bit
     if (scs_ptr->static_config.encoder_bit_depth > EB_8BIT) {
+#if TUNE_INL_TPL_ENHANCEMENT
+        if (input_picture_ptr->buffer_bit_inc_cb)
+#endif
         generate_padding(input_picture_ptr->buffer_bit_inc_cb,
                 input_picture_ptr->stride_bit_inc_cb,
                 input_picture_ptr->width >> scs_ptr->subsampling_x,
@@ -3869,6 +3890,9 @@ void pad_input_pictures(SequenceControlSet *scs_ptr,
                 input_picture_ptr->origin_x >> scs_ptr->subsampling_x,
                 input_picture_ptr->origin_y >> scs_ptr->subsampling_y);
 
+#if TUNE_INL_TPL_ENHANCEMENT
+        if (input_picture_ptr->buffer_bit_inc_cr)
+#endif
         generate_padding(input_picture_ptr->buffer_bit_inc_cr,
                 input_picture_ptr->stride_bit_inc_cr,
                 input_picture_ptr->width >> scs_ptr->subsampling_x,
@@ -3903,7 +3927,7 @@ void pad_input_pictures(SequenceControlSet *scs_ptr,
 *  n-bin histogram is created to gather 1st and 2nd moment statistics for each 8x8 block which is then used to compute statistics
 *
 ********************************************************************************/
-#if !INL_ME
+#if !FEATURE_INL_ME
 void *picture_analysis_kernel(void *input_ptr) {
     EbThreadContext *        thread_context_ptr = (EbThreadContext *)input_ptr;
     PictureAnalysisContext * context_ptr = (PictureAnalysisContext *)thread_context_ptr->priv;

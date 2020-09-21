@@ -24,7 +24,7 @@
 #include "EbRateDistortionCost.h"
 #include "EbPictureDecisionProcess.h"
 #include "firstpass.h"
-#if INL_ME
+#if FEATURE_INL_ME
 #include "EbPictureAnalysisProcess.h"
 #endif
 
@@ -1601,7 +1601,7 @@ void pad_ref_and_set_flags(PictureControlSet *pcs_ptr, SequenceControlSet *scs_p
             (ref_pic_16bit_ptr->width + (ref_pic_ptr->origin_x << 1)) >> 1,
             (ref_pic_16bit_ptr->height + (ref_pic_ptr->origin_y << 1)) >> 1);
     }
-#if INL_ME
+#if FEATURE_INL_ME
     // Save down scaled reference for HME
     if (scs_ptr->in_loop_me) {
         if (scs_ptr->down_sampling_method_me_search == ME_FILTERED_DOWNSAMPLED) {
@@ -1617,7 +1617,7 @@ void pad_ref_and_set_flags(PictureControlSet *pcs_ptr, SequenceControlSet *scs_p
                     reference_object->quarter_reference_picture,
                     reference_object->sixteenth_reference_picture);
         }
-#if INL_ME_DBG
+#if TUNE_INL_ME_RECON_INPUT
         // Copy original input to reference->input_picture
         EbPictureBufferDesc *src_ptr = pcs_ptr->parent_pcs_ptr->enhanced_picture_ptr;
         uint16_t luma_height = (uint16_t)(src_ptr->height - scs_ptr->max_input_pad_bottom);

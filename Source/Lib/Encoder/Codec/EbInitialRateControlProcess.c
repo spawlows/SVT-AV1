@@ -20,12 +20,14 @@
 #include "EbReferenceObject.h"
 #include "EbResize.h"
 #include "common_dsp_rtcd.h"
+#if !FEATURE_IN_LOOP_TPL
 #include "EbTransforms.h"
 #include "aom_dsp_rtcd.h"
 #include "EbRateDistortionCost.h"
 #include "EbLog.h"
 #include "EbIntraPrediction.h"
 #include "EbMotionEstimation.h"
+#endif
 /**************************************
  * Context
  **************************************/
@@ -61,7 +63,7 @@ EbErrorType initial_rate_control_context_ctor(EbThreadContext *  thread_context_
     return EB_ErrorNone;
 }
 
-#if !INL_ME
+#if !FEATURE_INL_ME
 /************************************************
 * Release Pa Reference Objects
 ** Check if reference pictures are needed
@@ -335,6 +337,7 @@ void update_histogram_queue_entry(SequenceControlSet *scs_ptr, EncodeContext *en
     return;
 }
 
+#if !FEATURE_IN_LOOP_TPL
 static void generate_lambda_scaling_factor(PictureParentControlSet         *pcs_ptr, int64_t mc_dep_cost_base)
 {
     Av1Common *cm = pcs_ptr->av1_cm;
@@ -1307,6 +1310,7 @@ EbErrorType tpl_mc_flow(
 
     return EB_ErrorNone;
 }
+#endif
 /* Initial Rate Control Kernel */
 
 /*********************************************************************************
@@ -1368,7 +1372,7 @@ void *initial_rate_control_kernel(void *input_ptr) {
             EncodeContext *encode_context_ptr = (EncodeContext *)scs_ptr->encode_context_ptr;
             if (scs_ptr->static_config.look_ahead_distance == 0 || scs_ptr->static_config.enable_tpl_la == 0) {
                 // Release Pa Ref pictures when not needed
-#if INL_ME
+#if FEATURE_INL_ME
                 // Release Pa ref after TPL
                 if (!scs_ptr->in_loop_me)
                     release_pa_reference_objects(scs_ptr, pcs_ptr);
@@ -1600,11 +1604,13 @@ void *initial_rate_control_kernel(void *input_ptr) {
                                     ->reference_picture_wrapper_ptr,
                                 1);
                         }
+#if !FEATURE_IN_LOOP_TPL
                         if (scs_ptr->static_config.look_ahead_distance != 0 &&
                             scs_ptr->static_config.enable_tpl_la &&
                             pcs_ptr->temporal_layer_index == 0) {
                             tpl_mc_flow(encode_context_ptr, scs_ptr, pcs_ptr);
                         }
+#endif
                         // Get Empty Results Object
                         eb_get_empty_object(
                             context_ptr->initialrate_control_results_output_fifo_ptr,

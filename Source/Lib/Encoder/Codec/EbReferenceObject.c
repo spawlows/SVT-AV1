@@ -15,7 +15,7 @@
 #include "EbThreads.h"
 #include "EbReferenceObject.h"
 #include "EbPictureBufferDesc.h"
-#if INL_ME
+#if FEATURE_INL_ME
 #include "EbUtility.h"
 #endif
 
@@ -148,10 +148,10 @@ static void eb_reference_object_dctor(EbPtr p) {
             EB_DELETE(obj->downscaled_reference_picture16bit[denom_idx]);
         }
     }
-#if INL_ME
+#if FEATURE_INL_ME
     EB_DELETE(obj->quarter_reference_picture);
     EB_DELETE(obj->sixteenth_reference_picture);
-#if INL_ME_DBG
+#if TUNE_INL_ME_RECON_INPUT
     EB_DELETE(obj->input_picture);
     EB_DELETE(obj->quarter_input_picture);
     EB_DELETE(obj->sixteenth_input_picture);
@@ -173,7 +173,7 @@ EbErrorType eb_reference_object_ctor(EbReferenceObject *reference_object,
     EbPictureBufferDescInitData picture_buffer_desc_init_data_16bit_ptr =
         *picture_buffer_desc_init_data_ptr;
 
-#if INL_ME
+#if FEATURE_INL_ME
     EbPictureBufferDescInitData hme_desc_init_data =
         *picture_buffer_desc_init_data_ptr;
 #endif
@@ -209,16 +209,6 @@ EbErrorType eb_reference_object_ctor(EbReferenceObject *reference_object,
                eb_picture_buffer_desc_ctor,
                (EbPtr)picture_buffer_desc_init_data_ptr);
 
-#if INL_ME_DBG
-        hme_desc_init_data.left_padding = 68;
-        hme_desc_init_data.right_padding = 68;
-        hme_desc_init_data.top_padding = 68;
-        hme_desc_init_data.bot_padding = 68;
-        hme_desc_init_data.split_mode = EB_FALSE;
-        EB_NEW(reference_object->input_picture,
-                eb_picture_buffer_desc_ctor,
-                (EbPtr)&hme_desc_init_data);
-#endif
         initialize_samples_neighboring_reference_picture(
             reference_object,
             picture_buffer_desc_init_data_ptr,
@@ -239,6 +229,20 @@ EbErrorType eb_reference_object_ctor(EbReferenceObject *reference_object,
         }
     }
 
+#if TUNE_INL_ME_RECON_INPUT
+        hme_desc_init_data.left_padding = 68;
+        hme_desc_init_data.right_padding = 68;
+        hme_desc_init_data.top_padding = 68;
+        hme_desc_init_data.bot_padding = 68;
+        hme_desc_init_data.split_mode = EB_FALSE;
+#if TUNE_INL_ME_MEM_OPT
+        hme_desc_init_data.buffer_enable_mask = PICTURE_BUFFER_DESC_LUMA_MASK; //Only save 8bit luma
+        hme_desc_init_data.bit_depth = EB_8BIT;
+#endif
+        EB_NEW(reference_object->input_picture,
+                eb_picture_buffer_desc_ctor,
+                (EbPtr)&hme_desc_init_data);
+#endif
     uint32_t mi_rows = reference_object->reference_picture->height >> MI_SIZE_LOG2;
     uint32_t mi_cols = reference_object->reference_picture->width >> MI_SIZE_LOG2;
 
@@ -247,7 +251,7 @@ EbErrorType eb_reference_object_ctor(EbReferenceObject *reference_object,
         const int mem_size = ((mi_rows + 1) >> 1) * ((mi_cols + 1) >> 1);
         EB_CALLOC_ALIGNED_ARRAY(reference_object->mvs, mem_size);
     }
-#if INL_ME
+#if FEATURE_INL_ME
     reference_object->quarter_reference_picture = NULL;
     reference_object->sixteenth_reference_picture = NULL;
     if (ref_init_ptr->hme_quarter_luma_recon) {
@@ -264,7 +268,7 @@ EbErrorType eb_reference_object_ctor(EbReferenceObject *reference_object,
         EB_NEW(reference_object->quarter_reference_picture,
                 eb_picture_buffer_desc_ctor,
                 (EbPtr)&hme_desc_init_data);
-#if INL_ME_DBG
+#if TUNE_INL_ME_RECON_INPUT
         hme_desc_init_data.left_padding = 64 >> 1;
         hme_desc_init_data.right_padding = 64 >> 1;
         hme_desc_init_data.top_padding = 64 >> 1;
@@ -288,7 +292,7 @@ EbErrorType eb_reference_object_ctor(EbReferenceObject *reference_object,
         EB_NEW(reference_object->sixteenth_reference_picture,
                 eb_picture_buffer_desc_ctor,
                 (EbPtr)&hme_desc_init_data);
-#if INL_ME_DBG
+#if TUNE_INL_ME_RECON_INPUT
         hme_desc_init_data.left_padding = 64 >> 2;
         hme_desc_init_data.right_padding = 64 >> 2;
         hme_desc_init_data.top_padding = 64 >> 2;
@@ -329,7 +333,7 @@ EbErrorType eb_reference_object_creator(EbPtr *object_dbl_ptr, EbPtr object_init
 
 static void eb_pa_reference_object_dctor(EbPtr p) {
     EbPaReferenceObject *obj = (EbPaReferenceObject *)p;
-#if INL_ME
+#if FEATURE_INL_ME
     if (obj->dummy_obj)
         return;
 #endif
@@ -362,7 +366,7 @@ EbErrorType eb_pa_reference_object_ctor(EbPaReferenceObject *pa_ref_obj_,
         (EbPictureBufferDescInitData *)object_init_data_ptr;
 
     pa_ref_obj_->dctor = eb_pa_reference_object_dctor;
-#if INL_ME
+#if FEATURE_INL_ME
     EbPaReferenceObjectDescInitData *pa_ref_init_data_ptr =
         (EbPaReferenceObjectDescInitData *)object_init_data_ptr;
     pa_ref_obj_->dummy_obj = pa_ref_init_data_ptr->empty_pa_buffers;
@@ -416,7 +420,7 @@ EbErrorType eb_pa_reference_object_creator(EbPtr *object_dbl_ptr, EbPtr object_i
     return EB_ErrorNone;
 }
 
-#if INL_ME
+#if FEATURE_INL_ME
 static void eb_down_scaled_object_dctor(EbPtr p) {
     EbDownScaledObject *ds_obj = (EbDownScaledObject*)p;
     EB_DELETE(ds_obj->quarter_picture_ptr);

@@ -65,7 +65,7 @@ EbErrorType me_context_ctor(MeContext *object_ptr) {
                     8 * 16); //16= 16 16x16 blocks in a SB.       8=8search points
 
     // Initialize Alt-Ref parameters
-#if !INL_ME
+#if !FEATURE_INL_ME
     object_ptr->me_alt_ref = EB_FALSE;
 #else
     object_ptr->me_type = ME_CLOSE_LOOP;

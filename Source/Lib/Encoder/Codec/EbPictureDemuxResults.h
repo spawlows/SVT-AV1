@@ -51,7 +51,7 @@ typedef struct PictureResultInitData {
  **************************************/
 extern EbErrorType picture_results_creator(EbPtr *object_dbl_ptr, EbPtr object_init_data_ptr);
 
-#if INL_ME
+#if FEATURE_INL_ME
 typedef struct PictureManagerResults {
     EbDctor          dctor;
     EbObjectWrapper *pcs_wrapper_ptr;

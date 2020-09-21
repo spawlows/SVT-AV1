@@ -20,7 +20,7 @@
  * Tasks Types
  **************************************/
 typedef enum RateControlTaskTypes {
-#if INL_ME
+#if FEATURE_INL_ME
     RC_INPUT,
 #else
     RC_PICTURE_MANAGER_RESULT,

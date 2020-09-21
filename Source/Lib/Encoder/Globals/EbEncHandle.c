@@ -96,11 +96,14 @@
 #define ENCDEC_INPUT_PORT_MDC                                0
 #define ENCDEC_INPUT_PORT_ENCDEC                             1
 #define ENCDEC_INPUT_PORT_INVALID                           -1
-#if !NEW_DELAY
+#if !FEATURE_NEW_DELAY
 #define SCD_LAD                                             12
 #endif
+#if ENABLE_TPL_ZERO_LAD
+#define TPL_LAD                                              0
+#else
 #define TPL_LAD                                              16
-
+#endif
 /**************************************
  * Globals
  **************************************/
@@ -543,11 +546,16 @@ EbErrorType load_default_buffer_configuration_settings(
         //References. Min to sustain flow (RA-5L-MRP-ON) 7 pictures from previous MGs + 10 needed for curr mini-GoP
         min_ref = 17;
 
-#if INL_ME
+#if FEATURE_INL_ME
         if (scs_ptr->static_config.look_ahead_distance > 0)
             min_me = min_parent;
         else if (scs_ptr->static_config.enable_tpl_la)
+#if TUNE_INL_TPL_ENHANCEMENT
+            //Now we only use minigop size for TPL, if enabled trailing frames, need to increase min_me accordingly
+            min_me = mg_size + 1;
+#else
             min_me = mg_size + 1 + 3; //TODO add Constant for 3
+#endif
         else
             min_me = 1;
 #else
@@ -611,7 +619,7 @@ EbErrorType load_default_buffer_configuration_settings(
     scs_ptr->picture_analysis_fifo_init_count            = 300;
     scs_ptr->picture_decision_fifo_init_count            = 300;
     scs_ptr->initial_rate_control_fifo_init_count        = 300;
-#if INL_ME
+#if FEATURE_INL_ME
     scs_ptr->in_loop_me_fifo_init_count                  = 300;
 #endif
     scs_ptr->picture_demux_fifo_init_count               = 300;
@@ -631,7 +639,7 @@ EbErrorType load_default_buffer_configuration_settings(
         scs_ptr->total_process_init_count += (scs_ptr->picture_analysis_process_init_count            = MAX(MIN(15, core_count >> 1), core_count / 6));
         scs_ptr->total_process_init_count += (scs_ptr->motion_estimation_process_init_count =  MAX(MIN(20, core_count >> 1), core_count / 3));//1);//
         scs_ptr->total_process_init_count += (scs_ptr->source_based_operations_process_init_count     = MAX(MIN(3, core_count >> 1), core_count / 12));
-#if INL_ME
+#if FEATURE_INL_ME
         // TODO: Tune the count here
         scs_ptr->total_process_init_count += (scs_ptr->inlme_process_init_count                       = MAX(MIN(20, core_count >> 1), core_count / 3));
 #endif
@@ -649,7 +657,7 @@ EbErrorType load_default_buffer_configuration_settings(
         scs_ptr->total_process_init_count += (scs_ptr->picture_analysis_process_init_count            = 1);
         scs_ptr->total_process_init_count += (scs_ptr->motion_estimation_process_init_count           = 1);
         scs_ptr->total_process_init_count += (scs_ptr->source_based_operations_process_init_count     = 1);
-#if INL_ME
+#if FEATURE_INL_ME
         scs_ptr->total_process_init_count += (scs_ptr->inlme_process_init_count                       = 1);
 #endif
         scs_ptr->total_process_init_count += (scs_ptr->mode_decision_configuration_process_init_count = 1);
@@ -681,7 +689,7 @@ EbErrorType load_default_buffer_configuration_settings(
 }
  // Rate Control
 static RateControlPorts rate_control_ports[] = {
-#if INL_ME
+#if FEATURE_INL_ME
     {RATE_CONTROL_INPUT_PORT_INLME,                 0},
 #else
     {RATE_CONTROL_INPUT_PORT_PICTURE_MANAGER,       0},
@@ -776,7 +784,7 @@ static void eb_enc_handle_stop_threads(EbEncHandle *enc_handle_ptr)
     // Picture Manager
     EB_DESTROY_THREAD(enc_handle_ptr->picture_manager_thread_handle);
 
-#if INL_ME
+#if FEATURE_INL_ME
     // Inloop ME
     EB_DESTROY_THREAD_ARRAY(enc_handle_ptr->ime_thread_handle_array, control_set_ptr->inlme_process_init_count);
 #endif
@@ -819,7 +827,7 @@ static void eb_enc_handle_dctor(EbPtr p)
     EB_DELETE_PTR_ARRAY(enc_handle_ptr->me_pool_ptr_array, enc_handle_ptr->encode_instance_total_count);
     EB_DELETE_PTR_ARRAY(enc_handle_ptr->picture_control_set_pool_ptr_array, enc_handle_ptr->encode_instance_total_count);
     EB_DELETE_PTR_ARRAY(enc_handle_ptr->pa_reference_picture_pool_ptr_array, enc_handle_ptr->encode_instance_total_count);
-#if INL_ME
+#if FEATURE_INL_ME
     EB_DELETE_PTR_ARRAY(enc_handle_ptr->down_scaled_picture_pool_ptr_array, enc_handle_ptr->encode_instance_total_count);
 #endif
     EB_DELETE_PTR_ARRAY(enc_handle_ptr->overlay_input_picture_pool_ptr_array, enc_handle_ptr->encode_instance_total_count);
@@ -832,7 +840,7 @@ static void eb_enc_handle_dctor(EbPtr p)
     EB_DELETE(enc_handle_ptr->motion_estimation_results_resource_ptr);
     EB_DELETE(enc_handle_ptr->initial_rate_control_results_resource_ptr);
     EB_DELETE(enc_handle_ptr->picture_demux_results_resource_ptr);
-#if INL_ME
+#if FEATURE_INL_ME
     EB_DELETE(enc_handle_ptr->pic_mgr_res_srm);
 #endif
     EB_DELETE(enc_handle_ptr->rate_control_tasks_resource_ptr);
@@ -848,7 +856,7 @@ static void eb_enc_handle_dctor(EbPtr p)
     EB_DELETE_PTR_ARRAY(enc_handle_ptr->picture_analysis_context_ptr_array, enc_handle_ptr->scs_instance_array[0]->scs_ptr->picture_analysis_process_init_count);
     EB_DELETE_PTR_ARRAY(enc_handle_ptr->motion_estimation_context_ptr_array, enc_handle_ptr->scs_instance_array[0]->scs_ptr->motion_estimation_process_init_count);
     EB_DELETE_PTR_ARRAY(enc_handle_ptr->source_based_operations_context_ptr_array, enc_handle_ptr->scs_instance_array[0]->scs_ptr->source_based_operations_process_init_count);
-#if INL_ME
+#if FEATURE_INL_ME
     EB_DELETE_PTR_ARRAY(enc_handle_ptr->inlme_context_ptr_array, enc_handle_ptr->scs_instance_array[0]->scs_ptr->inlme_process_init_count);
 #endif
     EB_DELETE_PTR_ARRAY(enc_handle_ptr->mode_decision_configuration_context_ptr_array, enc_handle_ptr->scs_instance_array[0]->scs_ptr->mode_decision_configuration_process_init_count);
@@ -981,7 +989,7 @@ EbErrorType rest_results_creator(
     return EB_ErrorNone;
 }
 
-#if INL_ME
+#if FEATURE_INL_ME
 static int create_down_scaled_buf_descs(EbEncHandle *enc_handle_ptr, uint32_t instance_index)
 {
     SequenceControlSet* scs_ptr = enc_handle_ptr->scs_instance_array[instance_index]->scs_ptr;
@@ -1164,7 +1172,7 @@ EB_API EbErrorType svt_av1_enc_init(EbComponentType *svt_enc_component)
     uint32_t instance_index;
     uint32_t process_index;
     uint32_t max_picture_width;
-#if !INL_ME
+#if !FEATURE_INL_ME
     EbBool is_16bit = (EbBool)(enc_handle_ptr->scs_instance_array[0]->scs_ptr->static_config.encoder_bit_depth > EB_8BIT);
 #endif
     EbColorFormat color_format = enc_handle_ptr->scs_instance_array[0]->scs_ptr->static_config.encoder_color_format;
@@ -1313,7 +1321,7 @@ EB_API EbErrorType svt_av1_enc_init(EbComponentType *svt_enc_component)
 
     // Allocate Resource Arrays
     EB_ALLOC_PTR_ARRAY(enc_handle_ptr->reference_picture_pool_ptr_array, enc_handle_ptr->encode_instance_total_count);
-#if INL_ME
+#if FEATURE_INL_ME
     if (enc_handle_ptr->scs_instance_array[0]->scs_ptr->in_loop_me)
         EB_ALLOC_PTR_ARRAY(enc_handle_ptr->down_scaled_picture_pool_ptr_array, enc_handle_ptr->encode_instance_total_count);
 #endif
@@ -1322,7 +1330,7 @@ EB_API EbErrorType svt_av1_enc_init(EbComponentType *svt_enc_component)
     EB_ALLOC_PTR_ARRAY(enc_handle_ptr->overlay_input_picture_pool_ptr_array, enc_handle_ptr->encode_instance_total_count);
 
     // Rate Control
-#if INL_ME
+#if FEATURE_INL_ME
     rate_control_ports[0].count = enc_handle_ptr->scs_instance_array[0]->scs_ptr->inlme_process_init_count;
 #else
     rate_control_ports[0].count = EB_PictureManagerProcessInitCount;
@@ -1335,7 +1343,7 @@ EB_API EbErrorType svt_av1_enc_init(EbComponentType *svt_enc_component)
     enc_dec_ports[ENCDEC_INPUT_PORT_ENCDEC].count = enc_handle_ptr->scs_instance_array[0]->scs_ptr->enc_dec_process_init_count;
 
     for (instance_index = 0; instance_index < enc_handle_ptr->encode_instance_total_count; ++instance_index) {
-#if !INL_ME
+#if !FEATURE_INL_ME
         EbReferenceObjectDescInitData     eb_ref_obj_ect_desc_init_data_structure;
         EbPaReferenceObjectDescInitData   eb_pa_ref_obj_ect_desc_init_data_structure;
         EbPictureBufferDescInitData       ref_pic_buf_desc_init_data;
@@ -1596,7 +1604,7 @@ EB_API EbErrorType svt_av1_enc_init(EbComponentType *svt_enc_component)
 
     }
 
-#if INL_ME
+#if FEATURE_INL_ME
     // Picture Mgr Results
     {
         PictureManagerResultInitData picture_manager_result_init_data;
@@ -1812,7 +1820,7 @@ EB_API EbErrorType svt_av1_enc_init(EbComponentType *svt_enc_component)
     }
 
     // Picture Manager Context
-#if INL_ME
+#if FEATURE_INL_ME
     EB_NEW(
         enc_handle_ptr->picture_manager_context_ptr,
         picture_manager_context_ctor,
@@ -1826,7 +1834,7 @@ EB_API EbErrorType svt_av1_enc_init(EbComponentType *svt_enc_component)
         rate_control_port_lookup(RATE_CONTROL_INPUT_PORT_PICTURE_MANAGER, 0));
 #endif
 
-#if INL_ME
+#if FEATURE_INL_ME
     // In-Loop ME Context
     EB_ALLOC_PTR_ARRAY(enc_handle_ptr->inlme_context_ptr_array, enc_handle_ptr->scs_instance_array[0]->scs_ptr->inlme_process_init_count);
 
@@ -1966,7 +1974,7 @@ EB_API EbErrorType svt_av1_enc_init(EbComponentType *svt_enc_component)
     // Picture Manager
     EB_CREATE_THREAD(enc_handle_ptr->picture_manager_thread_handle, picture_manager_kernel, enc_handle_ptr->picture_manager_context_ptr);
 
-#if INL_ME
+#if FEATURE_INL_ME
     // Close Loop Motion Estimation
     EB_CREATE_THREAD_ARRAY(enc_handle_ptr->ime_thread_handle_array, control_set_ptr->inlme_process_init_count,
             inloop_me_kernel,
@@ -2034,7 +2042,7 @@ EB_API EbErrorType svt_av1_enc_deinit(EbComponentType *svt_enc_component){
         eb_shutdown_process(handle->motion_estimation_results_resource_ptr);
         eb_shutdown_process(handle->initial_rate_control_results_resource_ptr);
         eb_shutdown_process(handle->picture_demux_results_resource_ptr);
-#if INL_ME
+#if FEATURE_INL_ME
         eb_shutdown_process(handle->pic_mgr_res_srm);
 #endif
         eb_shutdown_process(handle->rate_control_tasks_resource_ptr);
@@ -2264,10 +2272,11 @@ void set_param_based_on_input(SequenceControlSet *scs_ptr)
         else
             scs_ptr->down_sampling_method_me_search = ME_DECIMATED_DOWNSAMPLED;
 
-#if INL_ME
-    //if (scs_ptr->static_config.rate_control_mode == 0 && scs_ptr->static_config.enable_tpl_la ==0)
-    //    scs_ptr->in_loop_me = 1;
-    scs_ptr->in_loop_me = 0;
+#if FEATURE_INL_ME
+    if (scs_ptr->static_config.rate_control_mode != 0 && use_input_stat(scs_ptr))
+        scs_ptr->in_loop_me = 0;
+    else
+        scs_ptr->in_loop_me = 1;
 #endif
 
     // Set over_boundary_block_mode     Settings

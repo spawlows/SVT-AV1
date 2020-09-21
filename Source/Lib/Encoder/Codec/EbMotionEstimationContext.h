@@ -41,7 +41,7 @@ typedef struct MePredictionUnit {
     uint32_t sub_pel_direction;
 } MePredictionUnit;
 
-#if INL_ME
+#if FEATURE_INL_ME
 typedef enum EbMeType {
     ME_CLOSE_LOOP  = 0,
     ME_MCTF = 1,
@@ -411,11 +411,11 @@ typedef struct MeContext {
     // ------- Context for Alt-Ref ME ------
     uint16_t adj_search_area_width;
     uint16_t adj_search_area_height;
-#if !INL_ME
+#if !FEATURE_INL_ME
     EbBool   me_alt_ref;
 #endif
     void *   alt_ref_reference_ptr;
-#if INL_ME
+#if FEATURE_INL_ME
     // Open Loop ME
     EbMeType me_type;
     EbDownScaledBufDescPtrArray mctf_ref_desc_ptr_array;

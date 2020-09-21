@@ -155,7 +155,7 @@ void global_motion_estimation(PictureParentControlSet *pcs_ptr, MeContext *conte
     }
 }
 
-#if INL_ME
+#if FEATURE_INL_ME
 void global_motion_estimation_inl(PictureParentControlSet *pcs_ptr, MeContext *context_ptr,
                               EbPictureBufferDesc *input_picture_ptr) {
     EbDownScaledObject *ds_object =
@@ -225,20 +225,20 @@ void global_motion_estimation_inl(PictureParentControlSet *pcs_ptr, MeContext *c
             // based on the input search mode
             if (pcs_ptr->gm_level == GM_DOWN16) {
                 ref_picture_ptr = reference_object->sixteenth_reference_picture;
-#if INL_GM_ON_INPUT_DBG
+#if TUNE_INL_GM_ON_INPUT
                 ref_picture_ptr = reference_object->sixteenth_input_picture;
 #endif
                 input_picture_ptr = sixteenth_picture_ptr;
             }
             else if (pcs_ptr->gm_level == GM_DOWN) {
                 ref_picture_ptr = reference_object->quarter_reference_picture;
-#if INL_GM_ON_INPUT_DBG
+#if TUNE_INL_GM_ON_INPUT
                 ref_picture_ptr = reference_object->quarter_input_picture;
 #endif
                 input_picture_ptr = quarter_picture_ptr;
             } else {
                 ref_picture_ptr = (EbPictureBufferDesc *)reference_object->reference_picture;
-#if INL_GM_ON_INPUT_DBG
+#if TUNE_INL_GM_ON_INPUT
                 ref_picture_ptr = reference_object->input_picture;
 #endif
             }
