@@ -1858,6 +1858,30 @@ void md_pme_search_controls(ModeDecisionContext *mdctxt, uint8_t md_pme_level) {
         break;
     }
 }
+#if PARTIAL_FREQUENCY
+void set_pf_controls(ModeDecisionContext *mdctxt, uint8_t pf_level) {
+
+   PfCtrls *pf_ctrls = &mdctxt->pf_ctrls;
+
+    switch (pf_level) {
+    case 0:
+        pf_ctrls->pf_shape = ONLY_DC_SHAPE;
+        break;
+    case 1:
+        pf_ctrls->pf_shape = DEFAULT_SHAPE;
+        break;
+    case 2:
+        pf_ctrls->pf_shape = N2_SHAPE;
+        break;
+    case 3:
+        pf_ctrls->pf_shape = N4_SHAPE;
+        break;
+    default:
+        assert(0);
+        break;
+    }
+}
+#endif
 /*
  * Control Adaptive ME search
  */
@@ -2892,6 +2916,19 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
         }
     }
     set_block_based_depth_refinement_controls(context_ptr, context_ptr->block_based_depth_refinement_level);
+#if PARTIAL_FREQUENCY
+    if (pcs_ptr->slice_type != I_SLICE) {
+        if (pd_pass == PD_PASS_0)
+            context_ptr->pf_level = 1;
+        else if (pd_pass == PD_PASS_1)
+            context_ptr->pf_level = 1;
+        else
+            context_ptr->pf_level = 1;
+    } else {
+        context_ptr->pf_level = 1;
+    }
+    set_pf_controls(context_ptr, context_ptr->pf_level);
+#endif
     if (pd_pass == PD_PASS_0)
         context_ptr->md_sq_mv_search_level = 0;
     else if (pd_pass == PD_PASS_1)

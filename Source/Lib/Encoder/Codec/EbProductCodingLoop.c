@@ -4670,7 +4670,11 @@ void tx_type_search(PictureControlSet *pcs_ptr, ModeDecisionContext *context_ptr
             context_ptr->hbd_mode_decision ? EB_10BIT : EB_8BIT,
             tx_type,
             PLANE_TYPE_Y,
+#if PARTIAL_FREQUENCY
+            context_ptr->pf_ctrls.pf_shape);
+#else
             DEFAULT_SHAPE);
+#endif
 
         quantized_dc_txt[tx_type] = av1_quantize_inv_quantize(
             pcs_ptr,

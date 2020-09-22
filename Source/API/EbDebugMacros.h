@@ -79,6 +79,8 @@ extern "C" {
 #define ENABLE_TPL_ZERO_LAD 1 // Enable TPL in loop to work with zero LAD
 #define TUNE_TPL 1   // Tuning TPL algorithm for QP assignment
 #endif
+
+#define PARTIAL_FREQUENCY 1 //Calculate partial frequency transforms N2 or N4
 // END  svt-03 /////////////////////////////////////////////////////////
 
 //FOR DEBUGGING - Do not remove
