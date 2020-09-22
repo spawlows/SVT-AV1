@@ -169,6 +169,11 @@ typedef struct DepthRefinementCtrls {
     int64_t parent_to_current_th; // decrease towards a more agressive level
 
 }DepthRefinementCtrls;
+#if PARTIAL_FREQUENCY
+typedef struct PfCtrls {
+    EB_TRANS_COEFF_SHAPE pf_shape;
+} PfCtrls;
+#endif
 typedef struct MdNsqMotionSearchCtrls {
     uint8_t enabled;                    // 0: NSQ motion search @ MD OFF; 1: NSQ motion search @ MD ON
     uint8_t use_ssd;                    // 0: search using SAD; 1: search using SSD
@@ -498,6 +503,10 @@ typedef struct ModeDecisionContext {
     uint8_t      dist_based_ref_pruning;
     uint8_t block_based_depth_refinement_level;
     DepthRefinementCtrls depth_refinement_ctrls;
+#if PARTIAL_FREQUENCY
+    uint8_t pf_level;
+    PfCtrls pf_ctrls;
+#endif
     // Control signals for MD sparse search (used for increasing ME search for active clips)
     uint8_t md_sq_mv_search_level;
     MdSqMotionSearchCtrls md_sq_me_ctrls;

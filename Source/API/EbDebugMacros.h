@@ -82,6 +82,7 @@ extern "C" {
 
 #define FEATURE_NIC_SCALING_PER_STAGE            1 // Add ability to scale NICs per stage; improve current trade-offs
 #define TUNE_NICS                                1 // Tune settings for NIC scaling/pruning/# of stages to improve trade-offs with new scaling
+#define PARTIAL_FREQUENCY                        1 //Calculate partial frequency transforms N2 or N4
 // END  svt-03 /////////////////////////////////////////////////////////
 
 //FOR DEBUGGING - Do not remove
