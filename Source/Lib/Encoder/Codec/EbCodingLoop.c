@@ -385,7 +385,11 @@ static void av1_encode_loop(PictureControlSet *pcs_ptr, EncDecContext *context_p
             EB_8BIT,
             txb_ptr->transform_type[PLANE_TYPE_Y],
             PLANE_TYPE_Y,
+#if PARTIAL_FREQUENCY
+            context_ptr->md_context->pf_ctrls.pf_shape);
+#else
             DEFAULT_SHAPE);
+#endif
 
         int32_t seg_qp = pcs_ptr->parent_pcs_ptr->frm_hdr.segmentation_params.segmentation_enabled
                              ? pcs_ptr->parent_pcs_ptr->frm_hdr.segmentation_params
@@ -539,7 +543,11 @@ static void av1_encode_loop(PictureControlSet *pcs_ptr, EncDecContext *context_p
             EB_8BIT,
             txb_ptr->transform_type[PLANE_TYPE_UV],
             PLANE_TYPE_UV,
+#if PARTIAL_FREQUENCY
+            context_ptr->md_context->pf_ctrls.pf_shape);
+#else
             DEFAULT_SHAPE);
+#endif
 
         int32_t seg_qp = pcs_ptr->parent_pcs_ptr->frm_hdr.segmentation_params.segmentation_enabled
                              ? pcs_ptr->parent_pcs_ptr->frm_hdr.segmentation_params
@@ -591,7 +599,11 @@ static void av1_encode_loop(PictureControlSet *pcs_ptr, EncDecContext *context_p
             EB_8BIT,
             txb_ptr->transform_type[PLANE_TYPE_UV],
             PLANE_TYPE_UV,
+#if PARTIAL_FREQUENCY
+            context_ptr->md_context->pf_ctrls.pf_shape);
+#else
             DEFAULT_SHAPE);
+#endif
         blk_ptr->quantized_dc[2][context_ptr->txb_itr] = av1_quantize_inv_quantize(
             sb_ptr->pcs_ptr,
             context_ptr->md_context,
@@ -766,7 +778,11 @@ static void av1_encode_loop_16bit(PictureControlSet *pcs_ptr, EncDecContext *con
                 bit_depth,
                 txb_ptr->transform_type[PLANE_TYPE_Y],
                 PLANE_TYPE_Y,
+#if PARTIAL_FREQUENCY
+                context_ptr->md_context->pf_ctrls.pf_shape);
+#else
                 DEFAULT_SHAPE);
+#endif
 
             int32_t seg_qp =
                 pcs_ptr->parent_pcs_ptr->frm_hdr.segmentation_params.segmentation_enabled
@@ -919,7 +935,11 @@ static void av1_encode_loop_16bit(PictureControlSet *pcs_ptr, EncDecContext *con
                 bit_depth,
                 txb_ptr->transform_type[PLANE_TYPE_UV],
                 PLANE_TYPE_UV,
+#if PARTIAL_FREQUENCY
+                context_ptr->md_context->pf_ctrls.pf_shape);
+#else
                 DEFAULT_SHAPE);
+#endif
             int32_t seg_qp =
                 pcs_ptr->parent_pcs_ptr->frm_hdr.segmentation_params.segmentation_enabled
                     ? pcs_ptr->parent_pcs_ptr->frm_hdr.segmentation_params
@@ -971,7 +991,11 @@ static void av1_encode_loop_16bit(PictureControlSet *pcs_ptr, EncDecContext *con
                 bit_depth,
                 txb_ptr->transform_type[PLANE_TYPE_UV],
                 PLANE_TYPE_UV,
+#if PARTIAL_FREQUENCY
+                context_ptr->md_context->pf_ctrls.pf_shape);
+#else
                 DEFAULT_SHAPE);
+#endif
 
             blk_ptr->quantized_dc[2][context_ptr->txb_itr] = av1_quantize_inv_quantize(
                 sb_ptr->pcs_ptr,
