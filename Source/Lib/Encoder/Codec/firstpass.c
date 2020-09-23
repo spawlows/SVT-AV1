@@ -1800,6 +1800,9 @@ void set_depth_cycle_redcution_controls(ModeDecisionContext *mdctxt, uint8_t dep
 void adaptive_md_cycles_redcution_controls(ModeDecisionContext *mdctxt, uint8_t adaptive_md_cycles_red_mode);
 void set_obmc_controls(ModeDecisionContext *mdctxt, uint8_t obmc_mode) ;
 void set_txs_cycle_reduction_controls(ModeDecisionContext *mdctxt, uint8_t txs_cycles_red_mode);
+#if FEATURE_NIC_SCALING_PER_STAGE
+void set_nic_controls(ModeDecisionContext *mdctxt, uint8_t nic_scaling_level);
+#endif
 
 void coeff_based_switch_md_controls(ModeDecisionContext *mdctxt, uint8_t switch_md_mode_based_on_sq_coeff_level);
 void md_subpel_me_controls(ModeDecisionContext *mdctxt, uint8_t md_subpel_me_level);
@@ -2017,6 +2020,10 @@ EbErrorType first_pass_signal_derivation_enc_dec_kernel(
     context_ptr->txs_in_inter_classes = 0;
 #endif
 
+#if FEATURE_NIC_SCALING_PER_STAGE
+    uint8_t nic_scaling_level = 12;
+    set_nic_controls(context_ptr, nic_scaling_level);
+#else
     // Each NIC scaling level corresponds to a scaling factor, given by the below {x,y}
     // combinations, where x is the numerator, and y is the denominator.  e.g. {1,8} corresponds
     // to 1/8x scaling of the base NICs, which are set in set_md_stage_counts().
@@ -2032,6 +2039,7 @@ EbErrorType first_pass_signal_derivation_enc_dec_kernel(
     //{ 1,8 },    // level9
     //{ 1,16}     // level10
     context_ptr->nic_scaling_level = 9;
+#endif
 
     uint8_t txs_cycles_reduction_level = 0;
     set_txs_cycle_reduction_controls(context_ptr, txs_cycles_reduction_level);

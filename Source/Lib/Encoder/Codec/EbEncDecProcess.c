@@ -2215,6 +2215,89 @@ void set_txs_cycle_reduction_controls(ModeDecisionContext *mdctxt, uint8_t txs_c
         break;
     }
 }
+#if FEATURE_NIC_SCALING_PER_STAGE
+void set_nic_controls(ModeDecisionContext *mdctxt, uint8_t nic_scaling_level) {
+
+    NicCtrls* nic_ctrls = &mdctxt->nic_ctrls;
+
+    switch (nic_scaling_level)
+    {
+    case 0:
+        nic_ctrls->stage1_scaling_num = 20;
+        nic_ctrls->stage2_scaling_num = 20;
+        nic_ctrls->stage3_scaling_num = 20;
+        break;
+    case 1:
+        nic_ctrls->stage1_scaling_num = 16;
+        nic_ctrls->stage2_scaling_num = 16;
+        nic_ctrls->stage3_scaling_num = 16;
+        break;
+    case 2:
+        nic_ctrls->stage1_scaling_num = 14;
+        nic_ctrls->stage2_scaling_num = 14;
+        nic_ctrls->stage3_scaling_num = 14;
+        break;
+    case 3:
+        nic_ctrls->stage1_scaling_num = 12;
+        nic_ctrls->stage2_scaling_num = 12;
+        nic_ctrls->stage3_scaling_num = 12;
+        break;
+    case 4:
+        nic_ctrls->stage1_scaling_num = 10;
+        nic_ctrls->stage2_scaling_num = 10;
+        nic_ctrls->stage3_scaling_num = 10;
+        break;
+    case 5:
+        nic_ctrls->stage1_scaling_num = 8;
+        nic_ctrls->stage2_scaling_num = 8;
+        nic_ctrls->stage3_scaling_num = 8;
+        break;
+    case 6:
+        nic_ctrls->stage1_scaling_num = 6;
+        nic_ctrls->stage2_scaling_num = 6;
+        nic_ctrls->stage3_scaling_num = 6;
+        break;
+    case 7:
+        nic_ctrls->stage1_scaling_num = 5;
+        nic_ctrls->stage2_scaling_num = 5;
+        nic_ctrls->stage3_scaling_num = 5;
+        break;
+    case 8:
+        nic_ctrls->stage1_scaling_num = 4;
+        nic_ctrls->stage2_scaling_num = 4;
+        nic_ctrls->stage3_scaling_num = 4;
+        break;
+    case 9:
+        nic_ctrls->stage1_scaling_num = 5;
+        nic_ctrls->stage2_scaling_num = 3;
+        nic_ctrls->stage3_scaling_num = 3;
+        break;
+    case 10:
+        nic_ctrls->stage1_scaling_num = 3;
+        nic_ctrls->stage2_scaling_num = 3;
+        nic_ctrls->stage3_scaling_num = 3;
+        break;
+    case 11:
+        nic_ctrls->stage1_scaling_num = 3;
+        nic_ctrls->stage2_scaling_num = 2;
+        nic_ctrls->stage3_scaling_num = 2;
+        break;
+    case 12:
+        nic_ctrls->stage1_scaling_num = 2;
+        nic_ctrls->stage2_scaling_num = 2;
+        nic_ctrls->stage3_scaling_num = 2;
+        break;
+    case 13:
+        nic_ctrls->stage1_scaling_num = 1;
+        nic_ctrls->stage2_scaling_num = 1;
+        nic_ctrls->stage3_scaling_num = 1;
+        break;
+    default:
+        assert(0);
+        break;
+    }
+}
+#endif
 /******************************************************
 * Derive EncDec Settings for OQ
 Input   : encoder mode and pd pass
@@ -2488,7 +2571,11 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
     }
     else
 #if FEATURE_MDS2
+#if TUNE_NICS
+        if (enc_mode <= ENC_M3)
+#else
         if (enc_mode <= ENC_M1)
+#endif
             context_ptr->md_staging_mode = MD_STAGING_MODE_2;
         else
             context_ptr->md_staging_mode = MD_STAGING_MODE_1;
@@ -2567,10 +2654,21 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
     else if (pd_pass == PD_PASS_1)
         context_ptr->md_stage_1_cand_prune_th = 75;
     else
+#if TUNE_NICS
+        if (enc_mode <= ENC_M0)
+            context_ptr->md_stage_1_cand_prune_th = (uint64_t)~0;
+        else if (enc_mode <= ENC_M2)
+            context_ptr->md_stage_1_cand_prune_th = 300;
+        else if (enc_mode <= ENC_M5)
+            context_ptr->md_stage_1_cand_prune_th = 200;
+        else
+            context_ptr->md_stage_1_cand_prune_th = 45;
+#else
         if (enc_mode <= ENC_M5)
             context_ptr->md_stage_1_cand_prune_th = (uint64_t)~0;
         else
             context_ptr->md_stage_1_cand_prune_th = 45;
+#endif
 
     // md_stage_1_class_prune_th (for class removal)
     // Remove class if deviation to the best higher than TH_C
@@ -2579,10 +2677,21 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
     else if (pd_pass == PD_PASS_1)
         context_ptr->md_stage_1_class_prune_th = 100;
     else
+#if TUNE_NICS
+        if (enc_mode <= ENC_M0)
+            context_ptr->md_stage_1_class_prune_th = (uint64_t)~0;
+        else if (enc_mode <= ENC_M2)
+            context_ptr->md_stage_1_class_prune_th = 300;
+        else if (enc_mode <= ENC_M5)
+            context_ptr->md_stage_1_class_prune_th = 200;
+        else
+            context_ptr->md_stage_1_class_prune_th = 100;
+#else
         if (enc_mode <= ENC_M5)
             context_ptr->md_stage_1_class_prune_th = (uint64_t)~0;
         else
             context_ptr->md_stage_1_class_prune_th = 100;
+#endif
 
 #if FEATURE_MDS2
    // md_stage_2_cand_prune_th (for single candidate removal per class)
@@ -2676,6 +2785,7 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
             context_ptr->coeff_area_based_bypass_nsq_th = 0;
         else
             context_ptr->coeff_area_based_bypass_nsq_th = context_ptr->enable_area_based_cycles_allocation ? nsq_cycles_reduction_th[context_ptr->sb_class] : 0;
+
         uint8_t adaptive_md_cycles_level = 0;
         if (pd_pass == PD_PASS_2) {
             if (enc_mode <= ENC_MR)
@@ -2692,6 +2802,7 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
                 adaptive_md_cycles_level = pcs_ptr->slice_type == I_SLICE ? 4 : 6;
         }
         adaptive_md_cycles_redcution_controls(context_ptr, adaptive_md_cycles_level);
+
         // Weighting (expressed as a percentage) applied to
         // square shape costs for determining if a and b
         // shapes should be skipped. Namely:
@@ -2819,6 +2930,29 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
     else
         context_ptr->txs_in_inter_classes = 0;
 #endif
+#if FEATURE_NIC_SCALING_PER_STAGE
+    // If using a mode offset, do not modify the NSQ-targeting features or NICS
+    if (!mode_offset) {
+        uint8_t nic_scaling_level = 1;
+
+        if (enc_mode <= ENC_MR)
+            nic_scaling_level = 0;
+        else if (enc_mode <= ENC_M0)
+            nic_scaling_level = 1;
+        else if (enc_mode <= ENC_M1)
+            nic_scaling_level = 4;
+        else if (enc_mode <= ENC_M2)
+            nic_scaling_level = 5;
+        else if (enc_mode <= ENC_M3)
+            nic_scaling_level = 7;
+        else if (enc_mode <= ENC_M4)
+            nic_scaling_level = 9;
+        else
+            nic_scaling_level = 11;
+
+        set_nic_controls(context_ptr, nic_scaling_level);
+    }
+#else
     // Each NIC scaling level corresponds to a scaling factor, given by the below {x,y}
     // combinations, where x is the numerator, and y is the denominator.  e.g. {1,8} corresponds
     // to 1/8x scaling of the base NICs, which are set in set_md_stage_counts().
@@ -2848,6 +2982,8 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
         else
             context_ptr->nic_scaling_level = 9;
     }
+#endif
+
     uint8_t txs_cycles_reduction_level = 0;
     set_txs_cycle_reduction_controls(context_ptr, txs_cycles_reduction_level);
     // Set md_filter_intra_mode @ MD

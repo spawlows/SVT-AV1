@@ -1104,6 +1104,7 @@ void fast_loop_core(ModeDecisionCandidateBuffer *candidate_buffer, PictureContro
     if (context_ptr->md_staging_mode == MD_STAGING_MODE_0)
         *(candidate_buffer->full_cost_ptr) = *(candidate_buffer->fast_cost_ptr);
 }
+#if !FEATURE_NIC_SCALING_PER_STAGE
 uint32_t nics_scale_factor[11/*levels*/][2/*num/denum*/] =
 {
     {10,8},   // level0
@@ -1118,6 +1119,7 @@ uint32_t nics_scale_factor[11/*levels*/][2/*num/denum*/] =
     {1,8},    // level9
     {1,16}    // level10
 };
+#endif
 void set_dist_based_ref_pruning_controls(
     ModeDecisionContext *mdctxt, uint8_t dist_based_ref_pruning_level) {
     RefPruningControls *ref_pruning_ctrls = &mdctxt->ref_pruning_ctrls;
@@ -1253,6 +1255,25 @@ void scale_nics(PictureControlSet *pcs_ptr, ModeDecisionContext *context_ptr) {
     // minimum nics allowed
     uint32_t min_nics = pcs_ptr->parent_pcs_ptr->is_used_as_reference_flag ? 2 : 1;
 
+#if FEATURE_NIC_SCALING_PER_STAGE
+    // Set the scaling numerators
+    uint32_t stage1_scale_num = context_ptr->nic_ctrls.stage1_scaling_num;
+    uint32_t stage2_scale_num = context_ptr->nic_ctrls.stage2_scaling_num;
+    uint32_t stage3_scale_num = context_ptr->nic_ctrls.stage3_scaling_num;
+
+    // The scaling denominator is 16 for all stages
+    uint32_t scale_denum = 16;
+
+    // no NIC setting should be done beyond this point
+    for (uint8_t cidx = 0; cidx < CAND_CLASS_TOTAL; ++cidx) {
+        context_ptr->md_stage_1_count[cidx] = MAX(min_nics,
+            DIVIDE_AND_ROUND(context_ptr->md_stage_1_count[cidx] * stage1_scale_num, scale_denum));
+        context_ptr->md_stage_2_count[cidx] = MAX(min_nics,
+            DIVIDE_AND_ROUND(context_ptr->md_stage_2_count[cidx] * stage2_scale_num, scale_denum));
+        context_ptr->md_stage_3_count[cidx] = MAX(min_nics,
+            DIVIDE_AND_ROUND(context_ptr->md_stage_3_count[cidx] * stage3_scale_num, scale_denum));
+    }
+#else
     uint8_t nics_scling_level = context_ptr->nic_scaling_level;
     uint32_t scale_num   = nics_scale_factor[nics_scling_level][0];
     uint32_t scale_denum = nics_scale_factor[nics_scling_level][1];
@@ -1268,6 +1289,7 @@ void scale_nics(PictureControlSet *pcs_ptr, ModeDecisionContext *context_ptr) {
             DIVIDE_AND_ROUND(context_ptr->md_stage_3_count[cidx] * scale_num, scale_denum));
 #endif
     }
+#endif
 }
 
 void set_md_stage_counts(PictureControlSet *pcs_ptr, ModeDecisionContext *context_ptr,

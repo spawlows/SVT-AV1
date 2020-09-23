@@ -79,6 +79,9 @@ extern "C" {
 #define ENABLE_TPL_ZERO_LAD 1 // Enable TPL in loop to work with zero LAD
 #define TUNE_TPL 1   // Tuning TPL algorithm for QP assignment
 #endif
+
+#define FEATURE_NIC_SCALING_PER_STAGE            1 // Add ability to scale NICs per stage; improve current trade-offs
+#define TUNE_NICS                                1 // Tune settings for NIC scaling/pruning/# of stages to improve trade-offs with new scaling
 // END  svt-03 /////////////////////////////////////////////////////////
 
 //FOR DEBUGGING - Do not remove
