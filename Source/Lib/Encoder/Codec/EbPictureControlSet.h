@@ -880,6 +880,9 @@ typedef struct PictureParentControlSet {
 #if TUNE_TPL
     uint8_t pd_window_count;
 #endif
+#if ENABLE_TPL_TRAILING
+    uint8_t tpl_trailing_frame_count;
+#endif
 #if FIX_LAD_DEADLOCK
     uint8_t is_next_frame_intra;
 #endif

@@ -1792,6 +1792,9 @@ EbErrorType first_pass_signal_derivation_multi_processes(SequenceControlSet *   
     // Level 2 .. 9 : Only set ref_list0_count_try and ref_list1_count_try
 
     pcs_ptr->tpl_opt_flag = 1;
+#if ENABLE_TPL_TRAILING
+    pcs_ptr->tpl_trailing_frame_count = 0;
+#endif
     return return_error;
 }
 void set_txt_cycle_reduction_controls(ModeDecisionContext *mdctxt, uint8_t txt_cycles_red_mode);

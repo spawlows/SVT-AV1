@@ -551,8 +551,12 @@ EbErrorType load_default_buffer_configuration_settings(
             min_me = min_parent;
         else if (scs_ptr->static_config.enable_tpl_la)
 #if TUNE_INL_TPL_ENHANCEMENT
+#if ENABLE_TPL_TRAILING
+        min_me = mg_size + 1 + SCD_LAD;
+#else
             //Now we only use minigop size for TPL, if enabled trailing frames, need to increase min_me accordingly
-            min_me = mg_size + 1;
+        min_me = mg_size + 1;
+#endif
 #else
             min_me = mg_size + 1 + 3; //TODO add Constant for 3
 #endif
@@ -2273,7 +2277,7 @@ void set_param_based_on_input(SequenceControlSet *scs_ptr)
             scs_ptr->down_sampling_method_me_search = ME_DECIMATED_DOWNSAMPLED;
 
 #if FEATURE_INL_ME
-    if (scs_ptr->static_config.rate_control_mode != 0 && use_input_stat(scs_ptr))
+    if (scs_ptr->static_config.rate_control_mode != 0 && !use_input_stat(scs_ptr))
         scs_ptr->in_loop_me = 0;
     else
         scs_ptr->in_loop_me = 1;
