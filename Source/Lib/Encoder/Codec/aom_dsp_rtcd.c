@@ -297,6 +297,11 @@ void setup_rtcd_internal(CPU_FLAGS flags) {
     handle_transform64x32 = handle_transform64x32_c;
     handle_transform64x64 = handle_transform64x64_c;
 #if PARTIAL_FREQUENCY
+    handle_transform16x64_N2_N4 = handle_transform16x64_N2_N4_c;
+    handle_transform32x64_N2_N4 = handle_transform32x64_N2_N4_c;
+    handle_transform64x16_N2_N4 = handle_transform64x16_N2_N4_c;
+    handle_transform64x32_N2_N4 = handle_transform64x32_N2_N4_c;
+    handle_transform64x64_N2_N4 = handle_transform64x64_N2_N4_c;
     eb_av1_fwd_txfm2d_16x8_N2 = eb_av1_fwd_txfm2d_16x8_N2_c;
     eb_av1_fwd_txfm2d_8x16_N2 = eb_av1_fwd_txfm2d_8x16_N2_c;
     eb_av1_fwd_txfm2d_16x4_N2 = eb_av1_fwd_txfm2d_16x4_N2_c;
@@ -618,6 +623,11 @@ void setup_rtcd_internal(CPU_FLAGS flags) {
                     if (flags & HAS_AVX2) handle_transform64x32 = handle_transform64x32_avx2;
                     if (flags & HAS_AVX2) handle_transform64x64 = handle_transform64x64_avx2;
 #if PARTIAL_FREQUENCY
+                    if (flags & HAS_AVX2) handle_transform16x64_N2_N4 = handle_transform16x64_N2_N4_avx2;
+                    if (flags & HAS_AVX2) handle_transform32x64_N2_N4 = handle_transform32x64_N2_N4_avx2;
+                    if (flags & HAS_AVX2) handle_transform64x16_N2_N4 = handle_transform64x16_N2_N4_avx2;
+                    if (flags & HAS_AVX2) handle_transform64x32_N2_N4 = handle_transform64x32_N2_N4_avx2;
+                    if (flags & HAS_AVX2) handle_transform64x64_N2_N4 = handle_transform64x64_N2_N4_avx2;
                     if (flags & HAS_AVX2) eb_av1_fwd_txfm2d_16x8_N2 = eb_av1_fwd_txfm2d_16x8_N2_avx2;
                     if (flags & HAS_AVX2) eb_av1_fwd_txfm2d_8x16_N2 = eb_av1_fwd_txfm2d_8x16_N2_avx2;
                     if (flags & HAS_AVX2) eb_av1_fwd_txfm2d_16x4_N2 = eb_av1_fwd_txfm2d_16x4_N2_avx2;
