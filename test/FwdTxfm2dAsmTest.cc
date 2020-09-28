@@ -114,7 +114,39 @@ static const FwdTxfm2dFunc fwd_txfm_2d_N4_c_func[TX_SIZES_ALL] = {
     eb_av1_fwd_txfm2d_32x8_N4_c,    eb_av1_fwd_txfm2d_16x64_N4_c,
     eb_av1_fwd_txfm2d_64x16_N4_c,
 };
+
+#ifndef NON_AVX512_SUPPORT
+static const FwdTxfm2dFunc fwd_txfm_2d_N2_asm512_func[TX_SIZES_ALL] = {
+    NULL,
+    NULL,
+    NULL,
+    av1_fwd_txfm2d_32x32_N2_avx512,
+    av1_fwd_txfm2d_64x64_N2_avx512,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    av1_fwd_txfm2d_32x64_N2_avx512,
+    av1_fwd_txfm2d_64x32_N2_avx512,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+};
+
+static const FwdTxfm2dFunc fwd_txfm_2d_N4_asm512_func[TX_SIZES_ALL] = {
+    NULL, NULL, NULL, NULL, av1_fwd_txfm2d_64x64_N4_avx512,
+    NULL, NULL, NULL, NULL, NULL,
+    NULL, NULL, NULL, NULL, NULL,
+    NULL, NULL, NULL, NULL,
+};
 #endif
+#endif /*PARTIAL_FREQUENCY*/
+
 /**
  * @brief Unit test for fwd tx 2d avx2 functions:
  * - eb_av1_fwd_txfm2d_{4, 8, 16, 32, 64}x{4, 8, 16, 32, 64}_avx2
@@ -195,7 +227,35 @@ class FwdTxfm2dAsmTest : public ::testing::TestWithParam<FwdTxfm2dAsmParam> {
         run_speed_test(
             "ASM AND N4 ", fwd_txfm_2d_N4_asm_func[tx_size_], test_func);
     }
- #endif
+
+#ifndef NON_AVX512_SUPPORT
+    void run_match_test_N2_512() {
+        FwdTxfm2dFunc test_func_asm = fwd_txfm_2d_N2_asm512_func[tx_size_];
+        FwdTxfm2dFunc ref_func = fwd_txfm_2d_c_func[tx_size_];
+        execute_test(test_func_asm, ref_func, N2_SHAPE);
+    }
+
+    void run_match_test_N4_512() {
+        FwdTxfm2dFunc test_func_asm = fwd_txfm_2d_N4_asm512_func[tx_size_];
+        FwdTxfm2dFunc ref_func = fwd_txfm_2d_c_func[tx_size_];
+        execute_test(test_func_asm, ref_func, N4_SHAPE);
+    }
+
+    void speed_test_512() {
+        FwdTxfm2dFunc test_func = fwd_txfm_2d_N2_asm512_func[tx_size_];
+        FwdTxfm2dFunc ref_func = fwd_txfm_2d_N2_asm_func[tx_size_];
+        if (test_func && ref_func) {
+            run_speed_test("N2 AVX512 AVX2 ", test_func, ref_func);
+        }
+
+        test_func = fwd_txfm_2d_N4_asm512_func[tx_size_];
+        ref_func = fwd_txfm_2d_N4_asm_func[tx_size_];
+        if (test_func && ref_func) {
+            run_speed_test("N4 AVX512 AVX2", test_func, ref_func);
+        }
+    }
+#endif
+#endif /*PARTIAL_FREQUENCY*/
 
   private:
 
@@ -396,7 +456,27 @@ TEST_P(FwdTxfm2dAsmTest, match_test_N4) {
 TEST_P(FwdTxfm2dAsmTest, DISABLED_speed_test) {
     speed_test();
 }
+
+#ifndef NON_AVX512_SUPPORT
+TEST_P(FwdTxfm2dAsmTest, match_test_N2_512) {
+    if (CPU_FLAGS_AVX512F & get_cpu_flags_to_use()) {
+        run_match_test_N2_512();
+    }
+}
+
+TEST_P(FwdTxfm2dAsmTest, match_test_N4_512) {
+    if (CPU_FLAGS_AVX512F & get_cpu_flags_to_use()) {
+        run_match_test_N4_512();
+    }
+}
+
+TEST_P(FwdTxfm2dAsmTest, DISABLED_speed_test_512) {
+    if (CPU_FLAGS_AVX512F & get_cpu_flags_to_use()) {
+        speed_test_512();
+    }
+}
 #endif
+#endif /*PARTIAL_FREQUENCY*/
 
 INSTANTIATE_TEST_CASE_P(
     TX, FwdTxfm2dAsmTest,

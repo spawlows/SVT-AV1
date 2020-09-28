@@ -594,6 +594,134 @@ class InvTxfm2dAsmTest : public ::testing::TestWithParam<InvTxfm2dParam> {
         }
     }
 
+#if PARTIAL_FREQUENCY
+    void run_HandleTransform_N2_N4_match_test() {
+        using HandleTxfmFunc = uint64_t (*)(int32_t * output);
+        const TxSize htf_tx_size[] = {
+            TX_16X64, TX_32X64, TX_64X16, TX_64X32, TX_64X64};
+        const HandleTxfmFunc htf_ref_funcs[] = {
+            handle_transform16x64_N2_N4_c,
+            handle_transform32x64_N2_N4_c,
+            handle_transform64x16_N2_N4_c,
+            handle_transform64x32_N2_N4_c,
+            handle_transform64x64_N2_N4_c};
+        const HandleTxfmFunc htf_asm_funcs[] = {
+            handle_transform16x64_N2_N4_avx2,
+            handle_transform32x64_N2_N4_avx2,
+            handle_transform64x16_N2_N4_avx2,
+            handle_transform64x32_N2_N4_avx2,
+            handle_transform64x64_N2_N4_avx2};
+        DECLARE_ALIGNED(32, int32_t, input[MAX_TX_SQUARE]);
+        const int num_htf_sizes = sizeof(htf_ref_funcs) / sizeof(htf_ref_funcs[0]);
+        ASSERT_EQ(num_htf_sizes,  sizeof(htf_asm_funcs) / sizeof(htf_asm_funcs[0]));
+        ASSERT_EQ(num_htf_sizes, sizeof(htf_tx_size) / sizeof(htf_tx_size[0]));
+
+        for (int idx = 0; idx < num_htf_sizes; ++idx) {
+            const TxSize tx_size = htf_tx_size[idx];
+
+            eb_buf_random_s32(input_, MAX_TX_SQUARE);
+            memcpy(input, input_, MAX_TX_SQUARE * sizeof(int32_t));
+
+            const uint64_t energy_ref = htf_ref_funcs[idx](input_);
+            const uint64_t energy_asm = htf_asm_funcs[idx](input);
+
+            ASSERT_EQ(energy_ref, energy_asm);
+
+            for (int i = 0; i < MAX_TX_SIZE; i++) {
+                for (int j = 0; j < MAX_TX_SIZE; j++) {
+                    ASSERT_EQ(input_[i * MAX_TX_SIZE + j],
+                              input[i * MAX_TX_SIZE + j])
+                        << " tx_size: " << tx_size << " " << j << " x " << i;
+                }
+            }
+        }
+    }
+
+    void run_handle_transform_N2_N4_speed_test() {
+        using HandleTxfmFunc = uint64_t (*)(int32_t * output);
+        const int widths[] = {16, 32, 64, 64, 64};
+        const int heights[] = {64, 64, 16, 32, 64};
+        const TxSize htf_tx_size[] = {
+            TX_16X64, TX_32X64, TX_64X16, TX_64X32, TX_64X64};
+        const HandleTxfmFunc htf_ref_funcs[] = {
+            handle_transform16x64_N2_N4_c,
+            handle_transform32x64_N2_N4_c,
+            handle_transform64x16_N2_N4_c,
+            handle_transform64x32_N2_N4_c,
+            handle_transform64x64_N2_N4_c};
+        const HandleTxfmFunc htf_asm_funcs[] = {
+            handle_transform16x64_N2_N4_avx2,
+            handle_transform32x64_N2_N4_avx2,
+            handle_transform64x16_N2_N4_avx2,
+            handle_transform64x32_N2_N4_avx2,
+            handle_transform64x64_N2_N4_avx2};
+        DECLARE_ALIGNED(32, int32_t, input[MAX_TX_SQUARE]);
+        const int num_htf_sizes = sizeof(htf_ref_funcs) / sizeof(htf_ref_funcs[0]);
+        ASSERT_EQ(num_htf_sizes,  sizeof(htf_asm_funcs) / sizeof(htf_asm_funcs[0]));
+        ASSERT_EQ(num_htf_sizes, sizeof(htf_tx_size) / sizeof(htf_tx_size[0]));
+        ASSERT_EQ(num_htf_sizes, sizeof(widths) / sizeof(widths[0]));
+        ASSERT_EQ(num_htf_sizes, sizeof(heights) / sizeof(heights[0]));
+        double time_c, time_o;
+        uint64_t start_time_seconds, start_time_useconds;
+        uint64_t middle_time_seconds, middle_time_useconds;
+        uint64_t finish_time_seconds, finish_time_useconds;
+
+        for (int idx = 0; idx < num_htf_sizes; ++idx) {
+            const TxSize tx_size = htf_tx_size[idx];
+            const uint64_t num_loop = 10000000;
+            uint64_t energy_ref, energy_asm;
+
+            eb_buf_random_s32(input_, MAX_TX_SQUARE);
+            memcpy(input, input_, MAX_TX_SQUARE * sizeof(int32_t));
+
+            eb_start_time(&start_time_seconds, &start_time_useconds);
+
+            for (uint64_t i = 0; i < num_loop; i++)
+                energy_ref = htf_ref_funcs[idx](input_);
+
+            eb_start_time(&middle_time_seconds, &middle_time_useconds);
+
+            for (uint64_t i = 0; i < num_loop; i++)
+                energy_asm = htf_asm_funcs[idx](input);
+
+            eb_start_time(&finish_time_seconds, &finish_time_useconds);
+            eb_compute_overall_elapsed_time_ms(start_time_seconds,
+                                               start_time_useconds,
+                                               middle_time_seconds,
+                                               middle_time_useconds,
+                                               &time_c);
+            eb_compute_overall_elapsed_time_ms(middle_time_seconds,
+                                               middle_time_useconds,
+                                               finish_time_seconds,
+                                               finish_time_useconds,
+                                               &time_o);
+
+            ASSERT_EQ(energy_ref, energy_asm);
+
+            for (int i = 0; i < MAX_TX_SIZE; i++) {
+                for (int j = 0; j < MAX_TX_SIZE; j++) {
+                    ASSERT_EQ(input_[i * MAX_TX_SIZE + j],
+                              input[i * MAX_TX_SIZE + j])
+                        << " tx_size: " << tx_size << " " << j << " x " << i;
+                }
+            }
+
+            printf("Average Nanoseconds per Function Call\n");
+            printf("    HandleTransform%dx%d_c     : %6.2f\n",
+                   widths[idx],
+                   heights[idx],
+                   1000000 * time_c / num_loop);
+            printf(
+                "    HandleTransform%dx%d_avx2) : %6.2f   (Comparison: "
+                "%5.2fx)\n",
+                widths[idx],
+                heights[idx],
+                1000000 * time_o / num_loop,
+                time_c / time_o);
+        }
+    }
+#endif /*PARTIAL_FREQUENCY*/
+
   private:
     // clear the coeffs according to eob position, note the coeffs are
     // linear.
@@ -719,6 +847,16 @@ TEST_P(InvTxfm2dAsmTest, HandleTransform_match_test) {
 TEST_P(InvTxfm2dAsmTest, DISABLED_HandleTransform_speed_test) {
     run_handle_transform_speed_test();
 }
+
+#if PARTIAL_FREQUENCY
+TEST_P(InvTxfm2dAsmTest, HandleTransform_pf_match_test) {
+    run_HandleTransform_N2_N4_match_test();
+}
+
+TEST_P(InvTxfm2dAsmTest, DISABLED_HandleTransform_pf_speed_test) {
+    run_handle_transform_N2_N4_speed_test();
+}
+#endif /*PARTIAL_FREQUENCY*/
 
 INSTANTIATE_TEST_CASE_P(
     TX, InvTxfm2dAsmTest,
