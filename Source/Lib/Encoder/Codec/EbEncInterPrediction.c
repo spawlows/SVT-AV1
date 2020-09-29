@@ -629,7 +629,7 @@ static void pick_wedge(PictureControlSet *picture_control_set_ptr, ModeDecisionC
     }
 }
 
-
+#if !FEATURE_NEW_INTER_COMP_LEVELS
 static int8_t estimate_wedge_sign(PictureControlSet *  picture_control_set_ptr,
                                   ModeDecisionContext *context_ptr, const BlockSize bsize,
                                   const uint8_t *pred0, int stride0, const uint8_t *pred1,
@@ -715,6 +715,7 @@ static int8_t estimate_wedge_sign(PictureControlSet *  picture_control_set_ptr,
             ((int64_t)esq[1][3] + esq[1][1] + esq[1][2]) - ((int64_t)esq[0][3] + esq[0][1] + esq[0][2]);
     return (tl + br > 0);
 }
+#endif
 // Choose the best wedge index the specified sign
 int64_t pick_wedge_fixed_sign(ModeDecisionCandidate *candidate_ptr,
                               PictureControlSet *    picture_control_set_ptr,
@@ -757,7 +758,13 @@ int64_t pick_wedge_fixed_sign(ModeDecisionCandidate *candidate_ptr,
     }
     return best_rd; //- RDCOST(x->rdmult, x->wedge_idx_cost[bsize][*best_wedge_index], 0);
 }
-
+#if FEATURE_NEW_INTER_COMP_LEVELS
+static void pick_interinter_wedge(PictureControlSet *     picture_control_set_ptr,
+                                  ModeDecisionContext *   context_ptr,
+                                  InterInterCompoundData *interinter_comp, const BlockSize bsize,
+                                  const uint8_t *const p0, const int16_t *const residual1,
+                                  const int16_t *const diff10) {
+#else
 static void pick_interinter_wedge(ModeDecisionCandidate * candidate_ptr,
                                   PictureControlSet *     picture_control_set_ptr,
                                   ModeDecisionContext *   context_ptr,
@@ -767,12 +774,23 @@ static void pick_interinter_wedge(ModeDecisionCandidate * candidate_ptr,
     (void)candidate_ptr;
     const int bw = block_size_wide[bsize];
     //int64_t rd;
+#endif
     int8_t wedge_index = -1;
     int8_t wedge_sign  = 0;
 
     assert(is_interinter_compound_used(COMPOUND_WEDGE, bsize));
     //TODO: OMK+CHKN to check on FIX_RATE_E_WEDGE
 
+#if FEATURE_NEW_INTER_COMP_LEVELS
+    pick_wedge(picture_control_set_ptr,
+        context_ptr,
+        bsize,
+        p0,
+        residual1,
+        diff10,
+        &wedge_sign,
+        &wedge_index);
+#else
     // Two method
     // Fast seatch method to be added  OMK
     if (context_ptr->inter_comp_ctrls.wedge_search_mode == 0){
@@ -789,7 +807,7 @@ static void pick_interinter_wedge(ModeDecisionCandidate * candidate_ptr,
                    &wedge_sign,
                    &wedge_index);
     }
-
+#endif
     interinter_comp->wedge_sign  = wedge_sign;
     interinter_comp->wedge_index = wedge_index;
 }
@@ -851,13 +869,28 @@ static void pick_interinter_seg(PictureControlSet *     picture_control_set_ptr,
 
     interinter_comp->mask_type = best_mask_type;
 }
-
+#if FEATURE_NEW_INTER_COMP_LEVELS
+void pick_interinter_mask(PictureControlSet *    picture_control_set_ptr,
+                          ModeDecisionContext *context_ptr, InterInterCompoundData *interinter_comp,
+                          const BlockSize bsize, const uint8_t *const p0, const uint8_t *const p1,
+                          const int16_t *const residual1, const int16_t *const diff10) {
+#else
 void pick_interinter_mask(ModeDecisionCandidate *candidate_ptr,
                           PictureControlSet *    picture_control_set_ptr,
                           ModeDecisionContext *context_ptr, InterInterCompoundData *interinter_comp,
                           const BlockSize bsize, const uint8_t *const p0, const uint8_t *const p1,
                           const int16_t *const residual1, const int16_t *const diff10) {
+#endif
     if (interinter_comp->type == COMPOUND_WEDGE)
+#if FEATURE_NEW_INTER_COMP_LEVELS
+        pick_interinter_wedge(picture_control_set_ptr,
+                              context_ptr,
+                              interinter_comp,
+                              bsize,
+                              p0,
+                              residual1,
+                              diff10);
+#else
         pick_interinter_wedge(candidate_ptr,
                               picture_control_set_ptr,
                               context_ptr,
@@ -867,6 +900,7 @@ void pick_interinter_mask(ModeDecisionCandidate *candidate_ptr,
                               p1,
                               residual1,
                               diff10);
+#endif
     else if (interinter_comp->type == COMPOUND_DIFFWTD)
         pick_interinter_seg(picture_control_set_ptr,
                             context_ptr,
@@ -6284,9 +6318,20 @@ void calc_pred_masked_compound(PictureControlSet *    pcs_ptr,
         }
 
 }
+
 void search_compound_diff_wedge(PictureControlSet *    picture_control_set_ptr,
                                 ModeDecisionContext *  context_ptr,
                                 ModeDecisionCandidate *candidate_ptr) {
+#if FEATURE_NEW_INTER_COMP_LEVELS
+    pick_interinter_mask(picture_control_set_ptr,
+                         context_ptr,
+                         &candidate_ptr->interinter_comp,
+                         context_ptr->blk_geom->bsize,
+                         context_ptr->pred0,
+                         context_ptr->pred1,
+                         context_ptr->residual1,
+                         context_ptr->diff10);
+#else
     pick_interinter_mask(candidate_ptr,
                          picture_control_set_ptr,
                          context_ptr,
@@ -6296,6 +6341,7 @@ void search_compound_diff_wedge(PictureControlSet *    picture_control_set_ptr,
                          context_ptr->pred1,
                          context_ptr->residual1,
                          context_ptr->diff10);
+#endif
 }
 
 EbErrorType inter_pu_prediction_av1(uint8_t hbd_mode_decision, ModeDecisionContext *md_context_ptr,

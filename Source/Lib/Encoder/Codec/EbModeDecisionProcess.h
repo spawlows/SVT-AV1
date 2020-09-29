@@ -126,12 +126,22 @@ typedef enum InterCandGroup {
     GLOBAL_GROUP        = 7,
     TOT_INTER_GROUP     = 8,
 } InterCandGroup;
+#if FEATURE_NEW_INTER_COMP_LEVELS
+typedef struct  InterCompCtrls {
+    uint8_t allowed_comp_types[MD_COMP_TYPES];       // Compound types to inject; AVG/DIST/DIFF/WEDGE
+    uint8_t allowed_dist1_comp_types[MD_COMP_TYPES]; // Compound types to inject for bipred cands with a ref > distance 1 from current frame; AVG/DIST/DIFF/WEDGE
+    uint8_t allowed_dist2_comp_types[MD_COMP_TYPES]; // Compound types to inject for bipred cands with a ref > distance 2 from current frame; AVG/DIST/DIFF/WEDGE
+}InterCompCtrls;
+#endif
 typedef struct  ObmcControls {
     uint8_t enabled;
     uint8_t me_count;      //how many me candidates to consider injecting obmc
     uint8_t pme_best_ref;  //limit injection to best ref in pme
     uint8_t mvp_ref_count; //closest references allowed in mvp 0:4
     uint8_t near_count;    //how many near to consider injecting obmc 0..3
+#if FEATURE_NEW_OBMC_LEVELS
+    EbBool max_blk_size_16x16; // if true, cap the max block size that OBMC can be used to 16x16
+#endif
 }ObmcControls;
 typedef struct  AMdCycleRControls {
     uint8_t enabled; // On/Off feature control
@@ -154,14 +164,14 @@ typedef struct  TxsCycleRControls {
     uint16_t intra_th;  // Threshold to bypass intra TXS <the higher th the higher speed>
     uint16_t inter_th;  // Threshold to bypass inter TXS <the higher th the higher speed>
 }TxsCycleRControls;
-
+#if !FEATURE_NEW_INTER_COMP_LEVELS
 typedef struct  InterCompoundControls {
     uint8_t enabled;
     uint8_t mrp_pruning_w_distortion;   // 0: OFF ; 1: Prune number of references based on ME/PME distortion
     uint8_t mrp_pruning_w_distance;     // 4: ALL ; 1: Prune number of references based on reference distance (Best 1)
     uint8_t wedge_search_mode;          // 0: Fast search: estimate Wedge sign 1: full search
 }InterCompoundControls;
-
+#endif
 typedef struct RefPruningControls {
     uint8_t enabled; // 0: OFF; 1: use inter to inter distortion deviation to derive best_refs
     uint8_t best_refs[TOT_INTER_GROUP];     // 0: OFF; 1: limit the injection to the best references based on distortion
@@ -494,7 +504,9 @@ typedef struct ModeDecisionContext {
     // square cost weighting for deciding if a/b shapes could be skipped
     uint32_t sq_weight;
     // signal for enabling shortcut to skip search depths
+#if !FEATURE_NEW_INTER_COMP_LEVELS
     MD_COMP_TYPE compound_types_to_try;
+#endif
     uint8_t      dc_cand_only_flag;
     EbBool       disable_angle_z2_intra_flag;
     uint8_t      shut_fast_rate; // use coeff rate and slipt flag rate only (no MVP derivation)
@@ -530,7 +542,11 @@ typedef struct ModeDecisionContext {
     uint8_t      md_max_ref_count;
     RefResults    pme_res[MAX_NUM_OF_REF_PIC_LIST][REF_LIST_MAX_DEPTH];
     ObmcControls obmc_ctrls;
+#if FEATURE_NEW_INTER_COMP_LEVELS
+    InterCompCtrls inter_comp_ctrls;
+#else
     InterCompoundControls inter_comp_ctrls;
+#endif
     RefResults ref_filtering_res[TOT_INTER_GROUP][MAX_NUM_OF_REF_PIC_LIST][REF_LIST_MAX_DEPTH];
     RefPruningControls ref_pruning_ctrls;
     // Signal to control initial and final pass PD setting(s)

@@ -793,10 +793,19 @@ EbErrorType signal_derivation_mode_decision_config_kernel_oq(
     //         0        | OFF subject to possible constraints               | OFF everywhere in encoder
     //         1        | ON subject to possible constraints                | Fully ON in PD_PASS_2
     //         2        | Faster level subject to possible constraints      | Level 2 everywhere in PD_PASS_2
-    //         3        | Even faster level subject to possible constraints | Level 3 everywhere in PD_PASS_3
+    //         3        | Even faster level subject to possible constraints | Level 3 everywhere in PD_PASS_2
     if (scs_ptr->static_config.obmc_level == DEFAULT) {
+#if FEATURE_NEW_OBMC_LEVELS
+        if (pcs_ptr->parent_pcs_ptr->enc_mode <= ENC_M3)
+            pcs_ptr->parent_pcs_ptr->pic_obmc_level = 1;
+        else if (pcs_ptr->parent_pcs_ptr->enc_mode <= ENC_M4)
+            pcs_ptr->parent_pcs_ptr->pic_obmc_level = 2;
+        else if (pcs_ptr->parent_pcs_ptr->enc_mode <= ENC_M5)
+            pcs_ptr->parent_pcs_ptr->pic_obmc_level = 3;
+#else
         if (pcs_ptr->parent_pcs_ptr->enc_mode <= ENC_M4)
             pcs_ptr->parent_pcs_ptr->pic_obmc_level = 2;
+#endif
         else
             pcs_ptr->parent_pcs_ptr->pic_obmc_level = 0;
     }

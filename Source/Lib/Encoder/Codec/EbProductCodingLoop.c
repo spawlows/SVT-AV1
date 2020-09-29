@@ -1120,6 +1120,192 @@ uint32_t nics_scale_factor[11/*levels*/][2/*num/denum*/] =
     {1,16}    // level10
 };
 #endif
+#if FEATURE_NEW_INTER_COMP_LEVELS
+void set_dist_based_ref_pruning_controls(
+    ModeDecisionContext *mdctxt, uint8_t dist_based_ref_pruning_level) {
+    RefPruningControls *ref_pruning_ctrls = &mdctxt->ref_pruning_ctrls;
+
+    switch (dist_based_ref_pruning_level) {
+    case 0: ref_pruning_ctrls->enabled = 0; break;
+    case 1:
+        ref_pruning_ctrls->enabled = 1;
+
+        ref_pruning_ctrls->best_refs[PA_ME_GROUP]               = 7;
+        ref_pruning_ctrls->best_refs[UNI_3x3_GROUP]             = 7;
+        ref_pruning_ctrls->best_refs[BI_3x3_GROUP]              = 2;
+        ref_pruning_ctrls->best_refs[NRST_NEW_NEAR_GROUP]       = 0;
+        ref_pruning_ctrls->best_refs[WARP_GROUP]                = 7;
+        ref_pruning_ctrls->best_refs[NRST_NEAR_GROUP]           = 7;
+        ref_pruning_ctrls->best_refs[PRED_ME_GROUP]             = 7;
+        ref_pruning_ctrls->best_refs[GLOBAL_GROUP]              = 7;
+
+        ref_pruning_ctrls->closest_refs[PA_ME_GROUP]            = 1;
+        ref_pruning_ctrls->closest_refs[UNI_3x3_GROUP]          = 1;
+        ref_pruning_ctrls->closest_refs[BI_3x3_GROUP]           = 1;
+        ref_pruning_ctrls->closest_refs[NRST_NEW_NEAR_GROUP]    = 1;
+        ref_pruning_ctrls->closest_refs[WARP_GROUP]             = 1;
+        ref_pruning_ctrls->closest_refs[NRST_NEAR_GROUP]        = 1;
+        ref_pruning_ctrls->closest_refs[PRED_ME_GROUP]          = 1;
+        ref_pruning_ctrls->closest_refs[GLOBAL_GROUP]           = 1;
+        break;
+    case 2:
+        ref_pruning_ctrls->enabled = 1;
+
+        ref_pruning_ctrls->best_refs[PA_ME_GROUP]               = 7;
+        ref_pruning_ctrls->best_refs[UNI_3x3_GROUP]             = 7;
+        ref_pruning_ctrls->best_refs[BI_3x3_GROUP]              = 2;
+        ref_pruning_ctrls->best_refs[NRST_NEW_NEAR_GROUP]       = 0;
+        ref_pruning_ctrls->best_refs[WARP_GROUP]                = 7;
+        ref_pruning_ctrls->best_refs[NRST_NEAR_GROUP]           = 6;
+        ref_pruning_ctrls->best_refs[PRED_ME_GROUP]             = 4;
+        ref_pruning_ctrls->best_refs[GLOBAL_GROUP]              = 7;
+
+        ref_pruning_ctrls->closest_refs[PA_ME_GROUP]            = 1;
+        ref_pruning_ctrls->closest_refs[UNI_3x3_GROUP]          = 1;
+        ref_pruning_ctrls->closest_refs[BI_3x3_GROUP]           = 1;
+        ref_pruning_ctrls->closest_refs[NRST_NEW_NEAR_GROUP]    = 1;
+        ref_pruning_ctrls->closest_refs[WARP_GROUP]             = 1;
+        ref_pruning_ctrls->closest_refs[NRST_NEAR_GROUP]        = 1;
+        ref_pruning_ctrls->closest_refs[PRED_ME_GROUP]          = 1;
+        ref_pruning_ctrls->closest_refs[GLOBAL_GROUP]           = 1;
+        break;
+    case 3:
+        ref_pruning_ctrls->enabled = 1;
+
+        ref_pruning_ctrls->best_refs[PA_ME_GROUP]               = 7;
+        ref_pruning_ctrls->best_refs[UNI_3x3_GROUP]             = 7;
+        ref_pruning_ctrls->best_refs[BI_3x3_GROUP]              = 2;
+        ref_pruning_ctrls->best_refs[NRST_NEW_NEAR_GROUP]       = 0;
+        ref_pruning_ctrls->best_refs[WARP_GROUP]                = 7;
+        ref_pruning_ctrls->best_refs[NRST_NEAR_GROUP]           = 4;
+        ref_pruning_ctrls->best_refs[PRED_ME_GROUP]             = 4;
+        ref_pruning_ctrls->best_refs[GLOBAL_GROUP]              = 7;
+
+        ref_pruning_ctrls->closest_refs[PA_ME_GROUP]            = 1;
+        ref_pruning_ctrls->closest_refs[UNI_3x3_GROUP]          = 1;
+        ref_pruning_ctrls->closest_refs[BI_3x3_GROUP]           = 1;
+        ref_pruning_ctrls->closest_refs[NRST_NEW_NEAR_GROUP]    = 1;
+        ref_pruning_ctrls->closest_refs[WARP_GROUP]             = 1;
+        ref_pruning_ctrls->closest_refs[NRST_NEAR_GROUP]        = 1;
+        ref_pruning_ctrls->closest_refs[PRED_ME_GROUP]          = 1;
+        ref_pruning_ctrls->closest_refs[GLOBAL_GROUP]           = 1;
+        break;
+    case 4:
+        ref_pruning_ctrls->enabled = 1;
+
+        ref_pruning_ctrls->best_refs[PA_ME_GROUP]               = 7;
+        ref_pruning_ctrls->best_refs[UNI_3x3_GROUP]             = 7;
+        ref_pruning_ctrls->best_refs[BI_3x3_GROUP]              = 2;
+        ref_pruning_ctrls->best_refs[NRST_NEW_NEAR_GROUP]       = 0;
+        ref_pruning_ctrls->best_refs[WARP_GROUP]                = 7;
+        ref_pruning_ctrls->best_refs[NRST_NEAR_GROUP]           = 4;
+        ref_pruning_ctrls->best_refs[PRED_ME_GROUP]             = 2;
+        ref_pruning_ctrls->best_refs[GLOBAL_GROUP]              = 7;
+
+        ref_pruning_ctrls->closest_refs[PA_ME_GROUP]            = 1;
+        ref_pruning_ctrls->closest_refs[UNI_3x3_GROUP]          = 1;
+        ref_pruning_ctrls->closest_refs[BI_3x3_GROUP]           = 1;
+        ref_pruning_ctrls->closest_refs[NRST_NEW_NEAR_GROUP]    = 1;
+        ref_pruning_ctrls->closest_refs[WARP_GROUP]             = 1;
+        ref_pruning_ctrls->closest_refs[NRST_NEAR_GROUP]        = 1;
+        ref_pruning_ctrls->closest_refs[PRED_ME_GROUP]          = 1;
+        ref_pruning_ctrls->closest_refs[GLOBAL_GROUP]           = 1;
+        break;
+    case 5:
+        ref_pruning_ctrls->enabled = 1;
+
+        ref_pruning_ctrls->best_refs[PA_ME_GROUP]               = 1;
+        ref_pruning_ctrls->best_refs[UNI_3x3_GROUP]             = 1;
+        ref_pruning_ctrls->best_refs[BI_3x3_GROUP]              = 1;
+        ref_pruning_ctrls->best_refs[NRST_NEW_NEAR_GROUP]       = 0;
+        ref_pruning_ctrls->best_refs[WARP_GROUP]                = 1;
+        ref_pruning_ctrls->best_refs[NRST_NEAR_GROUP]           = 1;
+        ref_pruning_ctrls->best_refs[PRED_ME_GROUP]             = 1;
+        ref_pruning_ctrls->best_refs[GLOBAL_GROUP]              = 1;
+
+        ref_pruning_ctrls->closest_refs[PA_ME_GROUP]            = 1;
+        ref_pruning_ctrls->closest_refs[UNI_3x3_GROUP]          = 1;
+        ref_pruning_ctrls->closest_refs[BI_3x3_GROUP]           = 1;
+        ref_pruning_ctrls->closest_refs[NRST_NEW_NEAR_GROUP]    = 1;
+        ref_pruning_ctrls->closest_refs[WARP_GROUP]             = 1;
+        ref_pruning_ctrls->closest_refs[NRST_NEAR_GROUP]        = 1;
+        ref_pruning_ctrls->closest_refs[PRED_ME_GROUP]          = 1;
+        ref_pruning_ctrls->closest_refs[GLOBAL_GROUP]           = 1;
+        break;
+    case 6:
+        ref_pruning_ctrls->enabled = 1;
+
+        ref_pruning_ctrls->best_refs[PA_ME_GROUP]               = 0;
+        ref_pruning_ctrls->best_refs[UNI_3x3_GROUP]             = 0;
+        ref_pruning_ctrls->best_refs[BI_3x3_GROUP]              = 0;
+        ref_pruning_ctrls->best_refs[NRST_NEW_NEAR_GROUP]       = 0;
+        ref_pruning_ctrls->best_refs[WARP_GROUP]                = 0;
+        ref_pruning_ctrls->best_refs[NRST_NEAR_GROUP]           = 0;
+        ref_pruning_ctrls->best_refs[PRED_ME_GROUP]             = 0;
+        ref_pruning_ctrls->best_refs[GLOBAL_GROUP]              = 0;
+
+        ref_pruning_ctrls->closest_refs[PA_ME_GROUP]            = 1;
+        ref_pruning_ctrls->closest_refs[UNI_3x3_GROUP]          = 1;
+        ref_pruning_ctrls->closest_refs[BI_3x3_GROUP]           = 1;
+        ref_pruning_ctrls->closest_refs[NRST_NEW_NEAR_GROUP]    = 1;
+        ref_pruning_ctrls->closest_refs[WARP_GROUP]             = 1;
+        ref_pruning_ctrls->closest_refs[NRST_NEAR_GROUP]        = 1;
+        ref_pruning_ctrls->closest_refs[PRED_ME_GROUP]          = 1;
+        ref_pruning_ctrls->closest_refs[GLOBAL_GROUP]           = 1;
+        break;
+    default: assert(0); break;
+    }
+}
+
+void set_compound_to_inject(ModeDecisionContext *context_ptr, EbBool * comp_inj_table, EbBool avg, EbBool dist, EbBool diff, EbBool wdg);
+
+void set_inter_comp_controls(ModeDecisionContext *ctx, uint8_t inter_comp_mode) {
+
+    InterCompCtrls* inter_comp_ctrls = &ctx->inter_comp_ctrls;
+
+    switch (inter_comp_mode)
+    {
+    case 0://OFF
+        set_compound_to_inject(ctx, inter_comp_ctrls->allowed_comp_types,       1 /*AVG*/, 0 /*DIST*/, 0 /*DIFF*/, 0 /*WEDGE*/);
+        set_compound_to_inject(ctx, inter_comp_ctrls->allowed_dist1_comp_types, 1 /*AVG*/, 0 /*DIST*/, 0 /*DIFF*/, 0 /*WEDGE*/);
+        set_compound_to_inject(ctx, inter_comp_ctrls->allowed_dist2_comp_types, 1 /*AVG*/, 0 /*DIST*/, 0 /*DIFF*/, 0 /*WEDGE*/);
+        break;
+    case 1://FULL
+        set_compound_to_inject(ctx, inter_comp_ctrls->allowed_comp_types,       1 /*AVG*/, 1 /*DIST*/, 1 /*DIFF*/, 1 /*WEDGE*/);
+        set_compound_to_inject(ctx, inter_comp_ctrls->allowed_dist1_comp_types, 1 /*AVG*/, 1 /*DIST*/, 1 /*DIFF*/, 1 /*WEDGE*/);
+        set_compound_to_inject(ctx, inter_comp_ctrls->allowed_dist2_comp_types, 1 /*AVG*/, 1 /*DIST*/, 1 /*DIFF*/, 1 /*WEDGE*/);
+        break;
+    case 2:
+        set_compound_to_inject(ctx, inter_comp_ctrls->allowed_comp_types,       1 /*AVG*/, 1 /*DIST*/, 1 /*DIFF*/, 1 /*WEDGE*/);
+        set_compound_to_inject(ctx, inter_comp_ctrls->allowed_dist1_comp_types, 1 /*AVG*/, 1 /*DIST*/, 1 /*DIFF*/, 1 /*WEDGE*/);
+        set_compound_to_inject(ctx, inter_comp_ctrls->allowed_dist2_comp_types, 1 /*AVG*/, 0 /*DIST*/, 0 /*DIFF*/, 0 /*WEDGE*/);
+        break;
+    case 3:
+        set_compound_to_inject(ctx, inter_comp_ctrls->allowed_comp_types,       1 /*AVG*/, 1 /*DIST*/, 1 /*DIFF*/, 1 /*WEDGE*/);
+        set_compound_to_inject(ctx, inter_comp_ctrls->allowed_dist1_comp_types, 1 /*AVG*/, 1 /*DIST*/, 1 /*DIFF*/, 0 /*WEDGE*/);
+        set_compound_to_inject(ctx, inter_comp_ctrls->allowed_dist2_comp_types, 1 /*AVG*/, 0 /*DIST*/, 0 /*DIFF*/, 0 /*WEDGE*/);
+        break;
+    case 4:
+        set_compound_to_inject(ctx, inter_comp_ctrls->allowed_comp_types,       1 /*AVG*/, 1 /*DIST*/, 1 /*DIFF*/, 1 /*WEDGE*/);
+        set_compound_to_inject(ctx, inter_comp_ctrls->allowed_dist1_comp_types, 1 /*AVG*/, 1 /*DIST*/, 0 /*DIFF*/, 0 /*WEDGE*/);
+        set_compound_to_inject(ctx, inter_comp_ctrls->allowed_dist2_comp_types, 1 /*AVG*/, 0 /*DIST*/, 0 /*DIFF*/, 0 /*WEDGE*/);
+        break;
+    case 5:
+        set_compound_to_inject(ctx, inter_comp_ctrls->allowed_comp_types,       1 /*AVG*/, 1 /*DIST*/, 1 /*DIFF*/, 0 /*WEDGE*/);
+        set_compound_to_inject(ctx, inter_comp_ctrls->allowed_dist1_comp_types, 1 /*AVG*/, 1 /*DIST*/, 0 /*DIFF*/, 0 /*WEDGE*/);
+        set_compound_to_inject(ctx, inter_comp_ctrls->allowed_dist2_comp_types, 1 /*AVG*/, 0 /*DIST*/, 0 /*DIFF*/, 0 /*WEDGE*/);
+        break;
+    case 6:
+        set_compound_to_inject(ctx, inter_comp_ctrls->allowed_comp_types,       1 /*AVG*/, 1 /*DIST*/, 0 /*DIFF*/, 0 /*WEDGE*/);
+        set_compound_to_inject(ctx, inter_comp_ctrls->allowed_dist1_comp_types, 1 /*AVG*/, 1 /*DIST*/, 0 /*DIFF*/, 0 /*WEDGE*/);
+        set_compound_to_inject(ctx, inter_comp_ctrls->allowed_dist2_comp_types, 1 /*AVG*/, 0 /*DIST*/, 0 /*DIFF*/, 0 /*WEDGE*/);
+        break;
+    default:
+        assert(0);
+        break;
+    }
+}
+#else
 void set_dist_based_ref_pruning_controls(
     ModeDecisionContext *mdctxt, uint8_t dist_based_ref_pruning_level) {
     RefPruningControls *ref_pruning_ctrls = &mdctxt->ref_pruning_ctrls;
@@ -1251,6 +1437,7 @@ void set_dist_based_ref_pruning_controls(
     default: assert(0); break;
     }
 }
+#endif
 void scale_nics(PictureControlSet *pcs_ptr, ModeDecisionContext *context_ptr) {
     // minimum nics allowed
     uint32_t min_nics = pcs_ptr->parent_pcs_ptr->is_used_as_reference_flag ? 2 : 1;
@@ -6847,6 +7034,7 @@ void check_similar_block(const BlockGeom *blk_geom, ModeDecisionContext *context
         }
     }
 }
+#if !FEATURE_NEW_INTER_COMP_LEVELS
 void set_inter_comp_controls(ModeDecisionContext *mdctxt, uint8_t inter_comp_mode) {
 
     InterCompoundControls*inter_comp_ctrls = &mdctxt->inter_comp_ctrls;
@@ -6876,7 +7064,7 @@ void set_inter_comp_controls(ModeDecisionContext *mdctxt, uint8_t inter_comp_mod
         break;
     }// AVG / DIT /DIFF/ WEDGE
 }
-
+#endif
 /******************************************************
 * Derive md Settings(feature signals) that could be
   changed  at the block level
@@ -6899,6 +7087,27 @@ EbErrorType signal_derivation_block(PictureControlSet *pcs,
     else
         enc_mode = pcs->parent_pcs_ptr->enc_mode;
 #endif
+#if FEATURE_NEW_INTER_COMP_LEVELS
+    // Set dist_based_ref_pruning
+    if (pcs->parent_pcs_ptr->ref_list0_count_try > 1 || pcs->parent_pcs_ptr->ref_list1_count_try > 1) {
+        if (context_ptr->pd_pass == PD_PASS_0)
+            context_ptr->dist_based_ref_pruning = 0;
+        else if (context_ptr->pd_pass == PD_PASS_1)
+            context_ptr->dist_based_ref_pruning = 0;
+        else if (enc_mode <= ENC_MR)
+            context_ptr->dist_based_ref_pruning = 1;
+        else if (enc_mode <= ENC_M0)
+            context_ptr->dist_based_ref_pruning = 2;
+        else if (enc_mode <= ENC_M1)
+            context_ptr->dist_based_ref_pruning = 3;
+        else
+            context_ptr->dist_based_ref_pruning = 4;
+    }
+    else {
+        context_ptr->dist_based_ref_pruning = 0;
+    }
+    set_dist_based_ref_pruning_controls(context_ptr, context_ptr->dist_based_ref_pruning);
+#else
     // Set dist_based_ref_pruning
     if (pcs->parent_pcs_ptr->ref_list0_count_try > 1 || pcs->parent_pcs_ptr->ref_list1_count_try > 1) {
         if (context_ptr->pd_pass == PD_PASS_0)
@@ -6914,9 +7123,11 @@ EbErrorType signal_derivation_block(PictureControlSet *pcs,
         context_ptr->dist_based_ref_pruning = 0;
     }
     set_dist_based_ref_pruning_controls(context_ptr, context_ptr->dist_based_ref_pruning);
-
-
+#endif
     // set compound_types_to_try
+#if FEATURE_NEW_INTER_COMP_LEVELS
+    set_inter_comp_controls(context_ptr, context_ptr->inter_compound_mode);
+#else
     uint8_t compound_mode = context_ptr->inter_compound_mode;
     if (context_ptr->pd_pass == PD_PASS_0)
         set_inter_comp_controls(context_ptr, 0);
@@ -6931,6 +7142,7 @@ EbErrorType signal_derivation_block(PictureControlSet *pcs,
     if (get_wedge_params_bits(context_ptr->blk_geom->bsize) == 0)
         context_ptr->compound_types_to_try = MIN(context_ptr->compound_types_to_try,MD_COMP_DIFF0);
     context_ptr->inject_inter_candidates = 1;
+#endif
 
     return return_error;
 }
@@ -8480,7 +8692,12 @@ void apply_new_md_settings(ModeDecisionContext *context_ptr, uint8_t level) {
     context_ptr->md_tx_size_search_mode = 0;
 
     if (level >= 1) {
+#if FEATURE_NEW_INTER_COMP_LEVELS
+        // Allow AVG compound only
+        set_compound_to_inject(context_ptr, context_ptr->inter_comp_ctrls.allowed_comp_types, 1 /*AVG*/, 0 /*DIST*/, 0 /*DIFF*/, 0 /*WEDGE*/);
+#else
         context_ptr->compound_types_to_try = MD_COMP_AVG;
+#endif
         context_ptr->md_inter_intra_level = 0;
         context_ptr->md_pme_level = 3;
         md_pme_search_controls(context_ptr, context_ptr->md_pme_level);

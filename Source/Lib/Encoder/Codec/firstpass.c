@@ -909,12 +909,13 @@ extern EbErrorType first_pass_signal_derivation_block(
 
     // set compound_types_to_try
     set_inter_comp_controls(context_ptr, 0);
-
+#if !FEATURE_NEW_INTER_COMP_LEVELS
     context_ptr->compound_types_to_try = MD_COMP_AVG;
 
     // Do not add MD_COMP_WEDGE  beyond this point
     if (get_wedge_params_bits(context_ptr->blk_geom->bsize) == 0)
         context_ptr->compound_types_to_try = MIN(context_ptr->compound_types_to_try, MD_COMP_DIFF0);
+#endif
     context_ptr->inject_inter_candidates = 1;
 
     return return_error;
