@@ -348,11 +348,18 @@ static const uint32_t intra_adaptive_md_cycles_reduction_th[DEPTH_DELTA_NUM][NUM
 {1875 ,962 ,222 ,144 ,171 ,5 ,17 ,1272 ,15},
 {3 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0},
 };
+#if FEATURE_REMOVE_CIRCULAR
+EbErrorType signal_derivation_enc_dec_kernel_oq(
+    SequenceControlSet *sequence_control_set_ptr,
+    PictureControlSet *pcs_ptr,
+    ModeDecisionContext *context_ptr);
+#else
 EbErrorType signal_derivation_enc_dec_kernel_oq(
     SequenceControlSet *sequence_control_set_ptr,
     PictureControlSet *pcs_ptr,
     ModeDecisionContext *context_ptr,
     EbEncMode mode_offset);
+#endif
 #ifdef __cplusplus
 }
 #endif

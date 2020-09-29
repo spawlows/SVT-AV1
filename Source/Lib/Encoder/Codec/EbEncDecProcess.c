@@ -2075,17 +2075,29 @@ void coeff_based_switch_md_controls(ModeDecisionContext *mdctxt, uint8_t switch_
     case 0: coeffb_sw_md_ctrls->enabled = 0; break;
     case 1:
         coeffb_sw_md_ctrls->enabled = 1;
+#if FEATURE_REMOVE_CIRCULAR
+        coeffb_sw_md_ctrls->non_skip_level = 0;
+#else
         coeffb_sw_md_ctrls->mode_offset = 3;
+#endif
         coeffb_sw_md_ctrls->skip_block = 0;
         break;
     case 2:
         coeffb_sw_md_ctrls->enabled = 1;
+#if FEATURE_REMOVE_CIRCULAR
+        coeffb_sw_md_ctrls->non_skip_level = 1;
+#else
         coeffb_sw_md_ctrls->mode_offset = 4;
+#endif
         coeffb_sw_md_ctrls->skip_block = 0;
         break;
     case 3:
         coeffb_sw_md_ctrls->enabled = 1;
+#if FEATURE_REMOVE_CIRCULAR
+        coeffb_sw_md_ctrls->non_skip_level = 1;
+#else
         coeffb_sw_md_ctrls->mode_offset = 4;
+#endif
         coeffb_sw_md_ctrls->skip_block = 1;
         break;
     default: assert(0); break;
@@ -2116,6 +2128,65 @@ uint8_t nsq_cycles_reduction_th[19] = {
  2,//[3%;6%]
  1 //[0%;3%]
 };
+#if FEATURE_REMOVE_CIRCULAR
+void adaptive_md_cycles_redcution_controls(ModeDecisionContext *mdctxt, uint8_t adaptive_md_cycles_red_mode) {
+    AMdCycleRControls* adaptive_md_cycles_red_ctrls = &mdctxt->admd_cycles_red_ctrls;
+    switch (adaptive_md_cycles_red_mode)
+    {
+    case 0:
+        adaptive_md_cycles_red_ctrls->enabled = 0;
+        adaptive_md_cycles_red_ctrls->skip_nsq_th = 0;
+        adaptive_md_cycles_red_ctrls->switch_level_th = 0;
+        adaptive_md_cycles_red_ctrls->non_skip_level = 0;
+        break;
+    case 1:
+        adaptive_md_cycles_red_ctrls->enabled = 1;
+        adaptive_md_cycles_red_ctrls->skip_nsq_th = 25;
+        adaptive_md_cycles_red_ctrls->switch_level_th = 0;
+        adaptive_md_cycles_red_ctrls->non_skip_level = 0;
+        break;
+    case 2:
+        adaptive_md_cycles_red_ctrls->enabled = 1;
+        adaptive_md_cycles_red_ctrls->skip_nsq_th = 75;
+        adaptive_md_cycles_red_ctrls->switch_level_th = 0;
+        adaptive_md_cycles_red_ctrls->non_skip_level = 0;
+        break;
+    case 3:
+        adaptive_md_cycles_red_ctrls->enabled = 1;
+        adaptive_md_cycles_red_ctrls->skip_nsq_th = 100;
+        adaptive_md_cycles_red_ctrls->switch_level_th = 0;
+        adaptive_md_cycles_red_ctrls->non_skip_level = 0;
+        break;
+    case 4:
+        adaptive_md_cycles_red_ctrls->enabled = 1;
+        adaptive_md_cycles_red_ctrls->skip_nsq_th = 300;
+        adaptive_md_cycles_red_ctrls->switch_level_th = 0;
+        adaptive_md_cycles_red_ctrls->non_skip_level = 0;
+        break;
+    case 5:
+        adaptive_md_cycles_red_ctrls->enabled = 1;
+        adaptive_md_cycles_red_ctrls->skip_nsq_th = 200;
+        adaptive_md_cycles_red_ctrls->switch_level_th = 500;
+        adaptive_md_cycles_red_ctrls->non_skip_level = 1;
+        break;
+    case 6:
+        adaptive_md_cycles_red_ctrls->enabled = 1;
+        adaptive_md_cycles_red_ctrls->skip_nsq_th = 500;
+        adaptive_md_cycles_red_ctrls->switch_level_th = 1000;
+        adaptive_md_cycles_red_ctrls->non_skip_level = 1;
+        break;
+    case 7:
+        adaptive_md_cycles_red_ctrls->enabled = 1;
+        adaptive_md_cycles_red_ctrls->skip_nsq_th = 750;
+        adaptive_md_cycles_red_ctrls->switch_level_th = 1500;
+        adaptive_md_cycles_red_ctrls->non_skip_level = 1;
+        break;
+    default:
+        assert(0);
+        break;
+    }
+}
+#else
 void adaptive_md_cycles_redcution_controls(ModeDecisionContext *mdctxt, uint8_t adaptive_md_cycles_red_mode) {
     AMdCycleRControls* adaptive_md_cycles_red_ctrls = &mdctxt->admd_cycles_red_ctrls;
     switch (adaptive_md_cycles_red_mode)
@@ -2167,6 +2238,7 @@ void adaptive_md_cycles_redcution_controls(ModeDecisionContext *mdctxt, uint8_t 
         break;
     }
 }
+#endif
 void set_txt_cycle_reduction_controls(ModeDecisionContext *mdctxt, uint8_t txt_cycles_red_mode) {
 
     TxtCycleRControls* txt_cycle_red_ctrls = &mdctxt->txt_cycles_red_ctrls;
@@ -2330,6 +2402,13 @@ Output  : EncDec Kernel signal(s)
 EbErrorType signal_derivation_enc_dec_kernel_oq(
     SequenceControlSet *sequence_control_set_ptr,
     PictureControlSet *pcs_ptr,
+#if FEATURE_REMOVE_CIRCULAR
+    ModeDecisionContext *context_ptr) {
+
+    EbErrorType return_error = EB_ErrorNone;
+
+    EbEncMode enc_mode = pcs_ptr->enc_mode;
+#else
     ModeDecisionContext *context_ptr,
     EbEncMode mode_offset) {
     EbErrorType return_error = EB_ErrorNone;
@@ -2338,6 +2417,7 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
         enc_mode = MIN(ENC_M8, pcs_ptr->enc_mode + mode_offset);
     else
         enc_mode = pcs_ptr->enc_mode;
+#endif
     uint8_t pd_pass = context_ptr->pd_pass;
 
     // sb_classifier levels
@@ -2801,8 +2881,10 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
     else
         context_ptr->md_stage_2_3_class_prune_th = 25;
 #endif
+#if !FEATURE_REMOVE_CIRCULAR
     // If using a mode offset, do not modify the NSQ-targeting features
     if (!mode_offset) {
+#endif
         if (pd_pass == PD_PASS_0)
             context_ptr->coeff_area_based_bypass_nsq_th = 0;
         else if (pd_pass == PD_PASS_1)
@@ -2812,6 +2894,18 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
 
         uint8_t adaptive_md_cycles_level = 0;
         if (pd_pass == PD_PASS_2) {
+#if FEATURE_REMOVE_CIRCULAR
+            if (enc_mode <= ENC_MR)
+                adaptive_md_cycles_level = 0;
+            else if (enc_mode <= ENC_M0)
+                adaptive_md_cycles_level = pcs_ptr->slice_type == I_SLICE ? 0 : pcs_ptr->parent_pcs_ptr->is_used_as_reference_flag ? 1 : 3;
+            else if (enc_mode <= ENC_M1)
+                adaptive_md_cycles_level = pcs_ptr->slice_type == I_SLICE ? 0 : pcs_ptr->parent_pcs_ptr->is_used_as_reference_flag ? 2 : 4;
+            else if (enc_mode <= ENC_M2)
+                adaptive_md_cycles_level = pcs_ptr->slice_type == I_SLICE ? 0 : pcs_ptr->parent_pcs_ptr->is_used_as_reference_flag ? 5 : 7;
+            else
+                adaptive_md_cycles_level = pcs_ptr->slice_type == I_SLICE ? 0 : pcs_ptr->parent_pcs_ptr->is_used_as_reference_flag ? 6 : 7;
+#else
             if (enc_mode <= ENC_MR)
                 adaptive_md_cycles_level = 0;
             else if (enc_mode <= ENC_M0)
@@ -2824,6 +2918,7 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
                 adaptive_md_cycles_level = pcs_ptr->slice_type == I_SLICE ? 0 : 5;
             else
                 adaptive_md_cycles_level = pcs_ptr->slice_type == I_SLICE ? 4 : 6;
+#endif
         }
         adaptive_md_cycles_redcution_controls(context_ptr, adaptive_md_cycles_level);
 
@@ -2852,28 +2947,35 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
                         context_ptr->sq_weight = 95;
                     else
                         context_ptr->sq_weight = 90;
-
+#if !FEATURE_REMOVE_CIRCULAR
     }
-
     // If using a mode offset, do not modify the NSQ-targeting features
     if (!mode_offset) {
+#endif
         if (pd_pass < PD_PASS_2)
             context_ptr->switch_md_mode_based_on_sq_coeff = 0;
         else if (pcs_ptr->slice_type == I_SLICE)
             context_ptr->switch_md_mode_based_on_sq_coeff = 0;
         else if (enc_mode <= ENC_MR)
             context_ptr->switch_md_mode_based_on_sq_coeff = 0;
+#if FEATURE_REMOVE_CIRCULAR
+        else if (enc_mode <= ENC_M1)
+            context_ptr->switch_md_mode_based_on_sq_coeff = 1;
+        else
+            context_ptr->switch_md_mode_based_on_sq_coeff = 2;
+#else
         else if (enc_mode <= ENC_M2)
             context_ptr->switch_md_mode_based_on_sq_coeff = 1;
         else if (enc_mode <= ENC_M3)
             context_ptr->switch_md_mode_based_on_sq_coeff = 2;
         else
             context_ptr->switch_md_mode_based_on_sq_coeff = 3;
-
+#endif
 
         coeff_based_switch_md_controls(context_ptr, context_ptr->switch_md_mode_based_on_sq_coeff);
-
+#if !FEATURE_REMOVE_CIRCULAR
     }
+#endif
     // Set pic_obmc_level @ MD
     if (pd_pass == PD_PASS_0)
         context_ptr->md_pic_obmc_level = 0;
@@ -2955,8 +3057,10 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
         context_ptr->txs_in_inter_classes = 0;
 #endif
 #if FEATURE_NIC_SCALING_PER_STAGE
+#if !FEATURE_REMOVE_CIRCULAR
     // If using a mode offset, do not modify the NSQ-targeting features or NICS
     if (!mode_offset) {
+#endif
         uint8_t nic_scaling_level = 1;
 
         if (enc_mode <= ENC_MR)
@@ -2975,7 +3079,9 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
             nic_scaling_level = 11;
 
         set_nic_controls(context_ptr, nic_scaling_level);
+#if !FEATURE_REMOVE_CIRCULAR
     }
+#endif
 #else
     // Each NIC scaling level corresponds to a scaling factor, given by the below {x,y}
     // combinations, where x is the numerator, and y is the denominator.  e.g. {1,8} corresponds
@@ -4423,8 +4529,12 @@ void *mode_decision_kernel(void *input_ptr) {
 
                         // [PD_PASS_0] Signal(s) derivation
                         context_ptr->md_context->pd_pass = PD_PASS_0;
+#if FEATURE_REMOVE_CIRCULAR
+                        signal_derivation_enc_dec_kernel_oq(scs_ptr, pcs_ptr, context_ptr->md_context);
+#else
                         signal_derivation_enc_dec_kernel_oq(
                             scs_ptr, pcs_ptr, context_ptr->md_context, 0);
+#endif
 
                         // [PD_PASS_0]
                         // Input : mdc_blk_ptr built @ mdc process (up to 4421)
@@ -4466,8 +4576,12 @@ void *mode_decision_kernel(void *input_ptr) {
                             pcs_ptr->parent_pcs_ptr->multi_pass_pd_level == MULTI_PASS_PD_LEVEL_4) {
                             // [PD_PASS_1] Signal(s) derivation
                             context_ptr->md_context->pd_pass = PD_PASS_1;
+#if FEATURE_REMOVE_CIRCULAR
+                            signal_derivation_enc_dec_kernel_oq(scs_ptr, pcs_ptr, context_ptr->md_context);
+#else
                             signal_derivation_enc_dec_kernel_oq(
                                 scs_ptr, pcs_ptr, context_ptr->md_context,0);
+#endif
                             // Re-build mdc_blk_ptr for the 2nd PD Pass [PD_PASS_1]
                             build_cand_block_array(scs_ptr, pcs_ptr, context_ptr->md_context, sb_index);
 
@@ -4505,7 +4619,11 @@ void *mode_decision_kernel(void *input_ptr) {
                     if (use_output_stat(scs_ptr))
                         first_pass_signal_derivation_enc_dec_kernel(pcs_ptr, context_ptr->md_context);
                     else
+#if FEATURE_REMOVE_CIRCULAR
+                        signal_derivation_enc_dec_kernel_oq(scs_ptr, pcs_ptr, context_ptr->md_context);
+#else
                         signal_derivation_enc_dec_kernel_oq(scs_ptr, pcs_ptr, context_ptr->md_context, 0);
+#endif
                     // Re-build mdc_blk_ptr for the 3rd PD Pass [PD_PASS_2]
                     if(pcs_ptr->parent_pcs_ptr->multi_pass_pd_level != MULTI_PASS_PD_OFF)
                     build_cand_block_array(scs_ptr, pcs_ptr, context_ptr->md_context, sb_index);

@@ -85,6 +85,7 @@ extern "C" {
 #define TUNE_NICS                                1 // Tune settings for NIC scaling/pruning/# of stages to improve trade-offs with new scaling
 #define PARTIAL_FREQUENCY                        1 //Calculate partial frequency transforms N2 or N4
 #define TUNE_SC_QPS_IMP   1 // Improve QP assignment for SC
+#define FEATURE_REMOVE_CIRCULAR 1 // Remove circular actions from current NSQ feautres; replace them with non-circular levels
 // END  svt-03 /////////////////////////////////////////////////////////
 
 //FOR DEBUGGING - Do not remove

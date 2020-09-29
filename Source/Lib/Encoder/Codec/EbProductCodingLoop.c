@@ -6882,6 +6882,13 @@ void set_inter_comp_controls(ModeDecisionContext *mdctxt, uint8_t inter_comp_mod
   changed  at the block level
 ******************************************************/
 EbErrorType signal_derivation_block(PictureControlSet *pcs,
+#if FEATURE_REMOVE_CIRCULAR
+    ModeDecisionContext   *context_ptr) {
+
+    EbErrorType return_error = EB_ErrorNone;
+
+    EbEncMode enc_mode = pcs->parent_pcs_ptr->enc_mode;
+#else
     ModeDecisionContext   *context_ptr,
     EbEncMode              mode_offset) {
     EbErrorType return_error = EB_ErrorNone;
@@ -6891,7 +6898,7 @@ EbErrorType signal_derivation_block(PictureControlSet *pcs,
         enc_mode = MIN(ENC_M8, pcs->parent_pcs_ptr->enc_mode + mode_offset);
     else
         enc_mode = pcs->parent_pcs_ptr->enc_mode;
-
+#endif
     // Set dist_based_ref_pruning
     if (pcs->parent_pcs_ptr->ref_list0_count_try > 1 || pcs->parent_pcs_ptr->ref_list1_count_try > 1) {
         if (context_ptr->pd_pass == PD_PASS_0)
@@ -8460,21 +8467,54 @@ uint8_t get_allowed_block(ModeDecisionContext *context_ptr) {
     return skip_nsq;
 }
 
+#if FEATURE_REMOVE_CIRCULAR
+void md_pme_search_controls(ModeDecisionContext *mdctxt, uint8_t md_pme_level);
+
+// Set the levels used by features which apply aggressive settings for certain blocks (e.g. NSQ stats)
+void apply_new_md_settings(ModeDecisionContext *context_ptr, uint8_t level) {
+
+    // Don't make NICs more conservative
+    context_ptr->nic_ctrls.stage1_scaling_num = MIN(context_ptr->nic_ctrls.stage1_scaling_num, 5);
+    context_ptr->nic_ctrls.stage2_scaling_num = MIN(context_ptr->nic_ctrls.stage2_scaling_num, 3);
+    context_ptr->nic_ctrls.stage3_scaling_num = MIN(context_ptr->nic_ctrls.stage3_scaling_num, 3);
+    context_ptr->md_tx_size_search_mode = 0;
+
+    if (level >= 1) {
+        context_ptr->compound_types_to_try = MD_COMP_AVG;
+        context_ptr->md_inter_intra_level = 0;
+        context_ptr->md_pme_level = 3;
+        md_pme_search_controls(context_ptr, context_ptr->md_pme_level);
+    }
+}
+#endif
+#if FEATURE_REMOVE_CIRCULAR
+void update_md_settings_based_on_stats(ModeDecisionContext *context_ptr, int8_t pred_depth_refinement) {
+#else
 void update_md_settings_based_on_stats(SequenceControlSet *scs_ptr, PictureControlSet *pcs_ptr,
     ModeDecisionContext *context_ptr,int8_t pred_depth_refinement) {
+#endif
     // Use more aggressive (faster, but less accurate) settigns for unlikely paritions (incl. SQ)
     AMdCycleRControls*adaptive_md_cycles_red_ctrls = &context_ptr->admd_cycles_red_ctrls;
     if (adaptive_md_cycles_red_ctrls->enabled) {
         pred_depth_refinement = MIN(pred_depth_refinement, 1);
         pred_depth_refinement = MAX(pred_depth_refinement, -1);
         pred_depth_refinement += 2;
+#if FEATURE_REMOVE_CIRCULAR
+        if (context_ptr->ad_md_prob[pred_depth_refinement][context_ptr->blk_geom->shape] < adaptive_md_cycles_red_ctrls->switch_level_th) {
+            apply_new_md_settings(context_ptr, adaptive_md_cycles_red_ctrls->non_skip_level);
+#else
         if (context_ptr->ad_md_prob[pred_depth_refinement][context_ptr->blk_geom->shape] < adaptive_md_cycles_red_ctrls->switch_mode_th) {
             signal_derivation_enc_dec_kernel_oq(scs_ptr, pcs_ptr, context_ptr, adaptive_md_cycles_red_ctrls->mode_offset);
             signal_derivation_block(pcs_ptr, context_ptr, adaptive_md_cycles_red_ctrls->mode_offset);
+#endif
         }
     }
 }
+#if FEATURE_REMOVE_CIRCULAR
+uint8_t update_md_settings_based_on_sq_coeff(ModeDecisionContext *context_ptr) {
+#else
 uint8_t update_md_settings_based_on_sq_coeff(SequenceControlSet *scs_ptr, PictureControlSet *pcs_ptr,ModeDecisionContext *context_ptr) {
+#endif
     // If SQ block has zero coeffs, use more aggressive settings (or skip) for NSQ blocks
     uint8_t zero_sq_coeff_skip_action = 0;
     uint8_t sq_index = eb_log2f(context_ptr->blk_geom->sq_size) - 2;
@@ -8490,8 +8530,15 @@ uint8_t update_md_settings_based_on_sq_coeff(SequenceControlSet *scs_ptr, Pictur
                 zero_sq_coeff_skip_action = 1;
             }
             else {
+#if FEATURE_REMOVE_CIRCULAR
+                apply_new_md_settings(context_ptr, coeffb_sw_md_ctrls->non_skip_level);
+                // Turn off TXT search because if have zero coeffs tx_type must be DCT_DCT, and if SQ has zero coeffs,
+                // NSQ blocks are likely to also have zero coeffs
+                context_ptr->tx_search_level = TX_SEARCH_DCT_DCT_ONLY;
+#else
                 signal_derivation_enc_dec_kernel_oq(scs_ptr, pcs_ptr, context_ptr, coeffb_sw_md_ctrls->mode_offset);
                 signal_derivation_block(pcs_ptr, context_ptr, coeffb_sw_md_ctrls->mode_offset);
+#endif
             }
         }
     }
@@ -8745,14 +8792,27 @@ EB_EXTERN EbErrorType mode_decision_sb(SequenceControlSet *scs_ptr, PictureContr
         uint16_t redundant_blk_mds;
         if (!use_output_stat(scs_ptr)) {
         // Reset settings, in case they were over-written by previous block
+#if FEATURE_REMOVE_CIRCULAR
+            signal_derivation_enc_dec_kernel_oq(scs_ptr, pcs_ptr, context_ptr);
+            signal_derivation_block(pcs_ptr, context_ptr);
+#else
         signal_derivation_enc_dec_kernel_oq(scs_ptr, pcs_ptr, context_ptr,0);
         signal_derivation_block(pcs_ptr, context_ptr,0);
+#endif
         }
+#if FEATURE_REMOVE_CIRCULAR
+        // Use more aggressive (faster, but less accurate) settigns for unlikely paritions (incl. SQ)
+        update_md_settings_based_on_stats(context_ptr,
+            context_ptr->md_local_blk_unit[blk_idx_mds].pred_depth_refinement);
+        // If SQ block has zero coeffs, use more aggressive settings (or skip) for NSQ blocks
+        uint8_t zero_sq_coeff_skip_action = update_md_settings_based_on_sq_coeff(context_ptr);
+#else
         // Use more aggressive (faster, but less accurate) settigns for unlikely paritions (incl. SQ)
         update_md_settings_based_on_stats(scs_ptr, pcs_ptr, context_ptr,
             context_ptr->md_local_blk_unit[blk_idx_mds].pred_depth_refinement);
         // If SQ block has zero coeffs, use more aggressive settings (or skip) for NSQ blocks
         uint8_t zero_sq_coeff_skip_action = update_md_settings_based_on_sq_coeff(scs_ptr, pcs_ptr, context_ptr);
+#endif
         if (!context_ptr->md_disallow_nsq)
             check_redundant_block(blk_geom, context_ptr, &redundant_blk_avail, &redundant_blk_mds);
 

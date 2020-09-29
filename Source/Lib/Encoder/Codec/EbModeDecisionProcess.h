@@ -136,8 +136,13 @@ typedef struct  ObmcControls {
 typedef struct  AMdCycleRControls {
     uint8_t enabled; // On/Off feature control
     uint16_t skip_nsq_th;  // Threshold to bypass nsq <the higher th the higher speed>
+#if FEATURE_REMOVE_CIRCULAR
+    uint16_t switch_level_th; // TH level used to determine if more aggressive feature levels should be used for the current block
+    uint8_t non_skip_level; // Which level of aggressive features to use when probability of block is less than switch_level_th; higher is more aggressive
+#else
     uint16_t switch_mode_th;
     uint8_t mode_offset;
+#endif
 }AMdCycleRControls;
 typedef struct  TxtCycleRControls {
     uint8_t enabled;    // On/Off feature control
@@ -225,7 +230,11 @@ typedef struct MdSubPelSearchCtrls {
 }MdSubPelSearchCtrls;
 typedef struct CoeffBSwMdCtrls {
     uint8_t enabled;                // 0:  OFF; 1:  ON
+#if FEATURE_REMOVE_CIRCULAR
+    uint8_t non_skip_level;         // Which level of aggressive features to use when SQ has zero coeffs; higher is more aggressive
+#else
     uint8_t mode_offset;            // Offset to the mode to switch to
+#endif
     uint8_t skip_block;             // Allow skipping NSQ blocks
 }CoeffBSwMdCtrls;
 #if FEATURE_NIC_SCALING_PER_STAGE
