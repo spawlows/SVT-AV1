@@ -12767,7 +12767,7 @@ static AOM_FORCE_INLINE void fdct4x8_col_N4_avx2(__m256i *in, __m256i *output, i
     output[1] = _mm256_permute2x128_si256(out[2], out[3], 0x20);
 }
 
-static AOM_FORCE_INLINE void fdct4x8_row_N4_with_round_avx2(__m256i *input, __m256i *output, int32_t bit,
+static INLINE void fdct4x8_row_N4_with_round_avx2(__m256i *input, __m256i *output, int32_t bit,
                                                   const int32_t num_col, int32_t shift) {
     const int32_t *cospi    = cospi_arr(bit);
     const __m256i  zero     = _mm256_setzero_si256();
