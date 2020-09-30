@@ -745,10 +745,12 @@ typedef enum ATTRIBUTE_PACKED {
     V_FLIPADST,
     H_FLIPADST,
     TX_TYPES,
+#if TUNE_TX_TYPE_LEVELS
+    INVALID_TX_TYPE
+#endif
 } TxType;
 
 #if TUNE_TX_TYPE_LEVELS
-#define INVALID_TX_TYPE (uint8_t) ~0
 #define MAX_TX_TYPE_GROUP 6
 static const TxType tx_type_group[MAX_TX_TYPE_GROUP][TX_TYPES] = {
     { DCT_DCT, INVALID_TX_TYPE},
