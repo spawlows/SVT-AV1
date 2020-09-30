@@ -13426,6 +13426,10 @@ void eb_av1_fwd_txfm2d_8x8_N4_avx2(int16_t *input, int32_t *coeff, uint32_t stri
         break;
     case IDTX:
         load_buffer_4x8_in_8x8(input, in, stride, 0, 0, shift[0], 1);
+        in[4] = _mm256_setzero_si256();
+        in[5] = _mm256_setzero_si256();
+        in[6] = _mm256_setzero_si256();
+        in[7] = _mm256_setzero_si256();
         fidtx8x8_N4_avx2(in, out, fwd_cos_bit_col[txw_idx][txh_idx], 1);
         col_txfm_8x8_N4_rounding(out, -shift[1]);
         fidtx8x8_N4_avx2(out, out, fwd_cos_bit_row[txw_idx][txh_idx], 1);
@@ -13440,6 +13444,10 @@ void eb_av1_fwd_txfm2d_8x8_N4_avx2(int16_t *input, int32_t *coeff, uint32_t stri
         break;
     case H_DCT:
         load_buffer_4x8_in_8x8(input, in, stride, 0, 0, shift[0], 1);
+        in[4] = _mm256_setzero_si256();
+        in[5] = _mm256_setzero_si256();
+        in[6] = _mm256_setzero_si256();
+        in[7] = _mm256_setzero_si256();
         fidtx8x8_N4_avx2(in, in, fwd_cos_bit_col[txw_idx][txh_idx], 1);
         col_txfm_8x8_N4_rounding(in, -shift[1]);
         transpose_8x8_avx2(in, out);
@@ -13456,6 +13464,10 @@ void eb_av1_fwd_txfm2d_8x8_N4_avx2(int16_t *input, int32_t *coeff, uint32_t stri
         break;
     case H_ADST:
         load_buffer_4x8_in_8x8(input, in, stride, 0, 0, shift[0], 1);
+        in[4] = _mm256_setzero_si256();
+        in[5] = _mm256_setzero_si256();
+        in[6] = _mm256_setzero_si256();
+        in[7] = _mm256_setzero_si256();
         fidtx8x8_N4_avx2(in, in, fwd_cos_bit_col[txw_idx][txh_idx], 1);
         col_txfm_8x8_N4_rounding(in, -shift[1]);
         transpose_8x8_avx2(in, out);
@@ -13472,6 +13484,10 @@ void eb_av1_fwd_txfm2d_8x8_N4_avx2(int16_t *input, int32_t *coeff, uint32_t stri
         break;
     case H_FLIPADST:
         load_buffer_4x8_in_8x8(input, in, stride, 0, 1, shift[0], 1);
+        in[4] = _mm256_setzero_si256();
+        in[5] = _mm256_setzero_si256();
+        in[6] = _mm256_setzero_si256();
+        in[7] = _mm256_setzero_si256();
         fidtx8x8_N4_avx2(in, in, fwd_cos_bit_col[txw_idx][txh_idx], 1);
         col_txfm_8x8_N4_rounding(in, -shift[1]);
         transpose_8x8_avx2(in, out);
