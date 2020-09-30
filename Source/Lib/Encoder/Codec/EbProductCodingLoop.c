@@ -436,6 +436,7 @@ void copy_neighbour_arrays(PictureControlSet *pcs_ptr, ModeDecisionContext *cont
                    NEIGHBOR_ARRAY_UNIT_FULL_MASK);
 
     //neighbor_array_unit_reset(pcs_ptr->md_leaf_depth_neighbor_array[depth]);
+#if !TUNE_REMOVE_UNUSED_NEIG_ARRAY
     copy_neigh_arr(pcs_ptr->md_leaf_depth_neighbor_array[src_idx][tile_idx],
                    pcs_ptr->md_leaf_depth_neighbor_array[dst_idx][tile_idx],
                    blk_org_x,
@@ -443,6 +444,7 @@ void copy_neighbour_arrays(PictureControlSet *pcs_ptr, ModeDecisionContext *cont
                    blk_geom->bwidth,
                    blk_geom->bheight,
                    NEIGHBOR_ARRAY_UNIT_TOP_AND_LEFT_ONLY_MASK);
+#endif
     copy_neigh_arr(pcs_ptr->mdleaf_partition_neighbor_array[src_idx][tile_idx],
                    pcs_ptr->mdleaf_partition_neighbor_array[dst_idx][tile_idx],
                    blk_org_x,
@@ -918,7 +920,9 @@ void product_coding_loop_init_fast_loop(ModeDecisionContext *context_ptr,
                                         NeighborArrayUnit *  intra_luma_mode_neighbor_array,
                                         NeighborArrayUnit *  skip_flag_neighbor_array,
                                         NeighborArrayUnit *  mode_type_neighbor_array,
+#if !TUNE_REMOVE_UNUSED_NEIG_ARRAY
                                         NeighborArrayUnit *  leaf_depth_neighbor_array,
+#endif
                                         NeighborArrayUnit *  leaf_partition_neighbor_array) {
     context_ptr->tx_depth = context_ptr->blk_ptr->tx_depth = 0;
     // Generate Split, Skip and intra mode contexts for the rate estimation
@@ -933,11 +937,17 @@ void product_coding_loop_init_fast_loop(ModeDecisionContext *context_ptr,
                                    intra_luma_mode_neighbor_array,
                                    skip_flag_neighbor_array,
                                    mode_type_neighbor_array,
+#if !TUNE_REMOVE_UNUSED_NEIG_ARRAY
                                    leaf_depth_neighbor_array,
+#endif
                                    leaf_partition_neighbor_array);
 
+#if TUNE_INIT_FAST_LOOP_OPT
+    EB_MEMSET(context_ptr->fast_cost_array, MAX_CU_COST, sizeof(uint64_t) * MAX_NFL_BUFF);
+#else
     for (uint32_t index = 0; index < MAX_NFL_BUFF; ++index)
         context_ptr->fast_cost_array[index] = MAX_CU_COST;
+#endif
 
     return;
 }
@@ -8126,7 +8136,9 @@ void md_encode_block(PictureControlSet *pcs_ptr, ModeDecisionContext *context_pt
                                        context_ptr->intra_luma_mode_neighbor_array,
                                        context_ptr->skip_flag_neighbor_array,
                                        context_ptr->mode_type_neighbor_array,
+#if !TUNE_REMOVE_UNUSED_NEIG_ARRAY
                                        context_ptr->leaf_depth_neighbor_array,
+#endif
                                        context_ptr->leaf_partition_neighbor_array);
 
     // Initialize uv_search_path
@@ -8921,8 +8933,10 @@ EB_EXTERN EbErrorType mode_decision_sb(SequenceControlSet *scs_ptr, PictureContr
         pcs_ptr->md_skip_flag_neighbor_array[MD_NEIGHBOR_ARRAY_INDEX][tile_idx];
     context_ptr->mode_type_neighbor_array =
         pcs_ptr->md_mode_type_neighbor_array[MD_NEIGHBOR_ARRAY_INDEX][tile_idx];
+#if !TUNE_REMOVE_UNUSED_NEIG_ARRAY
     context_ptr->leaf_depth_neighbor_array =
         pcs_ptr->md_leaf_depth_neighbor_array[MD_NEIGHBOR_ARRAY_INDEX][tile_idx];
+#endif
     context_ptr->leaf_partition_neighbor_array =
         pcs_ptr->mdleaf_partition_neighbor_array[MD_NEIGHBOR_ARRAY_INDEX][tile_idx];
 

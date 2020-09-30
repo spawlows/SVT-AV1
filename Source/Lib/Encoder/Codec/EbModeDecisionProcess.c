@@ -368,7 +368,9 @@ void reset_mode_decision_neighbor_arrays(PictureControlSet *pcs_ptr, uint16_t ti
         neighbor_array_unit_reset(pcs_ptr->md_mv_neighbor_array[depth][tile_idx]);
         neighbor_array_unit_reset(pcs_ptr->md_skip_flag_neighbor_array[depth][tile_idx]);
         neighbor_array_unit_reset(pcs_ptr->md_mode_type_neighbor_array[depth][tile_idx]);
+#if !TUNE_REMOVE_UNUSED_NEIG_ARRAY
         neighbor_array_unit_reset(pcs_ptr->md_leaf_depth_neighbor_array[depth][tile_idx]);
+#endif
         neighbor_array_unit_reset(pcs_ptr->mdleaf_partition_neighbor_array[depth][tile_idx]);
         if (pcs_ptr->hbd_mode_decision != EB_10_BIT_MD) {
             neighbor_array_unit_reset(pcs_ptr->md_luma_recon_neighbor_array[depth][tile_idx]);

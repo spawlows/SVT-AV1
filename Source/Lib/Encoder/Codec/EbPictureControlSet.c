@@ -107,7 +107,9 @@ void picture_control_set_dctor(EbPtr p) {
     EB_DELETE_PTR_ARRAY(obj->ep_mv_neighbor_array, tile_cnt);
     EB_DELETE_PTR_ARRAY(obj->ep_skip_flag_neighbor_array, tile_cnt);
     EB_DELETE_PTR_ARRAY(obj->ep_mode_type_neighbor_array, tile_cnt);
+#if !TUNE_REMOVE_UNUSED_NEIG_ARRAY
     EB_DELETE_PTR_ARRAY(obj->ep_leaf_depth_neighbor_array, tile_cnt);
+#endif
     EB_DELETE_PTR_ARRAY(obj->ep_luma_recon_neighbor_array, tile_cnt);
     EB_DELETE_PTR_ARRAY(obj->ep_cb_recon_neighbor_array, tile_cnt);
     EB_DELETE_PTR_ARRAY(obj->ep_cr_recon_neighbor_array, tile_cnt);
@@ -141,7 +143,9 @@ void picture_control_set_dctor(EbPtr p) {
         EB_DELETE_PTR_ARRAY(obj->md_mv_neighbor_array[depth], tile_cnt);
         EB_DELETE_PTR_ARRAY(obj->md_skip_flag_neighbor_array[depth], tile_cnt);
         EB_DELETE_PTR_ARRAY(obj->md_mode_type_neighbor_array[depth], tile_cnt);
+#if !TUNE_REMOVE_UNUSED_NEIG_ARRAY
         EB_DELETE_PTR_ARRAY(obj->md_leaf_depth_neighbor_array[depth], tile_cnt);
+#endif
         EB_DELETE_PTR_ARRAY(obj->mdleaf_partition_neighbor_array[depth], tile_cnt);
 
 #if PR1481
@@ -419,7 +423,9 @@ EbErrorType picture_control_set_ctor(PictureControlSet *object_ptr, EbPtr object
         EB_ALLOC_PTR_ARRAY(object_ptr->md_mv_neighbor_array[depth], total_tile_cnt);
         EB_ALLOC_PTR_ARRAY(object_ptr->md_skip_flag_neighbor_array[depth], total_tile_cnt);
         EB_ALLOC_PTR_ARRAY(object_ptr->md_mode_type_neighbor_array[depth], total_tile_cnt);
+#if !TUNE_REMOVE_UNUSED_NEIG_ARRAY
         EB_ALLOC_PTR_ARRAY(object_ptr->md_leaf_depth_neighbor_array[depth], total_tile_cnt);
+#endif
         EB_ALLOC_PTR_ARRAY(object_ptr->mdleaf_partition_neighbor_array[depth], total_tile_cnt);
         EB_ALLOC_PTR_ARRAY(object_ptr->md_skip_coeff_neighbor_array[depth], total_tile_cnt);
         EB_ALLOC_PTR_ARRAY(object_ptr->md_luma_dc_sign_level_coeff_neighbor_array[depth], total_tile_cnt);
@@ -494,6 +500,7 @@ EbErrorType picture_control_set_ctor(PictureControlSet *object_ptr, EbPtr object
                     PU_NEIGHBOR_ARRAY_GRANULARITY,
                     NEIGHBOR_ARRAY_UNIT_FULL_MASK,
                 },
+#if !TUNE_REMOVE_UNUSED_NEIG_ARRAY
                 {
                     &object_ptr->md_leaf_depth_neighbor_array[depth][tile_idx],
                     MAX_PICTURE_WIDTH_SIZE,
@@ -503,6 +510,7 @@ EbErrorType picture_control_set_ctor(PictureControlSet *object_ptr, EbPtr object
                     PU_NEIGHBOR_ARRAY_GRANULARITY,
                     NEIGHBOR_ARRAY_UNIT_TOP_AND_LEFT_ONLY_MASK,
                 },
+#endif
                 {
                     &object_ptr->mdleaf_partition_neighbor_array[depth][tile_idx],
                     MAX_PICTURE_WIDTH_SIZE,
@@ -713,7 +721,9 @@ EbErrorType picture_control_set_ctor(PictureControlSet *object_ptr, EbPtr object
     EB_ALLOC_PTR_ARRAY(object_ptr->ep_mv_neighbor_array, total_tile_cnt);
     EB_ALLOC_PTR_ARRAY(object_ptr->ep_skip_flag_neighbor_array, total_tile_cnt);
     EB_ALLOC_PTR_ARRAY(object_ptr->ep_mode_type_neighbor_array, total_tile_cnt);
+#if !TUNE_REMOVE_UNUSED_NEIG_ARRAY
     EB_ALLOC_PTR_ARRAY(object_ptr->ep_leaf_depth_neighbor_array, total_tile_cnt);
+#endif
     EB_ALLOC_PTR_ARRAY(object_ptr->ep_luma_recon_neighbor_array, total_tile_cnt);
     EB_ALLOC_PTR_ARRAY(object_ptr->ep_cb_recon_neighbor_array, total_tile_cnt);
     EB_ALLOC_PTR_ARRAY(object_ptr->ep_cr_recon_neighbor_array, total_tile_cnt);
@@ -790,6 +800,7 @@ EbErrorType picture_control_set_ctor(PictureControlSet *object_ptr, EbPtr object
                 PU_NEIGHBOR_ARRAY_GRANULARITY,
                 NEIGHBOR_ARRAY_UNIT_FULL_MASK,
             },
+#if !TUNE_REMOVE_UNUSED_NEIG_ARRAY
             {
                 &object_ptr->ep_leaf_depth_neighbor_array[tile_idx],
                 MAX_PICTURE_WIDTH_SIZE,
@@ -799,6 +810,7 @@ EbErrorType picture_control_set_ctor(PictureControlSet *object_ptr, EbPtr object
                 PU_NEIGHBOR_ARRAY_GRANULARITY,
                 NEIGHBOR_ARRAY_UNIT_TOP_AND_LEFT_ONLY_MASK,
             },
+#endif
             {
                 &object_ptr->ep_luma_recon_neighbor_array[tile_idx],
                 MAX_PICTURE_WIDTH_SIZE,

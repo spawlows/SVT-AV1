@@ -928,7 +928,9 @@ void product_coding_loop_init_fast_loop(ModeDecisionContext *context_ptr,
                                         NeighborArrayUnit *  intra_luma_mode_neighbor_array,
                                         NeighborArrayUnit *  skip_flag_neighbor_array,
                                         NeighborArrayUnit *  mode_type_neighbor_array,
+#if !TUNE_REMOVE_UNUSED_NEIG_ARRAY
                                         NeighborArrayUnit *  leaf_depth_neighbor_array,
+#endif
                                         NeighborArrayUnit *  leaf_partition_neighbor_array);
 void read_refine_me_mvs(PictureControlSet *pcs_ptr, ModeDecisionContext *context_ptr,
     EbPictureBufferDesc *input_picture_ptr, uint32_t input_origin_index,
@@ -1339,7 +1341,9 @@ extern void first_pass_md_encode_block(PictureControlSet *pcs_ptr, ModeDecisionC
                                        context_ptr->intra_luma_mode_neighbor_array,
                                        context_ptr->skip_flag_neighbor_array,
                                        context_ptr->mode_type_neighbor_array,
+#if !TUNE_REMOVE_UNUSED_NEIG_ARRAY
                                        context_ptr->leaf_depth_neighbor_array,
+#endif
                                        context_ptr->leaf_partition_neighbor_array);
 
     FrameHeader *frm_hdr = &pcs_ptr->parent_pcs_ptr->frm_hdr;

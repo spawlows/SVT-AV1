@@ -178,7 +178,9 @@ static void reset_encode_pass_neighbor_arrays(PictureControlSet *pcs_ptr, uint16
     neighbor_array_unit_reset(pcs_ptr->ep_mv_neighbor_array[tile_idx]);
     neighbor_array_unit_reset(pcs_ptr->ep_skip_flag_neighbor_array[tile_idx]);
     neighbor_array_unit_reset(pcs_ptr->ep_mode_type_neighbor_array[tile_idx]);
+#if !TUNE_REMOVE_UNUSED_NEIG_ARRAY
     neighbor_array_unit_reset(pcs_ptr->ep_leaf_depth_neighbor_array[tile_idx]);
+#endif
     neighbor_array_unit_reset(pcs_ptr->ep_luma_recon_neighbor_array[tile_idx]);
     neighbor_array_unit_reset(pcs_ptr->ep_cb_recon_neighbor_array[tile_idx]);
     neighbor_array_unit_reset(pcs_ptr->ep_cr_recon_neighbor_array[tile_idx]);

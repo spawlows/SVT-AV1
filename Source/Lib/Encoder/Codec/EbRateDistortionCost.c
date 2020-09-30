@@ -2175,7 +2175,9 @@ void coding_loop_context_generation(ModeDecisionContext *context_ptr, BlkStruct 
                                     NeighborArrayUnit *intra_luma_mode_neighbor_array,
                                     NeighborArrayUnit *skip_flag_neighbor_array,
                                     NeighborArrayUnit *mode_type_neighbor_array,
+#if !TUNE_REMOVE_UNUSED_NEIG_ARRAY
                                     NeighborArrayUnit *leaf_depth_neighbor_array,
+#endif
                                     NeighborArrayUnit *leaf_partition_neighbor_array) {
     (void)sb_sz;
     UNUSED(ref_frame_type_neighbor_array);
@@ -2183,10 +2185,12 @@ void coding_loop_context_generation(ModeDecisionContext *context_ptr, BlkStruct 
         get_neighbor_array_unit_left_index(mode_type_neighbor_array, blk_origin_y);
     uint32_t mode_type_top_neighbor_index =
         get_neighbor_array_unit_top_index(mode_type_neighbor_array, blk_origin_x);
+#if !TUNE_REMOVE_UNUSED_NEIG_ARRAY
     uint32_t leaf_depth_left_neighbor_index =
         get_neighbor_array_unit_left_index(leaf_depth_neighbor_array, blk_origin_y);
     uint32_t leaf_depth_top_neighbor_index =
         get_neighbor_array_unit_top_index(leaf_depth_neighbor_array, blk_origin_x);
+#endif
     uint32_t skip_flag_left_neighbor_index =
         get_neighbor_array_unit_left_index(skip_flag_neighbor_array, blk_origin_y);
     uint32_t skip_flag_top_neighbor_index =
@@ -2256,14 +2260,18 @@ void coding_loop_context_generation(ModeDecisionContext *context_ptr, BlkStruct 
         (mode_type_neighbor_array->left_array[mode_type_left_neighbor_index] != INTRA_MODE)
             ? (uint32_t)DC_PRED
             : intra_luma_mode_neighbor_array->left_array[intra_luma_mode_left_neighbor_index]);
+#if !TUNE_REMOVE_UNUSED_NEIG_ARRAY
     context_ptr->md_local_blk_unit[blk_ptr->mds_idx].left_neighbor_depth =
         leaf_depth_neighbor_array->left_array[leaf_depth_left_neighbor_index];
+#endif
     context_ptr->md_local_blk_unit[blk_ptr->mds_idx].top_neighbor_mode = (uint32_t)(
         (mode_type_neighbor_array->top_array[mode_type_top_neighbor_index] != INTRA_MODE)
             ? (uint32_t)DC_PRED
             : intra_luma_mode_neighbor_array->top_array[intra_luma_mode_top_neighbor_index]);
+#if !TUNE_REMOVE_UNUSED_NEIG_ARRAY
     context_ptr->md_local_blk_unit[blk_ptr->mds_idx].top_neighbor_depth =
         leaf_depth_neighbor_array->top_array[leaf_depth_top_neighbor_index];
+#endif
 
     // Generate Partition context
     context_ptr->md_local_blk_unit[blk_ptr->mds_idx].above_neighbor_partition =

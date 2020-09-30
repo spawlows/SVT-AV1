@@ -90,6 +90,8 @@ extern "C" {
 #define FEATURE_NEW_OBMC_LEVELS                  0 // Add new levels and controls for OBMC
 #define TUNE_CDF                                 1 // Update CDF Levels
 #define TUNE_TX_TYPE_LEVELS                      1 // Add Tx Type Grouping Levels
+#define TUNE_INIT_FAST_LOOP_OPT                  1 // Fast loop optimizations
+#define TUNE_REMOVE_UNUSED_NEIG_ARRAY            1 // Removes unused neighbor array
 // END  svt-03 /////////////////////////////////////////////////////////
 
 //FOR DEBUGGING - Do not remove
