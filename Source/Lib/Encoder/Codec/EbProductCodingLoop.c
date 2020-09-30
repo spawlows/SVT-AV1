@@ -679,6 +679,7 @@ int sq_block_index[TOTAL_SQ_BLOCK_COUNT] = {
     1012, 1013, 1018, 1019, 1020, 1021, 1022, 1027, 1028, 1029, 1030, 1031, 1036, 1037, 1038, 1039,
     1040, 1065, 1070, 1071, 1072, 1073, 1074, 1079, 1080, 1081, 1082, 1083, 1088, 1089, 1090, 1091,
     1092, 1097, 1098, 1099, 1100};
+#if !INIT_BLOCK_OPT
 void init_sq_nsq_block(SequenceControlSet *scs_ptr, ModeDecisionContext *context_ptr) {
     uint32_t blk_idx = 0;
     do {
@@ -698,6 +699,7 @@ void init_sq_nsq_block(SequenceControlSet *scs_ptr, ModeDecisionContext *context
         ++blk_idx;
     } while (blk_idx < scs_ptr->max_block_cnt);
 }
+#endif
 void av1_perform_inverse_transform_recon_luma(ModeDecisionContext *        context_ptr,
                                               ModeDecisionCandidateBuffer *candidate_buffer) {
     uint32_t tu_total_count;
@@ -2192,20 +2194,31 @@ void derive_me_offsets(const SequenceControlSet *scs_ptr, PictureControlSet *pcs
         context_ptr->me_sb_addr = me_sb_x + me_sb_y * me_pic_width_in_sb;
         context_ptr->geom_offset_x = (me_sb_x & 0x1) * me_sb_size;
         context_ptr->geom_offset_y = (me_sb_y & 0x1) * me_sb_size;
+#if ME_IDX_LUPT
+        context_ptr->me_block_offset = (uint32_t)
+            me_idx_128x128[((context_ptr->geom_offset_y / me_sb_size) * 2) +
+                           (context_ptr->geom_offset_x / me_sb_size)]
+                          [context_ptr->blk_geom->blkidx_mds];
+    } else {
+        context_ptr->me_sb_addr      = context_ptr->sb_ptr->index;
+        context_ptr->me_block_offset = me_idx[context_ptr->blk_geom->blkidx_mds];
     }
+#else
     else
         context_ptr->me_sb_addr = context_ptr->sb_ptr->index;
-
+#endif
     if (sq_blk_geom->bwidth == 128 || sq_blk_geom->bheight == 128) {
         context_ptr->me_block_offset = 0;
     }
+#if !ME_IDX_LUPT
     else {
-        context_ptr->me_block_offset =
-            get_me_info_index(pcs_ptr->parent_pcs_ptr->max_number_of_pus_per_sb,
-                sq_blk_geom,
-                context_ptr->geom_offset_x,
-                context_ptr->geom_offset_y);
+        context_ptr->me_block_offset = get_me_info_index(
+            pcs_ptr->parent_pcs_ptr->max_number_of_pus_per_sb,
+            sq_blk_geom,
+            context_ptr->geom_offset_x,
+            context_ptr->geom_offset_y);
     }
+#endif
     context_ptr->me_cand_offset = context_ptr->me_block_offset * MAX_PA_ME_CAND;
 }
 #define MAX_MD_NSQ_SARCH_MVC_CNT 5
@@ -7218,7 +7231,11 @@ EbErrorType signal_derivation_block(PictureControlSet *pcs,
 
     EbEncMode enc_mode;
     if (mode_offset)
+#if BYPASS_SIGNAL_SET
+        enc_mode = MIN(pcs->parent_pcs_ptr->fastest_preset, pcs->parent_pcs_ptr->enc_mode + mode_offset);
+#else
         enc_mode = MIN(ENC_M8, pcs->parent_pcs_ptr->enc_mode + mode_offset);
+#endif
     else
         enc_mode = pcs->parent_pcs_ptr->enc_mode;
 #endif
@@ -8883,7 +8900,15 @@ uint8_t update_md_settings_based_on_sq_coeff(SequenceControlSet *scs_ptr, Pictur
             if (coeffb_sw_md_ctrls->skip_block) {
                 zero_sq_coeff_skip_action = 1;
             }
+#if FEATURE_REMOVE_CIRCULAR
             else {
+#else
+#if BYPASS_SIGNAL_SET
+            else if (pcs_ptr->parent_pcs_ptr->enc_mode < pcs_ptr->parent_pcs_ptr->fastest_preset) {
+#else
+            else {
+#endif
+#endif
 #if FEATURE_REMOVE_CIRCULAR
                 apply_new_md_settings(context_ptr, coeffb_sw_md_ctrls->non_skip_level);
                 // Turn off TXT search because if have zero coeffs tx_type must be DCT_DCT, and if SQ has zero coeffs,
@@ -8917,7 +8942,9 @@ EB_EXTERN EbErrorType mode_decision_sb(SequenceControlSet *scs_ptr, PictureContr
     const EbMdcLeafData *const leaf_data_array = mdcResultTbPtr->leaf_data_array;
     const uint16_t             tile_idx        = context_ptr->tile_index;
     context_ptr->sb_ptr                        = sb_ptr;
+#if !INIT_BLOCK_OPT
     init_sq_nsq_block(scs_ptr, context_ptr);
+#endif
 
     uint32_t full_lambda = context_ptr->hbd_mode_decision
         ? context_ptr->full_sb_lambda_md[EB_10_BIT_MD] :
@@ -9156,6 +9183,9 @@ EB_EXTERN EbErrorType mode_decision_sb(SequenceControlSet *scs_ptr, PictureContr
             signal_derivation_enc_dec_kernel_oq(scs_ptr, pcs_ptr, context_ptr);
             signal_derivation_block(pcs_ptr, context_ptr);
 #else
+#if BYPASS_SIGNAL_SET
+        if (pcs_ptr->parent_pcs_ptr->enc_mode < pcs_ptr->parent_pcs_ptr->fastest_preset)
+#endif
         signal_derivation_enc_dec_kernel_oq(scs_ptr, pcs_ptr, context_ptr,0);
         signal_derivation_block(pcs_ptr, context_ptr,0);
 #endif
@@ -9168,6 +9198,9 @@ EB_EXTERN EbErrorType mode_decision_sb(SequenceControlSet *scs_ptr, PictureContr
         uint8_t zero_sq_coeff_skip_action = update_md_settings_based_on_sq_coeff(context_ptr);
 #else
         // Use more aggressive (faster, but less accurate) settigns for unlikely paritions (incl. SQ)
+#if BYPASS_SIGNAL_SET
+            if (pcs_ptr->parent_pcs_ptr->enc_mode < pcs_ptr->parent_pcs_ptr->fastest_preset)
+#endif
         update_md_settings_based_on_stats(scs_ptr, pcs_ptr, context_ptr,
             context_ptr->md_local_blk_unit[blk_idx_mds].pred_depth_refinement);
         // If SQ block has zero coeffs, use more aggressive settings (or skip) for NSQ blocks

@@ -92,6 +92,9 @@ extern "C" {
 #define TUNE_TX_TYPE_LEVELS                      1 // Add Tx Type Grouping Levels
 #define TUNE_INIT_FAST_LOOP_OPT                  1 // Fast loop optimizations
 #define TUNE_REMOVE_UNUSED_NEIG_ARRAY            1 // Removes unused neighbor array
+#define INIT_BLOCK_OPT							 1 // optimize block initialization
+#define BYPASS_SIGNAL_SET						 1 // bypass block based signal derivation for fastest preset when superfluous 
+#define ME_IDX_LUPT								 1 // get index using lookuptable
 // END  svt-03 /////////////////////////////////////////////////////////
 
 //FOR DEBUGGING - Do not remove

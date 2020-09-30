@@ -904,7 +904,9 @@ typedef struct PictureParentControlSet {
     uint8_t is_next_frame_intra;
 #endif
 #endif
-
+#if BYPASS_SIGNAL_SET
+    uint8_t fastest_preset;
+#endif
 } PictureParentControlSet;
 
 typedef struct PictureControlSetInitData {

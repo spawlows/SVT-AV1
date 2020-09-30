@@ -2535,6 +2535,9 @@ uint32_t d2_inter_depth_block_decision(ModeDecisionContext *context_ptr, uint32_
             } else {
                 context_ptr->md_local_blk_unit[parent_depth_idx_mds].cost = current_depth_cost;
                 context_ptr->md_blk_arr_nsq[parent_depth_idx_mds].part    = PARTITION_SPLIT;
+#if INIT_BLOCK_OPT
+                context_ptr->md_blk_arr_nsq[parent_depth_idx_mds].split_flag = EB_TRUE;
+#endif
             }
 
             //setup next parent inter depth
