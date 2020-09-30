@@ -88,6 +88,8 @@ extern "C" {
 #define FEATURE_REMOVE_CIRCULAR 1 // Remove circular actions from current NSQ feautres; replace them with non-circular levels
 #define FEATURE_NEW_INTER_COMP_LEVELS            0 // Add new levels and controls for inter compound; remove old levels
 #define FEATURE_NEW_OBMC_LEVELS                  0 // Add new levels and controls for OBMC
+#define TUNE_CDF                                 1 // Update CDF Levels
+#define TUNE_TX_TYPE_LEVELS                      1 // Add Tx Type Grouping Levels
 // END  svt-03 /////////////////////////////////////////////////////////
 
 //FOR DEBUGGING - Do not remove

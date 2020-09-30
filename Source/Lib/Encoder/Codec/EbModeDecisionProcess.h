@@ -154,11 +154,27 @@ typedef struct  AMdCycleRControls {
     uint8_t mode_offset;
 #endif
 }AMdCycleRControls;
+#if TUNE_TX_TYPE_LEVELS
+typedef struct TxtControls {
+    uint8_t enabled;
+
+    uint8_t txt_group_inter_lt_16x16;       // group to use when inter and tx block < 16x16
+    uint8_t txt_group_inter_gt_eq_16x16;    // group to use when inter and tx block >= 16x16
+
+    uint8_t txt_group_intra_lt_16x16;       // group to use when intra and tx block < 16x16
+    uint8_t txt_group_intra_gt_eq_16x16;    // group to use when intra and tx block >= 16x16
+
+    uint8_t use_stats;    // On/Off feature control
+    uint16_t intra_th;    // Threshold to bypass intra TXT <the higher th the higher speed>
+    uint16_t inter_th;    // Threshold to bypass inter TXT <the higher th the higher speed>
+}TxtControls;
+#else
 typedef struct  TxtCycleRControls {
     uint8_t enabled;    // On/Off feature control
     uint16_t intra_th;  // Threshold to bypass intra TXT <the higher th the higher speed>
     uint16_t inter_th;  // Threshold to bypass inter TXT <the higher th the higher speed>
 }TxtCycleRControls;
+#endif
 typedef struct  TxsCycleRControls {
     uint8_t enabled;    // On/Off feature control
     uint16_t intra_th;  // Threshold to bypass intra TXS <the higher th the higher speed>
@@ -471,7 +487,11 @@ typedef struct ModeDecisionContext {
     // full_loop_core signals
     EbBool md_staging_perform_inter_pred; // 0: perform luma & chroma prediction + interpolation search, 2: nothing (use information from previous stages)
     EbBool md_staging_tx_size_mode; // 0: Tx Size recon only, 1:Tx Size search and recon
+#if TUNE_TX_TYPE_LEVELS
+    EbBool md_staging_txt_level;
+#else
     EbBool md_staging_tx_search; // 0: skip, 1: use ref cost, 2: no shortcuts
+#endif
     EbBool md_staging_skip_full_chroma;
     EbBool md_staging_skip_rdoq;
     EbBool md_staging_spatial_sse_full_loop_level;
@@ -510,7 +530,9 @@ typedef struct ModeDecisionContext {
     uint8_t      dc_cand_only_flag;
     EbBool       disable_angle_z2_intra_flag;
     uint8_t      shut_fast_rate; // use coeff rate and slipt flag rate only (no MVP derivation)
+#if !TUne_TX_TYPE_LEVELS
     uint8_t      tx_search_level;
+#endif
     uint8_t      interpolation_search_level;
     uint8_t      md_tx_size_search_mode;
     uint8_t      md_pic_obmc_level;
@@ -553,7 +575,11 @@ typedef struct ModeDecisionContext {
     PdPass pd_pass;
 
     EbBool        md_disable_cfl;
+#if TUNE_TX_TYPE_LEVELS
+    TxtControls txt_ctrls;
+#else
     TxtCycleRControls txt_cycles_red_ctrls;
+#endif
     TxsCycleRControls txs_cycles_red_ctrls;
     AMdCycleRControls admd_cycles_red_ctrls;
     uint8_t disallow_4x4;

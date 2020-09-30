@@ -4704,30 +4704,72 @@ EbBool bypass_txt_based_on_stats(PictureControlSet *pcs_ptr,
     if (pcs_ptr->slice_type == I_SLICE) {
         if (is_inter) { // INTER path
             if (inter_txt_cycles_reduction_th[depth_idx][pred_depth_refinement][tx_size_idx][freq_band][(tx_type - 1)]
+#if TUNE_TX_TYPE_LEVELS
+                < context_ptr->txt_ctrls.inter_th)
+#else
                 < context_ptr->txt_cycles_red_ctrls.inter_th)
+#endif
                 return EB_TRUE;
         }
         else { // INTRA path
             if (intra_txt_cycles_reduction_th[depth_idx][pred_depth_refinement][tx_size_idx][freq_band][(tx_type - 1)]
+#if TUNE_TX_TYPE_LEVELS
+                < context_ptr->txt_ctrls.intra_th)
+#else
                 < context_ptr->txt_cycles_red_ctrls.intra_th)
+#endif
                 return EB_TRUE;
         }
     }
     else {
         if (is_inter) { // INTER path
+#if TUNE_TX_TYPE_LEVELS
+            if (context_ptr->txt_prob[pred_depth_refinement][tx_type] < context_ptr->txt_ctrls.inter_th)
+#else
             if (context_ptr->txt_prob[pred_depth_refinement][tx_type] < context_ptr->txt_cycles_red_ctrls.inter_th)
+#endif
                 return EB_TRUE;
         }
         else { // INTRA path
+#if TUNE_TX_TYPE_LEVELS
+            if (context_ptr->txt_prob[pred_depth_refinement][tx_type] < context_ptr->txt_ctrls.intra_th)
+#else
             if (context_ptr->txt_prob[pred_depth_refinement][tx_type] < context_ptr->txt_cycles_red_ctrls.intra_th)
+#endif
                 return EB_TRUE;
         }
     }
     return EB_FALSE;
 }
+
+#if TUNE_TX_TYPE_LEVELS
+uint8_t get_tx_type_group(ModeDecisionContext *context_ptr, ModeDecisionCandidateBuffer *candidate_buffer, EbBool only_dct_dct) {
+    int tx_type_group = 1;
+    if (!only_dct_dct) {
+        if (candidate_buffer->candidate_ptr->cand_class == CAND_CLASS_0 || candidate_buffer->candidate_ptr->cand_class == CAND_CLASS_3) {
+            tx_type_group = (context_ptr->blk_geom->tx_width[context_ptr->tx_depth][context_ptr->txb_itr] < 16 ||
+                context_ptr->blk_geom->tx_height[context_ptr->tx_depth][context_ptr->txb_itr] < 16)
+                ? context_ptr->txt_ctrls.txt_group_intra_lt_16x16
+                : context_ptr->txt_ctrls.txt_group_intra_gt_eq_16x16;
+        }
+        else {
+            tx_type_group = (context_ptr->blk_geom->tx_width[context_ptr->tx_depth][context_ptr->txb_itr] < 16 ||
+                context_ptr->blk_geom->tx_height[context_ptr->tx_depth][context_ptr->txb_itr] < 16)
+                ? context_ptr->txt_ctrls.txt_group_inter_lt_16x16
+                : context_ptr->txt_ctrls.txt_group_inter_gt_eq_16x16;
+        }
+    }
+    return tx_type_group;
+}
+#endif
+
 void tx_type_search(PictureControlSet *pcs_ptr, ModeDecisionContext *context_ptr,
                     ModeDecisionCandidateBuffer *candidate_buffer,
+#if TUNE_TX_TYPE_LEVELS
+        uint32_t qindex, uint32_t *y_count_non_zero_coeffs, uint64_t *y_coeff_bits,
+#else
         uint32_t qindex, uint8_t tx_search_skip_flag ,uint32_t *y_count_non_zero_coeffs, uint64_t *y_coeff_bits,
+#endif
         uint64_t *y_full_distortion) {
     EbPictureBufferDesc *input_picture_ptr = context_ptr->hbd_mode_decision
         ? pcs_ptr->input_frame16bit
@@ -4749,13 +4791,23 @@ void tx_type_search(PictureControlSet *pcs_ptr, ModeDecisionContext *context_ptr
                         candidate_buffer->candidate_ptr->use_intrabc)
         ? EB_TRUE
         : EB_FALSE;
+
+#if TUNE_TX_TYPE_LEVELS
+    uint8_t only_dct_dct = (context_ptr->md_staging_txt_level == 0);
+#endif
     // Tunr OFF TXT search for disallowed cases
     // Do not turn ON TXT search beyond this point
-    if (get_ext_tx_types(tx_size,is_inter, pcs_ptr->parent_pcs_ptr->frm_hdr.reduced_tx_set) == 1)
+    if (get_ext_tx_types(tx_size, is_inter, pcs_ptr->parent_pcs_ptr->frm_hdr.reduced_tx_set) == 1)
+#if TUNE_TX_TYPE_LEVELS
+        only_dct_dct = 1;
+#else
             tx_search_skip_flag =1 ;
+#endif
 
+#if !TUNE_TX_TYPE_LEVELS
     TxType   txk_start           = DCT_DCT;
     TxType   txk_end             = tx_search_skip_flag ? DCT_DCT + 1 : TX_TYPES;
+#endif
     uint64_t best_cost_tx_search = (uint64_t)~0;
     int32_t  tx_type;
     const TxSetType tx_set_type = get_ext_tx_set_type(
@@ -4789,22 +4841,46 @@ void tx_type_search(PictureControlSet *pcs_ptr, ModeDecisionContext *context_ptr
                 &context_ptr->luma_txb_skip_context,
                 &context_ptr->luma_dc_sign_context);
     TxType best_tx_type = DCT_DCT;
+#if !TUNE_TX_TYPE_LEVELS
     uint8_t default_md_staging_skip_rdoq = context_ptr->md_staging_skip_rdoq;
+#endif
     uint8_t default_md_staging_spatial_sse_full_loop = context_ptr->md_staging_spatial_sse_full_loop_level;
+#if !TUNE_TX_TYPE_LEVELS
     if (scs_ptr->static_config.spatial_sse_full_loop_level == 1 && context_ptr->pd_pass == PD_PASS_2)
         context_ptr->md_staging_spatial_sse_full_loop_level = scs_ptr->static_config.spatial_sse_full_loop_level;
+#endif
     // local variables for all TX types
     uint16_t eob_txt[TX_TYPES] = { 0 };
     int32_t  quantized_dc_txt[TX_TYPES]= { 0 };
     uint32_t y_count_non_zero_coeffs_txt[TX_TYPES]= { 0 };
     uint64_t y_txb_coeff_bits_txt[TX_TYPES]= { 0 };
     uint64_t txb_full_distortion_txt[TX_TYPES][DIST_CALC_TOTAL] = { { 0 } };
+#if TUNE_TX_TYPE_LEVELS
+    int tx_type_tot_group = get_tx_type_group(context_ptr, candidate_buffer, only_dct_dct);
+    for (int tx_type_group_idx = 0; tx_type_group_idx < tx_type_tot_group; ++tx_type_group_idx) {
+        for (int tx_type_idx = 0; tx_type_idx < TX_TYPES; ++tx_type_idx) {
+            if (pcs_ptr->parent_pcs_ptr->sc_content_detected)
+                tx_type = tx_type_group_sc[tx_type_group_idx][tx_type_idx];
+            else
+                tx_type = tx_type_group[tx_type_group_idx][tx_type_idx];
+
+            if (tx_type == INVALID_TX_TYPE)
+                break;
+
+            if (only_dct_dct && tx_type != DCT_DCT)
+                continue;
+#else
     for (tx_type = txk_start; tx_type < txk_end; ++tx_type) {
         if (context_ptr->tx_search_level == TX_SEARCH_DCT_TX_TYPES)
             if (tx_type != DCT_DCT && tx_type != V_DCT && tx_type != H_DCT)
                 continue;
+#endif
         // Perform search selectively based on statistics (DCT_DCT always performed)
+#if TUNE_TX_TYPE_LEVELS
+        if (context_ptr->txt_ctrls.use_stats && tx_type != DCT_DCT) {
+#else
         if (context_ptr->txt_cycles_red_ctrls.enabled && tx_type != DCT_DCT) {
+#endif
             // Determine if current tx_type should be skipped based on statistics
             if (bypass_txt_based_on_stats(pcs_ptr,
                 context_ptr,
@@ -4814,20 +4890,28 @@ void tx_type_search(PictureControlSet *pcs_ptr, ModeDecisionContext *context_ptr
                 y_count_non_zero_coeffs_txt[DCT_DCT]))
                 continue;
         }
-     // Do not use temporary buffers when TXT is OFF
-    EbPictureBufferDesc *recon_coeff_ptr =
+        // Do not use temporary buffers when TXT is OFF
+        EbPictureBufferDesc *recon_coeff_ptr =
+#if TUNE_TX_TYPE_LEVELS
+            only_dct_dct
+#else
             (tx_search_skip_flag)
-                ? candidate_buffer->recon_coeff_ptr
-                : context_ptr->recon_coeff_ptr[tx_type];
-    EbPictureBufferDesc *recon_ptr =
+#endif
+            ? candidate_buffer->recon_coeff_ptr
+            : context_ptr->recon_coeff_ptr[tx_type];
+        EbPictureBufferDesc *recon_ptr =
+#if TUNE_TX_TYPE_LEVELS
+            only_dct_dct
+#else
             (tx_search_skip_flag)
-                ? candidate_buffer->recon_ptr
-                : context_ptr->recon_ptr[tx_type];
+#endif
+            ? candidate_buffer->recon_ptr
+            : context_ptr->recon_ptr[tx_type];
 
         context_ptr->three_quad_energy = 0;
         if (tx_type != DCT_DCT) {
             if (is_inter) {
-                TxSize          max_tx_size       = context_ptr->blk_geom->txsize[0][0];
+                TxSize          max_tx_size = context_ptr->blk_geom->txsize[0][0];
                 const TxSetType tx_set_type_inter = get_ext_tx_set_type(
                     max_tx_size, is_inter, pcs_ptr->parent_pcs_ptr->frm_hdr.reduced_tx_set);
                 int32_t eset = get_ext_tx_set(
@@ -4839,9 +4923,9 @@ void tx_type_search(PictureControlSet *pcs_ptr, ModeDecisionContext *context_ptr
                 else if (av1_ext_tx_used[tx_set_type_inter][tx_type] == 0)
                     continue;
                 else if (context_ptr->blk_geom
-                                 ->tx_height[context_ptr->tx_depth][context_ptr->txb_itr] > 32 ||
-                         context_ptr->blk_geom
-                                 ->tx_width[context_ptr->tx_depth][context_ptr->txb_itr] > 32)
+                    ->tx_height[context_ptr->tx_depth][context_ptr->txb_itr] > 32 ||
+                    context_ptr->blk_geom
+                    ->tx_width[context_ptr->tx_depth][context_ptr->txb_itr] > 32)
                     continue;
             }
             int32_t eset = get_ext_tx_set(
@@ -4855,24 +4939,24 @@ void tx_type_search(PictureControlSet *pcs_ptr, ModeDecisionContext *context_ptr
             else if (av1_ext_tx_used[tx_set_type][tx_type] == 0)
                 continue;
             else if (context_ptr->blk_geom->tx_height[context_ptr->tx_depth][context_ptr->txb_itr] >
-                         32 ||
-                     context_ptr->blk_geom->tx_width[context_ptr->tx_depth][context_ptr->txb_itr] >
-                         32)
+                32 ||
+                context_ptr->blk_geom->tx_width[context_ptr->tx_depth][context_ptr->txb_itr] >
+                32)
                 continue;
         }
 
         // For Inter blocks, transform type of chroma follows luma transfrom type
         if (is_inter)
             candidate_buffer->candidate_ptr->transform_type_uv = (context_ptr->txb_itr == 0)
-                ? candidate_buffer->candidate_ptr->transform_type[context_ptr->txb_itr]
-                : candidate_buffer->candidate_ptr->transform_type_uv;
+            ? candidate_buffer->candidate_ptr->transform_type[context_ptr->txb_itr]
+            : candidate_buffer->candidate_ptr->transform_type_uv;
 
         // Y: T Q i_q
         av1_estimate_transform(
             &(((int16_t *)candidate_buffer->residual_ptr->buffer_y)[txb_origin_index]),
             candidate_buffer->residual_ptr->stride_y,
             &(((int32_t *)context_ptr->trans_quant_buffers_ptr->txb_trans_coeff2_nx2_n_ptr
-                   ->buffer_y)[context_ptr->txb_1d_offset]),
+                ->buffer_y)[context_ptr->txb_1d_offset]),
             NOT_USED_VALUE,
             context_ptr->blk_geom->txsize[context_ptr->tx_depth][context_ptr->txb_itr],
             &context_ptr->three_quad_energy,
@@ -4889,7 +4973,7 @@ void tx_type_search(PictureControlSet *pcs_ptr, ModeDecisionContext *context_ptr
             pcs_ptr,
             context_ptr,
             &(((int32_t *)context_ptr->trans_quant_buffers_ptr->txb_trans_coeff2_nx2_n_ptr
-                   ->buffer_y)[context_ptr->txb_1d_offset]),
+                ->buffer_y)[context_ptr->txb_1d_offset]),
             NOT_USED_VALUE,
             &(((int32_t *)context_ptr->residual_quant_coeff_ptr->buffer_y)[context_ptr->txb_1d_offset]),
             &(((int32_t *)recon_coeff_ptr->buffer_y)[context_ptr->txb_1d_offset]),
@@ -4961,7 +5045,7 @@ void tx_type_search(PictureControlSet *pcs_ptr, ModeDecisionContext *context_ptr
                 candidate_buffer->prediction_ptr->stride_y,
                 cropped_tx_width,
                 cropped_tx_height);
-        txb_full_distortion_txt[tx_type][DIST_CALC_RESIDUAL] = spatial_full_dist_type_fun(
+            txb_full_distortion_txt[tx_type][DIST_CALC_RESIDUAL] = spatial_full_dist_type_fun(
                 input_picture_ptr->buffer_y,
                 input_txb_origin_index,
                 input_picture_ptr->stride_y,
@@ -4970,9 +5054,10 @@ void tx_type_search(PictureControlSet *pcs_ptr, ModeDecisionContext *context_ptr
                 candidate_buffer->recon_ptr->stride_y,
                 cropped_tx_width,
                 cropped_tx_height);
-        txb_full_distortion_txt[tx_type][DIST_CALC_PREDICTION] <<= 4;
-        txb_full_distortion_txt[tx_type][DIST_CALC_RESIDUAL] <<= 4;
-        } else {
+            txb_full_distortion_txt[tx_type][DIST_CALC_PREDICTION] <<= 4;
+            txb_full_distortion_txt[tx_type][DIST_CALC_RESIDUAL] <<= 4;
+        }
+        else {
             // LUMA DISTORTION
             picture_full_distortion32_bits(
                 context_ptr->trans_quant_buffers_ptr->txb_trans_coeff2_nx2_n_ptr,
@@ -5006,45 +5091,50 @@ void tx_type_search(PictureControlSet *pcs_ptr, ModeDecisionContext *context_ptr
         if (use_output_stat(scs_ptr))
             y_txb_coeff_bits_txt[tx_type] = 0;
         else
-        av1_txb_estimate_coeff_bits(
-            context_ptr,
-            0, //allow_update_cdf,
-            NULL, //FRAME_CONTEXT *ec_ctx,
-            pcs_ptr,
-            candidate_buffer,
-            context_ptr->txb_1d_offset,
-            0,
-            context_ptr->residual_quant_coeff_ptr,
-            y_count_non_zero_coeffs_txt[tx_type],
-            0,
-            0,
-            &(y_txb_coeff_bits_txt[tx_type]),
-            &(y_txb_coeff_bits_txt[tx_type]),
-            &(y_txb_coeff_bits_txt[tx_type]),
-            context_ptr->blk_geom->txsize[context_ptr->tx_depth][context_ptr->txb_itr],
-            context_ptr->blk_geom->txsize_uv[context_ptr->tx_depth][context_ptr->txb_itr],
-            tx_type,
-            candidate_buffer->candidate_ptr->transform_type_uv,
-            COMPONENT_LUMA);
+            av1_txb_estimate_coeff_bits(
+                context_ptr,
+                0, //allow_update_cdf,
+                NULL, //FRAME_CONTEXT *ec_ctx,
+                pcs_ptr,
+                candidate_buffer,
+                context_ptr->txb_1d_offset,
+                0,
+                context_ptr->residual_quant_coeff_ptr,
+                y_count_non_zero_coeffs_txt[tx_type],
+                0,
+                0,
+                &(y_txb_coeff_bits_txt[tx_type]),
+                &(y_txb_coeff_bits_txt[tx_type]),
+                &(y_txb_coeff_bits_txt[tx_type]),
+                context_ptr->blk_geom->txsize[context_ptr->tx_depth][context_ptr->txb_itr],
+                context_ptr->blk_geom->txsize_uv[context_ptr->tx_depth][context_ptr->txb_itr],
+                tx_type,
+                candidate_buffer->candidate_ptr->transform_type_uv,
+                COMPONENT_LUMA);
         uint64_t            y_full_cost;
         //TODO: fix cbf decision
         av1_txb_calc_cost_luma(context_ptr->luma_txb_skip_context,
-                                candidate_buffer->candidate_ptr,
-                                context_ptr->txb_itr,
-                                context_ptr->blk_geom->txsize[context_ptr->tx_depth][0],
-                                y_count_non_zero_coeffs_txt[tx_type],
-                                txb_full_distortion_txt[tx_type],
-                                &(y_txb_coeff_bits_txt[tx_type]),
-                                &y_full_cost,
-                                full_lambda);
+            candidate_buffer->candidate_ptr,
+            context_ptr->txb_itr,
+            context_ptr->blk_geom->txsize[context_ptr->tx_depth][0],
+            y_count_non_zero_coeffs_txt[tx_type],
+            txb_full_distortion_txt[tx_type],
+            &(y_txb_coeff_bits_txt[tx_type]),
+            &y_full_cost,
+            full_lambda);
         uint64_t cost = RDCOST(
             full_lambda, y_txb_coeff_bits_txt[tx_type], txb_full_distortion_txt[tx_type][DIST_CALC_RESIDUAL]);
         if (cost < best_cost_tx_search) {
             best_cost_tx_search = cost;
-            best_tx_type        = tx_type;
+            best_tx_type = tx_type;
         }
+        }
+#if TUNE_TX_TYPE_LEVELS
     }
+#endif
+#if !TUNE_TX_TYPE_LEVELS
     context_ptr->md_staging_skip_rdoq = default_md_staging_skip_rdoq;
+#endif
     context_ptr->md_staging_spatial_sse_full_loop_level = default_md_staging_spatial_sse_full_loop;
     //  Best Tx Type Pass
     candidate_buffer->candidate_ptr->transform_type[context_ptr->txb_itr] = best_tx_type;
@@ -5059,7 +5149,11 @@ void tx_type_search(PictureControlSet *pcs_ptr, ModeDecisionContext *context_ptr
 
     // Do not copy when TXT is OFF
     // Data is already in candidate_buffer
+#if TUNE_TX_TYPE_LEVELS
+    if (!only_dct_dct) {
+#else
    if (!tx_search_skip_flag) {
+#endif
        // copy best_tx_type data
        copy_txt_data(candidate_buffer, context_ptr, txb_origin_index, best_tx_type);
     }
@@ -5769,11 +5863,13 @@ void perform_tx_partitioning(ModeDecisionCandidateBuffer *candidate_buffer,
     uint64_t best_cost_search  = (uint64_t)~0;
     uint8_t  is_best_has_coeff = 1;
     init_tx_candidate_buffer(candidate_buffer, context_ptr, end_tx_depth);
+#if !TUNE_TX_TYPE_LEVELS
     uint8_t tx_search_skip_flag;
     if (context_ptr->md_staging_tx_search == 0)
         tx_search_skip_flag = EB_TRUE;
     else
         tx_search_skip_flag = context_ptr->tx_search_level != TX_SEARCH_DCT_DCT_ONLY ? EB_FALSE : EB_TRUE;
+#endif
     // Transform Depth Loop
     for (context_ptr->tx_depth = start_tx_depth; context_ptr->tx_depth <= end_tx_depth;
          context_ptr->tx_depth++) {
@@ -5844,7 +5940,9 @@ void perform_tx_partitioning(ModeDecisionCandidateBuffer *candidate_buffer,
             tx_type_search(pcs_ptr, context_ptr,
                 tx_candidate_buffer,
                 qindex,
+#if !TUNE_TX_TYPE_LEVELS
                 tx_search_skip_flag,
+#endif
                 &(tx_y_count_non_zero_coeffs[0]),
                 &tx_y_coeff_bits,
                 &tx_y_full_distortion[0]);
@@ -6557,18 +6655,26 @@ static void md_stage_1(PictureControlSet *pcs_ptr, SuperBlock *sb_ptr, BlkStruct
     ModeDecisionCandidateBuffer **candidate_buffer_ptr_array = &(
         candidate_buffer_ptr_array_base[0]);
 
+#if !TUNE_TX_TYPE_LEVELS
     SequenceControlSet *scs_ptr;
     scs_ptr = (SequenceControlSet *)pcs_ptr->scs_wrapper_ptr->object_ptr;
+#endif
 
     // Set MD Staging full_loop_core settings
     context_ptr->md_staging_tx_size_mode          = 0;
+#if TUNE_TX_TYPE_LEVELS
+    context_ptr->md_staging_txt_level             = 0;
+#else
     context_ptr->md_staging_tx_search             = 0;
+#endif
     context_ptr->md_staging_skip_full_chroma      = EB_TRUE;
     context_ptr->md_staging_skip_rdoq             = EB_TRUE;
 
+#if !TUNE_TX_TYPE_LEVELS
     if (scs_ptr->static_config.spatial_sse_full_loop_level != DEFAULT && context_ptr->pd_pass == PD_PASS_2)
         context_ptr->md_staging_spatial_sse_full_loop_level = scs_ptr->static_config.spatial_sse_full_loop_level;
     else
+#endif
         context_ptr->md_staging_spatial_sse_full_loop_level = EB_FALSE;
 
     for (uint32_t full_loop_candidate_index = 0;
@@ -6608,8 +6714,10 @@ static void md_stage_2(PictureControlSet *pcs_ptr, SuperBlock *sb_ptr, BlkStruct
     ModeDecisionCandidateBuffer **candidate_buffer_ptr_array = &(
         candidate_buffer_ptr_array_base[0]);
 
+#if !TUNE_TX_TYPE_LEVELS
     SequenceControlSet *scs_ptr;
     scs_ptr = (SequenceControlSet *)pcs_ptr->scs_wrapper_ptr->object_ptr;
+#endif
 
     // Set MD Staging full_loop_core settings
     for (uint32_t fullLoopCandidateIndex = 0;
@@ -6627,6 +6735,12 @@ static void md_stage_2(PictureControlSet *pcs_ptr, SuperBlock *sb_ptr, BlkStruct
 #else
         context_ptr->md_staging_tx_size_mode = 0;
 #endif
+#if TUNE_TX_TYPE_LEVELS
+        context_ptr->md_staging_txt_level =
+            (candidate_ptr->cand_class == CAND_CLASS_0 || candidate_ptr->cand_class == CAND_CLASS_3)
+            ? context_ptr->txt_ctrls.enabled
+            : 0;
+#else
 #if FEATURE_MDS2
         context_ptr->md_staging_tx_search =
             (candidate_ptr->cand_class == CAND_CLASS_0 || candidate_ptr->cand_class == CAND_CLASS_3)
@@ -6634,6 +6748,7 @@ static void md_stage_2(PictureControlSet *pcs_ptr, SuperBlock *sb_ptr, BlkStruct
             : 0;
 #else
         context_ptr->md_staging_tx_search = 1;
+#endif
 #endif
 #if FEATURE_MDS2
         context_ptr->md_staging_skip_rdoq = (candidate_ptr->cand_class == CAND_CLASS_0 || candidate_ptr->cand_class == CAND_CLASS_3) ?
@@ -6649,9 +6764,11 @@ static void md_stage_2(PictureControlSet *pcs_ptr, SuperBlock *sb_ptr, BlkStruct
             (context_ptr->interpolation_search_level == IFS_MDS2) ? EB_FALSE : EB_TRUE;
         context_ptr->md_staging_skip_chroma_pred          = EB_TRUE;
 
+#if !TUNE_TX_TYPE_LEVELS
         if (scs_ptr->static_config.spatial_sse_full_loop_level != DEFAULT && context_ptr->pd_pass == PD_PASS_2)
             context_ptr->md_staging_spatial_sse_full_loop_level = scs_ptr->static_config.spatial_sse_full_loop_level;
         else
+#endif
 #if FEATURE_MDS2
             context_ptr->md_staging_spatial_sse_full_loop_level = context_ptr->spatial_sse_full_loop_level;
 #else
@@ -6773,8 +6890,10 @@ static void md_stage_3(PictureControlSet *pcs_ptr, SuperBlock *sb_ptr, BlkStruct
     ModeDecisionCandidateBuffer **candidate_buffer_ptr_array = &(
         candidate_buffer_ptr_array_base[0]);
 
+#if !TUNE_TX_TYPE_LEVELS
     SequenceControlSet *scs_ptr;
     scs_ptr = (SequenceControlSet *)pcs_ptr->scs_wrapper_ptr->object_ptr;
+#endif
 
     for (uint32_t full_loop_candidate_index = 0;
          full_loop_candidate_index < fullCandidateTotalCount;
@@ -6798,13 +6917,19 @@ static void md_stage_3(PictureControlSet *pcs_ptr, SuperBlock *sb_ptr, BlkStruct
         else
             context_ptr->md_staging_tx_size_mode = candidate_ptr->cand_class == CAND_CLASS_0 ||
                 candidate_ptr->cand_class == CAND_CLASS_3;
+#if TUNE_TX_TYPE_LEVELS
+        context_ptr->md_staging_txt_level = context_ptr->txt_ctrls.enabled;
+#else
         context_ptr->md_staging_tx_search = 1;
+#endif
         context_ptr->md_staging_skip_full_chroma          = EB_FALSE;
         context_ptr->md_staging_skip_rdoq                 = EB_FALSE;
 
+#if !TUNE_TX_TYPE_LEVELS
         if (scs_ptr->static_config.spatial_sse_full_loop_level != DEFAULT && context_ptr->pd_pass == PD_PASS_2)
             context_ptr->md_staging_spatial_sse_full_loop_level = scs_ptr->static_config.spatial_sse_full_loop_level;
         else
+#endif
             context_ptr->md_staging_spatial_sse_full_loop_level = context_ptr->spatial_sse_full_loop_level;
 
         context_ptr->md_staging_perform_intra_chroma_pred = EB_TRUE;
@@ -8751,7 +8876,11 @@ uint8_t update_md_settings_based_on_sq_coeff(SequenceControlSet *scs_ptr, Pictur
                 apply_new_md_settings(context_ptr, coeffb_sw_md_ctrls->non_skip_level);
                 // Turn off TXT search because if have zero coeffs tx_type must be DCT_DCT, and if SQ has zero coeffs,
                 // NSQ blocks are likely to also have zero coeffs
+#if TUNE_TX_TYPE_LEVELS
+                context_ptr->md_staging_txt_level = 0;
+#else
                 context_ptr->tx_search_level = TX_SEARCH_DCT_DCT_ONLY;
+#endif
 #else
                 signal_derivation_enc_dec_kernel_oq(scs_ptr, pcs_ptr, context_ptr, coeffb_sw_md_ctrls->mode_offset);
                 signal_derivation_block(pcs_ptr, context_ptr, coeffb_sw_md_ctrls->mode_offset);

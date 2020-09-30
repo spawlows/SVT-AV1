@@ -31,6 +31,9 @@
 
 #define FC_SKIP_TX_SR_TH025 125 // Fast cost skip tx search threshold.
 #define FC_SKIP_TX_SR_TH010 110 // Fast cost skip tx search threshold.
+#if TUNE_CDF
+void copy_mv_rate(PictureControlSet *pcs, MdRateEstimationContext * dst_rate);
+#endif
 void eb_av1_cdef_search(EncDecContext *context_ptr, SequenceControlSet *scs_ptr,
                         PictureControlSet *pcs_ptr);
 
@@ -2268,6 +2271,97 @@ void adaptive_md_cycles_redcution_controls(ModeDecisionContext *mdctxt, uint8_t 
     }
 }
 #endif
+#if TUNE_TX_TYPE_LEVELS
+void set_txt_controls(ModeDecisionContext *mdctxt, uint8_t txt_level) {
+
+    TxtControls * txt_ctrls = &mdctxt->txt_ctrls;
+
+    switch (txt_level)
+    {
+    case 0:
+        txt_ctrls->enabled = 0;
+
+        txt_ctrls->txt_group_inter_lt_16x16 = 1;
+        txt_ctrls->txt_group_inter_gt_eq_16x16 = 1;
+
+        txt_ctrls->txt_group_intra_lt_16x16 = 1;
+        txt_ctrls->txt_group_intra_gt_eq_16x16 = 1;
+
+        txt_ctrls->use_stats = 0;
+        txt_ctrls->intra_th = 0;
+        txt_ctrls->inter_th = 0;
+        break;
+    case 1:
+        txt_ctrls->enabled = 1;
+
+        txt_ctrls->txt_group_inter_lt_16x16 = MAX_TX_TYPE_GROUP;
+        txt_ctrls->txt_group_inter_gt_eq_16x16 = MAX_TX_TYPE_GROUP;
+
+        txt_ctrls->txt_group_intra_lt_16x16 = MAX_TX_TYPE_GROUP;
+        txt_ctrls->txt_group_intra_gt_eq_16x16 = MAX_TX_TYPE_GROUP;
+
+        txt_ctrls->use_stats = 0;
+        txt_ctrls->intra_th = 0;
+        txt_ctrls->inter_th = 0;
+        break;
+    case 2:
+        txt_ctrls->enabled = 1;
+
+        txt_ctrls->txt_group_inter_lt_16x16 = MAX_TX_TYPE_GROUP;
+        txt_ctrls->txt_group_inter_gt_eq_16x16 = MAX_TX_TYPE_GROUP;
+
+        txt_ctrls->txt_group_intra_lt_16x16 = MAX_TX_TYPE_GROUP;
+        txt_ctrls->txt_group_intra_gt_eq_16x16 = MAX_TX_TYPE_GROUP;
+
+        txt_ctrls->use_stats = 1;
+        txt_ctrls->intra_th = 5;
+        txt_ctrls->inter_th = 8;
+        break;
+    case 3:
+        txt_ctrls->enabled = 1;
+
+        txt_ctrls->txt_group_inter_lt_16x16 = 5;
+        txt_ctrls->txt_group_inter_gt_eq_16x16 = 5;
+
+        txt_ctrls->txt_group_intra_lt_16x16 = MAX_TX_TYPE_GROUP;
+        txt_ctrls->txt_group_intra_gt_eq_16x16 = MAX_TX_TYPE_GROUP;
+
+        txt_ctrls->use_stats = 0;
+        txt_ctrls->intra_th = 0;
+        txt_ctrls->inter_th = 0;
+        break;
+    case 4:
+        txt_ctrls->enabled = 1;
+
+        txt_ctrls->txt_group_inter_lt_16x16 = 5;
+        txt_ctrls->txt_group_inter_gt_eq_16x16 = 3;
+
+        txt_ctrls->txt_group_intra_lt_16x16 = MAX_TX_TYPE_GROUP;
+        txt_ctrls->txt_group_intra_gt_eq_16x16 = MAX_TX_TYPE_GROUP;
+
+        txt_ctrls->use_stats = 0;
+        txt_ctrls->intra_th = 0;
+        txt_ctrls->inter_th = 0;
+        break;
+    case 5:
+        txt_ctrls->enabled = 1;
+
+        txt_ctrls->txt_group_inter_lt_16x16 = 3;
+        txt_ctrls->txt_group_inter_gt_eq_16x16 = 2;
+
+        txt_ctrls->txt_group_intra_lt_16x16 = MAX_TX_TYPE_GROUP;
+        txt_ctrls->txt_group_intra_gt_eq_16x16 = 4;
+
+        txt_ctrls->use_stats = 0;
+        txt_ctrls->intra_th = 0;
+        txt_ctrls->inter_th = 0;
+        break;
+    default:
+        assert(0);
+        break;
+    }
+}
+#else
 void set_txt_cycle_reduction_controls(ModeDecisionContext *mdctxt, uint8_t txt_cycles_red_mode) {
 
     TxtCycleRControls* txt_cycle_red_ctrls = &mdctxt->txt_cycles_red_ctrls;
@@ -2309,6 +2403,7 @@ void set_txt_cycle_reduction_controls(ModeDecisionContext *mdctxt, uint8_t txt_c
         break;
     }
 }
+#endif
 void set_txs_cycle_reduction_controls(ModeDecisionContext *mdctxt, uint8_t txs_cycles_red_mode) {
 
     TxsCycleRControls* txs_cycle_red_ctrls = &mdctxt->txs_cycles_red_ctrls;
@@ -2470,6 +2565,44 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
         else
             context_ptr->enable_area_based_cycles_allocation = 1;
     }
+
+#if TUNE_TX_TYPE_LEVELS
+    // TxT Groups - The different groups of transform types that can be searched
+    // Group #          Settings
+    // 1                DCT_DCT
+    // 2                DCT-DCT + V-DCT + H-DCT + ADST-ADST
+    // 3                DCT-DCT + V-DCT + H-DCT + ADST-ADST
+    // 4                DCT-DCT + V-DCT + H-DCT + ADST-ADST + DCT-ADST + ADST-DCT
+    // 5                DCT-DCT + V-DCT + H-DCT + ADST-ADST + DCT-ADST + ADST-DCT + FLIFADST-FLIPADST + IDTX
+    // 6                All Transform Types
+
+    // txt_level specifies the group of transform types to search over depending on block type/size.
+    // txt_level         Settings
+    // 0                 OFF (DCT_DCT only)
+    // 1                 FULL: Group 6 + Stats OFF
+    // 2                 Group 6 + Stats ON
+    // 3                 Inter: Group 5, All types for Intra + Stats OFF
+    // 4                 Inter: For block size >= 16x16 Group 3 else Group 5, Intra: All types, Stats OFF
+    // 5                 Inter: For block size >= 16x16 Group 2 else Group 3,
+    //                   Intra: For block size >= 16x16 Group 4 else All types,
+    //                   Stats OFF
+    uint8_t txt_level = 0;
+    if (pd_pass == PD_PASS_0)
+        txt_level = 0;
+    else if (pd_pass == PD_PASS_1)
+        txt_level = 0;
+    else
+        if (enc_mode <= ENC_M4)
+            txt_level = 1;
+        else if (enc_mode <= ENC_M5)
+            txt_level = 3;
+        else if (enc_mode <= ENC_M6)
+            txt_level = 4;
+        else
+            txt_level = 5;
+
+    set_txt_controls(context_ptr, txt_level);
+#else
     // Tx_search Level for Luma                       Settings
     // TX_SEARCH_DCT_DCT_ONLY                         DCT_DCT only
     // TX_SEARCH_DCT_TX_TYPES                         Tx search DCT type(s): DCT_DCT, V_DCT, H_DCT
@@ -2501,6 +2634,8 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
             txt_cycles_reduction_level = 5;
     }
     set_txt_cycle_reduction_controls(context_ptr, txt_cycles_reduction_level);
+#endif
+
     if (pd_pass == PD_PASS_0)
         context_ptr->interpolation_search_level = IFS_OFF;
     else if (pd_pass == PD_PASS_1)
@@ -4429,6 +4564,19 @@ void *mode_decision_kernel(void *input_ptr) {
         memset( context_ptr->md_context->txt_cnt, 0, sizeof(uint32_t) * TXT_DEPTH_DELTA_NUM * TX_TYPES);
         generate_txt_prob(pcs_ptr, context_ptr->md_context);
 
+#if TUNE_CDF
+        if (!pcs_ptr->cdf_ctrl.update_mv)
+            copy_mv_rate(pcs_ptr, &context_ptr->md_context->rate_est_table);
+        if (!pcs_ptr->cdf_ctrl.update_se)
+            av1_estimate_syntax_rate(&context_ptr->md_context->rate_est_table,
+                pcs_ptr->slice_type == I_SLICE ? EB_TRUE : EB_FALSE,
+                &pcs_ptr->md_frame_context);
+
+        if (!pcs_ptr->cdf_ctrl.update_coef)
+            av1_estimate_coefficients_rate(&context_ptr->md_context->rate_est_table,
+                &pcs_ptr->md_frame_context);
+#endif
+
         // Segment-loop
         while (assign_enc_dec_segments(segments_ptr,
                                        &segment_index,
@@ -4506,7 +4654,11 @@ void *mode_decision_kernel(void *input_ptr) {
                     context_ptr->sb_index = sb_index;
                     context_ptr->md_context->sb_class = NONE_CLASS;
 
+#if TUNE_CDF
+                    if (pcs_ptr->cdf_ctrl.enabled) {
+#else
                     if (pcs_ptr->update_cdf) {
+#endif
                         if (scs_ptr->seq_header.pic_based_rate_est &&
                             scs_ptr->enc_dec_segment_row_count_array[pcs_ptr->temporal_layer_index] == 1 &&
                             scs_ptr->enc_dec_segment_col_count_array[pcs_ptr->temporal_layer_index] == 1) {
@@ -4547,14 +4699,23 @@ void *mode_decision_kernel(void *input_ptr) {
                             }
                         }
                         // Initial Rate Estimation of the syntax elements
+#if TUNE_CDF
+                        if (pcs_ptr->cdf_ctrl.update_se)
+#endif
                         av1_estimate_syntax_rate(&context_ptr->md_context->rate_est_table,
                             pcs_ptr->slice_type == I_SLICE,
                             &pcs_ptr->ec_ctx_array[sb_index]);
                         // Initial Rate Estimation of the Motion vectors
+#if TUNE_CDF
+                        if (pcs_ptr->cdf_ctrl.update_mv)
+#endif
                         av1_estimate_mv_rate(pcs_ptr,
                             &context_ptr->md_context->rate_est_table,
                             &pcs_ptr->ec_ctx_array[sb_index]);
 
+#if TUNE_CDF
+                        if (pcs_ptr->cdf_ctrl.update_coef)
+#endif
                         av1_estimate_coefficients_rate(&context_ptr->md_context->rate_est_table,
                             &pcs_ptr->ec_ctx_array[sb_index]);
 

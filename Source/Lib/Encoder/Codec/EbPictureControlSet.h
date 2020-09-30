@@ -214,6 +214,15 @@ typedef struct MeshPattern {
     int interval;
 } MeshPattern;
 
+#if TUNE_CDF
+typedef struct CdfControls {
+    uint8_t  enabled;    //1 if mv, or se, or coeff is ON
+    uint8_t  update_mv;  //cdf update for mv
+    uint8_t  update_se;  //cdf update for various syntax elements
+    uint8_t  update_coef;//cdf update for coeffs
+} CdfControls;
+#endif
+
 typedef struct SpeedFeatures {
     // This allows us to use motion search at other sizes as a starting
     // point for this motion search and limits the search range around it.
@@ -395,7 +404,11 @@ typedef struct PictureControlSet {
 
     FRAME_CONTEXT *                 ec_ctx_array;
     FRAME_CONTEXT                   md_frame_context;
+#if TUNE_CDF
+    CdfControls                     cdf_ctrl;
+#else
     uint8_t                         update_cdf;
+#endif
     FRAME_CONTEXT                   ref_frame_context[REF_FRAMES];
     EbWarpedMotionParams            ref_global_motion[TOTAL_REFS_PER_FRAME];
     struct MdRateEstimationContext *md_rate_estimation_array;
