@@ -2481,7 +2481,18 @@ void compute_depth_costs(ModeDecisionContext *context_ptr, SequenceControlSet *s
         context_ptr->md_local_blk_unit[curr_depth_mds - 3 * step].cost + curr_non_split_rate_blk0 +
         above_split_rate;
 }
+#if REFACTOR_MD_BLOCK_LOOP
+uint32_t d2_inter_depth_block_decision(SequenceControlSet* scs_ptr,
+                                       PictureControlSet* pcs_ptr,
+                                       ModeDecisionContext* context_ptr,
+                                       uint32_t blk_mds,
+                                       uint32_t sb_addr) {
 
+    uint64_t parent_depth_cost = 0, current_depth_cost = 0;
+    EbBool last_depth_flag = (context_ptr->md_blk_arr_nsq[blk_mds].split_flag == EB_FALSE);
+    uint32_t last_blk_index = blk_mds, current_depth_idx_mds = blk_mds;
+    const BlockGeom* blk_geom = get_blk_geom_mds(blk_mds);
+#else
 uint32_t d2_inter_depth_block_decision(ModeDecisionContext *context_ptr, uint32_t blk_mds,
                                        SuperBlock *tb_ptr, uint32_t sb_addr, uint32_t tb_origin_x,
                                        uint32_t tb_origin_y, uint64_t full_lambda,
@@ -2497,6 +2508,7 @@ uint32_t d2_inter_depth_block_decision(ModeDecisionContext *context_ptr, uint32_
     uint32_t last_blk_index, d0_idx_mds, top_left_idx_mds;
     UNUSED(top_left_idx_mds);
     UNUSED(d0_idx_mds);
+
     uint64_t            parent_depth_cost = 0, current_depth_cost = 0;
     SequenceControlSet *scs_ptr = (SequenceControlSet *)pcs_ptr->scs_wrapper_ptr->object_ptr;
     EbBool              last_depth_flag;
@@ -2507,6 +2519,7 @@ uint32_t d2_inter_depth_block_decision(ModeDecisionContext *context_ptr, uint32_
     last_blk_index                 = blk_mds;
     blk_geom                       = get_blk_geom_mds(blk_mds);
     uint32_t current_depth_idx_mds = blk_mds;
+#endif
 
     if (last_depth_flag) {
         while (blk_geom->is_last_quadrant) {

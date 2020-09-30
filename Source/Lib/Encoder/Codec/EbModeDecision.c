@@ -1132,21 +1132,6 @@ void set_compound_to_inject(ModeDecisionContext *context_ptr, EbBool * comp_inj_
     comp_inj_table[MD_COMP_DIFF0] = diff;
     comp_inj_table[MD_COMP_WEDGE] = wdg;
 }
-
-/*
- * This function configures the compound modes to be injected
- */
-void set_max_compound_to_inject(ModeDecisionContext *context_ptr,
-                                EbBool * comp_inj_table,
-                                uint8_t max_comp_type) {
-    if (get_wedge_params_bits(context_ptr->blk_geom->bsize) == 0)
-        max_comp_type = MIN(max_comp_type, MD_COMP_DIFF0);
-
-    comp_inj_table[MD_COMP_AVG]   = EB_TRUE; // Always inject average
-    comp_inj_table[MD_COMP_DIST]  = max_comp_type >= MD_COMP_DIST;
-    comp_inj_table[MD_COMP_DIFF0] = max_comp_type >= MD_COMP_DIFF0;
-    comp_inj_table[MD_COMP_WEDGE] = max_comp_type >= MD_COMP_WEDGE;
-}
 #endif
 void bipred_3x3_candidates_injection(const SequenceControlSet *scs_ptr, PictureControlSet *pcs_ptr,
                                      ModeDecisionContext *context_ptr, SuperBlock *sb_ptr,

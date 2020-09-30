@@ -1308,8 +1308,12 @@ void distortion_based_modulator(ModeDecisionContext *context_ptr,
     EbPictureBufferDesc *recon_ptr, uint32_t blk_origin_index);
 
 extern void first_pass_md_encode_block(PictureControlSet *pcs_ptr, ModeDecisionContext *context_ptr,
+#if REFACTOR_MD_BLOCK_LOOP
+                                       EbPictureBufferDesc *        input_picture_ptr) {
+#else
                                        EbPictureBufferDesc *        input_picture_ptr,
                                        ModeDecisionCandidateBuffer *bestcandidate_buffers[5]) {
+#endif
     ModeDecisionCandidateBuffer **candidate_buffer_ptr_array_base =
         context_ptr->candidate_buffer_ptr_array;
     ModeDecisionCandidateBuffer **candidate_buffer_ptr_array;
@@ -1460,8 +1464,9 @@ extern void first_pass_md_encode_block(PictureControlSet *pcs_ptr, ModeDecisionC
         context_ptr->best_candidate_index_array,
         &best_intra_mode);
     candidate_buffer = candidate_buffer_ptr_array[candidate_index];
-
+#if !REFACTOR_MD_BLOCK_LOOP
     bestcandidate_buffers[0] = candidate_buffer;
+#endif
     uint8_t sq_index         = eb_log2f(context_ptr->blk_geom->sq_size) - 2;
     if (context_ptr->blk_geom->shape == PART_N) {
         context_ptr->parent_sq_type[sq_index] = candidate_buffer->candidate_ptr->type;

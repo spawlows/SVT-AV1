@@ -86,8 +86,8 @@ extern "C" {
 #define PARTIAL_FREQUENCY                        1 //Calculate partial frequency transforms N2 or N4
 #define TUNE_SC_QPS_IMP   1 // Improve QP assignment for SC
 #define FEATURE_REMOVE_CIRCULAR 1 // Remove circular actions from current NSQ feautres; replace them with non-circular levels
-#define FEATURE_NEW_INTER_COMP_LEVELS            0 // Add new levels and controls for inter compound; remove old levels
-#define FEATURE_NEW_OBMC_LEVELS                  0 // Add new levels and controls for OBMC
+#define FEATURE_NEW_INTER_COMP_LEVELS            1 // Add new levels and controls for inter compound; remove old levels
+#define FEATURE_NEW_OBMC_LEVELS                  1 // Add new levels and controls for OBMC
 #define TUNE_CDF                                 1 // Update CDF Levels
 #define TUNE_TX_TYPE_LEVELS                      1 // Add Tx Type Grouping Levels
 #define TUNE_INIT_FAST_LOOP_OPT                  1 // Fast loop optimizations
@@ -95,6 +95,8 @@ extern "C" {
 #define INIT_BLOCK_OPT							 1 // optimize block initialization
 #define BYPASS_SIGNAL_SET						 1 // bypass block based signal derivation for fastest preset when superfluous 
 #define ME_IDX_LUPT								 1 // get index using lookuptable
+#define REFACTOR_MD_BLOCK_LOOP                   1 // Refactor the loop that iterates over all blocks at MD
+
 // END  svt-03 /////////////////////////////////////////////////////////
 
 //FOR DEBUGGING - Do not remove

@@ -3671,6 +3671,7 @@ static void build_cand_block_array(SequenceControlSet *scs_ptr, PictureControlSe
 
             if (pcs_ptr->parent_pcs_ptr->disallow_HV4)
                 tot_d1_blocks = MIN(17, tot_d1_blocks);
+
             d1_blocks_accumlated = 0;
             for (d1_block_idx = 0; d1_block_idx < tot_d1_blocks; d1_block_idx++) {
 #if INIT_BLOCK_OPT

@@ -47,14 +47,20 @@ void inv_transform_recon_wrapper(uint8_t *pred_buffer, uint32_t pred_offset, uin
                                  int32_t *rec_coeff_buffer, uint32_t coeff_offset, EbBool hbd,
                                  TxSize txsize, TxType transform_type, PlaneType component_type,
                                  uint32_t eob);
-
+#if REFACTOR_MD_BLOCK_LOOP
+extern uint32_t d2_inter_depth_block_decision(SequenceControlSet* scs_ptr,
+                                              PictureControlSet* pcs_ptr,
+                                              ModeDecisionContext* context_ptr,
+                                              uint32_t blk_mds,
+                                              uint32_t sb_addr);
+#else
 extern uint32_t d2_inter_depth_block_decision(ModeDecisionContext *context_ptr, uint32_t blk_mds,
                                               SuperBlock *tb_ptr, uint32_t sb_addr,
                                               uint32_t tb_origin_x, uint32_t tb_origin_y,
                                               uint64_t                 full_lambda,
                                               MdRateEstimationContext *md_rate_estimation_ptr,
                                               PictureControlSet *      pcs_ptr);
-
+#endif
 // compute the cost of curr depth, and the depth above
 extern void compute_depth_costs_md_skip(ModeDecisionContext *context_ptr,
                                         SequenceControlSet *scs_ptr,
