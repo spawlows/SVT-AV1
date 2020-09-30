@@ -494,7 +494,7 @@ static AOM_FORCE_INLINE void load_buffer_8x8_N2(const int16_t *input, __m256i *i
 }
 #endif /*PARTIAL_FREQUENCY*/
 
-static AOM_FORCE_INLINE void load_buffer_4x4_avx2(const int16_t *input, __m256i *in, int32_t stride,
+static AOM_FORCE_INLINE void load_buffer_4x4_avx2(const int16_t *input, __m256i in[], int32_t stride,
                                         int32_t flipud, int32_t fliplr, int32_t shift) {
     if (!flipud) {
         in[0] = _mm256_setr_epi64x(
@@ -542,11 +542,11 @@ static AOM_FORCE_INLINE void load_buffer_8x4_avx2(const int16_t *input, __m256i 
     const int16_t *top_r = input + 4;
 
     if (fliplr) {
-        load_buffer_4x4_avx2(top_r, out, stride, flipud, fliplr, shift);
-        load_buffer_4x4_avx2(top_l, out + 2, stride, flipud, fliplr, shift);
+        load_buffer_4x4_avx2(top_r, &out[0], stride, flipud, fliplr, shift);
+        load_buffer_4x4_avx2(top_l, &out[2], stride, flipud, fliplr, shift);
     } else {
-        load_buffer_4x4_avx2(top_l, out, stride, flipud, fliplr, shift);
-        load_buffer_4x4_avx2(top_r, out + 2, stride, flipud, fliplr, shift);
+        load_buffer_4x4_avx2(top_l, &out[0], stride, flipud, fliplr, shift);
+        load_buffer_4x4_avx2(top_r, &out[2], stride, flipud, fliplr, shift);
     }
 }
 
