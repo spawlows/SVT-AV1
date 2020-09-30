@@ -35,7 +35,7 @@ typedef void (*FwdTransform1dAvx2)(const __m256i *in, __m256i *out, int8_t bit,
         y3 = _mm256_unpackhi_epi64(u1, u3);                \
     } while (0)
 
-static INLINE void transpose_8x8_avx2(const __m256i *in, __m256i *out) {
+static AOM_FORCE_INLINE void transpose_8x8_avx2(const __m256i *in, __m256i *out) {
     __m256i out1[8];
     TRANSPOSE_4X4_AVX2(in[0], in[1], in[2], in[3], out1[0], out1[1], out1[4], out1[5]);
     TRANSPOSE_4X4_AVX2(in[4], in[5], in[6], in[7], out1[2], out1[3], out1[6], out1[7]);
@@ -49,7 +49,7 @@ static INLINE void transpose_8x8_avx2(const __m256i *in, __m256i *out) {
     out[7] = _mm256_permute2x128_si256(out1[5], out1[7], 0x31);
 }
 
-static INLINE void transpose_16x16_avx2(const __m256i *in, __m256i *out) {
+static AOM_FORCE_INLINE void transpose_16x16_avx2(const __m256i *in, __m256i *out) {
     __m256i temp[32];
     TRANSPOSE_4X4_AVX2(in[0], in[2], in[4], in[6], temp[0], temp[2], temp[4], temp[6]);
     TRANSPOSE_4X4_AVX2(in[8], in[10], in[12], in[14], temp[17], temp[19], temp[21], temp[23]);
@@ -94,7 +94,7 @@ static INLINE void transpose_16x16_avx2(const __m256i *in, __m256i *out) {
     out[31] = _mm256_permute2x128_si256(temp[14], temp[30], 0x31);
 }
 
-static INLINE void transpose_32_8x8_avx2(int32_t stride, const __m256i *in, __m256i *out) {
+static AOM_FORCE_INLINE void transpose_32_8x8_avx2(int32_t stride, const __m256i *in, __m256i *out) {
     __m256i out1[8];
     __m256i temp0 = _mm256_unpacklo_epi32(in[0 * stride], in[2 * stride]);
     __m256i temp1 = _mm256_unpackhi_epi32(in[0 * stride], in[2 * stride]);
@@ -124,7 +124,7 @@ static INLINE void transpose_32_8x8_avx2(int32_t stride, const __m256i *in, __m2
     out[7 * stride] = _mm256_permute2x128_si256(out1[5], out1[7], 0x31);
 }
 
-static INLINE void transpose_32_avx2(int32_t txfm_size, const __m256i *input, __m256i *output) {
+static AOM_FORCE_INLINE void transpose_32_avx2(int32_t txfm_size, const __m256i *input, __m256i *output) {
     const int32_t num_per_256 = 8;
     const int32_t row_size    = txfm_size;
     const int32_t col_size    = txfm_size / num_per_256;
@@ -139,7 +139,7 @@ static INLINE void transpose_32_avx2(int32_t txfm_size, const __m256i *input, __
     }
 }
 
-static INLINE void transpose_8nx8n(const __m256i *input, __m256i *output, const int32_t width,
+static AOM_FORCE_INLINE void transpose_8nx8n(const __m256i *input, __m256i *output, const int32_t width,
                                    const int32_t height) {
     const int32_t numcol = height >> 3;
     const int32_t numrow = width >> 3;
@@ -183,7 +183,7 @@ static INLINE void transpose_8nx8n(const __m256i *input, __m256i *output, const 
 }
 
 #if PARTIAL_FREQUENCY
-static INLINE void transpose_8nx8n_N2_half(const __m256i *input, __m256i *output,
+static AOM_FORCE_INLINE void transpose_8nx8n_N2_half(const __m256i *input, __m256i *output,
                                            const int32_t width, const int32_t height) {
     const int32_t numcol      = height >> 3;
     const int32_t numrow      = width >> 3;
@@ -231,7 +231,7 @@ static INLINE void transpose_8nx8n_N2_half(const __m256i *input, __m256i *output
     }
 }
 
-static INLINE void transpose_8nx8n_N2_quad(const __m256i *input, __m256i *output,
+static AOM_FORCE_INLINE void transpose_8nx8n_N2_quad(const __m256i *input, __m256i *output,
                                            const int32_t width, const int32_t height) {
     const int32_t numcol = height >> 3;
     const int32_t numrow = width >> 3;
@@ -285,7 +285,7 @@ static INLINE void transpose_8nx8n_N2_quad(const __m256i *input, __m256i *output
 }
 #endif /*PARTIAL_FREQUENCY*/
 
-static INLINE void transpose_4x8_avx2(const __m256i *in, __m256i *out) {
+static AOM_FORCE_INLINE void transpose_4x8_avx2(const __m256i *in, __m256i *out) {
     __m256i perm = _mm256_set_epi32(7, 3, 6, 2, 5, 1, 4, 0);
 
     TRANSPOSE_4X4_AVX2(in[0], in[1], in[2], in[3], out[0], out[1], out[2], out[3]);
@@ -295,7 +295,7 @@ static INLINE void transpose_4x8_avx2(const __m256i *in, __m256i *out) {
     out[3] = _mm256_permutevar8x32_epi32(out[3], perm);
 }
 
-static INLINE void transpose_4x16_avx2(const __m256i *in, __m256i *out) {
+static AOM_FORCE_INLINE void transpose_4x16_avx2(const __m256i *in, __m256i *out) {
     __m256i perm = _mm256_set_epi32(7, 3, 6, 2, 5, 1, 4, 0);
 
     TRANSPOSE_4X4_AVX2(in[0], in[1], in[2], in[3], out[0], out[2], out[4], out[6]);
@@ -313,7 +313,7 @@ static INLINE void transpose_4x16_avx2(const __m256i *in, __m256i *out) {
 
 // Note:
 //  rounding = 1 << (bit - 1)
-static INLINE __m256i half_btf_avx2(const __m256i *w0, const __m256i *n0, const __m256i *w1,
+static AOM_FORCE_INLINE __m256i half_btf_avx2(const __m256i *w0, const __m256i *n0, const __m256i *w1,
                                     const __m256i *n1, const __m256i *rounding, int32_t bit) {
     __m256i x, y;
 
@@ -325,7 +325,7 @@ static INLINE __m256i half_btf_avx2(const __m256i *w0, const __m256i *n0, const 
     return x;
 }
 
-static INLINE __m128i half_btf_small(const __m128i *w0, const __m128i *n0, const __m128i *w1,
+static AOM_FORCE_INLINE __m128i half_btf_small(const __m128i *w0, const __m128i *n0, const __m128i *w1,
                                      const __m128i *n1, const __m128i *rounding, int32_t bit) {
     __m128i x, y;
 
@@ -386,7 +386,7 @@ static const int8_t *fwd_txfm_shift_ls[TX_SIZES_ALL] = {
     fwd_shift_8x32,  fwd_shift_32x8,  fwd_shift_16x64, fwd_shift_64x16,
 };
 
-static INLINE void load_buffer_8x8(const int16_t *input, __m256i *in, int32_t stride,
+static AOM_FORCE_INLINE void load_buffer_8x8(const int16_t *input, __m256i *in, int32_t stride,
                                    int32_t flipud, int32_t fliplr, int32_t shift) {
     __m128i temp[8];
     if (!flipud) {
@@ -440,7 +440,7 @@ static INLINE void load_buffer_8x8(const int16_t *input, __m256i *in, int32_t st
 }
 
 #if PARTIAL_FREQUENCY
-static INLINE void load_buffer_8x8_N2(const int16_t *input, __m256i *in, int32_t stride,
+static AOM_FORCE_INLINE void load_buffer_8x8_N2(const int16_t *input, __m256i *in, int32_t stride,
                                       int32_t flipud, int32_t fliplr, int32_t shift) {
     __m128i temp[8];
     if (!flipud) {
@@ -494,7 +494,7 @@ static INLINE void load_buffer_8x8_N2(const int16_t *input, __m256i *in, int32_t
 }
 #endif /*PARTIAL_FREQUENCY*/
 
-static INLINE void load_buffer_4x4_avx2(const int16_t *input, __m256i *in, int32_t stride,
+static AOM_FORCE_INLINE void load_buffer_4x4_avx2(const int16_t *input, __m256i *in, int32_t stride,
                                         int32_t flipud, int32_t fliplr, int32_t shift) {
     if (!flipud) {
         in[0] = _mm256_setr_epi64x(
@@ -522,7 +522,7 @@ static INLINE void load_buffer_4x4_avx2(const int16_t *input, __m256i *in, int32
     in[1] = _mm256_slli_epi32(in[1], shift);
 }
 
-static INLINE void load_buffer_4x8_avx2(const int16_t *input, __m256i *out, int32_t stride,
+static AOM_FORCE_INLINE void load_buffer_4x8_avx2(const int16_t *input, __m256i *out, int32_t stride,
                                         int32_t flipud, int32_t fliplr, int32_t shift) {
     const int16_t *top_l = input;
     const int16_t *bot_l = input + 4 * stride;
@@ -536,7 +536,7 @@ static INLINE void load_buffer_4x8_avx2(const int16_t *input, __m256i *out, int3
     }
 }
 
-static INLINE void load_buffer_8x4_avx2(const int16_t *input, __m256i *out, int32_t stride,
+static AOM_FORCE_INLINE void load_buffer_8x4_avx2(const int16_t *input, __m256i *out, int32_t stride,
                                         int32_t flipud, int32_t fliplr, int32_t shift) {
     const int16_t *top_l = input;
     const int16_t *top_r = input + 4;
@@ -550,7 +550,7 @@ static INLINE void load_buffer_8x4_avx2(const int16_t *input, __m256i *out, int3
     }
 }
 
-static INLINE void load_buffer_4x16_avx2(const int16_t *input, __m256i *out, const int32_t stride,
+static AOM_FORCE_INLINE void load_buffer_4x16_avx2(const int16_t *input, __m256i *out, const int32_t stride,
                                          const int32_t flipud, const int32_t fliplr,
                                          const int32_t shift) {
     const int16_t *top_l = input;
@@ -565,7 +565,7 @@ static INLINE void load_buffer_4x16_avx2(const int16_t *input, __m256i *out, con
     }
 }
 
-static INLINE void load_buffer_16x4_avx2(const int16_t *input, __m256i *out, int32_t stride,
+static AOM_FORCE_INLINE void load_buffer_16x4_avx2(const int16_t *input, __m256i *out, int32_t stride,
                                          int32_t flipud, int32_t fliplr, int32_t shift) {
     const int16_t *top_l = input;
     const int16_t *top_r = input + 8;
@@ -579,7 +579,7 @@ static INLINE void load_buffer_16x4_avx2(const int16_t *input, __m256i *out, int
     }
 }
 
-static INLINE void col_txfm_8x8_rounding(__m256i *in, int32_t shift) {
+static AOM_FORCE_INLINE void col_txfm_8x8_rounding(__m256i *in, int32_t shift) {
     const __m256i rounding = _mm256_set1_epi32(1 << (shift - 1));
 
     in[0] = _mm256_add_epi32(in[0], rounding);
@@ -613,7 +613,7 @@ static void fidtx8x8_avx2(const __m256i *in, __m256i *out, int8_t bit, int32_t c
     out[7] = _mm256_slli_epi32(in[7 * col_num], 1);
 }
 
-static INLINE void fidtx16x8_avx2(const __m256i *in, __m256i *out, int8_t bit, int32_t col_num) {
+static AOM_FORCE_INLINE void fidtx16x8_avx2(const __m256i *in, __m256i *out, int8_t bit, int32_t col_num) {
     (void)bit;
     const int32_t bits     = 12; // new_sqrt2_bits = 12
     const int32_t sqrt     = 2 * 5793; // 2 * new_sqrt2
@@ -628,14 +628,14 @@ static INLINE void fidtx16x8_avx2(const __m256i *in, __m256i *out, int8_t bit, i
     }
 }
 
-static INLINE void write_buffer_4x8(const __m256i *res, int32_t *output) {
+static AOM_FORCE_INLINE void write_buffer_4x8(const __m256i *res, int32_t *output) {
     _mm256_storeu_si256((__m256i *)(output + 0 * 8), res[0]);
     _mm256_storeu_si256((__m256i *)(output + 1 * 8), res[1]);
     _mm256_storeu_si256((__m256i *)(output + 2 * 8), res[2]);
     _mm256_storeu_si256((__m256i *)(output + 3 * 8), res[3]);
 }
 
-static INLINE void write_buffer_8x8(const __m256i *res, int32_t *output) {
+static AOM_FORCE_INLINE void write_buffer_8x8(const __m256i *res, int32_t *output) {
     _mm256_storeu_si256((__m256i *)(output + 0 * 8), res[0]);
     _mm256_storeu_si256((__m256i *)(output + 1 * 8), res[1]);
     _mm256_storeu_si256((__m256i *)(output + 2 * 8), res[2]);
@@ -1071,7 +1071,7 @@ void eb_av1_fwd_txfm2d_8x8_avx2(int16_t *input, int32_t *coeff, uint32_t stride,
     (void)bd;
 }
 
-static INLINE void convert_8x8_to_16x16(const __m256i *in, __m256i *out) {
+static AOM_FORCE_INLINE void convert_8x8_to_16x16(const __m256i *in, __m256i *out) {
     int32_t row_index = 0;
     int32_t dst_index = 0;
     int32_t src_index = 0;
@@ -1096,7 +1096,7 @@ static INLINE void convert_8x8_to_16x16(const __m256i *in, __m256i *out) {
     } while (row_index < 16);
 }
 
-static INLINE void load_buffer_16x16(const int16_t *input, __m256i *out, int32_t stride,
+static AOM_FORCE_INLINE void load_buffer_16x16(const int16_t *input, __m256i *out, int32_t stride,
                                      int32_t flipud, int32_t fliplr, int32_t shift) {
     __m256i in[32];
     // Load 4 8x8 blocks
@@ -1142,7 +1142,7 @@ static INLINE void load_buffer_16x16(const int16_t *input, __m256i *out, int32_t
 
 #if PARTIAL_FREQUENCY
 
-static INLINE void load_buffer_16x16_N2(const int16_t *input, __m256i *out, int32_t stride,
+static AOM_FORCE_INLINE void load_buffer_16x16_N2(const int16_t *input, __m256i *out, int32_t stride,
                                         int32_t flipud, int32_t fliplr, int32_t shift) {
     // Load 4 8x8 blocks
     const int16_t *top_l = input;
@@ -1179,7 +1179,7 @@ static INLINE void load_buffer_16x16_N2(const int16_t *input, __m256i *out, int3
     load_buffer_8x8_N2(bot_l, &out[16], stride, flipud, fliplr, shift);
 }
 
-static INLINE void load_buffer_16x16_N2_H(const int16_t *input, __m256i *out, int32_t stride,
+static AOM_FORCE_INLINE void load_buffer_16x16_N2_H(const int16_t *input, __m256i *out, int32_t stride,
                                           int32_t flipud, int32_t fliplr, int32_t shift) {
     // Load 4 8x8 blocks
     const int16_t *top_l = input;
@@ -1218,7 +1218,7 @@ static INLINE void load_buffer_16x16_N2_H(const int16_t *input, __m256i *out, in
     load_buffer_8x8_N2(top_r, &out[1], stride, flipud, fliplr, shift);
 }
 
-static INLINE void load_buffer_16x16_N2_half(const int16_t *input, __m256i *out, int32_t stride,
+static AOM_FORCE_INLINE void load_buffer_16x16_N2_half(const int16_t *input, __m256i *out, int32_t stride,
                                              int32_t flipud, int32_t fliplr, int32_t shift) {
     // Load 4 8x8 blocks
     const int16_t *top_l = input;
@@ -1255,7 +1255,7 @@ static INLINE void load_buffer_16x16_N2_half(const int16_t *input, __m256i *out,
 }
 #endif /*PARTIAL_FREQUENCY*/
 
-static INLINE void col_txfm_16x16_rounding(__m256i *in, int32_t shift) {
+static AOM_FORCE_INLINE void col_txfm_16x16_rounding(__m256i *in, int32_t shift) {
     col_txfm_8x8_rounding(&in[0], shift);
     col_txfm_8x8_rounding(&in[8], shift);
     col_txfm_8x8_rounding(&in[16], shift);
@@ -1277,7 +1277,7 @@ static void fidtx16x16_avx2(const __m256i *in, __m256i *out, int8_t bit, int32_t
     }
 }
 
-static INLINE void write_buffer_16x16(const __m256i *res, int32_t *output) {
+static AOM_FORCE_INLINE void write_buffer_16x16(const __m256i *res, int32_t *output) {
     int32_t fact = -1, index = -1;
     for (int32_t i = 0; i < 8; i++) {
         _mm256_storeu_si256((__m256i *)(output + (++fact) * 16), res[++index]);
@@ -1287,7 +1287,7 @@ static INLINE void write_buffer_16x16(const __m256i *res, int32_t *output) {
     }
 }
 
-static INLINE void fdct4x8_row_avx2(__m256i *input, __m256i *output, int32_t bit,
+static AOM_FORCE_INLINE void fdct4x8_row_avx2(__m256i *input, __m256i *output, int32_t bit,
                                     const int32_t num_col) {
     const int32_t *cospi   = cospi_arr(bit);
     const __m256i  cospi32 = _mm256_set1_epi32(cospi[32]);
@@ -1358,7 +1358,7 @@ static INLINE void fdct4x8_row_avx2(__m256i *input, __m256i *output, int32_t bit
     output[3] = _mm256_permute2x128_si256(out[2], out[3], 0x31);
 }
 
-static INLINE void fdct4x8_col_avx2(__m256i *in, __m256i *output, int32_t bit,
+static AOM_FORCE_INLINE void fdct4x8_col_avx2(__m256i *in, __m256i *output, int32_t bit,
                                     const int32_t num_col) {
     const int32_t *cospi   = cospi_arr(bit);
     const __m256i  cospi32 = _mm256_set1_epi32(cospi[32]);
@@ -1423,7 +1423,7 @@ static INLINE void fdct4x8_col_avx2(__m256i *in, __m256i *output, int32_t bit,
     output[3] = _mm256_permute2x128_si256(out[2], out[3], 0x31);
 }
 
-static INLINE void fdct16x4_avx2(__m256i *input, __m256i *output, int32_t bit) {
+static AOM_FORCE_INLINE void fdct16x4_avx2(__m256i *input, __m256i *output, int32_t bit) {
     __m128i *in  = (__m128i *)input;
     __m128i *out = (__m128i *)output;
 
@@ -1668,7 +1668,7 @@ static INLINE void fdct16x4_avx2(__m256i *input, __m256i *output, int32_t bit) {
     out[3] = _mm_srai_epi32(v[12], bit);
 }
 
-static INLINE void fadst8x4_avx2(__m256i *input, __m256i *output, int32_t bit,
+static AOM_FORCE_INLINE void fadst8x4_avx2(__m256i *input, __m256i *output, int32_t bit,
                                  const int32_t col_num) {
     __m128i *      in       = (__m128i *)input;
     __m128i *      out      = (__m128i *)output;
@@ -1842,7 +1842,7 @@ static INLINE void fadst8x4_avx2(__m256i *input, __m256i *output, int32_t bit,
     }
 }
 
-static INLINE void fadst16x4_avx2(__m256i *input, __m256i *output, int32_t bit) {
+static AOM_FORCE_INLINE void fadst16x4_avx2(__m256i *input, __m256i *output, int32_t bit) {
     __m128i *in  = (__m128i *)input;
     __m128i *out = (__m128i *)output;
 
@@ -2318,7 +2318,7 @@ static void fdct16x16_avx2(const __m256i *in, __m256i *out, int8_t bit, const in
     }
 }
 
-static INLINE void fadst4x8_row_avx2(__m256i *input, __m256i *output, int32_t bit,
+static AOM_FORCE_INLINE void fadst4x8_row_avx2(__m256i *input, __m256i *output, int32_t bit,
                                      const int32_t num_col) {
     const int32_t *sinpi  = sinpi_arr(bit);
     const __m256i  rnding = _mm256_set1_epi32(1 << (bit - 1));
@@ -2394,7 +2394,7 @@ static INLINE void fadst4x8_row_avx2(__m256i *input, __m256i *output, int32_t bi
     output[3] = _mm256_permute2x128_si256(out[2], out[3], 0x31);
 }
 
-static INLINE void fadst4x8_col_avx2(__m256i *in, __m256i *output, int32_t bit,
+static AOM_FORCE_INLINE void fadst4x8_col_avx2(__m256i *in, __m256i *output, int32_t bit,
                                      const int32_t num_col) {
     const int32_t *sinpi  = sinpi_arr(bit);
     const __m256i  rnding = _mm256_set1_epi32(1 << (bit - 1));
@@ -2464,7 +2464,7 @@ static INLINE void fadst4x8_col_avx2(__m256i *in, __m256i *output, int32_t bit,
     output[3] = _mm256_permute2x128_si256(out[2], out[3], 0x31);
 }
 
-static INLINE void fdct4x8_avx2(__m256i *input, __m256i *output, int32_t bit) {
+static AOM_FORCE_INLINE void fdct4x8_avx2(__m256i *input, __m256i *output, int32_t bit) {
     __m128i *      in       = (__m128i *)input;
     __m128i *      out      = (__m128i *)output;
     const int32_t *cospi    = cospi_arr(bit);
@@ -4126,7 +4126,7 @@ static void av1_fdct64_new_avx2(const __m256i *input, __m256i *output, int8_t co
 typedef void (*TxfmFuncAVX2)(const __m256i *input, __m256i *output, const int8_t cos_bit,
                              const int8_t *stage_range);
 
-static INLINE void fdct32x32_avx2(const __m256i *input, __m256i *output, const int8_t cos_bit,
+static AOM_FORCE_INLINE void fdct32x32_avx2(const __m256i *input, __m256i *output, const int8_t cos_bit,
                                   const int8_t *stage_range) {
     const int32_t txfm_size   = 32;
     const int32_t num_per_256 = 8;
@@ -4135,14 +4135,14 @@ static INLINE void fdct32x32_avx2(const __m256i *input, __m256i *output, const i
     av1_fdct32_new_avx2(input, output, cos_bit, txfm_size, col_num);
 }
 
-static INLINE void fdct64x64_avx2(const __m256i *input, __m256i *output, const int8_t cos_bit) {
+static AOM_FORCE_INLINE void fdct64x64_avx2(const __m256i *input, __m256i *output, const int8_t cos_bit) {
     const int32_t txfm_size   = 64;
     const int32_t num_per_256 = 8;
     int32_t       col_num     = txfm_size / num_per_256;
     av1_fdct64_new_avx2(input, output, cos_bit, txfm_size, col_num);
 }
 
-static INLINE void fidtx4x8_row_avx2(__m256i *input, __m256i *output, int32_t bit,
+static AOM_FORCE_INLINE void fidtx4x8_row_avx2(__m256i *input, __m256i *output, int32_t bit,
                                      int32_t col_num) {
     (void)bit;
     __m256i in[4];
@@ -4180,7 +4180,7 @@ static INLINE void fidtx4x8_row_avx2(__m256i *input, __m256i *output, int32_t bi
     output[3] = _mm256_permute2x128_si256(out[2], out[3], 0x31);
 }
 
-static INLINE void fidtx4x8_col_avx2(__m256i *in, __m256i *output, int32_t bit, int32_t col_num) {
+static AOM_FORCE_INLINE void fidtx4x8_col_avx2(__m256i *in, __m256i *output, int32_t bit, int32_t col_num) {
     (void)bit;
     __m256i out[4];
     __m256i fact   = _mm256_set1_epi32(new_sqrt2);
@@ -4211,7 +4211,7 @@ static INLINE void fidtx4x8_col_avx2(__m256i *in, __m256i *output, int32_t bit, 
     output[3] = _mm256_permute2x128_si256(out[2], out[3], 0x31);
 }
 
-static INLINE void fidtx8x4_avx2(__m256i *in, __m256i *out, int32_t bit) {
+static AOM_FORCE_INLINE void fidtx8x4_avx2(__m256i *in, __m256i *out, int32_t bit) {
     (void)bit;
 
     out[0] = _mm256_add_epi32(in[0], in[0]);
@@ -4263,7 +4263,7 @@ static void fidtx64x64_avx2(const __m256i *input, __m256i *output) {
     }
 }
 
-static INLINE TxfmFuncAVX2 fwd_txfm_type_to_func(TxfmType txfmtype) {
+static AOM_FORCE_INLINE TxfmFuncAVX2 fwd_txfm_type_to_func(TxfmType txfmtype) {
     switch (txfmtype) {
     case TXFM_TYPE_DCT32: return fdct32x32_avx2; break;
     case TXFM_TYPE_IDENTITY32: return fidtx32x32_avx2; break;
@@ -4272,7 +4272,7 @@ static INLINE TxfmFuncAVX2 fwd_txfm_type_to_func(TxfmType txfmtype) {
     return NULL;
 }
 
-static INLINE void load_buffer_32x32_avx2(const int16_t *input, __m256i *output, int32_t stride) {
+static AOM_FORCE_INLINE void load_buffer_32x32_avx2(const int16_t *input, __m256i *output, int32_t stride) {
     __m128i temp[4];
     int32_t i;
 
@@ -4292,7 +4292,7 @@ static INLINE void load_buffer_32x32_avx2(const int16_t *input, __m256i *output,
 }
 
 #if PARTIAL_FREQUENCY
-static INLINE void load_buffer_32x16_avx2(const int16_t *input, __m256i *output, int32_t stride) {
+static AOM_FORCE_INLINE void load_buffer_32x16_avx2(const int16_t *input, __m256i *output, int32_t stride) {
     __m128i temp[4];
     int32_t i;
 
@@ -4311,7 +4311,7 @@ static INLINE void load_buffer_32x16_avx2(const int16_t *input, __m256i *output,
     }
 }
 
-static INLINE void load_buffer_32x16_N2_avx2(const int16_t *input, __m256i *output,
+static AOM_FORCE_INLINE void load_buffer_32x16_N2_avx2(const int16_t *input, __m256i *output,
                                              int32_t stride) {
     __m128i temp[4];
     int32_t i;
@@ -4328,7 +4328,7 @@ static INLINE void load_buffer_32x16_N2_avx2(const int16_t *input, __m256i *outp
 }
 #endif /*PARTIAL_FREQUENCY*/
 
-static INLINE void fwd_txfm2d_32x32_avx2(const int16_t *input, int32_t *output,
+static AOM_FORCE_INLINE void fwd_txfm2d_32x32_avx2(const int16_t *input, int32_t *output,
                                          const int32_t stride, const Txfm2dFlipCfg *cfg,
                                          int32_t *txfm_buf) {
     assert(cfg->tx_size < TX_SIZES);
@@ -4366,7 +4366,7 @@ void eb_av1_fwd_txfm2d_32x32_avx2(int16_t *input, int32_t *output, uint32_t stri
     fwd_txfm2d_32x32_avx2(input, output, stride, &cfg, txfm_buf);
 }
 
-static INLINE void load_buffer_64x64_avx2(const int16_t *input, int32_t stride, __m256i *output) {
+static AOM_FORCE_INLINE void load_buffer_64x64_avx2(const int16_t *input, int32_t stride, __m256i *output) {
     __m128i x0, x1, x2, x3, x4, x5, x6, x7;
     __m256i v0, v1, v2, v3, v4, v5, v6, v7;
     int32_t i;
@@ -4440,7 +4440,7 @@ void eb_av1_fwd_txfm2d_64x64_avx2(int16_t *input, int32_t *output, uint32_t stri
     }
 }
 
-static INLINE void load_buffer_32_avx2(const int16_t *input, __m256i *in, int32_t stride,
+static AOM_FORCE_INLINE void load_buffer_32_avx2(const int16_t *input, __m256i *in, int32_t stride,
                                        int32_t flipud, int32_t fliplr, int32_t shift) {
     __m128i temp[4];
     if (!flipud) {
@@ -4473,7 +4473,7 @@ static INLINE void load_buffer_32_avx2(const int16_t *input, __m256i *in, int32_
     in[3] = _mm256_slli_epi32(in[3], shift);
 }
 
-static INLINE void load_buffer_16_avx2(const int16_t *input, __m256i *in, int32_t stride,
+static AOM_FORCE_INLINE void load_buffer_16_avx2(const int16_t *input, __m256i *in, int32_t stride,
                                        int32_t flipud, int32_t fliplr, int32_t shift) {
     __m128i temp[2];
     if (!flipud) {
@@ -4496,7 +4496,7 @@ static INLINE void load_buffer_16_avx2(const int16_t *input, __m256i *in, int32_
     in[1] = _mm256_slli_epi32(in[1], shift);
 }
 
-static INLINE void load_buffer_32x8n(const int16_t *input, __m256i *out, int32_t stride,
+static AOM_FORCE_INLINE void load_buffer_32x8n(const int16_t *input, __m256i *out, int32_t stride,
                                      int32_t flipud, int32_t fliplr, int32_t shift,
                                      const int32_t height) {
     for (int32_t col = 0; col < height; col++) {
@@ -4507,7 +4507,7 @@ static INLINE void load_buffer_32x8n(const int16_t *input, __m256i *out, int32_t
 }
 
 #if PARTIAL_FREQUENCY
-static INLINE void load_buffer_16x8n(const int16_t *input, __m256i *out, int32_t stride,
+static AOM_FORCE_INLINE void load_buffer_16x8n(const int16_t *input, __m256i *out, int32_t stride,
                                      int32_t flipud, int32_t fliplr, int32_t shift,
                                      const int32_t height) {
     for (int32_t col = 0; col < height; col++) {
@@ -4518,7 +4518,7 @@ static INLINE void load_buffer_16x8n(const int16_t *input, __m256i *out, int32_t
 }
 #endif
 
-static INLINE void load_buffer_8x16(const int16_t *input, __m256i *out, int32_t stride,
+static AOM_FORCE_INLINE void load_buffer_8x16(const int16_t *input, __m256i *out, int32_t stride,
                                     int32_t flipud, int32_t fliplr, int32_t shift) {
     const int16_t *top_l = input;
     const int16_t *bot_l = input + 8 * stride;
@@ -4535,7 +4535,7 @@ static INLINE void load_buffer_8x16(const int16_t *input, __m256i *out, int32_t 
     load_buffer_8x8(bot_l, out + 8, stride, flipud, fliplr, shift);
 }
 
-static INLINE void col_txfm_8x4_rounding(__m256i *in, int32_t shift) {
+static AOM_FORCE_INLINE void col_txfm_8x4_rounding(__m256i *in, int32_t shift) {
     const __m256i rounding = _mm256_set1_epi32(1 << (shift - 1));
 
     in[0] = _mm256_add_epi32(in[0], rounding);
@@ -4549,12 +4549,12 @@ static INLINE void col_txfm_8x4_rounding(__m256i *in, int32_t shift) {
     in[3] = _mm256_srai_epi32(in[3], shift);
 }
 
-static INLINE void col_txfm_8x16_rounding(__m256i *in, int32_t shift) {
+static AOM_FORCE_INLINE void col_txfm_8x16_rounding(__m256i *in, int32_t shift) {
     col_txfm_8x8_rounding(&in[0], shift);
     col_txfm_8x8_rounding(&in[8], shift);
 }
 
-static INLINE void write_buffer_16x8_avx2(const __m256i *res, int32_t *output,
+static AOM_FORCE_INLINE void write_buffer_16x8_avx2(const __m256i *res, int32_t *output,
                                           const int32_t stride) {
     _mm256_storeu_si256((__m256i *)(output), res[0]);
     _mm256_storeu_si256((__m256i *)(output + stride), res[1]);
@@ -5632,7 +5632,7 @@ void eb_av1_fwd_txfm2d_16x4_avx2(int16_t *input, int32_t *output, uint32_t strid
 
 #if PARTIAL_FREQUENCY
 
-static INLINE void transpose_16x16_in_64x64_avx2(const __m256i *in, __m256i *out) {
+static AOM_FORCE_INLINE void transpose_16x16_in_64x64_avx2(const __m256i *in, __m256i *out) {
     __m256i temp[32];
     TRANSPOSE_4X4_AVX2(in[0], in[8], in[16], in[24], temp[0], temp[2], temp[4], temp[6]);
     TRANSPOSE_4X4_AVX2(in[32], in[40], in[48], in[56], temp[17], temp[19], temp[21], temp[23]);
@@ -5678,7 +5678,7 @@ static INLINE void transpose_16x16_in_64x64_avx2(const __m256i *in, __m256i *out
     out[121] = _mm256_permute2x128_si256(temp[14], temp[30], 0x31);
 }
 
-static INLINE void transpose_32x32_in_64x64_avx2(const __m256i *in, __m256i *out) {
+static AOM_FORCE_INLINE void transpose_32x32_in_64x64_avx2(const __m256i *in, __m256i *out) {
     transpose_16x16_in_64x64_avx2(in, out); //top-left
     transpose_16x16_in_64x64_avx2(in + 2, out + 128); //top-right
     transpose_16x16_in_64x64_avx2(in + 128, out + 2); //bottom-left
@@ -5688,7 +5688,7 @@ static INLINE void transpose_32x32_in_64x64_avx2(const __m256i *in, __m256i *out
 /*
 *    Transpose top left block of size 16x16 in 32x32 block
 */
-static INLINE void transpose_16x16_in_32x32_avx2(const __m256i *in, __m256i *out) {
+static AOM_FORCE_INLINE void transpose_16x16_in_32x32_avx2(const __m256i *in, __m256i *out) {
     __m256i temp[32];
     TRANSPOSE_4X4_AVX2(in[0], in[4], in[8], in[12], temp[0], temp[2], temp[4], temp[6]);
     TRANSPOSE_4X4_AVX2(in[16], in[20], in[24], in[28], temp[17], temp[19], temp[21], temp[23]);
@@ -5737,7 +5737,7 @@ static INLINE void transpose_16x16_in_32x32_avx2(const __m256i *in, __m256i *out
 /*
 *    Transpose top left block of size 8x8 in 16x16 block
 */
-static INLINE void transpose_8x8_in_16x16_avx2(const __m256i *in, __m256i *out) {
+static AOM_FORCE_INLINE void transpose_8x8_in_16x16_avx2(const __m256i *in, __m256i *out) {
     __m256i out1[8];
     TRANSPOSE_4X4_AVX2(in[0], in[2], in[4], in[6], out1[0], out1[1], out1[4], out1[5]);
     TRANSPOSE_4X4_AVX2(in[8], in[10], in[12], in[14], out1[2], out1[3], out1[6], out1[7]);
@@ -5752,7 +5752,7 @@ static INLINE void transpose_8x8_in_16x16_avx2(const __m256i *in, __m256i *out) 
     out[14] = _mm256_permute2x128_si256(out1[5], out1[7], 0x31);
 }
 
-static INLINE void transpose_8x8_half_avx2(const __m256i *in, __m256i *out) {
+static AOM_FORCE_INLINE void transpose_8x8_half_avx2(const __m256i *in, __m256i *out) {
     const __m256i zero = _mm256_setzero_si256();
     TRANSPOSE_4X4_AVX2(in[0], in[1], in[2], in[3], out[0], out[1], out[2], out[3]);
     out[4] = _mm256_permute2x128_si256(out[0], zero, 0x31);
@@ -5761,11 +5761,11 @@ static INLINE void transpose_8x8_half_avx2(const __m256i *in, __m256i *out) {
     out[7] = _mm256_permute2x128_si256(out[3], zero, 0x31);
 }
 
-static INLINE void transpose_8x8_N2_avx2(const __m256i *in, __m256i *out) {
+static AOM_FORCE_INLINE void transpose_8x8_N2_avx2(const __m256i *in, __m256i *out) {
     TRANSPOSE_4X4_AVX2(in[0], in[1], in[2], in[3], out[0], out[1], out[2], out[3]);
 }
 
-static INLINE void transpose_4x8_in_4x16_avx2(const __m256i *in, __m256i *out) {
+static AOM_FORCE_INLINE void transpose_4x8_in_4x16_avx2(const __m256i *in, __m256i *out) {
     __m256i perm = _mm256_set_epi32(7, 3, 6, 2, 5, 1, 4, 0);
 
     TRANSPOSE_4X4_AVX2(in[0], in[1], in[2], in[3], out[0], out[2], out[4], out[6]);
@@ -5775,7 +5775,7 @@ static INLINE void transpose_4x8_in_4x16_avx2(const __m256i *in, __m256i *out) {
     out[6] = _mm256_permutevar8x32_epi32(out[6], perm);
 }
 
-static INLINE void transpose_4x8_in_4x16_half_avx2(const __m256i *in, __m256i *out) {
+static AOM_FORCE_INLINE void transpose_4x8_in_4x16_half_avx2(const __m256i *in, __m256i *out) {
     __m256i perm = _mm256_set_epi32(7, 3, 6, 2, 5, 1, 4, 0);
     __m256i u0, u1;
 
@@ -5787,7 +5787,7 @@ static INLINE void transpose_4x8_in_4x16_half_avx2(const __m256i *in, __m256i *o
     out[2] = _mm256_permutevar8x32_epi32(out[2], perm);
 }
 
-static INLINE void load_buffer_4x8_in_8x8(const int16_t *input, __m256i *in, int32_t stride,
+static AOM_FORCE_INLINE void load_buffer_4x8_in_8x8(const int16_t *input, __m256i *in, int32_t stride,
                                           int32_t flipud, int32_t fliplr, int32_t shift,
                                           int32_t step) {
     __m128i temp[4];
@@ -5821,7 +5821,7 @@ static INLINE void load_buffer_4x8_in_8x8(const int16_t *input, __m256i *in, int
     in[3 * step] = _mm256_slli_epi32(in[3 * step], shift);
 }
 
-static INLINE void load_buffer_4x16_in_16x16(const int16_t *input, __m256i *out, int32_t stride,
+static AOM_FORCE_INLINE void load_buffer_4x16_in_16x16(const int16_t *input, __m256i *out, int32_t stride,
                                              int32_t flipud, int32_t fliplr, int32_t shift) {
     // Load 2 4x8 blocks
     const int16_t *top_l = input;
@@ -5852,7 +5852,7 @@ static INLINE void load_buffer_4x16_in_16x16(const int16_t *input, __m256i *out,
     load_buffer_4x8_in_8x8(top_r, &out[1], stride, flipud, fliplr, shift, 2);
 }
 
-static INLINE void write_buffer_8x8_N2(const __m256i *res, int32_t *output) {
+static AOM_FORCE_INLINE void write_buffer_8x8_N2(const __m256i *res, int32_t *output) {
     const __m256i zero256 = _mm256_setzero_si256();
     const __m128i zero128 = _mm_setzero_si128();
 
@@ -6099,7 +6099,7 @@ static void fidtx8x8_N2_avx2(const __m256i *in, __m256i *out, int8_t bit, int32_
     out[3] = _mm256_slli_epi32(in[3 * col_num], 1);
 }
 
-static INLINE void col_txfm_8x8_N2_rounding(__m256i *in, int32_t shift) {
+static AOM_FORCE_INLINE void col_txfm_8x8_N2_rounding(__m256i *in, int32_t shift) {
     const __m256i rounding = _mm256_set1_epi32(1 << (shift - 1));
 
     in[0] = _mm256_add_epi32(in[0], rounding);
@@ -6113,12 +6113,12 @@ static INLINE void col_txfm_8x8_N2_rounding(__m256i *in, int32_t shift) {
     in[3] = _mm256_srai_epi32(in[3], shift);
 }
 
-static INLINE void col_txfm_16x16_N2_rounding(__m256i *in, int32_t shift) {
+static AOM_FORCE_INLINE void col_txfm_16x16_N2_rounding(__m256i *in, int32_t shift) {
     col_txfm_8x8_rounding(&in[0], shift);
     col_txfm_8x8_rounding(&in[8], shift);
 }
 
-static INLINE void col_txfm_32x8_N2_half_rounding(__m256i *in, int32_t shift) {
+static AOM_FORCE_INLINE void col_txfm_32x8_N2_half_rounding(__m256i *in, int32_t shift) {
     const __m256i rounding = _mm256_set1_epi32(1 << (shift - 1));
     in[0]                  = _mm256_add_epi32(in[0], rounding);
     in[1]                  = _mm256_add_epi32(in[1], rounding);
@@ -6138,7 +6138,7 @@ static INLINE void col_txfm_32x8_N2_half_rounding(__m256i *in, int32_t shift) {
     in[13]                 = _mm256_srai_epi32(in[13], shift);
 }
 
-static INLINE void col_txfm_16x16_N2_half_rounding(__m256i *in, int32_t shift) {
+static AOM_FORCE_INLINE void col_txfm_16x16_N2_half_rounding(__m256i *in, int32_t shift) {
     const __m256i rounding = _mm256_set1_epi32(1 << (shift - 1));
     in[0]                  = _mm256_add_epi32(in[0], rounding);
     in[2]                  = _mm256_add_epi32(in[2], rounding);
@@ -6158,7 +6158,7 @@ static INLINE void col_txfm_16x16_N2_half_rounding(__m256i *in, int32_t shift) {
     in[14]                 = _mm256_srai_epi32(in[14], shift);
 }
 
-static INLINE void write_buffer_16x16_N2(const __m256i *res, int32_t *output) {
+static AOM_FORCE_INLINE void write_buffer_16x16_N2(const __m256i *res, int32_t *output) {
     const __m256i zero = _mm256_setzero_si256();
     int32_t       i;
     for (i = 0; i < 4; i++) {
@@ -6666,7 +6666,7 @@ void av1_idtx16x32_N2_avx2(const __m256i *input, __m256i *output) {
     for (int32_t i = 0; i < 32; i += 2) { output[i] = _mm256_slli_epi32(input[i], 2); }
 }
 
-static INLINE void clear_buffer_wxh_N2(__m256i *buff, int32_t num_col, int32_t num_row) {
+static AOM_FORCE_INLINE void clear_buffer_wxh_N2(__m256i *buff, int32_t num_col, int32_t num_row) {
     const __m256i zero    = _mm256_setzero_si256();
     const __m128i zero128 = _mm_setzero_si128();
     assert(num_col > 0);
@@ -7021,7 +7021,7 @@ static void av1_fdct32_new_N2_avx2(const __m256i *input, __m256i *output, int8_t
     }
 }
 
-static INLINE void fdct32x32_N2_row_avx2(const __m256i *input, __m256i *output,
+static AOM_FORCE_INLINE void fdct32x32_N2_row_avx2(const __m256i *input, __m256i *output,
                                          const int8_t cos_bit) {
     const int32_t txfm_size   = 32;
     const int32_t num_per_256 = 8;
@@ -7029,7 +7029,7 @@ static INLINE void fdct32x32_N2_row_avx2(const __m256i *input, __m256i *output,
     av1_fdct32_new_N2_avx2(input, output, cos_bit, txfm_size / 2, col_num);
 }
 
-static INLINE void fdct32x32_N2_col_avx2(const __m256i *input, __m256i *output,
+static AOM_FORCE_INLINE void fdct32x32_N2_col_avx2(const __m256i *input, __m256i *output,
                                          const int8_t cos_bit) {
     const int32_t txfm_size   = 32;
     const int32_t num_per_256 = 8;
@@ -7037,7 +7037,7 @@ static INLINE void fdct32x32_N2_col_avx2(const __m256i *input, __m256i *output,
     av1_fdct32_new_N2_avx2(input, output, cos_bit, txfm_size, col_num);
 }
 
-static INLINE void av1_round_shift_array_32_N2_avx2(__m256i *input, __m256i *output,
+static AOM_FORCE_INLINE void av1_round_shift_array_32_N2_avx2(__m256i *input, __m256i *output,
                                                     const int32_t size, const int32_t bit) {
     int32_t i;
 
@@ -7058,7 +7058,7 @@ static INLINE void av1_round_shift_array_32_N2_avx2(__m256i *input, __m256i *out
     }
 }
 
-static INLINE void av1_round_shift_rect_array_wxh_avx2(__m256i *input, __m256i *output,
+static AOM_FORCE_INLINE void av1_round_shift_rect_array_wxh_avx2(__m256i *input, __m256i *output,
                                                        const int32_t bit, const int32_t val,
                                                        int32_t num_col, int32_t num_row) {
     const __m256i sqrt2  = _mm256_set1_epi32(val);
@@ -7089,7 +7089,7 @@ static INLINE void av1_round_shift_rect_array_wxh_avx2(__m256i *input, __m256i *
     }
 }
 
-static INLINE void load_buffer_32x32_in_64x64_avx2(const int16_t *input, int32_t stride,
+static AOM_FORCE_INLINE void load_buffer_32x32_in_64x64_avx2(const int16_t *input, int32_t stride,
                                                    __m256i *output) {
     __m128i x0, x1, x2, x3;
     __m256i v0, v1, v2, v3;
@@ -7856,7 +7856,7 @@ static void fidtx64x64_N2_avx2(const __m256i *input, __m256i *output) {
     }
 }
 
-static INLINE void av1_round_shift_array_64_N2_avx2(__m256i *input, __m256i *output,
+static AOM_FORCE_INLINE void av1_round_shift_array_64_N2_avx2(__m256i *input, __m256i *output,
                                                     const int32_t size, const int32_t bit) {
     int32_t i;
     if (bit > 0) {
@@ -7920,7 +7920,7 @@ void av1_idtx32x16_N2_avx2(const __m256i *input, __m256i *output, const int32_t 
     }
 }
 
-static INLINE void col_txfm_32x16_N2_rounding(__m256i *in, int32_t shift) {
+static AOM_FORCE_INLINE void col_txfm_32x16_N2_rounding(__m256i *in, int32_t shift) {
     const __m256i rounding = _mm256_set1_epi32(1 << (shift - 1));
     in[0]                  = _mm256_add_epi32(in[0], rounding);
     in[4]                  = _mm256_add_epi32(in[4], rounding);
@@ -7940,7 +7940,7 @@ static INLINE void col_txfm_32x16_N2_rounding(__m256i *in, int32_t shift) {
     in[28]                 = _mm256_srai_epi32(in[28], shift);
 }
 
-static INLINE void fdct16x4_N2_avx2(__m256i *input, __m256i *output, int32_t bit) {
+static AOM_FORCE_INLINE void fdct16x4_N2_avx2(__m256i *input, __m256i *output, int32_t bit) {
     __m128i *in  = (__m128i *)input;
     __m128i *out = (__m128i *)output;
 
@@ -8139,7 +8139,7 @@ static INLINE void fdct16x4_N2_avx2(__m256i *input, __m256i *output, int32_t bit
     out[3] = _mm_srai_epi32(v[12], bit);
 }
 
-static INLINE void fadst16x4_N2_avx2(__m256i *input, __m256i *output, int32_t bit) {
+static AOM_FORCE_INLINE void fadst16x4_N2_avx2(__m256i *input, __m256i *output, int32_t bit) {
     __m128i *in  = (__m128i *)input;
     __m128i *out = (__m128i *)output;
 
@@ -8315,7 +8315,7 @@ static INLINE void fadst16x4_N2_avx2(__m256i *input, __m256i *output, int32_t bi
     out[1] = half_btf_small(&cospi58, &u[14], &cospi6, &u[15], &rnding, bit);
 }
 
-static INLINE void fdct4x8_col_N2_avx2(__m256i *in, __m256i *output, int32_t bit,
+static AOM_FORCE_INLINE void fdct4x8_col_N2_avx2(__m256i *in, __m256i *output, int32_t bit,
                                        const int32_t num_col) {
     const int32_t *cospi   = cospi_arr(bit);
     const __m256i  zero    = _mm256_setzero_si256();
@@ -8367,7 +8367,7 @@ static INLINE void fdct4x8_col_N2_avx2(__m256i *in, __m256i *output, int32_t bit
     output[3] = _mm256_permute2x128_si256(out[2], out[3], 0x31);
 }
 
-static INLINE void fadst4x8_col_N2_avx2(__m256i *in, __m256i *output, int32_t bit,
+static AOM_FORCE_INLINE void fadst4x8_col_N2_avx2(__m256i *in, __m256i *output, int32_t bit,
                                         const int32_t num_col) {
     const int32_t *sinpi  = sinpi_arr(bit);
     const __m256i  zero   = _mm256_setzero_si256();
@@ -8419,7 +8419,7 @@ static INLINE void fadst4x8_col_N2_avx2(__m256i *in, __m256i *output, int32_t bi
     output[3] = _mm256_permute2x128_si256(out[2], out[3], 0x31);
 }
 
-static INLINE void clear_buffer_4x16_N2(__m256i *buff) {
+static AOM_FORCE_INLINE void clear_buffer_4x16_N2(__m256i *buff) {
     const __m256i zero = _mm256_setzero_si256();
     buff[4]            = zero;
     buff[5]            = zero;
@@ -8427,7 +8427,7 @@ static INLINE void clear_buffer_4x16_N2(__m256i *buff) {
     buff[7]            = zero;
 }
 
-static INLINE void fidtx4x8_col_N2_avx2(__m256i *in, __m256i *output, int32_t bit,
+static AOM_FORCE_INLINE void fidtx4x8_col_N2_avx2(__m256i *in, __m256i *output, int32_t bit,
                                         int32_t col_num) {
     (void)bit;
     const __m256i zero   = _mm256_setzero_si256();
@@ -8443,7 +8443,7 @@ static INLINE void fidtx4x8_col_N2_avx2(__m256i *in, __m256i *output, int32_t bi
     }
 }
 
-static INLINE void fidtx4x8_N2_perm_avx2(__m256i *in, __m256i *output, int32_t bit) {
+static AOM_FORCE_INLINE void fidtx4x8_N2_perm_avx2(__m256i *in, __m256i *output, int32_t bit) {
     (void)bit;
     __m256i fact   = _mm256_set1_epi32(2 * new_sqrt2);
     __m256i offset = _mm256_set1_epi32(1 << (new_sqrt2_bits - 1));
@@ -8461,7 +8461,7 @@ static INLINE void fidtx4x8_N2_perm_avx2(__m256i *in, __m256i *output, int32_t b
     output[2] = _mm256_permute2x128_si256(out[0], out[1], 0x31);
 }
 
-static INLINE void fidtx4x8_row_N2_avx2(__m256i *in, __m256i *output, int32_t bit) {
+static AOM_FORCE_INLINE void fidtx4x8_row_N2_avx2(__m256i *in, __m256i *output, int32_t bit) {
     (void)bit;
     __m256i fact   = _mm256_set1_epi32(new_sqrt2);
     __m256i offset = _mm256_set1_epi32(1 << (new_sqrt2_bits - 1));
@@ -8474,7 +8474,7 @@ static INLINE void fidtx4x8_row_N2_avx2(__m256i *in, __m256i *output, int32_t bi
     }
 }
 
-static INLINE void fdct4x8_row_N2_with_round_avx2(__m256i *input, __m256i *output, int32_t bit,
+static AOM_FORCE_INLINE void fdct4x8_row_N2_with_round_avx2(__m256i *input, __m256i *output, int32_t bit,
                                                   const int32_t num_col, int32_t shift) {
     const int32_t *cospi    = cospi_arr(bit);
     const __m256i  zero     = _mm256_setzero_si256();
@@ -8539,7 +8539,7 @@ static INLINE void fdct4x8_row_N2_with_round_avx2(__m256i *input, __m256i *outpu
     output[3] = _mm256_permute2x128_si256(out[2], out[3], 0x31);
 }
 
-static INLINE void fadst4x8_row_N2_with_round_avx2(__m256i *input, __m256i *output, int32_t bit,
+static AOM_FORCE_INLINE void fadst4x8_row_N2_with_round_avx2(__m256i *input, __m256i *output, int32_t bit,
                                                    const int32_t num_col, int32_t shift) {
     const int32_t *sinpi    = sinpi_arr(bit);
     const __m256i  zero     = _mm256_setzero_si256();
@@ -8605,7 +8605,7 @@ static INLINE void fadst4x8_row_N2_with_round_avx2(__m256i *input, __m256i *outp
     output[3] = _mm256_permute2x128_si256(out[2], out[3], 0x31);
 }
 
-static INLINE void fidtx4x8_row_N2_with_round_avx2(__m256i *input, __m256i *output, int32_t bit,
+static AOM_FORCE_INLINE void fidtx4x8_row_N2_with_round_avx2(__m256i *input, __m256i *output, int32_t bit,
                                                    int32_t shift) {
     (void)bit;
     __m256i       in[2];
@@ -8643,7 +8643,7 @@ static INLINE void fidtx4x8_row_N2_with_round_avx2(__m256i *input, __m256i *outp
     output[3] = _mm256_permute2x128_si256(out[2], out[3], 0x31);
 }
 
-static INLINE void fdct4x8_N2_avx2(__m256i *input, __m256i *output, int32_t bit) {
+static AOM_FORCE_INLINE void fdct4x8_N2_avx2(__m256i *input, __m256i *output, int32_t bit) {
     __m128i *      in       = (__m128i *)input;
     __m128i *      out      = (__m128i *)output;
     const int32_t *cospi    = cospi_arr(bit);
@@ -8723,7 +8723,7 @@ static INLINE void fdct4x8_N2_avx2(__m256i *input, __m256i *output, int32_t bit)
     out[3] = _mm_srai_epi32(v[0], bit); // buf0[6]
 }
 
-static INLINE void col_txfm_8x4_N2_rounding(__m256i *in, int32_t shift) {
+static AOM_FORCE_INLINE void col_txfm_8x4_N2_rounding(__m256i *in, int32_t shift) {
     const __m256i rounding = _mm256_set1_epi32(1 << (shift - 1));
 
     in[0] = _mm256_add_epi32(in[0], rounding);
@@ -8733,7 +8733,7 @@ static INLINE void col_txfm_8x4_N2_rounding(__m256i *in, int32_t shift) {
     in[1] = _mm256_srai_epi32(in[1], shift);
 }
 
-static INLINE void write_buffer_4x8_N2(const __m256i *res, int32_t *output) {
+static AOM_FORCE_INLINE void write_buffer_4x8_N2(const __m256i *res, int32_t *output) {
     const __m256i zero = _mm256_setzero_si256();
     _mm256_storeu_si256((__m256i *)(output + 0 * 8), res[0]);
     _mm256_storeu_si256((__m256i *)(output + 1 * 8), res[1]);
@@ -8741,7 +8741,7 @@ static INLINE void write_buffer_4x8_N2(const __m256i *res, int32_t *output) {
     _mm256_storeu_si256((__m256i *)(output + 3 * 8), zero);
 }
 
-static INLINE void fadst8x4_N2_avx2(__m256i *input, __m256i *output, int32_t bit,
+static AOM_FORCE_INLINE void fadst8x4_N2_avx2(__m256i *input, __m256i *output, int32_t bit,
                                     const int32_t col_num) {
     __m128i *      in       = (__m128i *)input;
     __m128i *      out      = (__m128i *)output;
@@ -8887,14 +8887,14 @@ static INLINE void fadst8x4_N2_avx2(__m256i *input, __m256i *output, int32_t bit
     }
 }
 
-static INLINE void fidtx8x4_N2_avx2(__m256i *in, __m256i *out, int32_t bit) {
+static AOM_FORCE_INLINE void fidtx8x4_N2_avx2(__m256i *in, __m256i *out, int32_t bit) {
     (void)bit;
 
     out[0] = _mm256_add_epi32(in[0], in[0]);
     out[1] = _mm256_add_epi32(in[1], in[1]);
 }
 
-static INLINE void write_buffer_16x8_N2_avx2(const __m256i *res, __m256i *out) {
+static AOM_FORCE_INLINE void write_buffer_16x8_N2_avx2(const __m256i *res, __m256i *out) {
     out[0] = res[0];
     out[2] = res[1];
     out[4] = res[2];
@@ -10663,7 +10663,7 @@ void eb_av1_fwd_txfm2d_64x16_N2_avx2(int16_t *input, int32_t *output, uint32_t s
     (void)bd;
 }
 
-static INLINE void transpose_4x4_in_16x16_avx2(const __m256i *in, __m256i *out) {
+static AOM_FORCE_INLINE void transpose_4x4_in_16x16_avx2(const __m256i *in, __m256i *out) {
     __m256i out1[4];
     __m256i zero = _mm256_setzero_si256();
     TRANSPOSE_4X4_AVX2(in[0], in[2], in[4], in[6], out1[0], out1[1], out1[2], out1[3]);
@@ -10673,7 +10673,7 @@ static INLINE void transpose_4x4_in_16x16_avx2(const __m256i *in, __m256i *out) 
     out[6] = _mm256_permute2x128_si256(out1[3], zero, 0x20);
 }
 
-static INLINE void transpose_8x8_in_32x32_avx2(const __m256i *in, __m256i *out) {
+static AOM_FORCE_INLINE void transpose_8x8_in_32x32_avx2(const __m256i *in, __m256i *out) {
     __m256i temp[8];
     TRANSPOSE_4X4_AVX2(in[0], in[4], in[8], in[12], temp[0], temp[1], temp[2], temp[3]);
     TRANSPOSE_4X4_AVX2(in[16], in[20], in[24], in[28], temp[4], temp[5], temp[6], temp[7]);
@@ -10688,7 +10688,7 @@ static INLINE void transpose_8x8_in_32x32_avx2(const __m256i *in, __m256i *out) 
     out[28] = _mm256_permute2x128_si256(temp[3], temp[7], 0x31);
 }
 
-static INLINE void transpose_8nx8n_N4_half(const __m256i *input, __m256i *output,
+static AOM_FORCE_INLINE void transpose_8nx8n_N4_half(const __m256i *input, __m256i *output,
                                            const int32_t width, const int32_t height) {
     const int32_t numcol      = height >> 3;
     const int32_t numrow      = width >> 3;
@@ -10736,7 +10736,7 @@ static INLINE void transpose_8nx8n_N4_half(const __m256i *input, __m256i *output
     }
 }
 
-static INLINE void transpose_8nx8n_N4_quad(const __m256i *input, __m256i *output,
+static AOM_FORCE_INLINE void transpose_8nx8n_N4_quad(const __m256i *input, __m256i *output,
                                            const int32_t width, const int32_t height) {
     const int32_t numcol = height >> 3;
     const int32_t numrow = width >> 3;
@@ -10789,7 +10789,7 @@ static INLINE void transpose_8nx8n_N4_quad(const __m256i *input, __m256i *output
     }
 }
 
-static INLINE void transpose_4x8_in_4x16_quad_avx2(const __m256i *in, __m256i *out) {
+static AOM_FORCE_INLINE void transpose_4x8_in_4x16_quad_avx2(const __m256i *in, __m256i *out) {
     __m256i perm = _mm256_set_epi32(7, 3, 6, 2, 5, 1, 4, 0);
     __m256i u0, u1;
 
@@ -10799,7 +10799,7 @@ static INLINE void transpose_4x8_in_4x16_quad_avx2(const __m256i *in, __m256i *o
     out[0] = _mm256_permutevar8x32_epi32(out[0], perm);
 }
 
-static INLINE void write_buffer_8x8_N4(const __m256i *res, int32_t *output) {
+static AOM_FORCE_INLINE void write_buffer_8x8_N4(const __m256i *res, int32_t *output) {
     const __m256i zero256 = _mm256_setzero_si256();
 
     _mm256_storeu_si256((__m256i *)(output + 0 * 8), zero256);
@@ -10816,7 +10816,7 @@ static INLINE void write_buffer_8x8_N4(const __m256i *res, int32_t *output) {
     _mm256_storeu_si256((__m256i *)(output + 7 * 8), zero256);
 }
 
-static INLINE void write_buffer_16x16_N4(const __m256i *res, int32_t *output) {
+static AOM_FORCE_INLINE void write_buffer_16x16_N4(const __m256i *res, int32_t *output) {
     int32_t       fact = -1, index = -1;
     const __m256i zero    = _mm256_setzero_si256();
     const __m128i zero128 = _mm_setzero_si128();
@@ -10839,7 +10839,7 @@ static INLINE void write_buffer_16x16_N4(const __m256i *res, int32_t *output) {
     }
 }
 
-static INLINE void write_buffer_32x32_N4(const __m256i *res, int32_t *output) {
+static AOM_FORCE_INLINE void write_buffer_32x32_N4(const __m256i *res, int32_t *output) {
     const __m256i zero = _mm256_setzero_si256();
     uint32_t      i;
 
@@ -10858,12 +10858,12 @@ static INLINE void write_buffer_32x32_N4(const __m256i *res, int32_t *output) {
     }
 }
 
-static INLINE void write_buffer_16x8_N4_avx2(const __m256i *res, __m256i *out) {
+static AOM_FORCE_INLINE void write_buffer_16x8_N4_avx2(const __m256i *res, __m256i *out) {
     out[0] = res[0];
     out[2] = res[1];
 }
 
-static INLINE void col_txfm_8x8_N4_rounding(__m256i *in, int32_t shift) {
+static AOM_FORCE_INLINE void col_txfm_8x8_N4_rounding(__m256i *in, int32_t shift) {
     const __m256i rounding = _mm256_set1_epi32(1 << (shift - 1));
 
     in[0] = _mm256_add_epi32(in[0], rounding);
@@ -10873,7 +10873,7 @@ static INLINE void col_txfm_8x8_N4_rounding(__m256i *in, int32_t shift) {
     in[1] = _mm256_srai_epi32(in[1], shift);
 }
 
-static INLINE void col_txfm_32x8_N4_rounding(__m256i *in, int32_t shift) {
+static AOM_FORCE_INLINE void col_txfm_32x8_N4_rounding(__m256i *in, int32_t shift) {
     const __m256i rounding = _mm256_set1_epi32(1 << (shift - 1));
 
     in[0] = _mm256_add_epi32(in[0], rounding);
@@ -10883,11 +10883,11 @@ static INLINE void col_txfm_32x8_N4_rounding(__m256i *in, int32_t shift) {
     in[4] = _mm256_srai_epi32(in[4], shift);
 }
 
-static INLINE void col_txfm_16x16_N4_rounding(__m256i *in, int32_t shift) {
+static AOM_FORCE_INLINE void col_txfm_16x16_N4_rounding(__m256i *in, int32_t shift) {
     col_txfm_8x8_rounding(&in[0], shift);
 }
 
-static INLINE void av1_round_shift_array_32_N4_avx2(__m256i *input, __m256i *output,
+static AOM_FORCE_INLINE void av1_round_shift_array_32_N4_avx2(__m256i *input, __m256i *output,
                                                     const int32_t size, const int32_t bit) {
     int32_t i;
     if (bit > 0) {
@@ -10902,7 +10902,7 @@ static INLINE void av1_round_shift_array_32_N4_avx2(__m256i *input, __m256i *out
     }
 }
 
-static INLINE void av1_round_shift_rect_wxh_N4(__m256i *input, __m256i *output, const int32_t bit,
+static AOM_FORCE_INLINE void av1_round_shift_rect_wxh_N4(__m256i *input, __m256i *output, const int32_t bit,
                                                const int32_t val, int32_t num_col,
                                                int32_t num_row) {
     const __m256i sqrt2       = _mm256_set1_epi32(val);
@@ -10936,7 +10936,7 @@ static INLINE void av1_round_shift_rect_wxh_N4(__m256i *input, __m256i *output, 
     }
 }
 
-static INLINE void col_txfm_32x16_N4_rounding(__m256i *in, int32_t shift) {
+static AOM_FORCE_INLINE void col_txfm_32x16_N4_rounding(__m256i *in, int32_t shift) {
     const __m256i rounding = _mm256_set1_epi32(1 << (shift - 1));
     in[0]                  = _mm256_add_epi32(in[0], rounding);
     in[4]                  = _mm256_add_epi32(in[4], rounding);
@@ -10948,7 +10948,7 @@ static INLINE void col_txfm_32x16_N4_rounding(__m256i *in, int32_t shift) {
     in[12]                 = _mm256_srai_epi32(in[12], shift);
 }
 
-static INLINE void load_buffer_8x8_in_32x32_avx2(const int16_t *input, __m256i *output,
+static AOM_FORCE_INLINE void load_buffer_8x8_in_32x32_avx2(const int16_t *input, __m256i *output,
                                                  int32_t stride) {
     __m128i temp;
     int32_t i;
@@ -10962,7 +10962,7 @@ static INLINE void load_buffer_8x8_in_32x32_avx2(const int16_t *input, __m256i *
     }
 }
 
-static INLINE void load_buffer_8x32_in_32x32_avx2(const int16_t *input, __m256i *output,
+static AOM_FORCE_INLINE void load_buffer_8x32_in_32x32_avx2(const int16_t *input, __m256i *output,
                                                   int32_t stride) {
     __m128i temp;
     int32_t i;
@@ -10976,7 +10976,7 @@ static INLINE void load_buffer_8x32_in_32x32_avx2(const int16_t *input, __m256i 
     }
 }
 
-static INLINE void load_buffer_32x8_in_32x32_avx2(const int16_t *input, __m256i *output,
+static AOM_FORCE_INLINE void load_buffer_32x8_in_32x32_avx2(const int16_t *input, __m256i *output,
                                                   int32_t stride) {
     __m128i temp[4];
     int32_t i;
@@ -10996,7 +10996,7 @@ static INLINE void load_buffer_32x8_in_32x32_avx2(const int16_t *input, __m256i 
     }
 }
 
-static INLINE void load_buffer_16x16_in_64x64_avx2(const int16_t *input, int32_t stride,
+static AOM_FORCE_INLINE void load_buffer_16x16_in_64x64_avx2(const int16_t *input, int32_t stride,
                                                    __m256i *output) {
     __m128i x0, x1;
     __m256i v0, v1;
@@ -11017,7 +11017,7 @@ static INLINE void load_buffer_16x16_in_64x64_avx2(const int16_t *input, int32_t
     }
 }
 
-static INLINE void load_buffer_8x16_N4(const int16_t *input, __m256i *out, int32_t stride,
+static AOM_FORCE_INLINE void load_buffer_8x16_N4(const int16_t *input, __m256i *out, int32_t stride,
                                        int32_t flipud, int32_t fliplr, int32_t shift) {
     if (flipud)
         load_buffer_8x8(input + 8 * stride, out, stride, flipud, fliplr, shift);
@@ -11025,7 +11025,7 @@ static INLINE void load_buffer_8x16_N4(const int16_t *input, __m256i *out, int32
         load_buffer_8x8(input, out, stride, flipud, fliplr, shift);
 }
 
-static INLINE void clear_buffer_wxh_N4(__m256i *buff, int32_t num_col, int32_t num_row) {
+static AOM_FORCE_INLINE void clear_buffer_wxh_N4(__m256i *buff, int32_t num_col, int32_t num_row) {
     const __m256i zero    = _mm256_setzero_si256();
     const __m128i zero128 = _mm_setzero_si128();
     assert(num_col > 0);
@@ -11052,7 +11052,7 @@ static INLINE void clear_buffer_wxh_N4(__m256i *buff, int32_t num_col, int32_t n
         for (int j = 0; j < num_col; j++) buff[i * num_col + j] = zero;
 }
 
-static INLINE void clear_buffer_4x16_N4(__m256i *buff) {
+static AOM_FORCE_INLINE void clear_buffer_4x16_N4(__m256i *buff) {
     const __m256i zero = _mm256_setzero_si256();
     buff[2]            = zero;
     buff[3]            = zero;
@@ -11062,7 +11062,7 @@ static INLINE void clear_buffer_4x16_N4(__m256i *buff) {
     buff[7]            = zero;
 }
 
-static INLINE void av1_round_shift_array_64_N4_avx2(__m256i *input, __m256i *output,
+static AOM_FORCE_INLINE void av1_round_shift_array_64_N4_avx2(__m256i *input, __m256i *output,
                                                     const int32_t size, const int32_t bit) {
     int32_t i;
     if (bit > 0) {
@@ -11925,7 +11925,7 @@ static void av1_fdct32_new_N4_avx2(const __m256i *input, __m256i *output, int8_t
     }
 }
 
-static INLINE void fdct32x32_N4_col_avx2(const __m256i *input, __m256i *output,
+static AOM_FORCE_INLINE void fdct32x32_N4_col_avx2(const __m256i *input, __m256i *output,
                                          const int8_t cos_bit) {
     const int32_t txfm_size   = 32;
     const int32_t num_per_256 = 8;
@@ -11933,7 +11933,7 @@ static INLINE void fdct32x32_N4_col_avx2(const __m256i *input, __m256i *output,
     av1_fdct32_new_N4_avx2(input, output, cos_bit, txfm_size, col_num);
 }
 
-static INLINE void fdct32x32_N4_row_avx2(const __m256i *input, __m256i *output,
+static AOM_FORCE_INLINE void fdct32x32_N4_row_avx2(const __m256i *input, __m256i *output,
                                          const int8_t cos_bit) {
     const int32_t txfm_size   = 32;
     const int32_t num_per_256 = 8;
@@ -12569,7 +12569,7 @@ static void fidtx64x64_N4_avx2(const __m256i *input, __m256i *output) {
     }
 }
 
-static INLINE void fdct16x4_N4_avx2(__m256i *input, __m256i *output, int32_t bit) {
+static AOM_FORCE_INLINE void fdct16x4_N4_avx2(__m256i *input, __m256i *output, int32_t bit) {
     __m128i *in  = (__m128i *)input;
     __m128i *out = (__m128i *)output;
 
@@ -12729,7 +12729,7 @@ static INLINE void fdct16x4_N4_avx2(__m256i *input, __m256i *output, int32_t bit
     out[3] = _mm_srai_epi32(v[12], bit);
 }
 
-static INLINE void fdct4x8_col_N4_avx2(__m256i *in, __m256i *output, int32_t bit,
+static AOM_FORCE_INLINE void fdct4x8_col_N4_avx2(__m256i *in, __m256i *output, int32_t bit,
                                        const int32_t num_col) {
     const int32_t *cospi   = cospi_arr(bit);
     const __m256i  zero    = _mm256_setzero_si256();
@@ -12817,7 +12817,7 @@ static INLINE void fdct4x8_row_N4_with_round_avx2(__m256i *input, __m256i *outpu
     output[3] = _mm256_permute2x128_si256(out[2], out[3], 0x31);
 }
 
-static INLINE void fadst4x8_col_N4_avx2(__m256i *in, __m256i *output, int32_t bit,
+static AOM_FORCE_INLINE void fadst4x8_col_N4_avx2(__m256i *in, __m256i *output, int32_t bit,
                                         const int32_t num_col) {
     const int32_t *sinpi  = sinpi_arr(bit);
     const __m256i  zero   = _mm256_setzero_si256();
@@ -12860,7 +12860,7 @@ static INLINE void fadst4x8_col_N4_avx2(__m256i *in, __m256i *output, int32_t bi
     output[1] = _mm256_permute2x128_si256(out[2], out[3], 0x20);
 }
 
-static INLINE void fadst4x8_row_N4_with_round_avx2(__m256i *input, __m256i *output, int32_t bit,
+static AOM_FORCE_INLINE void fadst4x8_row_N4_with_round_avx2(__m256i *input, __m256i *output, int32_t bit,
                                                    const int32_t num_col, int32_t shift) {
     const int32_t *sinpi    = sinpi_arr(bit);
     const __m256i  zero     = _mm256_setzero_si256();
@@ -12915,7 +12915,7 @@ static INLINE void fadst4x8_row_N4_with_round_avx2(__m256i *input, __m256i *outp
     output[3] = _mm256_permute2x128_si256(out[2], out[3], 0x31);
 }
 
-static INLINE void fadst16x4_N4_avx2(__m256i *input, __m256i *output, int32_t bit) {
+static AOM_FORCE_INLINE void fadst16x4_N4_avx2(__m256i *input, __m256i *output, int32_t bit) {
     __m128i *in  = (__m128i *)input;
     __m128i *out = (__m128i *)output;
 
@@ -13071,7 +13071,7 @@ static INLINE void fadst16x4_N4_avx2(__m256i *input, __m256i *output, int32_t bi
     out[1] = half_btf_small(&cospi58, &u[14], &cospi6, &u[15], &rnding, bit);
 }
 
-static INLINE void fidtx4x8_col_N4_avx2(__m256i *in, __m256i *output, int32_t bit,
+static AOM_FORCE_INLINE void fidtx4x8_col_N4_avx2(__m256i *in, __m256i *output, int32_t bit,
                                         int32_t col_num) {
     (void)bit;
     const __m256i zero   = _mm256_setzero_si256();
@@ -13087,7 +13087,7 @@ static INLINE void fidtx4x8_col_N4_avx2(__m256i *in, __m256i *output, int32_t bi
     }
 }
 
-static INLINE void fidtx4x8_row_N4_with_round_avx2(__m256i *input, __m256i *output, int32_t bit,
+static AOM_FORCE_INLINE void fidtx4x8_row_N4_with_round_avx2(__m256i *input, __m256i *output, int32_t bit,
                                                    int32_t shift) {
     (void)bit;
     __m256i out[4];
@@ -13121,7 +13121,7 @@ static INLINE void fidtx4x8_row_N4_with_round_avx2(__m256i *input, __m256i *outp
     output[3] = _mm256_permute2x128_si256(out[2], out[3], 0x31);
 }
 
-static INLINE void fidtx4x8_row_N4_avx2(__m256i *in, __m256i *output, int32_t bit) {
+static AOM_FORCE_INLINE void fidtx4x8_row_N4_avx2(__m256i *in, __m256i *output, int32_t bit) {
     (void)bit;
     __m256i fact   = _mm256_set1_epi32(new_sqrt2);
     __m256i offset = _mm256_set1_epi32(1 << (new_sqrt2_bits - 1));
@@ -13132,12 +13132,12 @@ static INLINE void fidtx4x8_row_N4_avx2(__m256i *in, __m256i *output, int32_t bi
     output[0] = _mm256_srai_epi32(a_low, new_sqrt2_bits);
 }
 
-static INLINE void fidtx8x4_N4_avx2(__m256i *in, __m256i *out, int32_t bit) {
+static AOM_FORCE_INLINE void fidtx8x4_N4_avx2(__m256i *in, __m256i *out, int32_t bit) {
     (void)bit;
     out[0] = _mm256_add_epi32(in[0], in[0]);
 }
 
-static INLINE void fdct4x8_N4_avx2(__m256i *input, __m256i *output, int32_t bit) {
+static AOM_FORCE_INLINE void fdct4x8_N4_avx2(__m256i *input, __m256i *output, int32_t bit) {
     __m128i *      in       = (__m128i *)input;
     __m128i *      out      = (__m128i *)output;
     const int32_t *cospi    = cospi_arr(bit);
@@ -13196,7 +13196,7 @@ static INLINE void fdct4x8_N4_avx2(__m256i *input, __m256i *output, int32_t bit)
     out[1] = _mm_srai_epi32(v[0], bit); // buf0[4]
 }
 
-static INLINE void fadst8x4_N4_avx2(__m256i *input, __m256i *output, int32_t bit,
+static AOM_FORCE_INLINE void fadst8x4_N4_avx2(__m256i *input, __m256i *output, int32_t bit,
                                     const int32_t col_num) {
     __m128i *      in       = (__m128i *)input;
     __m128i *      out      = (__m128i *)output;
@@ -13322,7 +13322,7 @@ static INLINE void fadst8x4_N4_avx2(__m256i *input, __m256i *output, int32_t bit
     }
 }
 
-static INLINE void write_buffer_4x8_N4(const __m256i *res, int32_t *output) {
+static AOM_FORCE_INLINE void write_buffer_4x8_N4(const __m256i *res, int32_t *output) {
     const __m256i zero = _mm256_setzero_si256();
     _mm256_storeu_si256((__m256i *)(output + 0 * 8), res[0]);
     _mm256_storeu_si256((__m256i *)(output + 1 * 8), zero);
@@ -13330,7 +13330,7 @@ static INLINE void write_buffer_4x8_N4(const __m256i *res, int32_t *output) {
     _mm256_storeu_si256((__m256i *)(output + 3 * 8), zero);
 }
 
-static INLINE void col_txfm_8x4_N4_rounding(__m256i *in, int32_t shift) {
+static AOM_FORCE_INLINE void col_txfm_8x4_N4_rounding(__m256i *in, int32_t shift) {
     const __m256i rounding = _mm256_set1_epi32(1 << (shift - 1));
 
     in[0] = _mm256_add_epi32(in[0], rounding);
