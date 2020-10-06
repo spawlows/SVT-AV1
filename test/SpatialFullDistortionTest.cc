@@ -451,14 +451,14 @@ void FullDistortionKernel16BitsFuncTest::RunCheckOutput() {
                                               recon_stride_,
                                               area_width_,
                                               area_height_);
-        const uint64_t dist_c = full_distortion_kernel16_bits_c(input_,
-                                                                0,
-                                                                input_stride_,
-                                                                recon_,
-                                                                0,
-                                                                recon_stride_,
-                                                                area_width_,
-                                                                area_height_);
+        const uint64_t dist_c = svt_full_distortion_kernel16_bits_c(input_,
+                                                                    0,
+                                                                    input_stride_,
+                                                                    recon_,
+                                                                    0,
+                                                                    recon_stride_,
+                                                                    area_width_,
+                                                                    area_height_);
 
         EXPECT_EQ(dist_test, dist_c)
             << "Compare Full distortion kernel 16 bits result error";
@@ -479,14 +479,14 @@ void FullDistortionKernel16BitsFuncTest::RunSpeedTest() {
         svt_av1_get_time(&start_time_seconds, &start_time_useconds);
 
         for (int i = 0; i < num_loops; ++i) {
-            dist_org = full_distortion_kernel16_bits_c(input_,
-                                                       0,
-                                                       input_stride_,
-                                                       recon_,
-                                                       0,
-                                                       recon_stride_,
-                                                       area_width,
-                                                       area_height);
+            dist_org = svt_full_distortion_kernel16_bits_c(input_,
+                                                           0,
+                                                           input_stride_,
+                                                           recon_,
+                                                           0,
+                                                           recon_stride_,
+                                                           area_width,
+                                                           area_height);
         }
 
         svt_av1_get_time(&middle_time_seconds, &middle_time_useconds);
@@ -514,12 +514,12 @@ void FullDistortionKernel16BitsFuncTest::RunSpeedTest() {
                                                          finish_time_seconds,
                                                          finish_time_useconds);
         printf("Average Nanoseconds per Function Call\n");
-        printf("    full_distortion_kernel16_bits_c  (%dx%d) : %6.2f\n",
+        printf("    svt_full_distortion_kernel16_bits_c  (%dx%d) : %6.2f\n",
                area_width,
                area_height,
                1000000 * time_c / num_loops);
         printf(
-               "    full_distortion_kernel16_bits_opt(%dx%d) : %6.2f   "
+               "    svt_full_distortion_kernel16_bits_opt(%dx%d) : %6.2f   "
                "(Comparison: %5.2fx)\n",
                area_width,
                area_height,
@@ -540,6 +540,6 @@ INSTANTIATE_TEST_CASE_P(
     FullDistortionKernel16FuncTest, FullDistortionKernel16BitsFuncTest,
     ::testing::Combine(::testing::ValuesIn(TEST_AREA_SIZES),
                        ::testing::ValuesIn(TEST_PATTERNS),
-                       ::testing::Values(full_distortion_kernel16_bits_avx2)));
+                       ::testing::Values(svt_full_distortion_kernel16_bits_avx2)));
 
 }  // namespace

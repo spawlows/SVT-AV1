@@ -1574,10 +1574,10 @@ uint64_t svt_spatial_full_distortion_kernel_avx2(uint8_t *input, uint32_t input_
  * Support for params *input and *recon up to 15bit values
  * This assumption allow to use faster _mm256_madd_epi16() instruction
  ************************************************/
-uint64_t full_distortion_kernel16_bits_avx2(uint8_t *input, uint32_t input_offset,
-                                            uint32_t input_stride, uint8_t *recon,
-                                            int32_t recon_offset, uint32_t recon_stride,
-                                            uint32_t area_width, uint32_t area_height) {
+uint64_t svt_full_distortion_kernel16_bits_avx2(uint8_t *input, uint32_t input_offset,
+                                                uint32_t input_stride, uint8_t *recon,
+                                                int32_t recon_offset, uint32_t recon_stride,
+                                                uint32_t area_width, uint32_t area_height) {
     const uint32_t leftover = area_width & 15;
     __m256i        sum32 = _mm256_setzero_si256();
     __m256i        sum64 = _mm256_setzero_si256();

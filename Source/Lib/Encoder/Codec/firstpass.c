@@ -615,7 +615,7 @@ static int firstpass_intra_prediction(PictureControlSet *pcs_ptr,
                          blk_origin_index);
 
     EbSpatialFullDistType spatial_full_dist_type_fun = context_ptr->hbd_mode_decision
-                                                           ? full_distortion_kernel16_bits
+                                                           ? svt_full_distortion_kernel16_bits
                                                            : svt_spatial_full_distortion_kernel;
 
     int this_intra_error =
@@ -728,7 +728,7 @@ static int firstpass_inter_prediction(
     int errorperbit = full_lambda >> RD_EPB_SHIFT;
     errorperbit += (errorperbit == 0);
     EbSpatialFullDistType spatial_full_dist_type_fun = context_ptr->hbd_mode_decision
-                                                           ? full_distortion_kernel16_bits
+                                                           ? svt_full_distortion_kernel16_bits
                                                            : svt_spatial_full_distortion_kernel;
 
     int motion_error = 0;
