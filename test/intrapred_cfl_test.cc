@@ -15,8 +15,8 @@
  * @brief Unit test for chroma from luma prediction:
  * - eb_cfl_predict_hbd_avx2
  * - eb_cfl_predict_lbd_avx2
- * - cfl_luma_subsampling_420_lbd_avx2
- * - cfl_luma_subsampling_420_hbd_avx2
+ * - svt_cfl_luma_subsampling_420_lbd_avx2
+ * - svt_cfl_luma_subsampling_420_hbd_avx2
  *
  * @author Cidana-Wenyao
  *
@@ -314,7 +314,7 @@ class CflLumaSubsamplingLbdTest
                 input[j] = rnd_.random();
             }
 
-            cfl_luma_subsampling_420_lbd_c(
+            svt_cfl_luma_subsampling_420_lbd_c(
                 input, width, output_q3_ref_, width, height);
 
             test_impl(input, width, output_q3_tst_, width, height);
@@ -337,7 +337,7 @@ TEST_P(CflLumaSubsamplingLbdTest, MatchTest) {
 INSTANTIATE_TEST_CASE_P(
     CFL_LUMA_SUBSAMPLING_LBD, CflLumaSubsamplingLbdTest,
     ::testing::Combine(::testing::Range(BLOCK_4X4, BlockSizeS_ALL),
-                       ::testing::Values(cfl_luma_subsampling_420_lbd_avx2)));
+        ::testing::Values(svt_cfl_luma_subsampling_420_lbd_avx2)));
 
 
 typedef void (*CflLumaSubsamplingHbdFunc)(const uint16_t *, int32_t, int16_t *,
@@ -380,7 +380,7 @@ class CflLumaSubsamplingHbdTest
                 input[j] = rnd_.random();
             }
 
-            cfl_luma_subsampling_420_hbd_c(
+            svt_cfl_luma_subsampling_420_hbd_c(
                 input, width, output_q3_ref_, width, height);
 
             test_impl(input, width, output_q3_tst_, width, height);
@@ -402,6 +402,6 @@ TEST_P(CflLumaSubsamplingHbdTest, MatchTest) {
 INSTANTIATE_TEST_CASE_P(
     CFL_LUMA_SUBSAMPLING_HBD, CflLumaSubsamplingHbdTest,
     ::testing::Combine(::testing::Range(BLOCK_4X4, BlockSizeS_ALL),
-                       ::testing::Values(cfl_luma_subsampling_420_hbd_avx2)));
+        ::testing::Values(svt_cfl_luma_subsampling_420_hbd_avx2)));
 
 }  // namespace
