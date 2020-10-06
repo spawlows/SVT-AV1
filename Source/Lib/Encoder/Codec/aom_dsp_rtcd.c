@@ -284,12 +284,12 @@ void setup_rtcd_internal(CPU_FLAGS flags) {
     eb_av1_fwd_txfm2d_64x32 = eb_av1_fwd_txfm2d_64x32_c;
     eb_av1_fwd_txfm2d_16x64 = eb_av1_fwd_txfm2d_16x64_c;
     eb_av1_fwd_txfm2d_64x16 = eb_av1_fwd_txfm2d_64x16_c;
-    eb_av1_fwd_txfm2d_64x64 = av1_transform_two_d_64x64_c;
-    eb_av1_fwd_txfm2d_32x32 = av1_transform_two_d_32x32_c;
-    eb_av1_fwd_txfm2d_16x16 = av1_transform_two_d_16x16_c;
+    eb_av1_fwd_txfm2d_64x64 = svt_av1_transform_two_d_64x64_c;
+    eb_av1_fwd_txfm2d_32x32 = svt_av1_transform_two_d_32x32_c;
+    eb_av1_fwd_txfm2d_16x16 = svt_av1_transform_two_d_16x16_c;
 
-    eb_av1_fwd_txfm2d_8x8 = av1_transform_two_d_8x8_c;
-    eb_av1_fwd_txfm2d_4x4 = av1_transform_two_d_4x4_c;
+    eb_av1_fwd_txfm2d_8x8 = svt_av1_transform_two_d_8x8_c;
+    eb_av1_fwd_txfm2d_4x4 = svt_av1_transform_two_d_4x4_c;
 
     handle_transform16x64 = handle_transform16x64_c;
     handle_transform32x64 = handle_transform32x64_c;
