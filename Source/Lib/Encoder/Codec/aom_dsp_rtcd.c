@@ -291,11 +291,11 @@ void setup_rtcd_internal(CPU_FLAGS flags) {
     eb_av1_fwd_txfm2d_8x8 = svt_av1_transform_two_d_8x8_c;
     eb_av1_fwd_txfm2d_4x4 = svt_av1_transform_two_d_4x4_c;
 
-    handle_transform16x64 = handle_transform16x64_c;
-    handle_transform32x64 = handle_transform32x64_c;
-    handle_transform64x16 = handle_transform64x16_c;
-    handle_transform64x32 = handle_transform64x32_c;
-    handle_transform64x64 = handle_transform64x64_c;
+    svt_handle_transform16x64 = svt_handle_transform16x64_c;
+    svt_handle_transform32x64 = svt_handle_transform32x64_c;
+    svt_handle_transform64x16 = svt_handle_transform64x16_c;
+    svt_handle_transform64x32 = svt_handle_transform64x32_c;
+    svt_handle_transform64x64 = svt_handle_transform64x64_c;
 
     eb_aom_fft2x2_float = eb_aom_fft2x2_float_c;
     eb_aom_fft4x4_float = eb_aom_fft4x4_float_c;
@@ -573,11 +573,11 @@ void setup_rtcd_internal(CPU_FLAGS flags) {
 #endif
                     if (flags & HAS_AVX2) eb_av1_fwd_txfm2d_8x8 = eb_av1_fwd_txfm2d_8x8_avx2;
                     if (flags & HAS_SSE4_1) eb_av1_fwd_txfm2d_4x4 = eb_av1_fwd_txfm2d_4x4_sse4_1;
-                    if (flags & HAS_AVX2) handle_transform16x64 = handle_transform16x64_avx2;
-                    if (flags & HAS_AVX2) handle_transform32x64 = handle_transform32x64_avx2;
-                    if (flags & HAS_AVX2) handle_transform64x16 = handle_transform64x16_avx2;
-                    if (flags & HAS_AVX2) handle_transform64x32 = handle_transform64x32_avx2;
-                    if (flags & HAS_AVX2) handle_transform64x64 = handle_transform64x64_avx2;
+                    if (flags & HAS_AVX2) svt_handle_transform16x64 = svt_handle_transform16x64_avx2;
+                    if (flags & HAS_AVX2) svt_handle_transform32x64 = svt_handle_transform32x64_avx2;
+                    if (flags & HAS_AVX2) svt_handle_transform64x16 = svt_handle_transform64x16_avx2;
+                    if (flags & HAS_AVX2) svt_handle_transform64x32 = svt_handle_transform64x32_avx2;
+                    if (flags & HAS_AVX2) svt_handle_transform64x64 = svt_handle_transform64x64_avx2;
                     if (flags & HAS_SSE2) eb_aom_fft4x4_float = eb_aom_fft4x4_float_sse2;
                     if (flags & HAS_AVX2) eb_aom_fft16x16_float = eb_aom_fft16x16_float_avx2;
                     if (flags & HAS_AVX2) eb_aom_fft32x32_float = eb_aom_fft32x32_float_avx2;
