@@ -1256,8 +1256,8 @@ class InitializeBuffer32
 
   protected:
     void checkWithSize() {
-        initialize_buffer_32bits_c(_ref_, count128, count32, value);
-        initialize_buffer_32bits_sse2_intrin(_test_, count128, count32, value);
+        svt_initialize_buffer_32bits_c(_ref_, count128, count32, value);
+        svt_initialize_buffer_32bits_sse2_intrin(_test_, count128, count32, value);
 
         int cmpResult = memcmp(_ref_, _test_, MAX_BUFFER_SIZE);
         EXPECT_EQ(cmpResult, 0);

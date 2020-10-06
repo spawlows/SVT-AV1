@@ -2667,11 +2667,11 @@ void sub_sample_luma_generate_pixel_intensity_histogram_bins(
              region_in_picture_height_index++) { // loop over vertical regions
 
             // Initialize bins to 1
-            initialize_buffer_32bits(pcs_ptr->picture_histogram[region_in_picture_width_index]
+            svt_initialize_buffer_32bits(pcs_ptr->picture_histogram[region_in_picture_width_index]
                                                                [region_in_picture_height_index][0],
-                                     64,
-                                     0,
-                                     1);
+                                         64,
+                                         0,
+                                         1);
 
             region_width_offset =
                 (region_in_picture_width_index ==
@@ -2752,16 +2752,16 @@ void sub_sample_chroma_generate_pixel_intensity_histogram_bins(
              region_in_picture_height_index++) { // loop over vertical regions
 
             // Initialize bins to 1
-            initialize_buffer_32bits(pcs_ptr->picture_histogram[region_in_picture_width_index]
+            svt_initialize_buffer_32bits(pcs_ptr->picture_histogram[region_in_picture_width_index]
                                                                [region_in_picture_height_index][1],
-                                     64,
-                                     0,
-                                     1);
-            initialize_buffer_32bits(pcs_ptr->picture_histogram[region_in_picture_width_index]
+                                         64,
+                                         0,
+                                         1);
+            svt_initialize_buffer_32bits(pcs_ptr->picture_histogram[region_in_picture_width_index]
                                                                [region_in_picture_height_index][2],
-                                     64,
-                                     0,
-                                     1);
+                                         64,
+                                         0,
+                                         1);
 
             region_width_offset =
                 (region_in_picture_width_index ==
