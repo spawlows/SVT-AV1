@@ -973,7 +973,7 @@ void fast_loop_core(ModeDecisionCandidateBuffer *candidate_buffer, PictureContro
     if (use_ssd) {
         EbSpatialFullDistType spatial_full_dist_type_fun = context_ptr->hbd_mode_decision
             ? full_distortion_kernel16_bits
-            : spatial_full_distortion_kernel;
+            : svt_spatial_full_distortion_kernel;
 
         candidate_buffer->candidate_ptr->luma_fast_distortion = (uint32_t)(
             luma_fast_distortion = spatial_full_dist_type_fun(input_picture_ptr->buffer_y,
@@ -1012,7 +1012,7 @@ void fast_loop_core(ModeDecisionCandidateBuffer *candidate_buffer, PictureContro
         if (use_ssd) {
             EbSpatialFullDistType spatial_full_dist_type_fun = context_ptr->hbd_mode_decision
                 ? full_distortion_kernel16_bits
-                : spatial_full_distortion_kernel;
+                : svt_spatial_full_distortion_kernel;
 
             chroma_fast_distortion = spatial_full_dist_type_fun(
                 input_picture_ptr->buffer_cb,
@@ -1872,7 +1872,7 @@ void md_full_pel_search(PictureControlSet *pcs_ptr, ModeDecisionContext *context
             if (use_ssd) {
                 EbSpatialFullDistType spatial_full_dist_type_fun = hbd_mode_decision
                     ? full_distortion_kernel16_bits
-                    : spatial_full_distortion_kernel;
+                    : svt_spatial_full_distortion_kernel;
 
                 cost = (uint32_t)spatial_full_dist_type_fun(input_picture_ptr->buffer_y,
                                                                   input_origin_index,
@@ -4718,7 +4718,7 @@ void tx_type_search(PictureControlSet *pcs_ptr, ModeDecisionContext *context_ptr
 
             EbSpatialFullDistType spatial_full_dist_type_fun = context_ptr->hbd_mode_decision
                 ? full_distortion_kernel16_bits
-                : spatial_full_distortion_kernel;
+                : svt_spatial_full_distortion_kernel;
             txb_full_distortion_txt[tx_type][DIST_CALC_PREDICTION] = spatial_full_dist_type_fun(
                 input_picture_ptr->buffer_y,
                 input_txb_origin_index,
@@ -7400,7 +7400,7 @@ void distortion_based_modulator(ModeDecisionContext *context_ptr,
                     int32_t min_blk_index = (int32_t)blk_origin_index + ((c * min_size) + ((r*min_size) * recon_ptr->stride_y));
                     EbSpatialFullDistType spatial_full_dist_type_fun = context_ptr->hbd_mode_decision
                         ? full_distortion_kernel16_bits
-                        : spatial_full_distortion_kernel;
+                        : svt_spatial_full_distortion_kernel;
                     min_blk_dist[r][c] = spatial_full_dist_type_fun(input_picture_ptr->buffer_y,
                         input_origin_index,
                         input_picture_ptr->stride_y,

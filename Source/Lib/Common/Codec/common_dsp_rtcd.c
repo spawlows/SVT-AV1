@@ -310,7 +310,7 @@ void setup_common_rtcd_internal(CPU_FLAGS flags) {
     svt_full_distortion_kernel_cbf_zero32_bits = svt_full_distortion_kernel_cbf_zero32_bits_c;
     svt_full_distortion_kernel32_bits = svt_full_distortion_kernel32_bits_c;
 
-    spatial_full_distortion_kernel = spatial_full_distortion_kernel_c;
+    svt_spatial_full_distortion_kernel = svt_spatial_full_distortion_kernel_c;
     full_distortion_kernel16_bits = full_distortion_kernel16_bits_c;
     residual_kernel8bit = residual_kernel8bit_c;
 
@@ -886,10 +886,10 @@ void setup_common_rtcd_internal(CPU_FLAGS flags) {
                  svt_full_distortion_kernel32_bits_c,
                  svt_full_distortion_kernel32_bits_avx2);
 
-        SET_AVX2_AVX512(spatial_full_distortion_kernel,
-            spatial_full_distortion_kernel_c,
-            spatial_full_distortion_kernel_avx2,
-            spatial_full_distortion_kernel_avx512);
+        SET_AVX2_AVX512(svt_spatial_full_distortion_kernel,
+                        svt_spatial_full_distortion_kernel_c,
+                        svt_spatial_full_distortion_kernel_avx2,
+                        svt_spatial_full_distortion_kernel_avx512);
         SET_AVX2(full_distortion_kernel16_bits,
             full_distortion_kernel16_bits_c,
             full_distortion_kernel16_bits_avx2);

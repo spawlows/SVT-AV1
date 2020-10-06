@@ -63,10 +63,10 @@ void picture_copy_kernel(EbByte src, uint32_t src_stride, EbByte dst, uint32_t d
 
 // C equivalents
 
-uint64_t spatial_full_distortion_kernel_c(uint8_t *input, uint32_t input_offset,
-                                          uint32_t input_stride, uint8_t *recon,
-                                          int32_t recon_offset, uint32_t recon_stride,
-                                          uint32_t area_width, uint32_t area_height) {
+uint64_t svt_spatial_full_distortion_kernel_c(uint8_t *input, uint32_t input_offset,
+                                              uint32_t input_stride, uint8_t *recon,
+                                              int32_t recon_offset, uint32_t recon_stride,
+                                              uint32_t area_width, uint32_t area_height) {
     uint64_t spatial_distortion = 0;
     input += input_offset;
     recon += recon_offset;

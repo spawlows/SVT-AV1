@@ -1424,10 +1424,10 @@ void residual_kernel8bit_avx2(uint8_t *input, uint32_t input_stride, uint8_t *pr
     }
 }
 
-uint64_t spatial_full_distortion_kernel_avx2(uint8_t *input, uint32_t input_offset,
-                                             uint32_t input_stride, uint8_t *recon,
-                                             int32_t recon_offset, uint32_t recon_stride,
-                                             uint32_t area_width, uint32_t area_height) {
+uint64_t svt_spatial_full_distortion_kernel_avx2(uint8_t *input, uint32_t input_offset,
+                                                 uint32_t input_stride, uint8_t *recon,
+                                                 int32_t recon_offset, uint32_t recon_stride,
+                                                 uint32_t area_width, uint32_t area_height) {
     const uint32_t leftover = area_width & 31;
     int32_t        h;
     __m256i        sum = _mm256_setzero_si256();
