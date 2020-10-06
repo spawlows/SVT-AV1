@@ -325,7 +325,7 @@ void setup_rtcd_internal(CPU_FLAGS flags) {
     svt_nxm_sad_kernel = svt_nxm_sad_kernel_helper_c;
     svt_compute_mean_square_values_8x8 = svt_compute_mean_squared_values_c;
     svt_compute_sub_mean_8x8 = svt_compute_sub_mean_8x8_c;
-    compute_interm_var_four8x8 = compute_interm_var_four8x8_c;
+    svt_compute_interm_var_four8x8 = svt_compute_interm_var_four8x8_c;
     sad_16b_kernel = sad_16b_kernel_c;
     eb_av1_compute_cross_correlation = eb_av1_compute_cross_correlation_c;
     eb_av1_k_means_dim1 = av1_k_means_dim1_c;
@@ -633,10 +633,10 @@ void setup_rtcd_internal(CPU_FLAGS flags) {
                              svt_compute_sub_mean_8x8_c,
                              svt_compute_sub_mean8x8_sse2_intrin);
 
-                    SET_SSE2_AVX2(compute_interm_var_four8x8,
-                        compute_interm_var_four8x8_c,
-                        compute_interm_var_four8x8_helper_sse2,
-                        compute_interm_var_four8x8_avx2_intrin);
+                    SET_SSE2_AVX2(svt_compute_interm_var_four8x8,
+                                  svt_compute_interm_var_four8x8_c,
+                                  svt_compute_interm_var_four8x8_helper_sse2,
+                                  svt_compute_interm_var_four8x8_avx2_intrin);
                     SET_AVX2(sad_16b_kernel, sad_16b_kernel_c, sad_16bit_kernel_avx2);
                     SET_AVX2(eb_av1_compute_cross_correlation,
                         eb_av1_compute_cross_correlation_c,

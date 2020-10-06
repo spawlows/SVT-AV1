@@ -18,7 +18,7 @@
  * - compute_sub_mean8x8_sse2_intrin
  * - compute_subd_mean_of_squared_values8x8_sse2_intrin
  * - compute_mean8x8_avx2_intrin
- * - compute_interm_var_four8x8_avx2_intrin
+ * - svt_compute_interm_var_four8x8_avx2_intrin
  *
  * @author Cidana-Edmond,Cidana-Ivy
  *
@@ -182,7 +182,7 @@ TEST(ComputeMeanTest, run_compute_mean_avx2_test) {
 
         uint64_t output_avx2_tst[4] = {0};
         uint64_t output_avx2_squared_tst[4] = {0};
-        compute_interm_var_four8x8_avx2_intrin(
+        svt_compute_interm_var_four8x8_avx2_intrin(
             input_data, 8, output_avx2_tst, output_avx2_squared_tst);
 
         // compare results
