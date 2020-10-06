@@ -13,10 +13,10 @@
  * @file PackUnPackTest.cc
  *
  * @brief Unit test for Pack UnPack functions:
- * - c_pack_avx2_intrin
+ * - svt_c_pack_avx2_intrin
  * - eb_enc_msb_pack2d_avx2_intrin_al
  * - eb_enc_msb_pack2d_sse2_intrin
- * - compressed_packmsb_avx2_intrin
+ * - svt_compressed_packmsb_avx2_intrin
  * - eb_enc_un_pack8_bit_data_avx2_intrin
  * - eb_enc_msb_un_pack2d_sse2_intrin
  * - unpack_avg_avx2_intrin
@@ -64,7 +64,7 @@ AreaSize TEST_PACK_SIZES[] = {AreaSize(32, 32),
                               AreaSize(64, 32),
                               AreaSize(32, 64)};
 
-// test c_pack_avx2_intrin, which only support width of 32 and 64;
+// test svt_c_pack_avx2_intrin, which only support width of 32 and 64;
 class PackTest : public ::testing::TestWithParam<AreaSize> {
   public:
     PackTest()
@@ -129,20 +129,20 @@ class PackTest : public ::testing::TestWithParam<AreaSize> {
     void run_test() {
         for (int i = 0; i < RANDOM_TIME; i++) {
             eb_buf_random_u8(in_bit_buffer_, test_size_);
-            c_pack_avx2_intrin(in_bit_buffer_,
-                               in_stride_,
-                               in_compn_bit_buffer1_,
-                               out_stride_,
-                               local_cache1_,
-                               area_width_,
-                               area_height_);
-            c_pack_c(in_bit_buffer_,
-                     in_stride_,
-                     in_compn_bit_buffer2_,
-                     out_stride_,
-                     local_cache2_,
-                     area_width_,
-                     area_height_);
+            svt_c_pack_avx2_intrin(in_bit_buffer_,
+                                   in_stride_,
+                                   in_compn_bit_buffer1_,
+                                   out_stride_,
+                                   local_cache1_,
+                                   area_width_,
+                                   area_height_);
+            svt_c_pack_c(in_bit_buffer_,
+                         in_stride_,
+                         in_compn_bit_buffer2_,
+                         out_stride_,
+                         local_cache2_,
+                         area_width_,
+                         area_height_);
 
             check_output(area_width_,
                          area_height_,
@@ -150,7 +150,7 @@ class PackTest : public ::testing::TestWithParam<AreaSize> {
                          in_compn_bit_buffer2_);
 
             EXPECT_FALSE(HasFailure())
-                << "c_pack_avx2_intrin failed at " << i << "th test with size ("
+                << "svt_c_pack_avx2_intrin failed at " << i << "th test with size ("
                 << area_width_ << "," << area_height_ << ")";
         }
     }
@@ -169,8 +169,8 @@ TEST_P(PackTest, PackTest) {
 
 INSTANTIATE_TEST_CASE_P(PACK, PackTest, ::testing::ValuesIn(TEST_PACK_SIZES));
 
-// test compressed_packmsb_avx2_intrin
-// only width of 32 and 64 are supported in compressed_packmsb_avx2_intrin.
+// test svt_compressed_packmsb_avx2_intrin
+// only width of 32 and 64 are supported in svt_compressed_packmsb_avx2_intrin.
 // Use TEST_PACK_SIZES to test.
 class PackMsbTest : public ::testing::TestWithParam<AreaSize> {
   public:
@@ -230,7 +230,7 @@ class PackMsbTest : public ::testing::TestWithParam<AreaSize> {
         for (int i = 0; i < RANDOM_TIME; i++) {
             eb_buf_random_u8(inn_bit_buffer_, test_size_ >> 2);
             eb_buf_random_u8(in_8bit_buffer_, test_size_);
-            compressed_packmsb_avx2_intrin(in_8bit_buffer_,
+            svt_compressed_packmsb_avx2_intrin(in_8bit_buffer_,
                                            in8_stride_,
                                            inn_bit_buffer_,
                                            out_16bit_buffer1_,
@@ -239,14 +239,14 @@ class PackMsbTest : public ::testing::TestWithParam<AreaSize> {
                                            area_width_,
                                            area_height_);
 
-            compressed_packmsb_c(in_8bit_buffer_,
-                                 in8_stride_,
-                                 inn_bit_buffer_,
-                                 out_16bit_buffer2_,
-                                 inn_stride_,
-                                 out_stride_,
-                                 area_width_,
-                                 area_height_);
+            svt_compressed_packmsb_c(in_8bit_buffer_,
+                                     in8_stride_,
+                                     inn_bit_buffer_,
+                                     out_16bit_buffer2_,
+                                     inn_stride_,
+                                     out_stride_,
+                                     area_width_,
+                                     area_height_);
 
             check_output(area_width_,
                          area_height_,
@@ -254,7 +254,7 @@ class PackMsbTest : public ::testing::TestWithParam<AreaSize> {
                          out_16bit_buffer2_);
 
             EXPECT_FALSE(HasFailure())
-                << "compressed_packmsb_avx2_intrin failed at " << i
+                << "svt_compressed_packmsb_avx2_intrin failed at " << i
                 << "th test with size (" << area_width_ << "," << area_height_
                 << ")";
         }

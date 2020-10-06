@@ -38,7 +38,7 @@ void eb_enc_msb_pack2_d(uint8_t *in8_bit_buffer, uint32_t in8_stride, uint8_t *i
 * pack 8 and 2 bit 2D data into 10 bit data
 2bit data storage : 4 2bit-pixels in one byte
 ************************************************/
-void compressed_packmsb_c(uint8_t *in8_bit_buffer, uint32_t in8_stride, uint8_t *inn_bit_buffer,
+void svt_compressed_packmsb_c(uint8_t *in8_bit_buffer, uint32_t in8_stride, uint8_t *inn_bit_buffer,
                           uint16_t *out16_bit_buffer, uint32_t inn_stride, uint32_t out_stride,
                           uint32_t width, uint32_t height) {
     uint64_t row, k_idx;
@@ -74,7 +74,7 @@ void compressed_packmsb_c(uint8_t *in8_bit_buffer, uint32_t in8_stride, uint8_t 
 * convert unpacked nbit (n=2) data to compressedPAcked
 2bit data storage : 4 2bit-pixels in one byte
 ************************************************/
-void c_pack_c(const uint8_t *inn_bit_buffer, uint32_t inn_stride, uint8_t *in_compn_bit_buffer,
+void svt_c_pack_c(const uint8_t *inn_bit_buffer, uint32_t inn_stride, uint8_t *in_compn_bit_buffer,
               uint32_t out_stride, uint8_t *local_cache, uint32_t width, uint32_t height) {
     uint32_t row_index, col_index;
     (void)local_cache;

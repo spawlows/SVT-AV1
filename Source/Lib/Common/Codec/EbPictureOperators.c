@@ -371,7 +371,7 @@ void compressed_pack_sb(uint8_t *in8_bit_buffer, uint32_t in8_stride, uint8_t *i
                         uint32_t inn_stride, uint16_t *out16_bit_buffer, uint32_t out_stride,
                         uint32_t width, uint32_t height) {
     if (width == 64 || width == 32) {
-        compressed_packmsb(in8_bit_buffer,
+        svt_compressed_packmsb(in8_bit_buffer,
                            in8_stride,
                            inn_bit_buffer,
                            out16_bit_buffer,
@@ -380,7 +380,7 @@ void compressed_pack_sb(uint8_t *in8_bit_buffer, uint32_t in8_stride, uint8_t *i
                            width,
                            height);
     } else {
-        compressed_packmsb_c(in8_bit_buffer,
+        svt_compressed_packmsb_c(in8_bit_buffer,
                              in8_stride,
                              inn_bit_buffer,
                              out16_bit_buffer,

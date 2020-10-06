@@ -17,7 +17,7 @@
 #define _mm256_set_m128i(/* __m128i */ hi, /* __m128i */ lo) \
     _mm256_insertf128_si256(_mm256_castsi128_si256(lo), (hi), 0x1)
 
-void compressed_packmsb_avx2_intrin(uint8_t *in8_bit_buffer, uint32_t in8_stride,
+void svt_compressed_packmsb_avx2_intrin(uint8_t *in8_bit_buffer, uint32_t in8_stride,
                                     uint8_t *inn_bit_buffer, uint16_t *out16_bit_buffer,
                                     uint32_t inn_stride, uint32_t out_stride, uint32_t width,
                                     uint32_t height) {
@@ -143,7 +143,7 @@ void compressed_packmsb_avx2_intrin(uint8_t *in8_bit_buffer, uint32_t in8_stride
     }
 }
 
-void c_pack_avx2_intrin(const uint8_t *inn_bit_buffer, uint32_t inn_stride,
+void svt_c_pack_avx2_intrin(const uint8_t *inn_bit_buffer, uint32_t inn_stride,
                         uint8_t *in_compn_bit_buffer, uint32_t out_stride, uint8_t *local_cache,
                         uint32_t width, uint32_t height) {
     uint32_t y;
