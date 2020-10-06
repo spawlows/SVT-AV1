@@ -302,8 +302,8 @@ void setup_common_rtcd_internal(CPU_FLAGS flags) {
     svt_un_pack8_bit_data = svt_un_pack8_bit_data_c;
     cfl_luma_subsampling_420_lbd = cfl_luma_subsampling_420_lbd_c;
     cfl_luma_subsampling_420_hbd = cfl_luma_subsampling_420_hbd_c;
-    convert_8bit_to_16bit = convert_8bit_to_16bit_c;
-    convert_16bit_to_8bit = convert_16bit_to_8bit_c;
+    svt_convert_8bit_to_16bit = svt_convert_8bit_to_16bit_c;
+    svt_convert_16bit_to_8bit = svt_convert_16bit_to_8bit_c;
     pack2d_16_bit_src_mul4 = eb_enc_msb_pack2_d;
     un_pack2d_16_bit_src_mul4 = eb_enc_msb_un_pack2_d;
 
@@ -872,8 +872,8 @@ void setup_common_rtcd_internal(CPU_FLAGS flags) {
         SET_AVX2(svt_un_pack8_bit_data, svt_un_pack8_bit_data_c, svt_eb_enc_un_pack8_bit_data_avx2_intrin);
         SET_AVX2(cfl_luma_subsampling_420_lbd, cfl_luma_subsampling_420_lbd_c, cfl_luma_subsampling_420_lbd_avx2);
         SET_AVX2(cfl_luma_subsampling_420_hbd, cfl_luma_subsampling_420_hbd_c, cfl_luma_subsampling_420_hbd_avx2);
-        SET_AVX2(convert_8bit_to_16bit, convert_8bit_to_16bit_c, convert_8bit_to_16bit_avx2);
-        SET_AVX2(convert_16bit_to_8bit, convert_16bit_to_8bit_c, convert_16bit_to_8bit_avx2);
+        SET_AVX2(svt_convert_8bit_to_16bit, svt_convert_8bit_to_16bit_c, svt_convert_8bit_to_16bit_avx2);
+        SET_AVX2(svt_convert_16bit_to_8bit, svt_convert_16bit_to_8bit_c, svt_convert_16bit_to_8bit_avx2);
         SET_SSE2_AVX2(pack2d_16_bit_src_mul4,
             eb_enc_msb_pack2_d,
             eb_enc_msb_pack2d_sse2_intrin,

@@ -1670,7 +1670,7 @@ uint64_t full_distortion_kernel16_bits_avx2(uint8_t *input, uint32_t input_offse
     __m128i s = _mm_add_epi64(_mm256_castsi256_si128(sum64), _mm256_extracti128_si256(sum64, 1));
     return _mm_extract_epi64(s, 0) + _mm_extract_epi64(s, 1);
 }
-void convert_8bit_to_16bit_avx2(uint8_t* src, uint32_t src_stride, uint16_t* dst,
+void svt_convert_8bit_to_16bit_avx2(uint8_t* src, uint32_t src_stride, uint16_t* dst,
     uint32_t dst_stride, uint32_t width, uint32_t height) {
     __m128i tmp128, tmp128_2;
     __m256i tmp1, tmp2, tmp3, tmp4, tmp5, tmp6;
@@ -1785,7 +1785,7 @@ void convert_8bit_to_16bit_avx2(uint8_t* src, uint32_t src_stride, uint16_t* dst
 }
 
 //Function is created with assumption that src buffer store values in range [0..255]
-void convert_16bit_to_8bit_avx2(uint16_t *src, uint32_t src_stride, uint8_t *dst, uint32_t dst_stride,
+void svt_convert_16bit_to_8bit_avx2(uint16_t *src, uint32_t src_stride, uint8_t *dst, uint32_t dst_stride,
     uint32_t width, uint32_t height) {
     int32_t k;
     __m256i   tmp1, tmp2, tmp3;

@@ -2205,7 +2205,7 @@ EB_EXTERN void av1_encode_decode(SequenceControlSet *scs_ptr, PictureControlSet 
         // PACK Y
         uint16_t *buf_16bit = (uint16_t *)context_ptr->input_sample16bit_buffer->buffer_y;
         uint8_t * buf_8bit = input_picture->buffer_y + input_luma_offset;
-        convert_8bit_to_16bit(buf_8bit,
+        svt_convert_8bit_to_16bit(buf_8bit,
             input_picture->stride_y,
             buf_16bit,
             context_ptr->input_sample16bit_buffer->stride_y,
@@ -2215,7 +2215,7 @@ EB_EXTERN void av1_encode_decode(SequenceControlSet *scs_ptr, PictureControlSet 
         // PACK CB
         buf_16bit = (uint16_t *)context_ptr->input_sample16bit_buffer->buffer_cb;
         buf_8bit = input_picture->buffer_cb + input_cb_offset;
-        convert_8bit_to_16bit(buf_8bit,
+        svt_convert_8bit_to_16bit(buf_8bit,
             input_picture->stride_cb,
             buf_16bit,
             context_ptr->input_sample16bit_buffer->stride_cb,
@@ -2225,7 +2225,7 @@ EB_EXTERN void av1_encode_decode(SequenceControlSet *scs_ptr, PictureControlSet 
         // PACK CR
         buf_16bit = (uint16_t *)context_ptr->input_sample16bit_buffer->buffer_cr;
         buf_8bit = input_picture->buffer_cr + input_cr_offset;
-        convert_8bit_to_16bit(buf_8bit,
+        svt_convert_8bit_to_16bit(buf_8bit,
             input_picture->stride_cr,
             buf_16bit,
             context_ptr->input_sample16bit_buffer->stride_cr,
@@ -3669,7 +3669,7 @@ EB_EXTERN void av1_encode_decode(SequenceControlSet *scs_ptr, PictureControlSet 
                         (pred_buf_y_offest + recon_buffer_8bit->origin_y) * recon_buffer_8bit->stride_y;
                     dst_stride = recon_buffer_8bit->stride_y;
 
-                    convert_16bit_to_8bit(dst_16bit,
+                    svt_convert_16bit_to_8bit(dst_16bit,
                         dst_stride_16bit,
                         dst,
                         dst_stride,
@@ -3693,7 +3693,7 @@ EB_EXTERN void av1_encode_decode(SequenceControlSet *scs_ptr, PictureControlSet 
                     dst_stride = recon_buffer_8bit->stride_cb;
 
 
-                    convert_16bit_to_8bit(dst_16bit,
+                    svt_convert_16bit_to_8bit(dst_16bit,
                         dst_stride_16bit,
                         dst,
                         dst_stride,
@@ -3712,7 +3712,7 @@ EB_EXTERN void av1_encode_decode(SequenceControlSet *scs_ptr, PictureControlSet 
                     dst_stride = recon_buffer_8bit->stride_cr;
 
 
-                    convert_16bit_to_8bit(dst_16bit,
+                    svt_convert_16bit_to_8bit(dst_16bit,
                         dst_stride_16bit,
                         dst,
                         dst_stride,

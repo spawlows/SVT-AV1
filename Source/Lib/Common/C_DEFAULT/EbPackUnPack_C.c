@@ -173,7 +173,8 @@ void svt_unpack_avg_safe_sub_c(uint16_t *ref16_l0, uint32_t ref_l0_stride, uint1
         }
     }
 }
-void convert_8bit_to_16bit_c(uint8_t* src, uint32_t src_stride, uint16_t* dst, uint32_t dst_stride,
+void svt_convert_8bit_to_16bit_c(uint8_t *src, uint32_t src_stride, uint16_t *dst,
+                                 uint32_t dst_stride,
     uint32_t width, uint32_t height) {
     for (uint32_t j = 0; j < height; j++) {
         for (uint32_t k = 0; k < width; k++) {
@@ -182,8 +183,8 @@ void convert_8bit_to_16bit_c(uint8_t* src, uint32_t src_stride, uint16_t* dst, u
     }
 }
 
-void convert_16bit_to_8bit_c(uint16_t *src, uint32_t src_stride, uint8_t *dst, uint32_t dst_stride,
-    uint32_t width, uint32_t height) {
+void svt_convert_16bit_to_8bit_c(uint16_t *src, uint32_t src_stride, uint8_t *dst,
+                                 uint32_t dst_stride, uint32_t width, uint32_t height) {
     for (uint32_t j = 0; j < height; j++) {
         for (uint32_t k = 0; k < width; k++) {
             dst[k + j * dst_stride] = (uint8_t)(src[k + j * src_stride]);
