@@ -323,7 +323,7 @@ void setup_rtcd_internal(CPU_FLAGS flags) {
     svt_initialize_buffer_32bits = svt_initialize_buffer_32bits_c;
     svt_nxm_sad_kernel_sub_sampled = svt_nxm_sad_kernel_helper_c;
     svt_nxm_sad_kernel = svt_nxm_sad_kernel_helper_c;
-    compute_mean_square_values_8x8 = compute_mean_squared_values_c;
+    svt_compute_mean_square_values_8x8 = svt_compute_mean_squared_values_c;
     compute_sub_mean_8x8 = compute_sub_mean_8x8_c;
     compute_interm_var_four8x8 = compute_interm_var_four8x8_c;
     sad_16b_kernel = sad_16b_kernel_c;
@@ -626,9 +626,9 @@ void setup_rtcd_internal(CPU_FLAGS flags) {
                              svt_nxm_sad_kernel_sub_sampled_helper_avx2);
 
                     SET_AVX2(svt_nxm_sad_kernel, svt_nxm_sad_kernel_helper_c, svt_nxm_sad_kernel_helper_avx2);
-                    SET_SSE2(compute_mean_square_values_8x8,
-                        compute_mean_squared_values_c,
-                        compute_mean_of_squared_values8x8_sse2_intrin);
+                    SET_SSE2(svt_compute_mean_square_values_8x8,
+                             svt_compute_mean_squared_values_c,
+                             svt_compute_mean_of_squared_values8x8_sse2_intrin);
                     SET_SSE2_AVX2(compute_interm_var_four8x8,
                         compute_interm_var_four8x8_c,
                         compute_interm_var_four8x8_helper_sse2,
