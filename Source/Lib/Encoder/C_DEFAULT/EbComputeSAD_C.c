@@ -17,12 +17,12 @@ Note: moved from picture operators.
 keep this function here for profiling
 issues.
 *******************************************/
-uint32_t fast_loop_nxm_sad_kernel(const uint8_t *src, // input parameter, source samples Ptr
-                                  uint32_t       src_stride, // input parameter, source stride
-                                  const uint8_t *ref, // input parameter, reference samples Ptr
-                                  uint32_t       ref_stride, // input parameter, reference stride
-                                  uint32_t       height, // input parameter, block height (M)
-                                  uint32_t       width) // input parameter, block width (N)
+uint32_t svt_fast_loop_nxm_sad_kernel(const uint8_t *src, // input parameter, source samples Ptr
+                                      uint32_t       src_stride, // input parameter, source stride
+                                      const uint8_t *ref, // input parameter, reference samples Ptr
+                                      uint32_t       ref_stride, // input parameter, reference stride
+                                      uint32_t       height, // input parameter, block height (M)
+                                      uint32_t       width) // input parameter, block width (N)
 {
     uint32_t x, y;
     uint32_t sad = 0;
@@ -204,7 +204,7 @@ sadMxNx4D(16, 64);
 sadMxN(64, 16);
 sadMxNx4D(64, 16);
 
-uint32_t nxm_sad_kernel_helper_c(const uint8_t *src, uint32_t src_stride, const uint8_t *ref,
+uint32_t svt_nxm_sad_kernel_helper_c(const uint8_t *src, uint32_t src_stride, const uint8_t *ref,
                                  uint32_t ref_stride, uint32_t height, uint32_t width) {
     uint32_t nxm_sad = 0;
 
@@ -217,7 +217,7 @@ uint32_t nxm_sad_kernel_helper_c(const uint8_t *src, uint32_t src_stride, const 
     case 48:
     case 64:
     case 128:
-        nxm_sad = fast_loop_nxm_sad_kernel(src, src_stride, ref, ref_stride, height, width);
+        nxm_sad = svt_fast_loop_nxm_sad_kernel(src, src_stride, ref, ref_stride, height, width);
         break;
     default: assert(0);
     }

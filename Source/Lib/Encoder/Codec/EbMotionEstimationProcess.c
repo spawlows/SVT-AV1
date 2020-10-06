@@ -550,7 +550,7 @@ EbErrorType compute_decimated_zz_sad(MotionEstimationContext_t *context_ptr, Pic
                               4);
 
                 // ZZ SAD between 1/16 current & 1/16 collocated
-                decimated_sb_collocated_sad = nxm_sad_kernel(
+                decimated_sb_collocated_sad = svt_nxm_sad_kernel(
                     &(sixteenth_decimated_picture_ptr->buffer_y[blk_displacement_decimated]),
                     sixteenth_decimated_picture_ptr->stride_y,
                     context_ptr->me_context_ptr->sixteenth_sb_buffer,

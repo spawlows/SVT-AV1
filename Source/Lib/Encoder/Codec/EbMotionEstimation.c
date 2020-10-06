@@ -1362,12 +1362,12 @@ EbErrorType check_00_center(EbPictureBufferDesc *ref_pic_ptr, MeContext *context
     search_region_index = (int16_t)ref_pic_ptr->origin_x + origin_x +
                           ((int16_t)ref_pic_ptr->origin_y + origin_y) * ref_pic_ptr->stride_y;
 
-    zero_mv_sad = nxm_sad_kernel(context_ptr->sb_src_ptr,
-                                 context_ptr->sb_src_stride << subsample_sad,
-                                 &(ref_pic_ptr->buffer_y[search_region_index]),
-                                 ref_pic_ptr->stride_y << subsample_sad,
-                                 sb_height >> subsample_sad,
-                                 sb_width);
+    zero_mv_sad = svt_nxm_sad_kernel(context_ptr->sb_src_ptr,
+                                     context_ptr->sb_src_stride << subsample_sad,
+                                     &(ref_pic_ptr->buffer_y[search_region_index]),
+                                     ref_pic_ptr->stride_y << subsample_sad,
+                                     sb_height >> subsample_sad,
+                                     sb_width);
 
     zero_mv_sad = zero_mv_sad << subsample_sad;
 
@@ -1399,12 +1399,12 @@ EbErrorType check_00_center(EbPictureBufferDesc *ref_pic_ptr, MeContext *context
         (int16_t)(ref_pic_ptr->origin_x + origin_x) + *x_search_center +
         ((int16_t)(ref_pic_ptr->origin_y + origin_y) + *y_search_center) * ref_pic_ptr->stride_y;
 
-    hme_mv_sad = nxm_sad_kernel(context_ptr->sb_src_ptr,
-                               context_ptr->sb_src_stride << subsample_sad,
-                               &(ref_pic_ptr->buffer_y[search_region_index]),
-                               ref_pic_ptr->stride_y << subsample_sad,
-                               sb_height >> subsample_sad,
-                               sb_width);
+    hme_mv_sad = svt_nxm_sad_kernel(context_ptr->sb_src_ptr,
+                                    context_ptr->sb_src_stride << subsample_sad,
+                                    &(ref_pic_ptr->buffer_y[search_region_index]),
+                                    ref_pic_ptr->stride_y << subsample_sad,
+                                    sb_height >> subsample_sad,
+                                    sb_width);
 
     hme_mv_sad = hme_mv_sad << subsample_sad;
 

@@ -320,10 +320,9 @@ void setup_rtcd_internal(CPU_FLAGS flags) {
     svt_ext_sad_calculation_32x32_64x64 = svt_ext_sad_calculation_32x32_64x64_c;
     svt_ext_all_sad_calculation_8x8_16x16 = svt_ext_all_sad_calculation_8x8_16x16_c;
     svt_ext_eight_sad_calculation_32x32_64x64 = svt_ext_eight_sad_calculation_32x32_64x64_c;
-    eb_sad_kernel4x4 = fast_loop_nxm_sad_kernel;
     initialize_buffer_32bits = initialize_buffer_32bits_c;
-    nxm_sad_kernel_sub_sampled = nxm_sad_kernel_helper_c;
-    nxm_sad_kernel = nxm_sad_kernel_helper_c;
+    svt_nxm_sad_kernel_sub_sampled = svt_nxm_sad_kernel_helper_c;
+    svt_nxm_sad_kernel = svt_nxm_sad_kernel_helper_c;
     compute_mean_square_values_8x8 = compute_mean_squared_values_c;
     compute_sub_mean_8x8 = compute_sub_mean_8x8_c;
     compute_interm_var_four8x8 = compute_interm_var_four8x8_c;
@@ -619,14 +618,13 @@ void setup_rtcd_internal(CPU_FLAGS flags) {
                     SET_AVX2(svt_ext_eight_sad_calculation_32x32_64x64,
                              svt_ext_eight_sad_calculation_32x32_64x64_c,
                              svt_ext_eight_sad_calculation_32x32_64x64_avx2);
-                    SET_AVX2(eb_sad_kernel4x4, fast_loop_nxm_sad_kernel, eb_compute4x_m_sad_avx2_intrin);
                     SET_SSE2(
                         initialize_buffer_32bits, initialize_buffer_32bits_c, initialize_buffer_32bits_sse2_intrin);
-                    SET_AVX2(nxm_sad_kernel_sub_sampled,
-                        nxm_sad_kernel_helper_c,
-                        nxm_sad_kernel_sub_sampled_helper_avx2);
+                    SET_AVX2(svt_nxm_sad_kernel_sub_sampled,
+                             svt_nxm_sad_kernel_helper_c,
+                             svt_nxm_sad_kernel_sub_sampled_helper_avx2);
 
-                    SET_AVX2(nxm_sad_kernel, nxm_sad_kernel_helper_c, nxm_sad_kernel_helper_avx2);
+                    SET_AVX2(svt_nxm_sad_kernel, svt_nxm_sad_kernel_helper_c, svt_nxm_sad_kernel_helper_avx2);
                     SET_SSE2(compute_mean_square_values_8x8,
                         compute_mean_squared_values_c,
                         compute_mean_of_squared_values8x8_sse2_intrin);

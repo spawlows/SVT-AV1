@@ -988,7 +988,7 @@ void fast_loop_core(ModeDecisionCandidateBuffer *candidate_buffer, PictureContro
         assert((context_ptr->blk_geom->bwidth >> 3) < 17);
         if (!context_ptr->hbd_mode_decision) {
             candidate_buffer->candidate_ptr->luma_fast_distortion = (uint32_t)(
-                luma_fast_distortion = nxm_sad_kernel_sub_sampled(
+                luma_fast_distortion = svt_nxm_sad_kernel_sub_sampled(
                     input_picture_ptr->buffer_y + input_origin_index,
                     input_picture_ptr->stride_y,
                     prediction_ptr->buffer_y + cu_origin_index,
@@ -1037,7 +1037,7 @@ void fast_loop_core(ModeDecisionCandidateBuffer *candidate_buffer, PictureContro
             assert((context_ptr->blk_geom->bwidth_uv >> 3) < 17);
 
             if (!context_ptr->hbd_mode_decision) {
-                chroma_fast_distortion = nxm_sad_kernel_sub_sampled(
+                chroma_fast_distortion = svt_nxm_sad_kernel_sub_sampled(
                     input_picture_ptr->buffer_cb + input_cb_origin_in_index,
                     input_picture_ptr->stride_cb,
                     candidate_buffer->prediction_ptr->buffer_cb + cu_chroma_origin_index,
@@ -1045,7 +1045,7 @@ void fast_loop_core(ModeDecisionCandidateBuffer *candidate_buffer, PictureContro
                     context_ptr->blk_geom->bheight_uv,
                     context_ptr->blk_geom->bwidth_uv);
 
-                chroma_fast_distortion += nxm_sad_kernel_sub_sampled(
+                chroma_fast_distortion += svt_nxm_sad_kernel_sub_sampled(
                     input_picture_ptr->buffer_cr + input_cr_origin_in_index,
                     input_picture_ptr->stride_cr,
                     candidate_buffer->prediction_ptr->buffer_cr + cu_chroma_origin_index,
@@ -1894,7 +1894,7 @@ void md_full_pel_search(PictureControlSet *pcs_ptr, ModeDecisionContext *context
                         context_ptr->blk_geom->bheight,
                         context_ptr->blk_geom->bwidth);
                 } else {
-                    cost = nxm_sad_kernel_sub_sampled(
+                    cost = svt_nxm_sad_kernel_sub_sampled(
                         input_picture_ptr->buffer_y + input_origin_index,
                         input_picture_ptr->stride_y,
                         ref_pic->buffer_y + ref_origin_index,
@@ -2608,7 +2608,7 @@ void perform_md_reference_pruning(PictureControlSet *  pcs_ptr,
                             ref_pic->stride_y,
                             context_ptr->blk_geom->bheight,
                             context_ptr->blk_geom->bwidth)
-                    : nxm_sad_kernel_sub_sampled(
+                    : svt_nxm_sad_kernel_sub_sampled(
                             input_picture_ptr->buffer_y + input_origin_index,
                             input_picture_ptr->stride_y,
                             ref_pic->buffer_y + ref_origin_index,
@@ -2661,7 +2661,7 @@ void perform_md_reference_pruning(PictureControlSet *  pcs_ptr,
                             ref_pic->stride_y,
                             context_ptr->blk_geom->bheight,
                             context_ptr->blk_geom->bwidth)
-                    : nxm_sad_kernel_sub_sampled(
+                    : svt_nxm_sad_kernel_sub_sampled(
                             input_picture_ptr->buffer_y + input_origin_index,
                             input_picture_ptr->stride_y,
                             ref_pic->buffer_y + ref_origin_index,
@@ -6970,7 +6970,7 @@ static void search_best_independent_uv_mode(PictureControlSet *  pcs_ptr,
 
         uint32_t chroma_fast_distortion;
         if (!context_ptr->hbd_mode_decision) {
-            chroma_fast_distortion = nxm_sad_kernel_sub_sampled(
+            chroma_fast_distortion = svt_nxm_sad_kernel_sub_sampled(
                 input_picture_ptr->buffer_cb + input_cb_origin_in_index,
                 input_picture_ptr->stride_cb,
                 candidate_buffer->prediction_ptr->buffer_cb + cu_chroma_origin_index,
@@ -6978,7 +6978,7 @@ static void search_best_independent_uv_mode(PictureControlSet *  pcs_ptr,
                 context_ptr->blk_geom->bheight_uv,
                 context_ptr->blk_geom->bwidth_uv);
 
-            chroma_fast_distortion += nxm_sad_kernel_sub_sampled(
+            chroma_fast_distortion += svt_nxm_sad_kernel_sub_sampled(
                 input_picture_ptr->buffer_cr + input_cr_origin_in_index,
                 input_picture_ptr->stride_cr,
                 candidate_buffer->prediction_ptr->buffer_cr + cu_chroma_origin_index,

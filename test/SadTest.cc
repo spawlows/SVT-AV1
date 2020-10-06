@@ -13,8 +13,8 @@
  * @file sad_Test.cc
  *
  * @brief Unit test for SAD functions:
- * - nxm_sad_kernel_sub_sampled_func
- * - nxm_sad_kernel_func
+ * - svt_nxm_sad_kernel_sub_sampled_func
+ * - svt_nxm_sad_kernel_func
  * - nxm_sad_averaging_kernel_func
  * - nxm_sad_loop_kernel_sparse_func
  * - nxm_sad_loop_kernel_sparse_func
@@ -404,8 +404,8 @@ class SADTestBase : public ::testing::Test {
 
 /**
  * @brief Unit test for SAD sub smaple functions include:
- *  - nxm_sad_kernel_helper_c
- *  - nxm_sad_kernel_sub_sampled_helper_avx2
+ *  - svt_nxm_sad_kernel_helper_c
+ *  - svt_nxm_sad_kernel_sub_sampled_helper_avx2
  *
  * Test strategy:
  *  This test case combine different width{4-64} x height{4-64} and different
@@ -418,8 +418,8 @@ class SADTestBase : public ::testing::Test {
  * equal.
  *
  * Test coverage:
- *  All functions inside nxm_sad_kernel_helper_c and
- * nxm_sad_kernel_sub_sampled_helper_avx2.
+ *  All functions inside svt_nxm_sad_kernel_helper_c and
+ * svt_nxm_sad_kernel_sub_sampled_helper_avx2.
  *
  * Test cases:
  *  Width {4, 8, 16, 24, 32, 48, 64} x height{ 4, 8, 16, 24, 32, 48, 64)
@@ -443,13 +443,13 @@ class SADTestSubSample : public ::testing::WithParamInterface<Testsad_Param>,
         prepare_data();
 
         ref_sad = reference_sad();
-        non_avx2_sad = nxm_sad_kernel_helper_c(src_aligned_,
+        non_avx2_sad = svt_nxm_sad_kernel_helper_c(src_aligned_,
                                                src_stride_,
                                                ref1_aligned_,
                                                ref1_stride_,
                                                height_,
                                                width_);
-        avx2_sad = nxm_sad_kernel_sub_sampled_helper_avx2(src_aligned_,
+        avx2_sad = svt_nxm_sad_kernel_sub_sampled_helper_avx2(src_aligned_,
                                                           src_stride_,
                                                           ref1_aligned_,
                                                           ref1_stride_,
@@ -471,8 +471,8 @@ INSTANTIATE_TEST_CASE_P(
                        ::testing::ValuesIn(TEST_BLOCK_SIZES)));
 /**
  * @brief Unit test for SAD functions include:
- *  - nxm_sad_kernel_helper_c
- *  - nxm_sad_kernel_helper_avx2
+ *  - svt_nxm_sad_kernel_helper_c
+ *  - svt_nxm_sad_kernel_helper_avx2
  *
  * Test strategy:
  *  This test case combine different wight{4-64} x height{4-64}, different test
@@ -486,8 +486,8 @@ INSTANTIATE_TEST_CASE_P(
  *  equal.
  *
  * Test coverage:
- *  All functions inside nxm_sad_kernel_helper_c and
- *  nxm_sad_kernel_helper_avx2.
+ *  All functions inside svt_nxm_sad_kernel_helper_c and
+ *  svt_nxm_sad_kernel_helper_avx2.
  *
  * Test cases:
  *  Width {4, 8, 16, 24, 32, 48, 64} x height{ 4, 8, 16, 24, 32, 48, 64)
@@ -511,18 +511,18 @@ class SADTest : public ::testing::WithParamInterface<Testsad_Param>,
         prepare_data();
 
         ref_sad = reference_sad();
-        non_avx2_sad = nxm_sad_kernel_helper_c(src_aligned_,
-                                               src_stride_,
-                                               ref1_aligned_,
-                                               ref1_stride_,
-                                               height_,
-                                               width_);
-        avx2_sad = nxm_sad_kernel_helper_avx2(src_aligned_,
-                                              src_stride_,
-                                              ref1_aligned_,
-                                              ref1_stride_,
-                                              height_,
-                                              width_);
+        non_avx2_sad = svt_nxm_sad_kernel_helper_c(src_aligned_,
+                                                   src_stride_,
+                                                   ref1_aligned_,
+                                                   ref1_stride_,
+                                                   height_,
+                                                   width_);
+        avx2_sad = svt_nxm_sad_kernel_helper_avx2(src_aligned_,
+                                                  src_stride_,
+                                                  ref1_aligned_,
+                                                  ref1_stride_,
+                                                  height_,
+                                                  width_);
         EXPECT_EQ(non_avx2_sad, avx2_sad)
             << "compare non_avx2_sad(" << non_avx2_sad << ") and avx2_sad("
             << avx2_sad << ") error, ref: " << ref_sad;
