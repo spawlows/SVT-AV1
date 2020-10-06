@@ -299,7 +299,7 @@ void setup_common_rtcd_internal(CPU_FLAGS flags) {
     svt_c_pack = svt_c_pack_c;
     svt_unpack_avg = svt_unpack_avg_c;
     svt_unpack_avg_safe_sub = svt_unpack_avg_safe_sub_c;
-    un_pack8_bit_data = un_pack8_bit_data_c;
+    svt_un_pack8_bit_data = svt_un_pack8_bit_data_c;
     cfl_luma_subsampling_420_lbd = cfl_luma_subsampling_420_lbd_c;
     cfl_luma_subsampling_420_hbd = cfl_luma_subsampling_420_hbd_c;
     convert_8bit_to_16bit = convert_8bit_to_16bit_c;
@@ -869,7 +869,7 @@ void setup_common_rtcd_internal(CPU_FLAGS flags) {
         SET_AVX2(svt_c_pack, svt_c_pack_c, svt_c_pack_avx2_intrin);
         SET_SSE2_AVX2(svt_unpack_avg, svt_unpack_avg_c, svt_unpack_avg_sse2_intrin, svt_unpack_avg_avx2_intrin);
         SET_AVX2(svt_unpack_avg_safe_sub, svt_unpack_avg_safe_sub_c, svt_unpack_avg_safe_sub_avx2_intrin);
-        SET_AVX2(un_pack8_bit_data, un_pack8_bit_data_c, eb_enc_un_pack8_bit_data_avx2_intrin);
+        SET_AVX2(svt_un_pack8_bit_data, svt_un_pack8_bit_data_c, svt_eb_enc_un_pack8_bit_data_avx2_intrin);
         SET_AVX2(cfl_luma_subsampling_420_lbd, cfl_luma_subsampling_420_lbd_c, cfl_luma_subsampling_420_lbd_avx2);
         SET_AVX2(cfl_luma_subsampling_420_hbd, cfl_luma_subsampling_420_hbd_c, cfl_luma_subsampling_420_hbd_avx2);
         SET_AVX2(convert_8bit_to_16bit, convert_8bit_to_16bit_c, convert_8bit_to_16bit_avx2);

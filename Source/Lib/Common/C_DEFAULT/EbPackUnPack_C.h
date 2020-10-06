@@ -32,8 +32,9 @@ void eb_enc_msb_un_pack2_d(uint16_t *in16_bit_buffer, uint32_t in_stride, uint8_
                            uint8_t *outn_bit_buffer, uint32_t out8_stride, uint32_t outn_stride,
                            uint32_t width, uint32_t height);
 
-void un_pack8_bit_data_c(uint16_t *in16_bit_buffer, uint32_t in_stride, uint8_t *out8_bit_buffer,
-                         uint32_t out8_stride, uint32_t width, uint32_t height);
+void svt_un_pack8_bit_data_c(uint16_t *in16_bit_buffer, uint32_t in_stride,
+                             uint8_t *out8_bit_buffer, uint32_t out8_stride,
+                             uint32_t width, uint32_t height);
 
 void svt_unpack_avg_c(uint16_t *ref16_l0, uint32_t ref_l0_stride, uint16_t *ref16_l1,
                       uint32_t ref_l1_stride, uint8_t *dst_ptr, uint32_t dst_stride, uint32_t width,

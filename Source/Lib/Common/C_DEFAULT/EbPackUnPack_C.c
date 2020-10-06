@@ -119,8 +119,9 @@ void eb_enc_msb_un_pack2_d(uint16_t *in16_bit_buffer, uint32_t in_stride, uint8_
         }
     }
 }
-void un_pack8_bit_data_c(uint16_t *in16_bit_buffer, uint32_t in_stride, uint8_t *out8_bit_buffer,
-                         uint32_t out8_stride, uint32_t width, uint32_t height) {
+void svt_un_pack8_bit_data_c(uint16_t *in16_bit_buffer, uint32_t in_stride,
+                             uint8_t *out8_bit_buffer, uint32_t out8_stride,
+                             uint32_t width, uint32_t height) {
     uint64_t j, k;
     uint16_t in_pixel;
     //uint8_t    tmp_pixel;

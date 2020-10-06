@@ -17,7 +17,7 @@
  * - eb_enc_msb_pack2d_avx2_intrin_al
  * - eb_enc_msb_pack2d_sse2_intrin
  * - svt_compressed_packmsb_avx2_intrin
- * - eb_enc_un_pack8_bit_data_avx2_intrin
+ * - svt_eb_enc_un_pack8_bit_data_avx2_intrin
  * - eb_enc_msb_un_pack2d_sse2_intrin
  * - svt_unpack_avg_avx2_intrin
  * - svt_unpack_avg_sse2_intrin
@@ -407,7 +407,7 @@ TEST_P(Pack2dTest, Pack2dTest) {
 INSTANTIATE_TEST_CASE_P(PACK2D, Pack2dTest,
                         ::testing::ValuesIn(TEST_COMMON_SIZES));
 
-// test eb_enc_un_pack8_bit_data_avx2_intrin
+// test svt_eb_enc_un_pack8_bit_data_avx2_intrin
 // Similar assumption that the width is multiple of 4, using
 // TEST_COMMON_SIZES to cover all the special width.
 class UnPackTest : public ::testing::TestWithParam<AreaSize> {
@@ -473,18 +473,18 @@ class UnPackTest : public ::testing::TestWithParam<AreaSize> {
     void run_test() {
         for (int i = 0; i < RANDOM_TIME; i++) {
             eb_buf_random_u16(in_16bit_buffer_, test_size_);
-            eb_enc_un_pack8_bit_data_avx2_intrin(in_16bit_buffer_,
-                                                 in_stride_,
-                                                 out_8bit_buffer1_,
-                                                 out_stride_,
-                                                 area_width_,
-                                                 area_height_);
-            un_pack8_bit_data_c(in_16bit_buffer_,
-                                in_stride_,
-                                out_8bit_buffer2_,
-                                out_stride_,
-                                area_width_,
-                                area_height_);
+            svt_eb_enc_un_pack8_bit_data_avx2_intrin(in_16bit_buffer_,
+                                                     in_stride_,
+                                                     out_8bit_buffer1_,
+                                                     out_stride_,
+                                                     area_width_,
+                                                     area_height_);
+            svt_un_pack8_bit_data_c(in_16bit_buffer_,
+                                    in_stride_,
+                                    out_8bit_buffer2_,
+                                    out_stride_,
+                                    area_width_,
+                                    area_height_);
 
             check_output(area_width_,
                          area_height_,
@@ -492,7 +492,7 @@ class UnPackTest : public ::testing::TestWithParam<AreaSize> {
                          out_8bit_buffer2_);
 
             EXPECT_FALSE(HasFailure())
-                << "eb_enc_un_pack8_bit_data_avx2_intrin failed at " << i
+                << "svt_eb_enc_un_pack8_bit_data_avx2_intrin failed at " << i
                 << "th test with size (" << area_width_ << "," << area_height_
                 << ")";
         }
