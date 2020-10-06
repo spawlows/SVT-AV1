@@ -759,7 +759,7 @@ EbErrorType compute_chroma_block_mean(
         cr_block_index             = cr_block_index + 8;
         cb_mean_of_16x16_blocks[2] = svt_compute_sub_mean_8x8(
             &(input_padded_picture_ptr->buffer_cb[cb_block_index]), stride_cb);
-        cr_mean_of_16x16_blocks[2] = compute_sub_mean_8x8(
+        cr_mean_of_16x16_blocks[2] = svt_compute_sub_mean_8x8(
             &(input_padded_picture_ptr->buffer_cr[cr_block_index]), stride_cr);
 
         // (0,3)

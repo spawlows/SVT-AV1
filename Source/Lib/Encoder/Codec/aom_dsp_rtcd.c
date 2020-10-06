@@ -629,6 +629,10 @@ void setup_rtcd_internal(CPU_FLAGS flags) {
                     SET_SSE2(svt_compute_mean_square_values_8x8,
                              svt_compute_mean_squared_values_c,
                              svt_compute_mean_of_squared_values8x8_sse2_intrin);
+                    SET_SSE2(svt_compute_sub_mean_8x8,
+                             svt_compute_sub_mean_8x8_c,
+                             svt_compute_sub_mean8x8_sse2_intrin);
+
                     SET_SSE2_AVX2(compute_interm_var_four8x8,
                         compute_interm_var_four8x8_c,
                         compute_interm_var_four8x8_helper_sse2,

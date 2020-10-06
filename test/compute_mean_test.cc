@@ -33,7 +33,7 @@
  * @brief Unit test for compute mean function:
  * - compute_mean8x8_sse2_intrin
  * - svt_compute_mean_of_squared_values8x8_sse2_intrin
- * - compute_sub_mean8x8_sse2_intrin
+ * - svt_compute_sub_mean8x8_sse2_intrin
  * - compute_subd_mean_of_squared_values8x8_sse2_intrin
  * - compute_mean8x8_avx2_intrin
  *
@@ -122,7 +122,7 @@ TEST(ComputeMeanTest, run_compute_sub_mean_test) {
 
             // compute mean
             uint64_t output_sse2_tst =
-                compute_sub_mean8x8_sse2_intrin(input_data, 8);
+                svt_compute_sub_mean8x8_sse2_intrin(input_data, 8);
             uint64_t output_c_ref = svt_compute_sub_mean_8x8_c(input_data, 8);
 
             // compare results
@@ -178,7 +178,7 @@ TEST(ComputeMeanTest, run_compute_mean_avx2_test) {
         uint64_t output_sse2_squared_tst =
             compute_subd_mean_of_squared_values8x8_sse2_intrin(input_data, 8);
         uint64_t output_sse2_tst =
-            compute_sub_mean8x8_sse2_intrin(input_data, 8);
+            svt_compute_sub_mean8x8_sse2_intrin(input_data, 8);
 
         uint64_t output_avx2_tst[4] = {0};
         uint64_t output_avx2_squared_tst[4] = {0};
