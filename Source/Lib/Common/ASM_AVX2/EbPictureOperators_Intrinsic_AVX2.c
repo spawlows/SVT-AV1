@@ -284,7 +284,7 @@ void svt_c_pack_avx2_intrin(const uint8_t *inn_bit_buffer, uint32_t inn_stride,
     }
 }
 
-void eb_enc_msb_pack2d_avx2_intrin_al(uint8_t *in8_bit_buffer, uint32_t in8_stride,
+void svt_eb_enc_msb_pack2d_avx2_intrin_al(uint8_t *in8_bit_buffer, uint32_t in8_stride,
                                       uint8_t *inn_bit_buffer, uint16_t *out16_bit_buffer,
                                       uint32_t inn_stride, uint32_t out_stride, uint32_t width,
                                       uint32_t height) {
