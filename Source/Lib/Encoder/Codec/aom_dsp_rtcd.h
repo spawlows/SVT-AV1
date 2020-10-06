@@ -1072,7 +1072,7 @@ extern "C" {
         uint32_t *p_best_sad_64x64,
         uint32_t *p_best_mv32x32, uint32_t *p_best_mv64x64,
         uint32_t mv, uint32_t p_sad32x32[4][8]);
-    uint32_t svt_eb_compute4x_m_sad_avx2_intrin(
+    uint32_t svt_compute4x_m_sad_avx2_intrin(
         const uint8_t *src, // input parameter, source samples Ptr
         uint32_t       src_stride, // input parameter, source stride
         const uint8_t *ref, // input parameter, reference samples Ptr

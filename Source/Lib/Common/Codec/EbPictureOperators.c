@@ -332,14 +332,14 @@ void un_pack2d(uint16_t *in16_bit_buffer, uint32_t in_stride, uint8_t *out8_bit_
                                       width,
                                       height);
     } else {
-        svt_eb_enc_msb_un_pack2_d(in16_bit_buffer,
-                              in_stride,
-                              out8_bit_buffer,
-                              outn_bit_buffer,
-                              out8_stride,
-                              outn_stride,
-                              width,
-                              height);
+        svt_enc_msb_un_pack2_d(in16_bit_buffer,
+                               in_stride,
+                               out8_bit_buffer,
+                               outn_bit_buffer,
+                               out8_stride,
+                               outn_stride,
+                               width,
+                               height);
     }
 }
 
@@ -356,14 +356,14 @@ void pack2d_src(uint8_t *in8_bit_buffer, uint32_t in8_stride, uint8_t *inn_bit_b
                                    width,
                                    height);
     } else {
-        svt_eb_enc_msb_pack2_d(in8_bit_buffer,
-                               in8_stride,
-                               inn_bit_buffer,
-                               out16_bit_buffer,
-                               inn_stride,
-                               out_stride,
-                               width,
-                               height);
+        svt_enc_msb_pack2_d(in8_bit_buffer,
+                            in8_stride,
+                            inn_bit_buffer,
+                            out16_bit_buffer,
+                            inn_stride,
+                            out_stride,
+                            width,
+                            height);
     }
 }
 

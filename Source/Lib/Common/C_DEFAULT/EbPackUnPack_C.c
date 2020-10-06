@@ -15,9 +15,9 @@
 /************************************************
 * pack 8 and 2 bit 2D data into 10 bit data
 ************************************************/
-void svt_eb_enc_msb_pack2_d(uint8_t *in8_bit_buffer, uint32_t in8_stride, uint8_t *inn_bit_buffer,
-                            uint16_t *out16_bit_buffer, uint32_t inn_stride, uint32_t out_stride,
-                            uint32_t width, uint32_t height) {
+void svt_enc_msb_pack2_d(uint8_t *in8_bit_buffer, uint32_t in8_stride, uint8_t *inn_bit_buffer,
+                         uint16_t *out16_bit_buffer, uint32_t inn_stride, uint32_t out_stride,
+                         uint32_t width, uint32_t height) {
     uint64_t j, k;
     uint16_t out_pixel;
     uint8_t  n_bit_pixel;
@@ -102,10 +102,10 @@ void svt_c_pack_c(const uint8_t *inn_bit_buffer, uint32_t inn_stride, uint8_t *i
 /************************************************
 * unpack 10 bit data into  8 and 2 bit 2D data
 ************************************************/
-void svt_eb_enc_msb_un_pack2_d(uint16_t *in16_bit_buffer, uint32_t in_stride,
-                               uint8_t *out8_bit_buffer, uint8_t *outn_bit_buffer,
-                               uint32_t out8_stride, uint32_t outn_stride,
-                               uint32_t width, uint32_t height) {
+void svt_enc_msb_un_pack2_d(uint16_t *in16_bit_buffer, uint32_t in_stride,
+                            uint8_t *out8_bit_buffer, uint8_t *outn_bit_buffer,
+                            uint32_t out8_stride, uint32_t outn_stride,
+                            uint32_t width, uint32_t height) {
     uint64_t j, k;
     uint16_t in_pixel;
     uint8_t  tmp_pixel;

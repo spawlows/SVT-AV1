@@ -284,10 +284,10 @@ void svt_c_pack_avx2_intrin(const uint8_t *inn_bit_buffer, uint32_t inn_stride,
     }
 }
 
-void svt_eb_enc_msb_pack2d_avx2_intrin_al(uint8_t *in8_bit_buffer, uint32_t in8_stride,
-                                      uint8_t *inn_bit_buffer, uint16_t *out16_bit_buffer,
-                                      uint32_t inn_stride, uint32_t out_stride, uint32_t width,
-                                      uint32_t height) {
+void svt_enc_msb_pack2d_avx2_intrin_al(uint8_t *in8_bit_buffer, uint32_t in8_stride,
+                                       uint8_t *inn_bit_buffer, uint16_t *out16_bit_buffer,
+                                       uint32_t inn_stride, uint32_t out_stride, uint32_t width,
+                                       uint32_t height) {
     //(out_pixel | n_bit_pixel) concatenation is done with unpacklo_epi8 and unpackhi_epi8
 
     uint32_t y, x;

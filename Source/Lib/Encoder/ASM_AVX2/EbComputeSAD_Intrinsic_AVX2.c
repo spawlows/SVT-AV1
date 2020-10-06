@@ -3043,7 +3043,7 @@ compute4x_m_sad_avx2(const uint8_t *src, // input parameter, source samples Ptr
     return (uint32_t)_mm_cvtsi128_si32(xmm0);
 }
 
-uint32_t svt_eb_compute4x_m_sad_avx2_intrin(
+uint32_t svt_compute4x_m_sad_avx2_intrin(
     const uint8_t *src, // input parameter, source samples Ptr
     uint32_t       src_stride, // input parameter, source stride
     const uint8_t *ref, // input parameter, reference samples Ptr
@@ -3098,7 +3098,7 @@ compute8x_m_sad_avx2(const uint8_t *src, // input parameter, source samples Ptr
     return sad_final_4_val_avx2(sad);
 }
 
-uint32_t svt_eb_compute8x_m_sad_avx2_intrin(
+uint32_t svt_compute8x_m_sad_avx2_intrin(
     const uint8_t *src, // input parameter, source samples Ptr
     uint32_t       src_stride, // input parameter, source stride
     const uint8_t *ref, // input parameter, reference samples Ptr
@@ -3168,7 +3168,7 @@ compute16x_m_sad_avx2(const uint8_t *src, // input parameter, source samples Ptr
     return sad_final_4_val_avx2(sad);
 }
 
-uint32_t svt_eb_compute16x_m_sad_avx2_intrin(
+uint32_t svt_compute16x_m_sad_avx2_intrin(
     const uint8_t *src, // input parameter, source samples Ptr
     uint32_t       src_stride, // input parameter, source stride
     const uint8_t *ref, // input parameter, reference samples Ptr
@@ -3183,7 +3183,7 @@ uint32_t svt_eb_compute16x_m_sad_avx2_intrin(
 /*******************************************************************************
 * Requirement: height % 2 = 0
 *******************************************************************************/
-uint32_t svt_eb_compute24x_m_sad_avx2_intrin(
+uint32_t svt_compute24x_m_sad_avx2_intrin(
     const uint8_t *src, // input parameter, source samples Ptr
     uint32_t       src_stride, // input parameter, source stride
     const uint8_t *ref, // input parameter, reference samples Ptr
@@ -3236,7 +3236,7 @@ compute32x_m_sad_avx2(const uint8_t *src, // input parameter, source samples Ptr
     return sad_final_4_val_avx2(sad);
 }
 
-uint32_t svt_eb_compute32x_m_sad_avx2_intrin(
+uint32_t svt_compute32x_m_sad_avx2_intrin(
     const uint8_t *src, // input parameter, source samples Ptr
     uint32_t       src_stride, // input parameter, source stride
     const uint8_t *ref, // input parameter, reference samples Ptr
@@ -3251,7 +3251,7 @@ uint32_t svt_eb_compute32x_m_sad_avx2_intrin(
 /*******************************************************************************
 * Requirement: height % 2 = 0
 *******************************************************************************/
-uint32_t svt_eb_compute48x_m_sad_avx2_intrin(
+uint32_t svt_compute48x_m_sad_avx2_intrin(
     const uint8_t *src, // input parameter, source samples Ptr
     uint32_t       src_stride, // input parameter, source stride
     const uint8_t *ref, // input parameter, reference samples Ptr
@@ -3324,7 +3324,7 @@ compute128x_m_sad_avx2(const uint8_t *src, // input parameter, source samples Pt
     return sad_final_4_val_avx2(sad);
 }
 
-uint32_t svt_eb_compute64x_m_sad_avx2_intrin(
+uint32_t svt_compute64x_m_sad_avx2_intrin(
     const uint8_t *src, // input parameter, source samples Ptr
     uint32_t       src_stride, // input parameter, source stride
     const uint8_t *ref, // input parameter, reference samples Ptr
@@ -3336,7 +3336,7 @@ uint32_t svt_eb_compute64x_m_sad_avx2_intrin(
     return compute64x_m_sad_avx2(src, src_stride, ref, ref_stride, height);
 }
 
-uint32_t svt_eb_compute128x_m_sad_avx2_intrin(
+uint32_t svt_compute128x_m_sad_avx2_intrin(
     const uint8_t *src, // input parameter, source samples Ptr
     uint32_t       src_stride, // input parameter, source stride
     const uint8_t *ref, // input parameter, reference samples Ptr
@@ -4607,28 +4607,28 @@ uint32_t svt_nxm_sad_kernel_sub_sampled_helper_avx2(const uint8_t *src, uint32_t
 
     switch (width) {
     case 4:
-        nxm_sad = svt_eb_compute4x_m_sad_avx2_intrin(src, src_stride, ref, ref_stride, height, width);
+        nxm_sad = svt_compute4x_m_sad_avx2_intrin(src, src_stride, ref, ref_stride, height, width);
         break;
     case 8:
-        nxm_sad = svt_eb_compute8x_m_sad_avx2_intrin(src, src_stride, ref, ref_stride, height, width);
+        nxm_sad = svt_compute8x_m_sad_avx2_intrin(src, src_stride, ref, ref_stride, height, width);
         break;
     case 16:
-        nxm_sad = svt_eb_compute16x_m_sad_avx2_intrin(src, src_stride, ref, ref_stride, height, width);
+        nxm_sad = svt_compute16x_m_sad_avx2_intrin(src, src_stride, ref, ref_stride, height, width);
         break;
     case 24:
-        nxm_sad = svt_eb_compute24x_m_sad_avx2_intrin(src, src_stride, ref, ref_stride, height, width);
+        nxm_sad = svt_compute24x_m_sad_avx2_intrin(src, src_stride, ref, ref_stride, height, width);
         break;
     case 32:
-        nxm_sad = svt_eb_compute32x_m_sad_avx2_intrin(src, src_stride, ref, ref_stride, height, width);
+        nxm_sad = svt_compute32x_m_sad_avx2_intrin(src, src_stride, ref, ref_stride, height, width);
         break;
     case 48:
-        nxm_sad = svt_eb_compute48x_m_sad_avx2_intrin(src, src_stride, ref, ref_stride, height, width);
+        nxm_sad = svt_compute48x_m_sad_avx2_intrin(src, src_stride, ref, ref_stride, height, width);
         break;
     case 64:
-        nxm_sad = svt_eb_compute64x_m_sad_avx2_intrin(src, src_stride, ref, ref_stride, height, width);
+        nxm_sad = svt_compute64x_m_sad_avx2_intrin(src, src_stride, ref, ref_stride, height, width);
         break;
     case 128:
-        nxm_sad = svt_eb_compute128x_m_sad_avx2_intrin(src, src_stride, ref, ref_stride, height, width);
+        nxm_sad = svt_compute128x_m_sad_avx2_intrin(src, src_stride, ref, ref_stride, height, width);
         break;
     default: assert(0);
     }
@@ -4642,25 +4642,25 @@ uint32_t svt_nxm_sad_kernel_helper_avx2(const uint8_t *src, uint32_t src_stride,
 
     switch (width) {
     case 4:
-        nxm_sad = svt_eb_compute4x_m_sad_avx2_intrin(src, src_stride, ref, ref_stride, height, width);
+        nxm_sad = svt_compute4x_m_sad_avx2_intrin(src, src_stride, ref, ref_stride, height, width);
         break;
     case 8:
-        nxm_sad = svt_eb_compute8x_m_sad_avx2_intrin(src, src_stride, ref, ref_stride, height, width);
+        nxm_sad = svt_compute8x_m_sad_avx2_intrin(src, src_stride, ref, ref_stride, height, width);
         break;
     case 16:
-        nxm_sad = svt_eb_compute16x_m_sad_avx2_intrin(src, src_stride, ref, ref_stride, height, width);
+        nxm_sad = svt_compute16x_m_sad_avx2_intrin(src, src_stride, ref, ref_stride, height, width);
         break;
     case 24:
-        nxm_sad = svt_eb_compute24x_m_sad_avx2_intrin(src, src_stride, ref, ref_stride, height, width);
+        nxm_sad = svt_compute24x_m_sad_avx2_intrin(src, src_stride, ref, ref_stride, height, width);
         break;
     case 32:
-        nxm_sad = svt_eb_compute32x_m_sad_avx2_intrin(src, src_stride, ref, ref_stride, height, width);
+        nxm_sad = svt_compute32x_m_sad_avx2_intrin(src, src_stride, ref, ref_stride, height, width);
         break;
     case 48:
-        nxm_sad = svt_eb_compute48x_m_sad_avx2_intrin(src, src_stride, ref, ref_stride, height, width);
+        nxm_sad = svt_compute48x_m_sad_avx2_intrin(src, src_stride, ref, ref_stride, height, width);
         break;
     case 64:
-        nxm_sad = svt_eb_compute64x_m_sad_avx2_intrin(src, src_stride, ref, ref_stride, height, width);
+        nxm_sad = svt_compute64x_m_sad_avx2_intrin(src, src_stride, ref, ref_stride, height, width);
         break;
     case 40:
     case 52: break; //void_func();

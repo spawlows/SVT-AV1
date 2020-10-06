@@ -14,11 +14,11 @@
  *
  * @brief Unit test for Pack UnPack functions:
  * - svt_c_pack_avx2_intrin
- * - svt_eb_enc_msb_pack2d_avx2_intrin_al
- * - svt_eb_enc_msb_pack2d_sse2_intrin
+ * - svt_enc_msb_pack2d_avx2_intrin_al
+ * - svt_enc_msb_pack2d_sse2_intrin
  * - svt_compressed_packmsb_avx2_intrin
- * - svt_eb_enc_un_pack8_bit_data_avx2_intrin
- * - svt_eb_enc_msb_un_pack2d_sse2_intrin
+ * - svt_enc_un_pack8_bit_data_avx2_intrin
+ * - svt_enc_msb_un_pack2d_sse2_intrin
  * - svt_unpack_avg_avx2_intrin
  * - svt_unpack_avg_sse2_intrin
  * - svt_unpack_avg_safe_sub_avx2_intrin
@@ -274,7 +274,7 @@ TEST_P(PackMsbTest, PackMsbTest) {
 INSTANTIATE_TEST_CASE_P(PACKMSB, PackMsbTest,
                         ::testing::ValuesIn(TEST_PACK_SIZES));
 
-// test svt_eb_enc_msb_pack2d_avx2_intrin_al and svt_eb_enc_msb_pack2d_sse2_intrin.
+// test svt_enc_msb_pack2d_avx2_intrin_al and svt_enc_msb_pack2d_sse2_intrin.
 // There is an implicit assumption that the width should be multiple of 4.
 // Also there are special snippet to handle width of {4, 8, 16, 32, 64}, so use
 // TEST_COMMON_SIZES to cover all the width;
@@ -351,30 +351,30 @@ class Pack2dTest : public ::testing::TestWithParam<AreaSize> {
             eb_buf_random_u8(in_8bit_buffer_, test_size_);
             eb_buf_random_u8(inn_bit_buffer_, test_size_);
 
-            svt_eb_enc_msb_pack2d_avx2_intrin_al(in_8bit_buffer_,
-                                                 in_stride_,
-                                                 inn_bit_buffer_,
-                                                 out_16bit_buffer_avx2_,
-                                                 out_stride_,
-                                                 out_stride_,
-                                                 area_width_,
-                                                 area_height_);
-            svt_eb_enc_msb_pack2_d(in_8bit_buffer_,
-                                   in_stride_,
-                                   inn_bit_buffer_,
-                                   out_16bit_buffer_c_,
-                                   out_stride_,
-                                   out_stride_,
-                                   area_width_,
-                                   area_height_);
-            svt_eb_enc_msb_pack2d_sse2_intrin(in_8bit_buffer_,
+            svt_enc_msb_pack2d_avx2_intrin_al(in_8bit_buffer_,
                                               in_stride_,
                                               inn_bit_buffer_,
-                                              out_16bit_buffer_sse2_,
+                                              out_16bit_buffer_avx2_,
                                               out_stride_,
                                               out_stride_,
                                               area_width_,
                                               area_height_);
+            svt_enc_msb_pack2_d(in_8bit_buffer_,
+                                in_stride_,
+                                inn_bit_buffer_,
+                                out_16bit_buffer_c_,
+                                out_stride_,
+                                out_stride_,
+                                area_width_,
+                                area_height_);
+            svt_enc_msb_pack2d_sse2_intrin(in_8bit_buffer_,
+                                            in_stride_,
+                                            inn_bit_buffer_,
+                                            out_16bit_buffer_sse2_,
+                                            out_stride_,
+                                            out_stride_,
+                                            area_width_,
+                                            area_height_);
 
             check_output(area_width_,
                          area_height_,
@@ -386,7 +386,7 @@ class Pack2dTest : public ::testing::TestWithParam<AreaSize> {
                          out_16bit_buffer_c_);
 
             EXPECT_FALSE(HasFailure())
-                << "svt_eb_enc_msb_pack2d_{sse2,avx2}_intrin failed at " << i
+                << "svt_enc_msb_pack2d_{sse2,avx2}_intrin failed at " << i
                 << "th test with size (" << area_width_ << "," << area_height_
                 << ")";
         }
@@ -407,7 +407,7 @@ TEST_P(Pack2dTest, Pack2dTest) {
 INSTANTIATE_TEST_CASE_P(PACK2D, Pack2dTest,
                         ::testing::ValuesIn(TEST_COMMON_SIZES));
 
-// test svt_eb_enc_un_pack8_bit_data_avx2_intrin
+// test svt_enc_un_pack8_bit_data_avx2_intrin
 // Similar assumption that the width is multiple of 4, using
 // TEST_COMMON_SIZES to cover all the special width.
 class UnPackTest : public ::testing::TestWithParam<AreaSize> {
@@ -473,7 +473,7 @@ class UnPackTest : public ::testing::TestWithParam<AreaSize> {
     void run_test() {
         for (int i = 0; i < RANDOM_TIME; i++) {
             eb_buf_random_u16(in_16bit_buffer_, test_size_);
-            svt_eb_enc_un_pack8_bit_data_avx2_intrin(in_16bit_buffer_,
+            svt_enc_un_pack8_bit_data_avx2_intrin(in_16bit_buffer_,
                                                      in_stride_,
                                                      out_8bit_buffer1_,
                                                      out_stride_,
@@ -492,7 +492,7 @@ class UnPackTest : public ::testing::TestWithParam<AreaSize> {
                          out_8bit_buffer2_);
 
             EXPECT_FALSE(HasFailure())
-                << "svt_eb_enc_un_pack8_bit_data_avx2_intrin failed at " << i
+                << "svt_enc_un_pack8_bit_data_avx2_intrin failed at " << i
                 << "th test with size (" << area_width_ << "," << area_height_
                 << ")";
         }
@@ -501,22 +501,22 @@ class UnPackTest : public ::testing::TestWithParam<AreaSize> {
     void run_2d_test() {
         for (int i = 0; i < RANDOM_TIME; i++) {
             eb_buf_random_u16(in_16bit_buffer_, test_size_);
-            svt_eb_enc_msb_un_pack2d_sse2_intrin(in_16bit_buffer_,
-                                                 in_stride_,
-                                                 out_8bit_buffer1_,
-                                                 out_nbit_buffer1_,
-                                                 out_stride_,
-                                                 out_stride_,
-                                                 area_width_,
-                                                 area_height_);
-            svt_eb_enc_msb_un_pack2_d(in_16bit_buffer_,
-                                      in_stride_,
-                                      out_8bit_buffer2_,
-                                      out_nbit_buffer2_,
-                                      out_stride_,
-                                      out_stride_,
-                                      area_width_,
-                                      area_height_);
+            svt_enc_msb_un_pack2d_sse2_intrin(in_16bit_buffer_,
+                                              in_stride_,
+                                              out_8bit_buffer1_,
+                                              out_nbit_buffer1_,
+                                              out_stride_,
+                                              out_stride_,
+                                              area_width_,
+                                              area_height_);
+            svt_enc_msb_un_pack2_d(in_16bit_buffer_,
+                                   in_stride_,
+                                   out_8bit_buffer2_,
+                                   out_nbit_buffer2_,
+                                   out_stride_,
+                                   out_stride_,
+                                   area_width_,
+                                   area_height_);
 
             check_output(area_width_,
                          area_height_,
@@ -528,7 +528,7 @@ class UnPackTest : public ::testing::TestWithParam<AreaSize> {
                          out_nbit_buffer2_);
 
             EXPECT_FALSE(HasFailure())
-                << "svt_eb_enc_msb_un_pack2d_sse2_intrin failed at " << i
+                << "svt_enc_msb_un_pack2d_sse2_intrin failed at " << i
                 << "th test with size (" << area_width_ << "," << area_height_
                 << ")";
         }
