@@ -1388,9 +1388,9 @@ SIMD_INLINE void residual_kernel128_avx2(const uint8_t *input, const uint32_t in
     } while (--y);
 }
 
-void residual_kernel8bit_avx2(uint8_t *input, uint32_t input_stride, uint8_t *pred,
-                              uint32_t pred_stride, int16_t *residual, uint32_t residual_stride,
-                              uint32_t area_width, uint32_t area_height) {
+void svt_residual_kernel8bit_avx2(uint8_t *input, uint32_t input_stride, uint8_t *pred,
+                                  uint32_t pred_stride, int16_t *residual, uint32_t residual_stride,
+                                  uint32_t area_width, uint32_t area_height) {
     switch (area_width) {
     case 4:
         residual_kernel4_avx2(

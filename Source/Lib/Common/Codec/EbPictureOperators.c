@@ -103,9 +103,9 @@ EbErrorType picture_copy(EbPictureBufferDesc *src, uint32_t src_luma_origin_inde
 * Residual Kernel 16bit
 Computes the residual data
 *******************************************/
-void residual_kernel16bit_c(uint16_t *input, uint32_t input_stride, uint16_t *pred,
-                            uint32_t pred_stride, int16_t *residual, uint32_t residual_stride,
-                            uint32_t area_width, uint32_t area_height) {
+void svt_residual_kernel16bit_c(uint16_t *input, uint32_t input_stride, uint16_t *pred,
+                                uint32_t pred_stride, int16_t *residual, uint32_t residual_stride,
+                                uint32_t area_width, uint32_t area_height) {
     uint32_t row_index = 0;
 
     while (row_index < area_height) {
@@ -127,9 +127,9 @@ void residual_kernel16bit_c(uint16_t *input, uint32_t input_stride, uint16_t *pr
 * Residual Kernel
 Computes the residual data
 *******************************************/
-void residual_kernel8bit_c(uint8_t *input, uint32_t input_stride, uint8_t *pred,
-                           uint32_t pred_stride, int16_t *residual, uint32_t residual_stride,
-                           uint32_t area_width, uint32_t area_height) {
+void svt_residual_kernel8bit_c(uint8_t *input, uint32_t input_stride, uint8_t *pred,
+                               uint32_t pred_stride, int16_t *residual, uint32_t residual_stride,
+                               uint32_t area_width, uint32_t area_height) {
     uint32_t row_index = 0;
 
     while (row_index < area_height) {

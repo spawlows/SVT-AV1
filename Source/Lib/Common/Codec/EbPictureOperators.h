@@ -69,13 +69,13 @@ uint64_t svt_full_distortion_kernel16_bits_c(uint8_t *input, uint32_t input_offs
                                              uint32_t pred_stride, uint32_t area_width,
                                              uint32_t area_height);
 
-void residual_kernel16bit_c(uint16_t *input, uint32_t input_stride, uint16_t *pred,
-                            uint32_t pred_stride, int16_t *residual, uint32_t residual_stride,
-                            uint32_t area_width, uint32_t area_height);
+void svt_residual_kernel16bit_c(uint16_t *input, uint32_t input_stride, uint16_t *pred,
+                                uint32_t pred_stride, int16_t *residual, uint32_t residual_stride,
+                                uint32_t area_width, uint32_t area_height);
 
-void residual_kernel8bit_c(uint8_t *input, uint32_t input_stride, uint8_t *pred,
-                           uint32_t pred_stride, int16_t *residual, uint32_t residual_stride,
-                           uint32_t area_width, uint32_t area_height);
+void svt_residual_kernel8bit_c(uint8_t *input, uint32_t input_stride, uint8_t *pred,
+                               uint32_t pred_stride, int16_t *residual, uint32_t residual_stride,
+                               uint32_t area_width, uint32_t area_height);
 void pic_copy_kernel_8bit(EbByte src, uint32_t src_stride, EbByte dst, uint32_t dst_stride,
                           uint32_t area_width, uint32_t area_height);
 

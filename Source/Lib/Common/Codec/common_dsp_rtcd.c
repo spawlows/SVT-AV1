@@ -312,9 +312,9 @@ void setup_common_rtcd_internal(CPU_FLAGS flags) {
 
     svt_spatial_full_distortion_kernel = svt_spatial_full_distortion_kernel_c;
     svt_full_distortion_kernel16_bits = svt_full_distortion_kernel16_bits_c;
-    residual_kernel8bit = residual_kernel8bit_c;
+    svt_residual_kernel8bit = svt_residual_kernel8bit_c;
 
-    residual_kernel16bit = residual_kernel16bit_c;
+    svt_residual_kernel16bit = svt_residual_kernel16bit_c;
 
     picture_average_kernel = picture_average_kernel_c;
     picture_average_kernel1_line = picture_average_kernel1_line_c;
@@ -893,12 +893,12 @@ void setup_common_rtcd_internal(CPU_FLAGS flags) {
         SET_AVX2(svt_full_distortion_kernel16_bits,
                  svt_full_distortion_kernel16_bits_c,
                  svt_full_distortion_kernel16_bits_avx2);
-        SET_AVX2_AVX512(residual_kernel8bit,
-            residual_kernel8bit_c,
-            residual_kernel8bit_avx2,
-            residual_kernel8bit_avx512);
+        SET_AVX2_AVX512(svt_residual_kernel8bit,
+                        svt_residual_kernel8bit_c,
+                        svt_residual_kernel8bit_avx2,
+                        svt_residual_kernel8bit_avx512);
 
-        SET_SSE2(residual_kernel16bit, residual_kernel16bit_c, residual_kernel16bit_sse2_intrin);
+        SET_SSE2(svt_residual_kernel16bit, svt_residual_kernel16bit_c, svt_residual_kernel16bit_sse2_intrin);
         SET_SSE2(picture_average_kernel, picture_average_kernel_c, picture_average_kernel_sse2_intrin);
         SET_SSE2(picture_average_kernel1_line,
             picture_average_kernel1_line_c,

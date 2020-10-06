@@ -70,23 +70,23 @@ void residual_kernel(uint8_t *input, uint32_t input_offset, uint32_t input_strid
                      uint32_t residual_offset, uint32_t residual_stride, EbBool hbd,
                      uint32_t area_width, uint32_t area_height) {
     if (hbd) {
-        residual_kernel16bit(((uint16_t *)input) + input_offset,
-                             input_stride,
-                             ((uint16_t *)pred) + pred_offset,
-                             pred_stride,
-                             residual + residual_offset,
-                             residual_stride,
-                             area_width,
-                             area_height);
+        svt_residual_kernel16bit(((uint16_t *)input) + input_offset,
+                                 input_stride,
+                                 ((uint16_t *)pred) + pred_offset,
+                                 pred_stride,
+                                 residual + residual_offset,
+                                 residual_stride,
+                                 area_width,
+                                 area_height);
     } else {
-        residual_kernel8bit(&(input[input_offset]),
-                            input_stride,
-                            &(pred[pred_offset]),
-                            pred_stride,
-                            residual + residual_offset,
-                            residual_stride,
-                            area_width,
-                            area_height);
+        svt_residual_kernel8bit(&(input[input_offset]),
+                                input_stride,
+                                &(pred[pred_offset]),
+                                pred_stride,
+                                residual + residual_offset,
+                                residual_stride,
+                                area_width,
+                                area_height);
     }
 }
 
@@ -366,7 +366,7 @@ static void av1_encode_loop(PictureControlSet *pcs_ptr, EncDecContext *context_p
     //**********************************
     if (component_mask == PICTURE_BUFFER_DESC_FULL_MASK ||
         component_mask == PICTURE_BUFFER_DESC_LUMA_MASK) {
-        residual_kernel8bit(
+        svt_residual_kernel8bit(
             input_samples->buffer_y + input_luma_offset,
             input_samples->stride_y,
             pred_samples->buffer_y + pred_luma_offset,
@@ -509,7 +509,7 @@ static void av1_encode_loop(PictureControlSet *pcs_ptr, EncDecContext *context_p
         // Cb
         //**********************************
 
-        residual_kernel8bit(
+        svt_residual_kernel8bit(
             input_samples->buffer_cb + input_cb_offset,
             input_samples->stride_cb,
             pred_samples->buffer_cb + pred_cb_offset,
@@ -519,7 +519,7 @@ static void av1_encode_loop(PictureControlSet *pcs_ptr, EncDecContext *context_p
             context_ptr->blk_geom->tx_width_uv[blk_ptr->tx_depth][context_ptr->txb_itr],
             context_ptr->blk_geom->tx_height_uv[blk_ptr->tx_depth][context_ptr->txb_itr]);
 
-        residual_kernel8bit(
+        svt_residual_kernel8bit(
             input_samples->buffer_cr + input_cr_offset,
             input_samples->stride_cr,
             pred_samples->buffer_cr + pred_cr_offset,
@@ -747,7 +747,7 @@ static void av1_encode_loop_16bit(PictureControlSet *pcs_ptr, EncDecContext *con
         //**********************************
         if (component_mask == PICTURE_BUFFER_DESC_FULL_MASK ||
             component_mask == PICTURE_BUFFER_DESC_LUMA_MASK) {
-            residual_kernel16bit(
+            svt_residual_kernel16bit(
                 ((uint16_t *)input_samples16bit->buffer_y) + input_luma_offset,
                 input_samples16bit->stride_y,
                 ((uint16_t *)pred_samples16bit->buffer_y) + pred_luma_offset,
@@ -889,7 +889,7 @@ static void av1_encode_loop_16bit(PictureControlSet *pcs_ptr, EncDecContext *con
             //**********************************
             // Cb
             //**********************************
-            residual_kernel16bit(
+            svt_residual_kernel16bit(
                 ((uint16_t *)input_samples16bit->buffer_cb) + input_cb_offset,
                 input_samples16bit->stride_cb,
                 ((uint16_t *)pred_samples16bit->buffer_cb) + pred_cb_offset,
@@ -899,7 +899,7 @@ static void av1_encode_loop_16bit(PictureControlSet *pcs_ptr, EncDecContext *con
                 context_ptr->blk_geom->tx_width_uv[blk_ptr->tx_depth][context_ptr->txb_itr],
                 context_ptr->blk_geom->tx_height_uv[blk_ptr->tx_depth][context_ptr->txb_itr]);
 
-            residual_kernel16bit(
+            svt_residual_kernel16bit(
                 ((uint16_t *)input_samples16bit->buffer_cr) + input_cr_offset,
                 input_samples16bit->stride_cr,
                 ((uint16_t *)pred_samples16bit->buffer_cr) + pred_cr_offset,
