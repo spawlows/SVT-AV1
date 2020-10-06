@@ -80,7 +80,7 @@ void setup_rtcd_internal(CPU_FLAGS flags) {
 
     eb_subtract_average = eb_subtract_average_c;
 
-    get_proj_subspace = get_proj_subspace_c;
+    svt_get_proj_subspace = svt_get_proj_subspace_c;
 
     eb_aom_mse16x16 = eb_aom_mse16x16_c;
 
@@ -357,7 +357,7 @@ void setup_rtcd_internal(CPU_FLAGS flags) {
         if (flags & HAS_AVX2) eb_av1_highbd_pixel_proj_error = eb_av1_highbd_pixel_proj_error_avx2;
         if (flags & HAS_AVX2) eb_av1_calc_frame_error = eb_av1_calc_frame_error_avx2;
         if (flags & HAS_AVX2) eb_subtract_average = eb_subtract_average_avx2;
-        if (flags & HAS_AVX2) get_proj_subspace = get_proj_subspace_avx2;
+        if (flags & HAS_AVX2) svt_get_proj_subspace = svt_get_proj_subspace_avx2;
         if (flags & HAS_AVX2) svt_search_one_dual = svt_search_one_dual_avx2;
         if (flags & HAS_AVX2) eb_aom_mse16x16 = eb_aom_mse16x16_avx2;
         if (flags & HAS_AVX2) eb_aom_quantize_b = eb_aom_quantize_b_avx2;
