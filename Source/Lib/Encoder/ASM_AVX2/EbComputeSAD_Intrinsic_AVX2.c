@@ -26,12 +26,12 @@
         y_best  = i;                     \
     }
 
-void ext_sad_calculation_8x8_16x16_avx2_intrin(uint8_t *src, uint32_t src_stride, uint8_t *ref,
-                                               uint32_t ref_stride, uint32_t *p_best_sad_8x8,
-                                               uint32_t *p_best_sad_16x16, uint32_t *p_best_mv8x8,
-                                               uint32_t *p_best_mv16x16, uint32_t mv,
-                                               uint32_t *p_sad16x16, uint32_t *p_sad8x8,
-                                               EbBool sub_sad) {
+void svt_ext_sad_calculation_8x8_16x16_avx2_intrin(uint8_t *src, uint32_t src_stride, uint8_t *ref,
+                                                   uint32_t ref_stride, uint32_t *p_best_sad_8x8,
+                                                   uint32_t *p_best_sad_16x16, uint32_t *p_best_mv8x8,
+                                                   uint32_t *p_best_mv16x16, uint32_t mv,
+                                                   uint32_t *p_sad16x16, uint32_t *p_sad8x8,
+                                                   EbBool sub_sad) {
     __m128i xmm_sad16x16, xmm_sad16x16_total, sad8x8_0_3;
     __m128i sad8x8_less_than_bitmask, best_mv8x8;
     __m128i best_sad8x8, xmm_best_sad8x8, xmm_best_mv8x8;
@@ -4354,12 +4354,12 @@ void eb_aom_sad128x128x4d_avx2(const uint8_t *src, int src_stride, const uint8_t
     res[3] = sum0[3] + sum1[3];
 }
 
-void ext_all_sad_calculation_8x8_16x16_avx2(uint8_t *src, uint32_t src_stride, uint8_t *ref,
-                                            uint32_t ref_stride, uint32_t mv,
-                                            uint32_t *p_best_sad_8x8, uint32_t *p_best_sad_16x16,
-                                            uint32_t *p_best_mv8x8, uint32_t *p_best_mv16x16,
-                                            uint32_t p_eight_sad16x16[16][8],
-                                            uint32_t p_eight_sad8x8[64][8], EbBool sub_sad) {
+void svt_ext_all_sad_calculation_8x8_16x16_avx2(uint8_t *src, uint32_t src_stride, uint8_t *ref,
+                                                uint32_t ref_stride, uint32_t mv,
+                                                uint32_t *p_best_sad_8x8, uint32_t *p_best_sad_16x16,
+                                                uint32_t *p_best_mv8x8, uint32_t *p_best_mv16x16,
+                                                uint32_t p_eight_sad16x16[16][8],
+                                                uint32_t p_eight_sad8x8[64][8], EbBool sub_sad) {
     static const char offsets[16] = {0, 1, 4, 5, 2, 3, 6, 7, 8, 9, 12, 13, 10, 11, 14, 15};
 
     //---- 16x16 : 0, 1, 4, 5, 2, 3, 6, 7, 8, 9, 12, 13, 10, 11, 14, 15
@@ -4511,11 +4511,11 @@ void ext_all_sad_calculation_8x8_16x16_avx2(uint8_t *src, uint32_t src_stride, u
         best_id = _mm256_extract_epi16(m, 0) & 0x07;                                \
     }
 
-void ext_eight_sad_calculation_32x32_64x64_avx2(uint32_t  p_sad16x16[16][8],
-                                                uint32_t *p_best_sad_32x32,
-                                                uint32_t *p_best_sad_64x64,
-                                                uint32_t *p_best_mv32x32, uint32_t *p_best_mv64x64,
-                                                uint32_t mv, uint32_t p_sad32x32[4][8]) {
+void svt_ext_eight_sad_calculation_32x32_64x64_avx2(uint32_t  p_sad16x16[16][8],
+                                                    uint32_t *p_best_sad_32x32,
+                                                    uint32_t *p_best_sad_64x64,
+                                                    uint32_t *p_best_mv32x32, uint32_t *p_best_mv64x64,
+                                                    uint32_t mv, uint32_t p_sad32x32[4][8]) {
     avx2_find_min_pos_init();
     uint32_t si_a, si_b, si_c, si_d, si_e;
 

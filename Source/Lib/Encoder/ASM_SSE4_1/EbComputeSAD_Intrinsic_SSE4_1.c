@@ -24,10 +24,10 @@
         y_best  = i;                   \
     }
 
-void ext_sad_calculation_32x32_64x64_sse4_intrin(uint32_t *p_sad16x16, uint32_t *p_best_sad_32x32,
-                                                 uint32_t *p_best_sad_64x64,
-                                                 uint32_t *p_best_mv32x32, uint32_t *p_best_mv64x64,
-                                                 uint32_t mv, uint32_t *p_sad32x32) {
+void svt_ext_sad_calculation_32x32_64x64_sse4_intrin(uint32_t *p_sad16x16, uint32_t *p_best_sad_32x32,
+                                                     uint32_t *p_best_sad_64x64,
+                                                     uint32_t *p_best_mv32x32, uint32_t *p_best_mv64x64,
+                                                     uint32_t mv, uint32_t *p_sad32x32) {
     __m128i xmm_n1, sad32x32_greater_than_bitmask, sad32x32_less_than_or_eq_bitmask, best_sad32x32,
         best_mv_32x32, xmm_mv;
     __m128i sad_16x16_0_7_lo, sad_16x16_0_7_hi, sad_16x16_8_15_lo, sad_16x16_8_15_hi, xmm_sad64x64,

@@ -316,10 +316,10 @@ void setup_rtcd_internal(CPU_FLAGS flags) {
     svt_av1_apply_temporal_filter_planewise = svt_av1_apply_temporal_filter_planewise_c;
     svt_av1_apply_temporal_filter_planewise_hbd = svt_av1_apply_temporal_filter_planewise_hbd_c;
     svt_av1_apply_filtering_highbd = svt_av1_apply_filtering_highbd_c;
-    ext_sad_calculation_8x8_16x16 = ext_sad_calculation_8x8_16x16_c;
-    ext_sad_calculation_32x32_64x64 = ext_sad_calculation_32x32_64x64_c;
-    ext_all_sad_calculation_8x8_16x16 = ext_all_sad_calculation_8x8_16x16_c;
-    ext_eight_sad_calculation_32x32_64x64 = ext_eight_sad_calculation_32x32_64x64_c;
+    svt_ext_sad_calculation_8x8_16x16 = svt_ext_sad_calculation_8x8_16x16_c;
+    svt_ext_sad_calculation_32x32_64x64 = svt_ext_sad_calculation_32x32_64x64_c;
+    svt_ext_all_sad_calculation_8x8_16x16 = svt_ext_all_sad_calculation_8x8_16x16_c;
+    svt_ext_eight_sad_calculation_32x32_64x64 = svt_ext_eight_sad_calculation_32x32_64x64_c;
     eb_sad_kernel4x4 = fast_loop_nxm_sad_kernel;
     initialize_buffer_32bits = initialize_buffer_32bits_c;
     nxm_sad_kernel_sub_sampled = nxm_sad_kernel_helper_c;
@@ -607,18 +607,18 @@ void setup_rtcd_internal(CPU_FLAGS flags) {
                     SET_SSE41(svt_av1_apply_filtering_highbd,
                         svt_av1_apply_filtering_highbd_c,
                         svt_av1_highbd_apply_temporal_filter_sse4_1);
-                    SET_AVX2(ext_sad_calculation_8x8_16x16,
-                        ext_sad_calculation_8x8_16x16_c,
-                        ext_sad_calculation_8x8_16x16_avx2_intrin);
-                    SET_SSE41(ext_sad_calculation_32x32_64x64,
-                        ext_sad_calculation_32x32_64x64_c,
-                        ext_sad_calculation_32x32_64x64_sse4_intrin);
-                    SET_AVX2(ext_all_sad_calculation_8x8_16x16,
-                        ext_all_sad_calculation_8x8_16x16_c,
-                        ext_all_sad_calculation_8x8_16x16_avx2);
-                    SET_AVX2(ext_eight_sad_calculation_32x32_64x64,
-                        ext_eight_sad_calculation_32x32_64x64_c,
-                        ext_eight_sad_calculation_32x32_64x64_avx2);
+                    SET_AVX2(svt_ext_sad_calculation_8x8_16x16,
+                             svt_ext_sad_calculation_8x8_16x16_c,
+                             svt_ext_sad_calculation_8x8_16x16_avx2_intrin);
+                    SET_SSE41(svt_ext_sad_calculation_32x32_64x64,
+                              svt_ext_sad_calculation_32x32_64x64_c,
+                              svt_ext_sad_calculation_32x32_64x64_sse4_intrin);
+                    SET_AVX2(svt_ext_all_sad_calculation_8x8_16x16,
+                             svt_ext_all_sad_calculation_8x8_16x16_c,
+                             svt_ext_all_sad_calculation_8x8_16x16_avx2);
+                    SET_AVX2(svt_ext_eight_sad_calculation_32x32_64x64,
+                             svt_ext_eight_sad_calculation_32x32_64x64_c,
+                             svt_ext_eight_sad_calculation_32x32_64x64_avx2);
                     SET_AVX2(eb_sad_kernel4x4, fast_loop_nxm_sad_kernel, eb_compute4x_m_sad_avx2_intrin);
                     SET_SSE2(
                         initialize_buffer_32bits, initialize_buffer_32bits_c, initialize_buffer_32bits_sse2_intrin);
