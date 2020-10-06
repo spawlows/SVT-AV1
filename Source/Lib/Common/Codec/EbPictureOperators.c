@@ -153,10 +153,10 @@ void residual_kernel8bit_c(uint8_t *input, uint32_t input_stride, uint8_t *pred,
 *  Used in the Full Mode Decision Loop for the only case of a MVP-SKIP candidate
 *******************************************/
 
-void full_distortion_kernel32_bits_c(int32_t *coeff, uint32_t coeff_stride, int32_t *recon_coeff,
-                                     uint32_t recon_coeff_stride,
-                                     uint64_t distortion_result[DIST_CALC_TOTAL],
-                                     uint32_t area_width, uint32_t area_height) {
+void svt_full_distortion_kernel32_bits_c(int32_t *coeff, uint32_t coeff_stride,
+                                         int32_t *recon_coeff, uint32_t recon_coeff_stride,
+                                         uint64_t distortion_result[DIST_CALC_TOTAL],
+                                         uint32_t area_width, uint32_t area_height) {
     uint32_t row_index             = 0;
     uint64_t residual_distortion   = 0;
     uint64_t prediction_distortion = 0;
@@ -209,9 +209,9 @@ uint64_t full_distortion_kernel16_bits_c(uint8_t *input, uint32_t input_offset,
 /*******************************************
 * Picture Distortion Full Kernel CbfZero
 *******************************************/
-void full_distortion_kernel_cbf_zero32_bits_c(int32_t *coeff, uint32_t coeff_stride,
-                                              uint64_t distortion_result[DIST_CALC_TOTAL],
-                                              uint32_t area_width, uint32_t area_height) {
+void svt_full_distortion_kernel_cbf_zero32_bits_c(int32_t *coeff, uint32_t coeff_stride,
+                                                  uint64_t distortion_result[DIST_CALC_TOTAL],
+                                                  uint32_t area_width, uint32_t area_height) {
     uint32_t row_index             = 0;
     uint64_t prediction_distortion = 0;
 
@@ -251,7 +251,7 @@ EbErrorType picture_full_distortion32_bits(
         bheight = bheight < 64 ? bheight : 32;
 
         if (y_count_non_zero_coeffs) {
-            full_distortion_kernel32_bits(
+            svt_full_distortion_kernel32_bits(
                 &(((int32_t *)coeff->buffer_y)[coeff_luma_origin_index]),
                 bwidth,
                 &(((int32_t *)recon_coeff->buffer_y)[recon_coeff_luma_origin_index]),
@@ -260,7 +260,7 @@ EbErrorType picture_full_distortion32_bits(
                 bwidth,
                 bheight);
         } else {
-            full_distortion_kernel_cbf_zero32_bits(
+            svt_full_distortion_kernel_cbf_zero32_bits(
                 &(((int32_t *)coeff->buffer_y)[coeff_luma_origin_index]),
                 bwidth,
                 y_distortion,
@@ -276,7 +276,7 @@ EbErrorType picture_full_distortion32_bits(
 
         // CB
         if (cb_count_non_zero_coeffs) {
-            full_distortion_kernel32_bits(
+            svt_full_distortion_kernel32_bits(
                 &(((int32_t *)coeff->buffer_cb)[coeff_chroma_origin_index]),
                 bwidth_uv,
                 &(((int32_t *)recon_coeff->buffer_cb)[recon_coeff_chroma_origin_index]),
@@ -285,7 +285,7 @@ EbErrorType picture_full_distortion32_bits(
                 bwidth_uv,
                 bheight_uv);
         } else {
-            full_distortion_kernel_cbf_zero32_bits(
+            svt_full_distortion_kernel_cbf_zero32_bits(
                 &(((int32_t *)coeff->buffer_cb)[coeff_chroma_origin_index]),
                 bwidth_uv,
                 cb_distortion,
@@ -299,7 +299,7 @@ EbErrorType picture_full_distortion32_bits(
         cr_distortion[1] = 0;
         // CR
         if (cr_count_non_zero_coeffs) {
-            full_distortion_kernel32_bits(
+            svt_full_distortion_kernel32_bits(
                 &(((int32_t *)coeff->buffer_cr)[coeff_chroma_origin_index]),
                 bwidth_uv,
                 &(((int32_t *)recon_coeff->buffer_cr)[recon_coeff_chroma_origin_index]),
@@ -308,7 +308,7 @@ EbErrorType picture_full_distortion32_bits(
                 bwidth_uv,
                 bheight_uv);
         } else {
-            full_distortion_kernel_cbf_zero32_bits(
+            svt_full_distortion_kernel_cbf_zero32_bits(
                 &(((int32_t *)coeff->buffer_cr)[coeff_chroma_origin_index]),
                 bwidth_uv,
                 cr_distortion,

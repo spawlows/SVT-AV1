@@ -307,8 +307,8 @@ void setup_common_rtcd_internal(CPU_FLAGS flags) {
     svt_pack2d_16_bit_src_mul4 = svt_eb_enc_msb_pack2_d;
     svt_un_pack2d_16_bit_src_mul4 = svt_eb_enc_msb_un_pack2_d;
 
-    full_distortion_kernel_cbf_zero32_bits = full_distortion_kernel_cbf_zero32_bits_c;
-    full_distortion_kernel32_bits = full_distortion_kernel32_bits_c;
+    svt_full_distortion_kernel_cbf_zero32_bits = svt_full_distortion_kernel_cbf_zero32_bits_c;
+    svt_full_distortion_kernel32_bits = svt_full_distortion_kernel32_bits_c;
 
     spatial_full_distortion_kernel = spatial_full_distortion_kernel_c;
     full_distortion_kernel16_bits = full_distortion_kernel16_bits_c;
@@ -879,12 +879,12 @@ void setup_common_rtcd_internal(CPU_FLAGS flags) {
                       svt_eb_enc_msb_pack2d_sse2_intrin,
                       svt_eb_enc_msb_pack2d_avx2_intrin_al);
         SET_SSE2(svt_un_pack2d_16_bit_src_mul4, svt_eb_enc_msb_un_pack2_d, svt_eb_enc_msb_un_pack2d_sse2_intrin);
-        SET_AVX2(full_distortion_kernel_cbf_zero32_bits,
-            full_distortion_kernel_cbf_zero32_bits_c,
-            full_distortion_kernel_cbf_zero32_bits_avx2);
-        SET_AVX2(full_distortion_kernel32_bits,
-            full_distortion_kernel32_bits_c,
-            full_distortion_kernel32_bits_avx2);
+        SET_AVX2(svt_full_distortion_kernel_cbf_zero32_bits,
+                 svt_full_distortion_kernel_cbf_zero32_bits_c,
+                 svt_full_distortion_kernel_cbf_zero32_bits_avx2);
+        SET_AVX2(svt_full_distortion_kernel32_bits,
+                 svt_full_distortion_kernel32_bits_c,
+                 svt_full_distortion_kernel32_bits_avx2);
 
         SET_AVX2_AVX512(spatial_full_distortion_kernel,
             spatial_full_distortion_kernel_c,

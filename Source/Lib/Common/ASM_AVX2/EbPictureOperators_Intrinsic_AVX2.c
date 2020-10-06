@@ -1240,7 +1240,7 @@ void svt_unpack_avg_safe_sub_avx2_intrin(uint16_t *ref16_l0, uint32_t ref_l0_str
 
     return;
 }
-void full_distortion_kernel32_bits_avx2(int32_t *coeff, uint32_t coeff_stride, int32_t *recon_coeff,
+void svt_full_distortion_kernel32_bits_avx2(int32_t *coeff, uint32_t coeff_stride, int32_t *recon_coeff,
                                         uint32_t recon_coeff_stride,
                                         uint64_t distortion_result[DIST_CALC_TOTAL],
                                         uint32_t area_width, uint32_t area_height) {
@@ -1291,7 +1291,7 @@ void full_distortion_kernel32_bits_avx2(int32_t *coeff, uint32_t coeff_stride, i
     _mm_storeu_si128((__m128i *)distortion_result, temp1);
 }
 
-void full_distortion_kernel_cbf_zero32_bits_avx2(int32_t *coeff, uint32_t coeff_stride,
+void svt_full_distortion_kernel_cbf_zero32_bits_avx2(int32_t *coeff, uint32_t coeff_stride,
                                                  uint64_t distortion_result[DIST_CALC_TOTAL],
                                                  uint32_t area_width, uint32_t area_height) {
     uint32_t row_count;
