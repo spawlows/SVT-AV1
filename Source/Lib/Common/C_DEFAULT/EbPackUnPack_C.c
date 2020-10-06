@@ -133,9 +133,9 @@ void un_pack8_bit_data_c(uint16_t *in16_bit_buffer, uint32_t in_stride, uint8_t 
         }
     }
 }
-void unpack_avg_c(uint16_t *ref16_l0, uint32_t ref_l0_stride, uint16_t *ref16_l1,
-                  uint32_t ref_l1_stride, uint8_t *dst_ptr, uint32_t dst_stride, uint32_t width,
-                  uint32_t height) {
+void svt_unpack_avg_c(uint16_t *ref16_l0, uint32_t ref_l0_stride, uint16_t *ref16_l1,
+                      uint32_t ref_l1_stride, uint8_t *dst_ptr, uint32_t dst_stride, uint32_t width,
+                      uint32_t height) {
     uint64_t j, k;
     uint8_t  in_pixel_l0, in_pixel_l1;
 
@@ -148,9 +148,9 @@ void unpack_avg_c(uint16_t *ref16_l0, uint32_t ref_l0_stride, uint16_t *ref16_l1
     }
 }
 
-void unpack_avg_safe_sub_c(uint16_t *ref16_l0, uint32_t ref_l0_stride, uint16_t *ref16_l1,
-                           uint32_t ref_l1_stride, uint8_t *dst_ptr, uint32_t dst_stride,
-                           EbBool sub_pred, uint32_t width, uint32_t height) {
+void svt_unpack_avg_safe_sub_c(uint16_t *ref16_l0, uint32_t ref_l0_stride, uint16_t *ref16_l1,
+                               uint32_t ref_l1_stride, uint8_t *dst_ptr, uint32_t dst_stride,
+                               EbBool sub_pred, uint32_t width, uint32_t height) {
     uint64_t j, k;
     uint8_t  in_pixel_l0, in_pixel_l1;
 

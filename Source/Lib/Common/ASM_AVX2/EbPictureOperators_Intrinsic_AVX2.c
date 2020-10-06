@@ -500,7 +500,7 @@ void eb_enc_msb_pack2d_avx2_intrin_al(uint8_t *in8_bit_buffer, uint32_t in8_stri
 #define ALSTORE 1
 #define B256 1
 
-void unpack_avg_avx2_intrin(uint16_t *ref16_l0, uint32_t ref_l0_stride, uint16_t *ref16_l1,
+void svt_unpack_avg_avx2_intrin(uint16_t *ref16_l0, uint32_t ref_l0_stride, uint16_t *ref16_l1,
                             uint32_t ref_l1_stride, uint8_t *dst_ptr, uint32_t dst_stride,
                             uint32_t width, uint32_t height) {
     uint32_t y;
@@ -929,9 +929,10 @@ void unpack_avg_avx2_intrin(uint16_t *ref16_l0, uint32_t ref_l0_stride, uint16_t
     return;
 }
 
-void unpack_avg_safe_sub_avx2_intrin(uint16_t *ref16_l0, uint32_t ref_l0_stride, uint16_t *ref16_l1,
-                                     uint32_t ref_l1_stride, uint8_t *dst_ptr, uint32_t dst_stride,
-                                     EbBool sub_pred, uint32_t width, uint32_t height) {
+void svt_unpack_avg_safe_sub_avx2_intrin(uint16_t *ref16_l0, uint32_t ref_l0_stride,
+                                         uint16_t *ref16_l1,
+                                         uint32_t ref_l1_stride, uint8_t *dst_ptr, uint32_t dst_stride,
+                                         EbBool sub_pred, uint32_t width, uint32_t height) {
     uint32_t y;
     __m128i  in_pixel0, in_pixel1;
 

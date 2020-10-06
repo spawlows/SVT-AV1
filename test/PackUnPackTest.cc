@@ -19,9 +19,9 @@
  * - svt_compressed_packmsb_avx2_intrin
  * - eb_enc_un_pack8_bit_data_avx2_intrin
  * - eb_enc_msb_un_pack2d_sse2_intrin
- * - unpack_avg_avx2_intrin
- * - unpack_avg_sse2_intrin
- * - unpack_avg_safe_sub_avx2_intrin
+ * - svt_unpack_avg_avx2_intrin
+ * - svt_unpack_avg_sse2_intrin
+ * - svt_unpack_avg_safe_sub_avx2_intrin
  *
  * @author Cidana-Ivy, Cidana-Wenyao
  *
@@ -553,10 +553,10 @@ TEST_P(UnPackTest, UnPack2dTest) {
 INSTANTIATE_TEST_CASE_P(UNPACK, UnPackTest,
                         ::testing::ValuesIn(TEST_COMMON_SIZES));
 
-// test unpack_avg_avx2_intrin
-// only width of {4, 8, 16, 32, 64} are implemented in unpack_avg_avx2_intrin.
+// test svt_unpack_avg_avx2_intrin
+// only width of {4, 8, 16, 32, 64} are implemented in svt_unpack_avg_avx2_intrin.
 // only width of {8, 16, 32, 64} are implemented in
-// unpack_avg_safe_sub_avx2_intrin. use TEST_AVG_SIZES to cover all the cases.
+// svt_unpack_avg_safe_sub_avx2_intrin. use TEST_AVG_SIZES to cover all the cases.
 AreaSize TEST_AVG_SIZES[] = {AreaSize(4, 4),
                              AreaSize(4, 8),
                              AreaSize(8, 4),
@@ -651,30 +651,30 @@ class UnPackAvgTest : public ::testing::TestWithParam<AreaSize> {
     void run_avg_test() {
         for (int i = 0; i < RANDOM_TIME; i++) {
             prepare_data();
-            unpack_avg_avx2_intrin(in_16bit_buffer1_,
-                                   in_stride_,
-                                   in_16bit_buffer2_,
-                                   in_stride_,
-                                   out_8bit_buffer_avx2_,
-                                   out_stride_,
-                                   area_width_,
-                                   area_height_);
-            unpack_avg_c(in_16bit_buffer1_,
-                         in_stride_,
-                         in_16bit_buffer2_,
-                         in_stride_,
-                         out_8bit_buffer_c_,
-                         out_stride_,
-                         area_width_,
-                         area_height_);
-            unpack_avg_sse2_intrin(in_16bit_buffer1_,
-                                   in_stride_,
-                                   in_16bit_buffer2_,
-                                   in_stride_,
-                                   out_8bit_buffer_sse2_,
-                                   out_stride_,
-                                   area_width_,
-                                   area_height_);
+            svt_unpack_avg_avx2_intrin(in_16bit_buffer1_,
+                                       in_stride_,
+                                       in_16bit_buffer2_,
+                                       in_stride_,
+                                       out_8bit_buffer_avx2_,
+                                       out_stride_,
+                                       area_width_,
+                                       area_height_);
+            svt_unpack_avg_c(in_16bit_buffer1_,
+                             in_stride_,
+                             in_16bit_buffer2_,
+                             in_stride_,
+                             out_8bit_buffer_c_,
+                             out_stride_,
+                             area_width_,
+                             area_height_);
+            svt_unpack_avg_sse2_intrin(in_16bit_buffer1_,
+                                       in_stride_,
+                                       in_16bit_buffer2_,
+                                       in_stride_,
+                                       out_8bit_buffer_sse2_,
+                                       out_stride_,
+                                       area_width_,
+                                       area_height_);
             check_output(area_width_,
                          area_height_,
                          out_8bit_buffer_avx2_,
@@ -685,7 +685,7 @@ class UnPackAvgTest : public ::testing::TestWithParam<AreaSize> {
                          out_8bit_buffer_c_);
 
             EXPECT_FALSE(HasFailure())
-                << "unpack_avg_{sse2,avx2}_intrin failed at " << i
+                << "svt_unpack_avg_{sse2,avx2}_intrin failed at " << i
                 << "th test with size (" << area_width_ << "," << area_height_
                 << ")";
         }
@@ -695,24 +695,24 @@ class UnPackAvgTest : public ::testing::TestWithParam<AreaSize> {
         for (int i = 0; i < RANDOM_TIME; i++) {
             if (area_width_ > 4) {
                 prepare_data();
-                unpack_avg_safe_sub_avx2_intrin(in_16bit_buffer1_,
-                                                in_stride_,
-                                                in_16bit_buffer2_,
-                                                in_stride_,
-                                                out_8bit_buffer_avx2_,
-                                                out_stride_,
-                                                false,
-                                                area_width_,
-                                                area_height_);
-                unpack_avg_safe_sub_c(in_16bit_buffer1_,
-                                      in_stride_,
-                                      in_16bit_buffer2_,
-                                      in_stride_,
-                                      out_8bit_buffer_c_,
-                                      out_stride_,
-                                      false,
-                                      area_width_,
-                                      area_height_);
+                svt_unpack_avg_safe_sub_avx2_intrin(in_16bit_buffer1_,
+                                                    in_stride_,
+                                                    in_16bit_buffer2_,
+                                                    in_stride_,
+                                                    out_8bit_buffer_avx2_,
+                                                    out_stride_,
+                                                    false,
+                                                    area_width_,
+                                                    area_height_);
+                svt_unpack_avg_safe_sub_c(in_16bit_buffer1_,
+                                          in_stride_,
+                                          in_16bit_buffer2_,
+                                          in_stride_,
+                                          out_8bit_buffer_c_,
+                                          out_stride_,
+                                          false,
+                                          area_width_,
+                                          area_height_);
 
                 check_output(area_width_,
                              area_height_,
@@ -720,7 +720,7 @@ class UnPackAvgTest : public ::testing::TestWithParam<AreaSize> {
                              out_8bit_buffer_c_);
 
                 EXPECT_FALSE(HasFailure())
-                    << "unpack_avg_safe_sub_avx2_intrin failed at " << i
+                    << "svt_unpack_avg_safe_sub_avx2_intrin failed at " << i
                     << "th test with size (" << area_width_ << ","
                     << area_height_ << ")";
             }
