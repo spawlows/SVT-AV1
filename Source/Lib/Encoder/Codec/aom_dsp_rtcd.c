@@ -310,7 +310,7 @@ void setup_rtcd_internal(CPU_FLAGS flags) {
     eb_aom_ifft4x4_float = eb_aom_ifft4x4_float_c;
     svt_av1_get_gradient_hist = svt_av1_get_gradient_hist_c;
 
-    search_one_dual = search_one_dual_c;
+    svt_search_one_dual = svt_search_one_dual_c;
     sad_loop_kernel = sad_loop_kernel_c;
     svt_av1_apply_filtering = svt_av1_apply_filtering_c;
     svt_av1_apply_temporal_filter_planewise = svt_av1_apply_temporal_filter_planewise_c;
@@ -359,7 +359,7 @@ void setup_rtcd_internal(CPU_FLAGS flags) {
         if (flags & HAS_AVX2) eb_av1_calc_frame_error = eb_av1_calc_frame_error_avx2;
         if (flags & HAS_AVX2) eb_subtract_average = eb_subtract_average_avx2;
         if (flags & HAS_AVX2) get_proj_subspace = get_proj_subspace_avx2;
-        if (flags & HAS_AVX2) search_one_dual = search_one_dual_avx2;
+        if (flags & HAS_AVX2) svt_search_one_dual = svt_search_one_dual_avx2;
         if (flags & HAS_AVX2) eb_aom_mse16x16 = eb_aom_mse16x16_avx2;
         if (flags & HAS_AVX2) eb_aom_quantize_b = eb_aom_quantize_b_avx2;
         if (flags & HAS_AVX2) eb_aom_highbd_quantize_b = eb_aom_highbd_quantize_b_avx2;
@@ -587,8 +587,10 @@ void setup_rtcd_internal(CPU_FLAGS flags) {
                     if (flags & HAS_AVX2) eb_aom_ifft8x8_float = eb_aom_ifft8x8_float_avx2;
                     if (flags & HAS_SSE2) eb_aom_ifft4x4_float = eb_aom_ifft4x4_float_sse2;
                     if (flags & HAS_AVX2) svt_av1_get_gradient_hist = svt_av1_get_gradient_hist_avx2;
-                    SET_AVX2_AVX512(
-                        search_one_dual, search_one_dual_c, search_one_dual_avx2, search_one_dual_avx512);
+                    SET_AVX2_AVX512(svt_search_one_dual,
+                                    svt_search_one_dual_c,
+                                    svt_search_one_dual_avx2,
+                                    svt_search_one_dual_avx512);
                     SET_SSE41_AVX2_AVX512(sad_loop_kernel,
                         sad_loop_kernel_c,
                         sad_loop_kernel_sse4_1_intrin,
