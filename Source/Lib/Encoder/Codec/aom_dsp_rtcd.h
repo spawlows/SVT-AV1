@@ -554,8 +554,8 @@ extern "C" {
     RTCD_EXTERN uint32_t(*nxm_sad_avg_kernel)(uint8_t *src, uint32_t src_stride, uint8_t *ref1, uint32_t ref1_stride, uint8_t *ref2, uint32_t ref2_stride, uint32_t height, uint32_t width);
     RTCD_EXTERN uint64_t(*compute_mean_8x8)(uint8_t *input_samples, uint32_t input_stride, uint32_t input_area_width, uint32_t input_area_height);
     RTCD_EXTERN uint64_t(*svt_compute_mean_square_values_8x8)(uint8_t *input_samples, uint32_t input_stride, uint32_t input_area_width, uint32_t input_area_height);
-    RTCD_EXTERN uint64_t(*compute_sub_mean_8x8)(uint8_t* input_samples, uint16_t input_stride);
-    uint64_t compute_sub_mean_8x8_c(uint8_t* input_samples, uint16_t input_stride);
+    RTCD_EXTERN uint64_t(*svt_compute_sub_mean_8x8)(uint8_t* input_samples, uint16_t input_stride);
+    uint64_t svt_compute_sub_mean_8x8_c(uint8_t* input_samples, uint16_t input_stride);
     RTCD_EXTERN void(*compute_interm_var_four8x8)(uint8_t *input_samples, uint16_t input_stride, uint64_t *mean_of8x8_blocks, uint64_t *mean_of_squared8x8_blocks);
     RTCD_EXTERN uint32_t(*sad_16b_kernel)(uint16_t *src, uint32_t src_stride, uint16_t *ref, uint32_t ref_stride, uint32_t height, uint32_t width);
     RTCD_EXTERN void(*pme_sad_loop_kernel)(uint8_t* src, uint32_t src_stride, uint8_t* ref, uint32_t ref_stride, uint32_t block_height, uint32_t block_width, uint32_t* best_sad, int16_t* best_mvx, int16_t* best_mvy, int16_t search_position_start_x, int16_t search_position_start_y, int16_t search_area_width, int16_t search_area_height, int16_t search_step, int16_t mvx, int16_t mvy);
