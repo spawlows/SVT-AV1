@@ -580,18 +580,18 @@ typedef void (*Ebsad_LoopKernelNxMType)(
 typedef std::tuple<Ebsad_LoopKernelNxMType, Ebsad_LoopKernelNxMType> FuncPair;
 
 FuncPair TEST_FUNC_PAIRS[] = {
-    FuncPair(sad_loop_kernel_c, sad_loop_kernel_sse4_1_intrin),
-    FuncPair(sad_loop_kernel_c, sad_loop_kernel_avx2_intrin),
+    FuncPair(svt_sad_loop_kernel_c, svt_sad_loop_kernel_sse4_1_intrin),
+    FuncPair(svt_sad_loop_kernel_c, svt_sad_loop_kernel_avx2_intrin),
 #ifndef NON_AVX512_SUPPORT
-    FuncPair(sad_loop_kernel_c, sad_loop_kernel_avx512_intrin),
+    FuncPair(svt_sad_loop_kernel_c, svt_sad_loop_kernel_avx512_intrin),
 #endif
 };
 
 FuncPair TEST_FUNC_PAIRS_SMALL[] = {
-    FuncPair(sad_loop_kernel_c, sad_loop_kernel_sse4_1_intrin),
-    FuncPair(sad_loop_kernel_c, sad_loop_kernel_avx2_intrin),
+    FuncPair(svt_sad_loop_kernel_c, svt_sad_loop_kernel_sse4_1_intrin),
+    FuncPair(svt_sad_loop_kernel_c, svt_sad_loop_kernel_avx2_intrin),
 #ifndef NON_AVX512_SUPPORT
-    FuncPair(sad_loop_kernel_c, sad_loop_kernel_avx512_intrin),
+    FuncPair(svt_sad_loop_kernel_c, svt_sad_loop_kernel_avx512_intrin),
 #endif
 };
 
@@ -600,9 +600,9 @@ typedef std::tuple<TestPattern, BlkSize, SearchArea, FuncPair>
 
 /**
  * @brief Unit test for SAD loop (sparse, hme) functions include:
- *  - sad_loop_kernel_{sse4_1,avx2,avx512}
- *  - sad_loop_kernel_sparse_{sse4_1,avx2}_intrin
- *  - sad_loop_kernel_{sse4_1,avx2}_hme_l0_intrin
+ *  - svt_sad_loop_kernel_{sse4_1,avx2,avx512}
+ *  - svt_sad_loop_kernel_sparse_{sse4_1,avx2}_intrin
+ *  - svt_sad_loop_kernel_{sse4_1,avx2}_hme_l0_intrin
  *
  * Test strategy:
  *  This test case combine different wight(4-64) x height(4-64), different test
@@ -765,7 +765,7 @@ class sad_LoopTest : public ::testing::WithParamInterface<sad_LoopTestParam>,
                                                          finish_time_seconds,
                                                          finish_time_useconds);
 
-        printf("    sad_loop_kernel(%dx%d) search area[%dx%d]: %5.2fx)\n",
+        printf("    svt_sad_loop_kernel(%dx%d) search area[%dx%d]: %5.2fx)\n",
                width_,
                height_,
                search_area_width_,

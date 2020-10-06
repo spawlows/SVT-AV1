@@ -408,7 +408,7 @@ void sad_loop_kernel_generalized_avx2(
  * Requirement: block_height <= 64
  * Requirement: block_height % 2 = 0 when width = 4, 6 or 8
 *******************************************************************************/
-void sad_loop_kernel_avx2_intrin(
+void svt_sad_loop_kernel_avx2_intrin(
     uint8_t * src, // input parameter, source samples Ptr
     uint32_t  src_stride, // input parameter, source stride
     uint8_t * ref, // input parameter, reference samples Ptr

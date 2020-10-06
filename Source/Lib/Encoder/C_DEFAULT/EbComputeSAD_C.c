@@ -55,15 +55,15 @@ uint32_t sad_16b_kernel_c(uint16_t *src, // input parameter, source samples Ptr
     return sad;
 }
 
-void sad_loop_kernel_c(uint8_t * src, // input parameter, source samples Ptr
-                       uint32_t  src_stride, // input parameter, source stride
-                       uint8_t * ref, // input parameter, reference samples Ptr
-                       uint32_t  ref_stride, // input parameter, reference stride
-                       uint32_t  block_height, // input parameter, block height (M)
-                       uint32_t  block_width, // input parameter, block width (N)
-                       uint64_t *best_sad, int16_t *x_search_center, int16_t *y_search_center,
-                       uint32_t src_stride_raw, // input parameter, source stride (no line skipping)
-                       int16_t search_area_width, int16_t search_area_height) {
+void svt_sad_loop_kernel_c(uint8_t * src, // input parameter, source samples Ptr
+                           uint32_t  src_stride, // input parameter, source stride
+                           uint8_t * ref, // input parameter, reference samples Ptr
+                           uint32_t  ref_stride, // input parameter, reference stride
+                           uint32_t  block_height, // input parameter, block height (M)
+                           uint32_t  block_width, // input parameter, block width (N)
+                           uint64_t *best_sad, int16_t *x_search_center, int16_t *y_search_center,
+                           uint32_t src_stride_raw, // input parameter, source stride (no line skipping)
+                           int16_t search_area_width, int16_t search_area_height) {
     int16_t x_search_index;
     int16_t y_search_index;
 

@@ -991,8 +991,8 @@ void hme_level_0(
     search_region_index =
         x_top_left_search_region + y_top_left_search_region * sixteenth_ref_pic_ptr->stride_y;
 
-            // Put the first search location into level0 results
-            sad_loop_kernel(
+    // Put the first search location into level0 results
+    svt_sad_loop_kernel(
                 &context_ptr->sixteenth_sb_buffer[0],
                 context_ptr->sixteenth_sb_buffer_stride,
                 &sixteenth_ref_pic_ptr->buffer_y[search_region_index],
@@ -1140,7 +1140,7 @@ void hme_level_1(
         x_top_left_search_region + y_top_left_search_region * quarter_ref_pic_ptr->stride_y;
 
     // Put the first search location into level0 results
-    sad_loop_kernel(
+    svt_sad_loop_kernel(
         &context_ptr->quarter_sb_buffer[0],
         (context_ptr->hme_search_method == FULL_SAD_SEARCH)
             ? context_ptr->quarter_sb_buffer_stride
@@ -1285,7 +1285,7 @@ void hme_level_2(PictureParentControlSet *pcs_ptr, // input parameter, Picture c
         x_top_left_search_region + y_top_left_search_region * ref_pic_ptr->stride_y;
 
     // Put the first search location into level0 results
-    sad_loop_kernel(
+    svt_sad_loop_kernel(
         context_ptr->sb_src_ptr,
         (context_ptr->hme_search_method == FULL_SAD_SEARCH) ? context_ptr->sb_src_stride
                                                             : context_ptr->sb_src_stride * 2,

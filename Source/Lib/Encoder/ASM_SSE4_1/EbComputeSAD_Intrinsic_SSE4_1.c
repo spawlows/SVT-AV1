@@ -94,7 +94,7 @@ void ext_sad_calculation_32x32_64x64_sse4_intrin(uint32_t *p_sad16x16, uint32_t 
  * Requirement: block_height <= 64
  * Requirement: block_height % 2 = 0 when width = 4, 6 or 8
 *******************************************************************************/
-void sad_loop_kernel_sse4_1_intrin(
+void svt_sad_loop_kernel_sse4_1_intrin(
     uint8_t * src, // input parameter, source samples Ptr
     uint32_t  src_stride, // input parameter, source stride
     uint8_t * ref, // input parameter, reference samples Ptr
@@ -2034,18 +2034,18 @@ void sad_loop_kernel_sse4_1_intrin(
         break;
 
     default:
-        sad_loop_kernel_c(src,
-                          src_stride,
-                          ref,
-                          ref_stride,
-                          block_height,
-                          block_width,
-                          best_sad,
-                          x_search_center,
-                          y_search_center,
-                          src_stride_raw,
-                          search_area_width,
-                          search_area_height);
+        svt_sad_loop_kernel_c(src,
+                              src_stride,
+                              ref,
+                              ref_stride,
+                              block_height,
+                              block_width,
+                              best_sad,
+                              x_search_center,
+                              y_search_center,
+                              src_stride_raw,
+                              search_area_width,
+                              search_area_height);
         return;
     }
 
