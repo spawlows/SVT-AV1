@@ -191,75 +191,13 @@ EbErrorType eb_recon_picture_buffer_desc_ctor(EbPictureBufferDesc *pictureBuffer
     }
     return EB_ErrorNone;
 }
-void link_eb_to_aom_buffer_desc_8bit(EbPictureBufferDesc *picBuffDsc,
-                                     Yv12BufferConfig *   aomBuffDsc) {
-    //forces an 8 bit version
-    //NOTe:  Not all fileds are connected. add more connections as needed.
-    {
-        aomBuffDsc->y_buffer = picBuffDsc->buffer_y + picBuffDsc->origin_x +
-                               (picBuffDsc->origin_y * picBuffDsc->stride_y);
-        aomBuffDsc->u_buffer = picBuffDsc->buffer_cb + picBuffDsc->origin_x / 2 +
-                               (picBuffDsc->origin_y / 2 * picBuffDsc->stride_cb);
-        aomBuffDsc->v_buffer = picBuffDsc->buffer_cr + picBuffDsc->origin_x / 2 +
-                               (picBuffDsc->origin_y / 2 * picBuffDsc->stride_cb);
 
-        aomBuffDsc->y_width  = picBuffDsc->width;
-        aomBuffDsc->uv_width = picBuffDsc->width / 2;
-
-        aomBuffDsc->y_height  = picBuffDsc->height;
-        aomBuffDsc->uv_height = picBuffDsc->height / 2;
-
-        aomBuffDsc->y_stride  = picBuffDsc->stride_y;
-        aomBuffDsc->uv_stride = picBuffDsc->stride_cb;
-
-        aomBuffDsc->border = picBuffDsc->origin_x;
-
-        aomBuffDsc->subsampling_x = 1;
-        aomBuffDsc->subsampling_y = 1;
-
-        aomBuffDsc->y_crop_width   = aomBuffDsc->y_width;
-        aomBuffDsc->uv_crop_width  = aomBuffDsc->uv_width;
-        aomBuffDsc->y_crop_height  = aomBuffDsc->y_height;
-        aomBuffDsc->uv_crop_height = aomBuffDsc->uv_height;
-
-        aomBuffDsc->flags = 0;
-    }
-}
-
-void link_eb_to_aom_buffer_desc(EbPictureBufferDesc *picBuffDsc, Yv12BufferConfig *aomBuffDsc, uint16_t pad_right, uint16_t pad_bottom, EbBool is_16bit)
+void link_eb_to_aom_buffer_desc(EbPictureBufferDesc *picBuffDsc, Yv12BufferConfig *aomBuffDsc, uint16_t pad_right, uint16_t pad_bottom)
 {
-    (void) is_16bit;
-
     //NOTe:  Not all fileds are connected. add more connections as needed.
-    if ((picBuffDsc->bit_depth == EB_8BIT) && (picBuffDsc->is_16bit_pipeline != 1)) {
-        aomBuffDsc->y_buffer = picBuffDsc->buffer_y + picBuffDsc->origin_x +
-                               (picBuffDsc->origin_y * picBuffDsc->stride_y);
-        aomBuffDsc->u_buffer = picBuffDsc->buffer_cb + picBuffDsc->origin_x / 2 +
-                               (picBuffDsc->origin_y / 2 * picBuffDsc->stride_cb);
-        aomBuffDsc->v_buffer = picBuffDsc->buffer_cr + picBuffDsc->origin_x / 2 +
-                               (picBuffDsc->origin_y / 2 * picBuffDsc->stride_cb);
+    EbBool is_16bit = (picBuffDsc->bit_depth != EB_8BIT) || picBuffDsc->is_16bit_pipeline;
 
-        aomBuffDsc->y_width  = picBuffDsc->width;
-        aomBuffDsc->uv_width = picBuffDsc->width / 2;
-
-        aomBuffDsc->y_height  = picBuffDsc->height;
-        aomBuffDsc->uv_height = picBuffDsc->height / 2;
-
-        aomBuffDsc->y_stride  = picBuffDsc->stride_y;
-        aomBuffDsc->uv_stride = picBuffDsc->stride_cb;
-
-        aomBuffDsc->border = picBuffDsc->origin_x;
-
-        aomBuffDsc->subsampling_x = 1;
-        aomBuffDsc->subsampling_y = 1;
-
-        aomBuffDsc->y_crop_width   = aomBuffDsc->y_width - pad_right;
-        aomBuffDsc->uv_crop_width  = aomBuffDsc->y_crop_width / 2;
-        aomBuffDsc->y_crop_height  = aomBuffDsc->y_height - pad_bottom;
-        aomBuffDsc->uv_crop_height = aomBuffDsc->y_crop_height / 2;
-
-        aomBuffDsc->flags = 0;
-    } else {
+    if (is_16bit) {
         /*
         Moving within a 16bit memory area: 2 possible mecanisms:
 
@@ -285,38 +223,45 @@ void link_eb_to_aom_buffer_desc(EbPictureBufferDesc *picBuffDsc, Yv12BufferConfi
                       = Base16b_asInt + 2*off
                       =(Base16b_asInt/2 +off)*2
         */
-
         aomBuffDsc->y_buffer = CONVERT_TO_BYTEPTR(picBuffDsc->buffer_y);
         aomBuffDsc->u_buffer = CONVERT_TO_BYTEPTR(picBuffDsc->buffer_cb);
         aomBuffDsc->v_buffer = CONVERT_TO_BYTEPTR(picBuffDsc->buffer_cr);
 
-        aomBuffDsc->y_buffer +=
-            picBuffDsc->origin_x + (picBuffDsc->origin_y * picBuffDsc->stride_y);
-        aomBuffDsc->u_buffer +=
-            picBuffDsc->origin_x / 2 + (picBuffDsc->origin_y / 2 * picBuffDsc->stride_cb);
-        aomBuffDsc->v_buffer +=
-            picBuffDsc->origin_x / 2 + (picBuffDsc->origin_y / 2 * picBuffDsc->stride_cb);
-
-        aomBuffDsc->y_width  = picBuffDsc->width;
-        aomBuffDsc->uv_width = picBuffDsc->width / 2;
-
-        aomBuffDsc->y_height  = picBuffDsc->height;
-        aomBuffDsc->uv_height = picBuffDsc->height / 2;
-
-        aomBuffDsc->y_stride  = picBuffDsc->stride_y;
-        aomBuffDsc->uv_stride = picBuffDsc->stride_cb;
-
-        aomBuffDsc->border = picBuffDsc->origin_x;
-
-        aomBuffDsc->subsampling_x = 1;
-        aomBuffDsc->subsampling_y = 1;
-
-        aomBuffDsc->y_crop_width   = aomBuffDsc->y_width - pad_right;
-        aomBuffDsc->uv_crop_width  = aomBuffDsc->y_crop_width / 2;
-        aomBuffDsc->y_crop_height  = aomBuffDsc->y_height - pad_bottom;
-        aomBuffDsc->uv_crop_height = aomBuffDsc->y_crop_height / 2;
-        aomBuffDsc->flags          = YV12_FLAG_HIGHBITDEPTH;
+        aomBuffDsc->y_buffer += picBuffDsc->origin_x +
+            (picBuffDsc->origin_y * picBuffDsc->stride_y);
+        aomBuffDsc->u_buffer += picBuffDsc->origin_x / 2 +
+            (picBuffDsc->origin_y / 2 * picBuffDsc->stride_cb);
+        aomBuffDsc->v_buffer += picBuffDsc->origin_x / 2 +
+            (picBuffDsc->origin_y / 2 * picBuffDsc->stride_cb);
+        aomBuffDsc->flags = YV12_FLAG_HIGHBITDEPTH;
+    } else {
+        aomBuffDsc->y_buffer = picBuffDsc->buffer_y + picBuffDsc->origin_x +
+            (picBuffDsc->origin_y * picBuffDsc->stride_y);
+        aomBuffDsc->u_buffer = picBuffDsc->buffer_cb + picBuffDsc->origin_x / 2 +
+            (picBuffDsc->origin_y / 2 * picBuffDsc->stride_cb);
+        aomBuffDsc->v_buffer = picBuffDsc->buffer_cr + picBuffDsc->origin_x / 2 +
+            (picBuffDsc->origin_y / 2 * picBuffDsc->stride_cb);
+        aomBuffDsc->flags = 0;
     }
+
+    aomBuffDsc->y_width  = picBuffDsc->width;
+    aomBuffDsc->uv_width = picBuffDsc->width / 2;
+
+    aomBuffDsc->y_height  = picBuffDsc->height;
+    aomBuffDsc->uv_height = picBuffDsc->height / 2;
+
+    aomBuffDsc->y_stride  = picBuffDsc->stride_y;
+    aomBuffDsc->uv_stride = picBuffDsc->stride_cb;
+
+    aomBuffDsc->border = picBuffDsc->origin_x;
+
+    aomBuffDsc->subsampling_x = 1;
+    aomBuffDsc->subsampling_y = 1;
+
+    aomBuffDsc->y_crop_width   = aomBuffDsc->y_width - pad_right;
+    aomBuffDsc->uv_crop_width  = aomBuffDsc->y_crop_width / 2;
+    aomBuffDsc->y_crop_height  = aomBuffDsc->y_height - pad_bottom;
+    aomBuffDsc->uv_crop_height = aomBuffDsc->y_crop_height / 2;
 }
 
 void *eb_aom_memalign(size_t align, size_t size);
