@@ -17,6 +17,7 @@
 #include "filter.h"
 #include "EbEntropyCoding.h"
 #include "EbBitstreamUnit.h"
+#include "EbRateDistortionCost.h"
 
 static INLINE int32_t get_interinter_wedge_bits(BlockSize sb_type) {
     const int32_t wbits = get_wedge_params_bits(sb_type);
@@ -680,7 +681,6 @@ static void update_mv_component_stats(int comp, NmvComponent *mvcomp, MvSubpelPr
     }
 }
 
-MvJointType svt_av1_get_mv_joint(const MV *mv);
 /*******************************************************************************
  * Updates all the mv stats/CDF for the current block
  ******************************************************************************/
