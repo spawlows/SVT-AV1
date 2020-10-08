@@ -456,7 +456,7 @@ void cdef_seg_search16bit(PictureControlSet *pcs_ptr, SequenceControlSet *scs_pt
                                       sec_damping,
                                       coeff_shift);
 
-                    curr_mse = eb_compute_cdef_dist(
+                    curr_mse = eb_compute_cdef_dist_16bit(
                         ref_coeff[pli] +
                             (fbr * MI_SIZE_64X64 << mi_high_l2[pli]) * stride_ref[pli] +
                             (fbc * MI_SIZE_64X64 << mi_wide_l2[pli]),
