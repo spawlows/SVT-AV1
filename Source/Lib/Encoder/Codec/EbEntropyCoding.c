@@ -1758,7 +1758,7 @@ void write_drl_idx(FRAME_CONTEXT *frame_context, AomWriter *ec_writer, BlkStruct
         return;
     }
 }
-extern MvJointType svt_av1_get_mv_joint(int32_t diff[2]);
+
 static void        encode_mv_component(AomWriter *w, int32_t comp, NmvComponent *mvcomp,
                                        MvSubpelPrecision precision) {
     int32_t       offset;

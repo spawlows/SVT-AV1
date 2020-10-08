@@ -156,6 +156,9 @@ extern EbErrorType av1_inter_full_cost(PictureControlSet *pcs_ptr, ModeDecisionC
 extern uint64_t    get_tx_size_bits(ModeDecisionCandidateBuffer *candidateBuffer,
                                     ModeDecisionContext *context_ptr, PictureControlSet *pcs_ptr,
                                     uint8_t tx_depth, EbBool block_has_coeff);
+
+MvJointType svt_av1_get_mv_joint(const MV *mv);
+
 #ifdef __cplusplus
 }
 #endif
