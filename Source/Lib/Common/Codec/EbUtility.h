@@ -290,6 +290,13 @@ static inline int gcc_right_shift(int a, unsigned shift) {
     return a ^ sbit;
 }
 
+static INLINE int convert_to_trans_prec(int allow_hp, int coor) {
+    if (allow_hp)
+        return ROUND_POWER_OF_TWO_SIGNED(coor, WARPEDMODEL_PREC_BITS - 3);
+    else
+        return ROUND_POWER_OF_TWO_SIGNED(coor, WARPEDMODEL_PREC_BITS - 2) * 2;
+}
+
 #ifdef __cplusplus
 }
 #endif
