@@ -1225,8 +1225,8 @@ void *mode_decision_configuration_kernel(void *input_ptr) {
                 //svt_av1_hash_table_create(&pcs_ptr->hash_table);
 
                 Yv12BufferConfig cpi_source;
-                link_eb_to_aom_buffer_desc_8bit(pcs_ptr->parent_pcs_ptr->enhanced_picture_ptr,
-                                                &cpi_source);
+                link_eb_to_aom_buffer_desc(pcs_ptr->parent_pcs_ptr->enhanced_picture_ptr,
+                                                &cpi_source, 0, 0);
 
                 svt_av1_crc_calculator_init(&pcs_ptr->crc_calculator1, 24, 0x5D6DCB);
                 svt_av1_crc_calculator_init(&pcs_ptr->crc_calculator2, 24, 0x864CFB);
