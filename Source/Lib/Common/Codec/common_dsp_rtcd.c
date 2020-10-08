@@ -260,7 +260,7 @@ void setup_common_rtcd_internal(CPU_FLAGS flags) {
 
     eb_av1_filter_intra_edge_high = eb_av1_filter_intra_edge_high_c;
 
-    eb_av1_filter_intra_edge = eb_av1_filter_intra_edge_high_old_c;
+    eb_av1_filter_intra_edge = eb_av1_filter_intra_edge_c;
 
     eb_av1_upsample_intra_edge = eb_av1_upsample_intra_edge_c;
 

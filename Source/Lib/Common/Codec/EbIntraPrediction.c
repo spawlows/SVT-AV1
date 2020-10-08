@@ -87,7 +87,7 @@ int32_t use_intra_edge_upsample(int32_t bs0, int32_t bs1, int32_t delta, int32_t
 
 #define INTRA_EDGE_FILT 3
 #define INTRA_EDGE_TAPS 5
-void eb_av1_filter_intra_edge_high_old_c(uint8_t *p, int32_t sz, int32_t strength)
+void eb_av1_filter_intra_edge_c(uint8_t *p, int32_t sz, int32_t strength)
 {
     if (!strength) return;
 

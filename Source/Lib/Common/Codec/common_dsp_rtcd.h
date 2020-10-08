@@ -114,7 +114,7 @@ extern "C" {
 
     void eb_av1_filter_intra_predictor_c(uint8_t *dst, ptrdiff_t stride, TxSize tx_size, const uint8_t *above, const uint8_t *left, int32_t mode);
     RTCD_EXTERN void(*eb_av1_filter_intra_predictor) (uint8_t *dst, ptrdiff_t stride, TxSize tx_size, const uint8_t *above, const uint8_t *left, int32_t mode);
-    void eb_av1_filter_intra_edge_high_old_c(uint8_t *p, int32_t sz, int32_t strength);
+    void eb_av1_filter_intra_edge_c(uint8_t *p, int32_t sz, int32_t strength);
     RTCD_EXTERN void(*eb_av1_filter_intra_edge)(uint8_t *p, int32_t sz, int32_t strength);
     void eb_av1_filter_intra_edge_high_c(uint16_t *p, int32_t sz, int32_t strength);
     RTCD_EXTERN void(*eb_av1_filter_intra_edge_high)(uint16_t *p, int32_t sz, int32_t strength);
