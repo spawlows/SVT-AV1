@@ -3010,6 +3010,7 @@ void gathering_picture_statistics(SequenceControlSet *scs_ptr, PictureParentCont
 /************************************************
  * Pad Picture at the right and bottom sides
  ** To match a multiple of min CU size in width and height
+ ** In the function, pixels are stored in short_ptr for 16bit
  ************************************************/
 void pad_picture_to_multiple_of_min_blk_size_dimensions(SequenceControlSet * scs_ptr,
                                                         EbPictureBufferDesc *input_picture_ptr) {
@@ -3019,120 +3020,73 @@ void pad_picture_to_multiple_of_min_blk_size_dimensions(SequenceControlSet * scs
     const uint16_t subsampling_x = (color_format == EB_YUV444 ? 1 : 2) - 1;
     const uint16_t subsampling_y = (color_format >= EB_YUV422 ? 1 : 2) - 1;
 
-    // Input Picture Padding
-    pad_input_picture(
-        &input_picture_ptr->buffer_y[input_picture_ptr->origin_x +
-                                     (input_picture_ptr->origin_y * input_picture_ptr->stride_y)],
-        input_picture_ptr->stride_y,
-        (input_picture_ptr->width - scs_ptr->pad_right),
-        (input_picture_ptr->height - scs_ptr->pad_bottom),
-        scs_ptr->pad_right,
-        scs_ptr->pad_bottom);
+    if (!is16_bit_input) {
+        uint8_t *buffer_y = &input_picture_ptr->buffer_y[input_picture_ptr->origin_x +
+                                                         (input_picture_ptr->origin_y *
+                                                          input_picture_ptr->stride_y)];
+        uint8_t *buffer_cb =
+            &input_picture_ptr->buffer_cb[(input_picture_ptr->origin_x >> subsampling_x) +
+                                          ((input_picture_ptr->origin_y >> subsampling_y) *
+                                           input_picture_ptr->stride_cb)];
+        uint8_t *buffer_cr =
+            &input_picture_ptr->buffer_cr[(input_picture_ptr->origin_x >> subsampling_x) +
+                                          ((input_picture_ptr->origin_y >> subsampling_y) *
+                                           input_picture_ptr->stride_cb)];
 
-    pad_input_picture(
-        &input_picture_ptr->buffer_cb[(input_picture_ptr->origin_x >> subsampling_x) +
-                                      ((input_picture_ptr->origin_y >> subsampling_y) *
-                                       input_picture_ptr->stride_cb)],
-        input_picture_ptr->stride_cb,
-        (input_picture_ptr->width - scs_ptr->pad_right) >> subsampling_x,
-        (input_picture_ptr->height - scs_ptr->pad_bottom) >> subsampling_y,
-        scs_ptr->pad_right >> subsampling_x,
-        scs_ptr->pad_bottom >> subsampling_y);
+        // Input Picture Padding
+        pad_input_picture(buffer_y,
+                          input_picture_ptr->stride_y,
+                          (input_picture_ptr->width - scs_ptr->pad_right),
+                          (input_picture_ptr->height - scs_ptr->pad_bottom),
+                          scs_ptr->pad_right,
+                          scs_ptr->pad_bottom);
 
-    pad_input_picture(
-        &input_picture_ptr->buffer_cr[(input_picture_ptr->origin_x >> subsampling_x) +
-                                      ((input_picture_ptr->origin_y >> subsampling_y) *
-                                       input_picture_ptr->stride_cb)],
-        input_picture_ptr->stride_cr,
-        (input_picture_ptr->width - scs_ptr->pad_right) >> subsampling_x,
-        (input_picture_ptr->height - scs_ptr->pad_bottom) >> subsampling_y,
-        scs_ptr->pad_right >> subsampling_x,
-        scs_ptr->pad_bottom >> subsampling_y);
+        pad_input_picture(buffer_cb,
+                          input_picture_ptr->stride_cb,
+                          (input_picture_ptr->width - scs_ptr->pad_right) >> subsampling_x,
+                          (input_picture_ptr->height - scs_ptr->pad_bottom) >> subsampling_y,
+                          scs_ptr->pad_right >> subsampling_x,
+                          scs_ptr->pad_bottom >> subsampling_y);
 
-    if (is16_bit_input) {
-        pad_input_picture(
-            &input_picture_ptr->buffer_bit_inc_y[input_picture_ptr->origin_x +
-                                                 (input_picture_ptr->origin_y *
-                                                  input_picture_ptr->stride_bit_inc_y)],
-            input_picture_ptr->stride_bit_inc_y,
-            (input_picture_ptr->width - scs_ptr->pad_right),
-            (input_picture_ptr->height - scs_ptr->pad_bottom),
-            scs_ptr->pad_right,
-            scs_ptr->pad_bottom);
+        pad_input_picture(buffer_cr,
+                          input_picture_ptr->stride_cr,
+                          (input_picture_ptr->width - scs_ptr->pad_right) >> subsampling_x,
+                          (input_picture_ptr->height - scs_ptr->pad_bottom) >> subsampling_y,
+                          scs_ptr->pad_right >> subsampling_x,
+                          scs_ptr->pad_bottom >> subsampling_y);
+    } else {
+        uint16_t *buffer_y = &((uint16_t *)input_picture_ptr->buffer_y)[
+            input_picture_ptr->origin_x +
+            (input_picture_ptr->origin_y * input_picture_ptr->stride_y)];
+        uint16_t *buffer_cb = &((uint16_t *)input_picture_ptr->buffer_cb)[
+            (input_picture_ptr->origin_x >> subsampling_x) +
+            ((input_picture_ptr->origin_y >> subsampling_y) * input_picture_ptr->stride_cb)];
+        uint16_t *buffer_cr = &((uint16_t *)input_picture_ptr->buffer_cr)[
+            (input_picture_ptr->origin_x >> subsampling_x) +
+            ((input_picture_ptr->origin_y >> subsampling_y) * input_picture_ptr->stride_cb)];
 
-        pad_input_picture(
-            &input_picture_ptr->buffer_bit_inc_cb[(input_picture_ptr->origin_x >> subsampling_x) +
-                                                  ((input_picture_ptr->origin_y >> subsampling_y) *
-                                                   input_picture_ptr->stride_bit_inc_cb)],
-            input_picture_ptr->stride_bit_inc_cb,
-            (input_picture_ptr->width - scs_ptr->pad_right) >> subsampling_x,
-            (input_picture_ptr->height - scs_ptr->pad_bottom) >> subsampling_y,
-            scs_ptr->pad_right >> subsampling_x,
-            scs_ptr->pad_bottom >> subsampling_y);
+        // Input Picture Padding
+        pad_input_picture_16bit(buffer_y,
+                                input_picture_ptr->stride_y,
+                                (input_picture_ptr->width - scs_ptr->pad_right),
+                                (input_picture_ptr->height - scs_ptr->pad_bottom),
+                                scs_ptr->pad_right,
+                                scs_ptr->pad_bottom);
 
-        pad_input_picture(
-            &input_picture_ptr->buffer_bit_inc_cr[(input_picture_ptr->origin_x >> subsampling_x) +
-                                                  ((input_picture_ptr->origin_y >> subsampling_y) *
-                                                   input_picture_ptr->stride_bit_inc_cb)],
-            input_picture_ptr->stride_bit_inc_cr,
-            (input_picture_ptr->width - scs_ptr->pad_right) >> subsampling_x,
-            (input_picture_ptr->height - scs_ptr->pad_bottom) >> subsampling_y,
-            scs_ptr->pad_right >> subsampling_x,
-            scs_ptr->pad_bottom >> subsampling_y);
+        pad_input_picture_16bit(buffer_cb,
+                                input_picture_ptr->stride_cb,
+                                (input_picture_ptr->width - scs_ptr->pad_right) >> subsampling_x,
+                                (input_picture_ptr->height - scs_ptr->pad_bottom) >> subsampling_y,
+                                scs_ptr->pad_right >> subsampling_x,
+                                scs_ptr->pad_bottom >> subsampling_y);
+
+        pad_input_picture_16bit(buffer_cr,
+                                input_picture_ptr->stride_cr,
+                                (input_picture_ptr->width - scs_ptr->pad_right) >> subsampling_x,
+                                (input_picture_ptr->height - scs_ptr->pad_bottom) >> subsampling_y,
+                                scs_ptr->pad_right >> subsampling_x,
+                                scs_ptr->pad_bottom >> subsampling_y);
     }
-
-    return;
-}
-
-/************************************************
- * Pad Picture at the right and bottom sides
- ** To match a multiple of min CU size in width and height
- ** In the function, pixels are stored in short_ptr
- ************************************************/
-void pad_picture_to_multiple_of_min_blk_size_dimensions_16bit(
-    SequenceControlSet * scs_ptr, EbPictureBufferDesc *input_picture_ptr) {
-    assert(scs_ptr->static_config.encoder_bit_depth > EB_8BIT);
-
-    uint32_t       color_format  = input_picture_ptr->color_format;
-    const uint16_t subsampling_x = (color_format == EB_YUV444 ? 1 : 2) - 1;
-    const uint16_t subsampling_y = (color_format >= EB_YUV422 ? 1 : 2) - 1;
-
-    // Input Picture Padding
-    uint16_t* buffer_y = (uint16_t*)(input_picture_ptr->buffer_y) + input_picture_ptr->origin_x +
-                         input_picture_ptr->origin_y * input_picture_ptr->stride_y;
-    pad_input_picture_16bit(
-        buffer_y,
-        input_picture_ptr->stride_y,
-        (input_picture_ptr->width - scs_ptr->pad_right),
-        (input_picture_ptr->height - scs_ptr->pad_bottom),
-        scs_ptr->pad_right,
-        scs_ptr->pad_bottom);
-
-    uint16_t* buffer_cb = (uint16_t*)(input_picture_ptr->buffer_cb) +
-                          (input_picture_ptr->origin_x >> subsampling_x) +
-                          (input_picture_ptr->origin_y >> subsampling_y) *
-                          input_picture_ptr->stride_cb;
-    pad_input_picture_16bit(
-        buffer_cb,
-        input_picture_ptr->stride_cb,
-        (input_picture_ptr->width - scs_ptr->pad_right) >> subsampling_x,
-        (input_picture_ptr->height - scs_ptr->pad_bottom) >> subsampling_y,
-        scs_ptr->pad_right >> subsampling_x,
-        scs_ptr->pad_bottom >> subsampling_y);
-
-    uint16_t* buffer_cr = (uint16_t*)(input_picture_ptr->buffer_cr) +
-                          (input_picture_ptr->origin_x >> subsampling_x) +
-                          (input_picture_ptr->origin_y >> subsampling_y) *
-                          input_picture_ptr->stride_cr;
-    pad_input_picture_16bit(
-        buffer_cr,
-        input_picture_ptr->stride_cr,
-        (input_picture_ptr->width - scs_ptr->pad_right) >> subsampling_x,
-        (input_picture_ptr->height - scs_ptr->pad_bottom) >> subsampling_y,
-        scs_ptr->pad_right >> subsampling_x,
-        scs_ptr->pad_bottom >> subsampling_y);
-
-    return;
 }
 
 /************************************************

@@ -2906,7 +2906,7 @@ void obmc_motion_refinement(PictureControlSet *pcs_ptr, struct ModeDecisionConte
                                       &reference_picture);
 
         Yv12BufferConfig ref_buf;
-        link_eb_to_aom_buffer_desc_8bit(reference_picture, &ref_buf);
+        link_eb_to_aom_buffer_desc(reference_picture, &ref_buf, 0, 0);
 
         struct Buf2D yv12_mb[MAX_MB_PLANE];
         eb_av1_setup_pred_block(context_ptr->blk_geom->bsize, yv12_mb, &ref_buf, mi_row, mi_col);
@@ -4237,7 +4237,7 @@ void intra_bc_search(PictureControlSet *pcs, ModeDecisionContext *context_ptr,
 
     /* pointer to current frame */
     Yv12BufferConfig cur_buf;
-    link_eb_to_aom_buffer_desc_8bit(pcs->parent_pcs_ptr->enhanced_picture_ptr, &cur_buf);
+    link_eb_to_aom_buffer_desc(pcs->parent_pcs_ptr->enhanced_picture_ptr, &cur_buf, 0, 0);
     struct Buf2D yv12_mb[MAX_MB_PLANE];
     eb_av1_setup_pred_block(bsize, yv12_mb, &cur_buf, mi_row, mi_col);
     for (int i = 0; i < num_planes; ++i) x->xdplane[i].pre[0] = yv12_mb[i]; //ref in ME

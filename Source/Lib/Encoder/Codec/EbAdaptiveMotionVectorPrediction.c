@@ -1027,13 +1027,6 @@ void setup_ref_mv_list(PictureControlSet *pcs_ptr, const Av1Common *cm, const Ma
     (void)nearest_match;
 }
 
-static INLINE int convert_to_trans_prec(int allow_hp, int coor) {
-    if (allow_hp)
-        return ROUND_POWER_OF_TWO_SIGNED(coor, WARPEDMODEL_PREC_BITS - 3);
-    else
-        return ROUND_POWER_OF_TWO_SIGNED(coor, WARPEDMODEL_PREC_BITS - 2) * 2;
-}
-
 static INLINE int block_center_x(int mi_col, BlockSize bs) {
     const int bw = block_size_wide[bs];
     return mi_col * MI_SIZE + bw / 2 - 1;

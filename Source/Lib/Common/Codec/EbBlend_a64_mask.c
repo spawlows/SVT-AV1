@@ -348,7 +348,7 @@ void eb_aom_blend_a64_vmask_c(uint8_t *dst, uint32_t dst_stride, const uint8_t *
     }
 }
 
-void eb_aom_highbd_blend_a64_vmask_c_8bit(uint8_t *dst_8, uint32_t dst_stride,
+void eb_aom_highbd_blend_a64_vmask_8bit_c(uint8_t *dst_8, uint32_t dst_stride,
                                           const uint8_t *src0_8, uint32_t src0_stride,
                                           const uint8_t *src1_8, uint32_t src1_stride,
                                           const uint8_t *mask, int w, int h, int bd) {
@@ -399,7 +399,7 @@ void eb_aom_blend_a64_hmask_c(uint8_t *dst, uint32_t dst_stride, const uint8_t *
     }
 }
 
-void eb_aom_highbd_blend_a64_hmask_c_8bit(uint8_t *dst_8, uint32_t dst_stride,
+void eb_aom_highbd_blend_a64_hmask_8bit_c(uint8_t *dst_8, uint32_t dst_stride,
                                           const uint8_t *src0_8, uint32_t src0_stride,
                                           const uint8_t *src1_8, uint32_t src1_stride,
                                           const uint8_t *mask, int w, int h, int bd) {
