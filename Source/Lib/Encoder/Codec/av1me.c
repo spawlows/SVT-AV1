@@ -13,6 +13,7 @@
 #include <math.h>
 #include <stdio.h>
 #include "av1me.h"
+#include "mcomp.h"
 #include "EbUtility.h"
 #include "EbPictureControlSet.h"
 #include "EbSequenceControlSet.h"
@@ -119,19 +120,13 @@ void svt_av1_set_mv_search_range(MvLimits *mv_limits, const MV *mv) {
     if (mv_limits->row_max > row_max) mv_limits->row_max = row_max;
 }
 
-MvJointType svt_av1_get_mv_joint(const MV *mv);
-
-static INLINE int mv_cost(const MV *mv, const int *joint_cost, int *const comp_cost[2]) {
-    return joint_cost[svt_av1_get_mv_joint(mv)] + comp_cost[0][mv->row] + comp_cost[1][mv->col];
-}
-
 #define PIXEL_TRANSFORM_ERROR_SCALE 4
 int mv_err_cost(const MV *mv, const MV *ref, const int *mvjcost, int *mvcost[2],
                        int error_per_bit) {
     if (mvcost) {
         const MV diff = {mv->row - ref->row, mv->col - ref->col};
         return (int)ROUND_POWER_OF_TWO_64(
-            (int64_t)mv_cost(&diff, mvjcost, mvcost) * error_per_bit,
+            (int64_t)svt_mv_cost(&diff, mvjcost, (const int* const *)mvcost) * error_per_bit,
             RDDIV_BITS + AV1_PROB_COST_SHIFT - RD_EPB_SHIFT + PIXEL_TRANSFORM_ERROR_SCALE);
     }
     return 0;
@@ -140,8 +135,8 @@ int mv_err_cost(const MV *mv, const MV *ref, const int *mvjcost, int *mvcost[2],
 static int mvsad_err_cost(const IntraBcContext *x, const MV *mv, const MV *ref, int sad_per_bit) {
     const MV diff = {(mv->row - ref->row) * 8, (mv->col - ref->col) * 8};
     return ROUND_POWER_OF_TWO(
-        (unsigned)mv_cost(&diff, x->nmv_vec_cost, x->mv_cost_stack) * sad_per_bit,
-        AV1_PROB_COST_SHIFT);
+        (unsigned)svt_mv_cost(&diff, x->nmv_vec_cost, (const int *const *)x->mv_cost_stack) *
+            sad_per_bit, AV1_PROB_COST_SHIFT);
 }
 
 void svt_av1_init3smotion_compensation(SearchSiteConfig *cfg, int stride) {
