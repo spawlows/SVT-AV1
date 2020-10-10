@@ -2791,6 +2791,20 @@ void pad_and_decimate_filtered_pic(
                          input_picture_ptr->height,
                          input_picture_ptr->origin_x,
                          input_picture_ptr->origin_y);
+#if FIX_PAD_CHROMA_AFTER_MCTF
+        generate_padding(input_picture_ptr->buffer_cb,
+                         input_picture_ptr->stride_cb,
+                         input_picture_ptr->width >> scs_ptr->subsampling_x,
+                         input_picture_ptr->height >> scs_ptr->subsampling_y,
+                         input_picture_ptr->origin_x >> scs_ptr->subsampling_x,
+                         input_picture_ptr->origin_y >> scs_ptr->subsampling_y);
+        generate_padding(input_picture_ptr->buffer_cr,
+                         input_picture_ptr->stride_cr,
+                         input_picture_ptr->width >> scs_ptr->subsampling_x,
+                         input_picture_ptr->height >> scs_ptr->subsampling_y,
+                         input_picture_ptr->origin_x >> scs_ptr->subsampling_x,
+                         input_picture_ptr->origin_y >> scs_ptr->subsampling_y);
+#endif
         for (uint32_t row = 0; row < input_picture_ptr->height; row++)
             svt_memcpy(pa + row * padded_pic_ptr->stride_y,
                        in + row * input_picture_ptr->stride_y,

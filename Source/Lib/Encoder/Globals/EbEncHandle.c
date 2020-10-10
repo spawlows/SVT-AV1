@@ -95,8 +95,14 @@
 #define ENCDEC_INPUT_PORT_MDC                                0
 #define ENCDEC_INPUT_PORT_ENCDEC                             1
 #define ENCDEC_INPUT_PORT_INVALID                           -1
+#if !FEATURE_NEW_DELAY
 #define SCD_LAD                                             12
+#endif
+#if ENABLE_TPL_ZERO_LAD
+#define TPL_LAD                                              0
+#else
 #define TPL_LAD                                              16
+#endif
 
 /**************************************
  * Globals
