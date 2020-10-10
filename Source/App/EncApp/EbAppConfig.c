@@ -1388,21 +1388,6 @@ ConfigEntry config_entry[] = {
 /**********************************
  * Constructor
  **********************************/
-void eb_2pass_config_update(EbConfig *config_ptr) {
-    if (config_ptr->pass == ENCODE_FIRST_PASS || config_ptr->output_stat_file) {
-        config_ptr->enc_mode = MAX_ENC_PRESET;
-        config_ptr->look_ahead_distance = 1;
-        config_ptr->enable_tpl_la = 0;
-        config_ptr->rate_control_mode = 0;
-        config_ptr->intra_refresh_type     = 2;
-    }
-    else if (config_ptr->pass == ENCODE_LAST_PASS || config_ptr->input_stat_file) {
-        config_ptr->look_ahead_distance = 16;
-        config_ptr->enable_tpl_la = 1;
-        config_ptr->intra_refresh_type     = 2;
-    }
-    return;
-}
 EbConfig * eb_config_ctor(EncodePass pass) {
     EbConfig *config_ptr = (EbConfig *)calloc(1, sizeof(EbConfig));
     if (!config_ptr)
@@ -1412,7 +1397,6 @@ EbConfig * eb_config_ctor(EncodePass pass) {
         config_ptr->pass = 1;
     else if (pass == ENCODE_LAST_PASS)
         config_ptr->pass = 2;
-    eb_2pass_config_update(config_ptr);
 
     config_ptr->error_log_file         = stderr;
     config_ptr->frame_rate             = 30 << 16;
@@ -1439,6 +1423,7 @@ EbConfig * eb_config_ctor(EncodePass pass) {
     config_ptr->intra_refresh_type                        = 1;
     config_ptr->hierarchical_levels                       = 4;
     config_ptr->pred_structure                            = 2;
+    config_ptr->disable_dlf_flag                          = EB_FALSE;
     config_ptr->enable_global_motion                      = EB_TRUE;
     config_ptr->progress                                  = 1;
     config_ptr->enable_warped_motion                      = DEFAULT;
@@ -1468,9 +1453,12 @@ EbConfig * eb_config_ctor(EncodePass pass) {
     config_ptr->filter_intra_level                        = DEFAULT;
     config_ptr->enable_intra_edge_filter                  = DEFAULT;
     config_ptr->pic_based_rate_est                        = DEFAULT;
+    config_ptr->ext_block_flag                            = EB_FALSE;
     config_ptr->use_default_me_hme                        = EB_TRUE;
     config_ptr->enable_hme_flag                           = EB_TRUE;
     config_ptr->enable_hme_level0_flag                    = EB_TRUE;
+    config_ptr->enable_hme_level1_flag                    = EB_FALSE;
+    config_ptr->enable_hme_level2_flag                    = EB_FALSE;
     config_ptr->search_area_width                         = 16;
     config_ptr->search_area_height                        = 7;
     config_ptr->number_hme_search_region_in_width         = 2;
@@ -1494,6 +1482,7 @@ EbConfig * eb_config_ctor(EncodePass pass) {
     config_ptr->intrabc_mode                              = DEFAULT;
     config_ptr->palette_level                             = DEFAULT;
     config_ptr->injector_frame_rate                       = 60 << 16;
+    config_ptr->speed_control_flag                        = 0;
 
     // ASM Type
     config_ptr->cpu_flags_limit = CPU_FLAGS_ALL;
@@ -1584,6 +1573,7 @@ EbErrorType enc_channel_ctor(EncChannel* c, EncodePass pass) {
     c->app_callback = (EbAppContext *)malloc(sizeof(EbAppContext));
     if (!c->app_callback)
         return EB_ErrorInsufficientResources;
+    memset(c->app_callback, 0, sizeof(EbAppContext));
     c->exit_cond        = APP_ExitConditionError;
     c->exit_cond_output = APP_ExitConditionError;
     c->exit_cond_recon  = APP_ExitConditionError;
@@ -1740,7 +1730,8 @@ static int32_t find_token(int32_t argc, char *const argv[], char const *token, c
 
     while ((argc > 0) && (return_error != 0)) {
         return_error = strcmp(argv[--argc], token);
-        if (return_error == 0) { strcpy_s(configStr, COMMAND_LINE_MAX_SIZE, argv[argc + 1]); }
+        if (return_error == 0 && configStr)
+            strcpy_s(configStr, COMMAND_LINE_MAX_SIZE, argv[argc + 1]);
     }
 
     return return_error;
@@ -2046,162 +2037,134 @@ int32_t find_token_multiple_inputs(int32_t argc, char *const argv[], const char 
     return return_error;
 }
 
-uint32_t check_long(ConfigEntry cfg_entry, ConfigEntry cfg_entry_next) {
-    if (cfg_entry_next.name == NULL) { return 0; }
-    if (strcmp(cfg_entry.name, cfg_entry_next.name) == 0) { return 1; }
-    return 0;
+static int check_long(ConfigEntry cfg_entry, ConfigEntry cfg_entry_next) {
+    return cfg_entry_next.name ? !strcmp(cfg_entry.name, cfg_entry_next.name) : 0;
 }
 
 uint32_t get_help(int32_t argc, char *const argv[]) {
     char config_string[COMMAND_LINE_MAX_SIZE];
-    if (find_token(argc, argv, HELP_TOKEN, config_string) == 0 ||
-        find_token(argc, argv, HELP_LONG_TOKEN, config_string) == 0) {
-        int32_t options_token_index        = -1;
-        int32_t global_options_token_index = -1;
-        int32_t rc_token_index             = -1;
-        int32_t two_p_token_index          = -1;
-        int32_t kf_token_index             = -1;
-        int32_t sp_token_index             = -1;
-        //fprintf(stderr, "\n%-25s\t%-25s\n", "TOKEN", "DESCRIPTION");
-        //fprintf(stderr, "%-25s\t%-25s\n", "-nch", "NumberOfChannels");
-        const char *empty_string         = "";
-        fprintf(stderr,
-                "Usage: SvtAv1EncApp <options> -b dst_filename -i src_filename\n");
-        fprintf(stderr, "\n%-25s\n", "Examples:");
-        fprintf(stderr, "\n%-25s", "Two passes encode:");
-        fprintf(stderr, "\n\t%s", "SvtAv1EncApp <--stats svtav1_2pass.log> --pass 1 -b dst_filename -i src_filename");
-        fprintf(stderr, "\n\t%s", "SvtAv1EncApp <--stats svtav1_2pass.log> --pass 2 -b dst_filename -i src_filename");
-        fprintf(stderr, "\n    Or a combined cli:");
-        fprintf(stderr, "\n\t%s\n", "SvtAv1EncApp <--stats svtav1_2pass.log> --passes 2 -b dst_filename -i src_filename");
-        fprintf(stderr, "\n%-25s\n", "Options:");
-        while (config_entry_options[++options_token_index].token != NULL) {
-            uint32_t check = check_long(
-                config_entry_options[options_token_index],
-                config_entry_options
-                    [options_token_index +
-                     1]); // this only works if short and long token are one after another
-            if (check == 1) {
-                fprintf(stderr,
-                        "\t%-5s\t%-25s\t%-25s\n",
-                        config_entry_options[options_token_index].token,
-                        config_entry_options[options_token_index + 1].token,
-                        config_entry_options[options_token_index].name);
-                options_token_index++;
-            } else
-                fprintf(stderr,
-                        *(config_entry_options[options_token_index].token + 1) == '-'
-                            ? "\t%-5s\t%-25s\t%-25s\n"
-                            : "\t%-5s\t-%-25s\t%-25s\n",
-                        empty_string,
-                        config_entry_options[options_token_index].token,
-                        config_entry_options[options_token_index].name);
-        }
-        fprintf(stderr, "\n%-25s\n", "Encoder Global Options:");
-        while (config_entry_global_options[++global_options_token_index].token != NULL) {
-            uint32_t check =
-                check_long(config_entry_global_options[global_options_token_index],
-                           config_entry_global_options[global_options_token_index + 1]);
-            if (check == 1) {
-                fprintf(stderr,
-                        "\t%-5s\t%-25s\t%-25s\n",
-                        config_entry_global_options[global_options_token_index].token,
-                        config_entry_global_options[global_options_token_index + 1].token,
-                        config_entry_global_options[global_options_token_index].name);
-                global_options_token_index++;
-            } else {
-                fprintf(stderr,
-                        *(config_entry_global_options[global_options_token_index].token + 1) == '-'
-                            ? "\t%-5s\t%-25s\t%-25s\n"
-                            : "\t%-5s\t-%-25s\t%-25s\n",
-                        empty_string,
-                        config_entry_global_options[global_options_token_index].token,
-                        config_entry_global_options[global_options_token_index].name);
-            }
-        }
-        fprintf(stderr, "\n%-25s\n", "Rate Control Options:");
-        while (config_entry_rc[++rc_token_index].token != NULL) {
-            uint32_t check =
-                check_long(config_entry_rc[rc_token_index], config_entry_rc[rc_token_index + 1]);
-            if (check == 1) {
-                fprintf(stderr,
-                        "\t%-5s\t%-25s\t%-25s\n",
-                        config_entry_rc[rc_token_index].token,
-                        config_entry_rc[rc_token_index + 1].token,
-                        config_entry_rc[rc_token_index].name);
-                rc_token_index++;
-            } else {
-                fprintf(stderr,
-                        *(config_entry_rc[rc_token_index].token + 1) == '-'
-                            ? "\t%-5s\t%-25s\t%-25s\n"
-                            : "\t%-5s\t-%-25s\t%-25s\n",
-                        empty_string,
-                        config_entry_rc[rc_token_index].token,
-                        config_entry_rc[rc_token_index].name);
-            }
-        }
-        fprintf(stderr, "\n%-25s\n", "Twopass Options:");
-        while (config_entry_2p[++two_p_token_index].token != NULL) {
-            uint32_t check = check_long(config_entry_2p[two_p_token_index],
-                                        config_entry_2p[two_p_token_index + 1]);
-            if (check == 1) {
-                fprintf(stderr,
-                        "\t%-5s\t%-25s\t%-25s\n",
-                        config_entry_2p[two_p_token_index].token,
-                        config_entry_2p[two_p_token_index + 1].token,
-                        config_entry_2p[two_p_token_index].name);
-                two_p_token_index++;
-            } else
-                fprintf(stderr,
-                        *(config_entry_2p[two_p_token_index].token + 1) == '-'
-                            ? "\t%-5s\t%-25s\t%-25s\n"
-                            : "\t%-5s\t-%-25s\t%-25s\n",
-                        empty_string,
-                        config_entry_2p[two_p_token_index].token,
-                        config_entry_2p[two_p_token_index].name);
-        }
-        fprintf(stderr, "\n%-25s\n", "Keyframe Placement Options:");
-        while (config_entry_intra_refresh[++kf_token_index].token != NULL) {
-            uint32_t check = check_long(config_entry_intra_refresh[kf_token_index],
-                                        config_entry_intra_refresh[kf_token_index + 1]);
-            if (check == 1) {
-                fprintf(stderr,
-                        "\t%-5s\t%-25s\t%-25s\n",
-                        config_entry_intra_refresh[kf_token_index].token,
-                        config_entry_intra_refresh[kf_token_index + 1].token,
-                        config_entry_intra_refresh[kf_token_index].name);
-                kf_token_index++;
-            } else
-                fprintf(stderr,
-                        *(config_entry_intra_refresh[kf_token_index].token + 1) == '-'
-                            ? "\t%-5s\t%-25s\t%-25s\n"
-                            : "\t%-5s\t-%-25s\t%-25s\n",
-                        empty_string,
-                        config_entry_intra_refresh[kf_token_index].token,
-                        config_entry_intra_refresh[kf_token_index].name);
-        }
-        fprintf(stderr, "\n%-25s\n", "AV1 Specific Options:");
-        while (config_entry_specific[++sp_token_index].token != NULL) {
-            uint32_t check = check_long(config_entry_specific[sp_token_index],
-                                        config_entry_specific[sp_token_index + 1]);
-            if (check == 1) {
-                fprintf(stderr,
-                        "\t%-5s\t%-25s\t%-25s\n",
-                        config_entry_specific[sp_token_index].token,
-                        config_entry_specific[sp_token_index + 1].token,
-                        config_entry_specific[sp_token_index].name);
-                sp_token_index++;
-            } else
-                fprintf(stderr,
-                        *(config_entry_specific[sp_token_index].token + 1) == '-'
-                            ? "\t%-5s\t%-25s\t%-25s\n"
-                            : "\t%-5s\t-%-25s\t%-25s\n",
-                        empty_string,
-                        config_entry_specific[sp_token_index].token,
-                        config_entry_specific[sp_token_index].name);
-        }
-        return 1;
-    } else
+    if (find_token(argc, argv, HELP_TOKEN, config_string) &&
+        find_token(argc, argv, HELP_LONG_TOKEN, config_string))
         return 0;
+
+    printf(
+        "Usage: SvtAv1EncApp <options> -b dst_filename -i src_filename\n\n"
+        "Examples:\n"
+        "Two passes encode:\n"
+        "    SvtAv1EncApp <--stats svtav1_2pass.log> --pass 1 -b dst_filename -i src_filename\n"
+        "    SvtAv1EncApp <--stats svtav1_2pass.log> --pass 2 -b dst_filename -i src_filename\n"
+        "Or a combined cli:\n"
+        "    SvtAv1EncApp <--stats svtav1_2pass.log> --passes 2 -b dst_filename -i src_filename\n"
+        "\nOptions:\n");
+    for (ConfigEntry *options_token_index = config_entry_options; options_token_index->token;
+         ++options_token_index) {
+        // this only works if short and long token are one after another
+        switch (check_long(*options_token_index, options_token_index[1])) {
+        case 1:
+            printf("  %s, %-25s    %-25s\n",
+                   options_token_index->token,
+                   options_token_index[1].token,
+                   options_token_index->name);
+            ++options_token_index;
+            break;
+        default:
+            printf(options_token_index->token[1] == '-' ? "      %-25s    %-25s\n"
+                                                        : "      -%-25s   %-25s\n",
+                   options_token_index->token,
+                   options_token_index->name);
+        }
+    }
+    printf("\nEncoder Global Options:\n");
+    for (ConfigEntry *global_options_token_index = config_entry_global_options;
+         global_options_token_index->token;
+         ++global_options_token_index) {
+        switch (check_long(*global_options_token_index, global_options_token_index[1])) {
+        case 1:
+            printf("  %s, %-25s    %-25s\n",
+                   global_options_token_index->token,
+                   global_options_token_index[1].token,
+                   global_options_token_index->name);
+            ++global_options_token_index;
+            break;
+        default:
+            printf(global_options_token_index->token[1] == '-' ? "      %-25s    %-25s\n"
+                                                               : "      -%-25s   %-25s\n",
+                   global_options_token_index->token,
+                   global_options_token_index->name);
+        }
+    }
+    printf("\nRate Control Options:\n");
+    for (ConfigEntry *rc_token_index = config_entry_rc; rc_token_index->token; ++rc_token_index) {
+        switch (check_long(*rc_token_index, rc_token_index[1])) {
+        case 1:
+            printf("  %s, %-25s    %-25s\n",
+                   rc_token_index->token,
+                   rc_token_index[1].token,
+                   rc_token_index->name);
+            ++rc_token_index;
+            break;
+        default:
+            printf(rc_token_index->token[1] == '-' ? "      %-25s    %-25s\n"
+                                                   : "      -%-25s   %-25s\n",
+                   rc_token_index->token,
+                   rc_token_index->name);
+        }
+    }
+    printf("\nTwopass Options:\n");
+    for (ConfigEntry *two_p_token_index = config_entry_2p; two_p_token_index->token;
+         ++two_p_token_index) {
+        switch (check_long(*two_p_token_index, two_p_token_index[1])) {
+        case 1:
+            printf("  %s, %-25s    %-25s\n",
+                   two_p_token_index->token,
+                   two_p_token_index[1].token,
+                   two_p_token_index->name);
+            ++two_p_token_index;
+            break;
+        default:
+            printf(two_p_token_index->token[1] == '-' ? "      %-25s    %-25s\n"
+                                                      : "      -%-25s   %-25s\n",
+                   two_p_token_index->token,
+                   two_p_token_index->name);
+        }
+    }
+    printf("\nKeyframe Placement Options:\n");
+    for (ConfigEntry *kf_token_index = config_entry_intra_refresh; kf_token_index->token;
+         ++kf_token_index) {
+        switch (check_long(*kf_token_index, kf_token_index[1])) {
+        case 1:
+            printf("  %s, %-25s    %-25s\n",
+                   kf_token_index->token,
+                   kf_token_index[1].token,
+                   kf_token_index->name);
+            ++kf_token_index;
+            break;
+        default:
+            printf(kf_token_index->token[1] == '-' ? "      %-25s    %-25s\n"
+                                                   : "      -%-25s   %-25s\n",
+                   kf_token_index->token,
+                   kf_token_index->name);
+        }
+    }
+    printf("\nAV1 Specific Options:\n");
+    for (ConfigEntry *sp_token_index = config_entry_specific; sp_token_index->token;
+         ++sp_token_index) {
+        switch (check_long(*sp_token_index, sp_token_index[1])) {
+        case 1:
+            printf("  %s, %-25s    %-25s\n",
+                   sp_token_index->token,
+                   sp_token_index[1].token,
+                   sp_token_index->name);
+            ++sp_token_index;
+            break;
+        default:
+            printf(sp_token_index->token[1] == '-' ? "      %-25s    %-25s\n"
+                                                   : "      -%-25s   %-25s\n",
+                   sp_token_index->token,
+                   sp_token_index->name);
+        }
+    }
+    return 1;
 }
 
 /******************************************************
@@ -2557,18 +2520,21 @@ const char *handle_warnings(const char *token, char *print_message, uint8_t doub
 
     if (strnlen_s(linked_token, WARNING_LENGTH) > 1) {
         const char *message_str = " will be deprecated soon, please use ";
+        size_t offset;
         strcpy_s(print_message, WARNING_LENGTH, token);
-        strcpy_s(
-            print_message + strnlen_s(print_message, WARNING_LENGTH), WARNING_LENGTH, message_str);
-        strcpy_s(
-            print_message + strnlen_s(print_message, WARNING_LENGTH), WARNING_LENGTH, linked_token);
+        offset = strnlen_s(print_message, WARNING_LENGTH);
+        strcpy_s(print_message + offset, WARNING_LENGTH - offset, message_str);
+        offset = strnlen_s(print_message, WARNING_LENGTH);
+        strcpy_s(print_message + offset, WARNING_LENGTH - offset, linked_token);
         return print_message;
     } else if (double_dash_token == 0) {
-        const char *message_str = " will be deprecated soon, please use -";
+       const char *message_str = " will be deprecated soon, please use -";
+        size_t offset;
         strcpy_s(print_message, WARNING_LENGTH, token);
-        strcpy_s(
-            print_message + strnlen_s(print_message, WARNING_LENGTH), WARNING_LENGTH, message_str);
-        strcpy_s(print_message + strnlen_s(print_message, WARNING_LENGTH), WARNING_LENGTH, token);
+        offset = strnlen_s(print_message, WARNING_LENGTH);
+        strcpy_s(print_message + offset, WARNING_LENGTH - offset, message_str);
+        offset = strnlen_s(print_message, WARNING_LENGTH);
+        strcpy_s(print_message + offset, WARNING_LENGTH - offset, token);
         return print_message;
     }
     return "";

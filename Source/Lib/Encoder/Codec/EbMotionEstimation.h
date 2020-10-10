@@ -163,7 +163,7 @@ extern "C" {
         uint32_t  src_stride,                      // input parameter, source stride
         uint8_t  *ref,                            // input parameter, reference samples Ptr
         uint32_t  ref_stride);
-    extern void ext_all_sad_calculation_8x8_16x16_c(
+    extern void svt_ext_all_sad_calculation_8x8_16x16_c(
         uint8_t *src,
         uint32_t src_stride,
         uint8_t *ref,
@@ -174,14 +174,15 @@ extern "C" {
         uint32_t *p_best_mv8x8,
         uint32_t *p_best_mv16x16,
         uint32_t p_eight_sad16x16[16][8],
-        uint32_t p_eight_sad8x8[64][8]);
+        uint32_t p_eight_sad8x8[64][8],
+        EbBool sub_sad);
 
     /*******************************************
     Calculate SAD for 32x32,64x64 from 16x16
     and check if there is improvment, if yes keep
     the best SAD+MV
     *******************************************/
-    extern void ext_eight_sad_calculation_32x32_64x64_c(
+    extern void svt_ext_eight_sad_calculation_32x32_64x64_c(
         uint32_t p_sad16x16[16][8],
         uint32_t *p_best_sad_32x32,
         uint32_t *p_best_sad_64x64,

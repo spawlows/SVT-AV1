@@ -19,7 +19,7 @@
 #include "EbSvtAv1ErrorCodes.h"
 #include "EbUtility.h"
 #include "grainSynthesis.h"
-//To fix warning C4013: 'convert_16bit_to_8bit' undefined; assuming extern returning int
+//To fix warning C4013: 'svt_convert_16bit_to_8bit' undefined; assuming extern returning int
 #include "common_dsp_rtcd.h"
 #include "EbRateDistortionCost.h"
 #include "EbPictureDecisionProcess.h"
@@ -617,7 +617,7 @@ static const int64_t cc2_12 = 61817334;  // (64^2*(.03*4095)^2
 static double similarity(uint32_t sum_s, uint32_t sum_r, uint32_t sum_sq_s,
                          uint32_t sum_sq_r, uint32_t sum_sxr, int count,
                          uint32_t bd) {
-  int64_t ssim_n, ssim_d;
+  double ssim_n, ssim_d;
   int64_t c1, c2;
 
   if (bd == 8) {
@@ -635,14 +635,14 @@ static double similarity(uint32_t sum_s, uint32_t sum_r, uint32_t sum_sq_s,
     assert(0);
   }
 
-  ssim_n = ((int64_t)2 * sum_s * sum_r + c1) *
-           ((int64_t)2 * count * sum_sxr - (int64_t)2 * sum_s * sum_r + c2);
+  ssim_n = (2.0 * sum_s * sum_r + c1) *
+           (2.0 * count * sum_sxr - 2.0 * sum_s * sum_r + c2);
 
-  ssim_d = ((int64_t)sum_s * sum_s + (int64_t)sum_r * sum_r + c1) *
-           ((int64_t)count * sum_sq_s - (int64_t)sum_s * sum_s +
-            (int64_t)count * sum_sq_r - (int64_t)sum_r * sum_r + c2);
+  ssim_d = ((double)sum_s * sum_s + (double)sum_r * sum_r + c1) *
+           ((double)count * sum_sq_s - (double)sum_s * sum_s +
+            (double)count * sum_sq_r - (double)sum_r * sum_r + c2);
 
-  return ssim_n * 1.0 / ssim_d;
+  return ssim_n / ssim_d;
 }
 
 static double ssim_8x8(const uint8_t *s, int sp, const uint8_t *r, int rp) {
@@ -1570,7 +1570,7 @@ void pad_ref_and_set_flags(PictureControlSet *pcs_ptr, SequenceControlSet *scs_p
         //Y
         uint16_t *buf_16bit = (uint16_t *)(ref_pic_16bit_ptr->buffer_y);
         uint8_t * buf_8bit = ref_pic_ptr->buffer_y;
-        convert_16bit_to_8bit(buf_16bit,
+        svt_convert_16bit_to_8bit(buf_16bit,
             ref_pic_16bit_ptr->stride_y,
             buf_8bit,
             ref_pic_ptr->stride_y,
@@ -1580,7 +1580,7 @@ void pad_ref_and_set_flags(PictureControlSet *pcs_ptr, SequenceControlSet *scs_p
         //CB
         buf_16bit = (uint16_t *)(ref_pic_16bit_ptr->buffer_cb);
         buf_8bit = ref_pic_ptr->buffer_cb;
-        convert_16bit_to_8bit(buf_16bit,
+        svt_convert_16bit_to_8bit(buf_16bit,
             ref_pic_16bit_ptr->stride_cb,
             buf_8bit,
             ref_pic_ptr->stride_cb,
@@ -1590,7 +1590,7 @@ void pad_ref_and_set_flags(PictureControlSet *pcs_ptr, SequenceControlSet *scs_p
         //CR
         buf_16bit = (uint16_t *)(ref_pic_16bit_ptr->buffer_cr);
         buf_8bit = ref_pic_ptr->buffer_cr;
-        convert_16bit_to_8bit(buf_16bit,
+        svt_convert_16bit_to_8bit(buf_16bit,
             ref_pic_16bit_ptr->stride_cr,
             buf_8bit,
             ref_pic_ptr->stride_cr,

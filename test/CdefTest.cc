@@ -17,7 +17,7 @@
  * * eb_cdef_filter_block_avx2
  * * compute_cdef_dist_avx2
  * * copy_rect8_8bit_to_16bit_avx2
- * * search_one_dual_avx2
+ * * svt_search_one_dual_avx2
  *
  * @author Cidana-Wenyao
  *
@@ -240,7 +240,7 @@ class CDEFBlockTest : public ::testing::TestWithParam<cdef_dir_param_t> {
 
         prepare_data(0, 1);
 
-        eb_start_time(&start_time_seconds, &start_time_useconds);
+        svt_av1_get_time(&start_time_seconds, &start_time_useconds);
 
         for (uint64_t i = 0; i < num_loop; i++) {
             for (dir = 0; dir < 8; dir++) {
@@ -273,7 +273,7 @@ class CDEFBlockTest : public ::testing::TestWithParam<cdef_dir_param_t> {
             }
         }
 
-        eb_start_time(&middle_time_seconds, &middle_time_useconds);
+        svt_av1_get_time(&middle_time_seconds, &middle_time_useconds);
 
         for (uint64_t i = 0; i < num_loop; i++) {
             for (dir = 0; dir < 8; dir++) {
@@ -306,17 +306,15 @@ class CDEFBlockTest : public ::testing::TestWithParam<cdef_dir_param_t> {
             }
         }
 
-        eb_start_time(&finish_time_seconds, &finish_time_useconds);
-        eb_compute_overall_elapsed_time_ms(start_time_seconds,
-                                      start_time_useconds,
-                                      middle_time_seconds,
-                                      middle_time_useconds,
-                                      &time_c);
-        eb_compute_overall_elapsed_time_ms(middle_time_seconds,
-                                      middle_time_useconds,
-                                      finish_time_seconds,
-                                      finish_time_useconds,
-                                      &time_o);
+        svt_av1_get_time(&finish_time_seconds, &finish_time_useconds);
+        time_c = svt_av1_compute_overall_elapsed_time_ms(start_time_seconds,
+                                                         start_time_useconds,
+                                                         middle_time_seconds,
+                                                         middle_time_useconds);
+        time_o = svt_av1_compute_overall_elapsed_time_ms(middle_time_seconds,
+                                                         middle_time_useconds,
+                                                         finish_time_seconds,
+                                                         finish_time_useconds);
 
         printf("Average Nanoseconds per Function Call\n");
         printf("    eb_cdef_filter_block_c()   : %6.2f\n",
@@ -662,7 +660,7 @@ TEST(CdefToolTest, ComputeCdefDist8bitMatchTest) {
 }
 
 /**
- * @brief Unit test for search_one_dual_avx2
+ * @brief Unit test for svt_search_one_dual_avx2
  *
  * Test strategy:
  * Prepare the mse array filled randomly and check the best mse, best
@@ -680,14 +678,14 @@ TEST(CdefToolTest, ComputeCdefDist8bitMatchTest) {
  *
  */
 
-typedef uint64_t (*search_one_dual_func)(int *lev0, int *lev1, int nb_strengths,
-                                         uint64_t (**mse)[64], int sb_count,
-                                         int start_gi, int end_gi);
+typedef uint64_t (*svt_search_one_dual_func)(int *lev0, int *lev1,
+    int nb_strengths, uint64_t (**mse)[64],
+    int sb_count, int start_gi, int end_gi);
 
-static const search_one_dual_func search_one_dual_func_table[] = {
-    search_one_dual_avx2,
+static const svt_search_one_dual_func search_one_dual_func_table[] = {
+    svt_search_one_dual_avx2,
 #ifndef NON_AVX512_SUPPORT
-    search_one_dual_avx512
+    svt_search_one_dual_avx512
 #endif
 };
 
@@ -719,13 +717,13 @@ TEST(CdefToolTest, SearchOneDualMatchTest) {
 
             int nb_strengths = 1 << i;
             for (int j = 0; j < nb_strengths; ++j) {
-                uint64_t best_mse_ref = search_one_dual_c(lvl_luma_ref,
-                                                          lvl_chroma_ref,
-                                                          j,
-                                                          mse,
-                                                          sb_count,
-                                                          start_gi,
-                                                          end_gi);
+                uint64_t best_mse_ref = svt_search_one_dual_c(lvl_luma_ref,
+                                                              lvl_chroma_ref,
+                                                              j,
+                                                              mse,
+                                                              sb_count,
+                                                              start_gi,
+                                                              end_gi);
                 for (int l = 0; l < (int) (sizeof(search_one_dual_func_table) /
                                         sizeof(*search_one_dual_func_table));
                      ++l) {
@@ -739,7 +737,7 @@ TEST(CdefToolTest, SearchOneDualMatchTest) {
                                                       end_gi);
 
                     ASSERT_EQ(best_mse_tst, best_mse_ref)
-                        << "search_one_dual_avx2 return different best mse "
+                        << "svt_search_one_dual_avx2 return different best mse "
                         << "loop: " << k << " nb_strength: " << nb_strengths;
                     for (int h = 0; h < CDEF_MAX_STRENGTHS; ++h) {
                         ASSERT_EQ(lvl_luma_ref[h], lvl_luma_tst[h])
@@ -796,19 +794,19 @@ TEST(CdefToolTest, DISABLED_SearchOneDualSpeedTest) {
             uint64_t middle_time_seconds, middle_time_useconds;
             uint64_t finish_time_seconds, finish_time_useconds;
             const uint64_t num_loop = 10000;
-            eb_start_time(&start_time_seconds, &start_time_useconds);
+            svt_av1_get_time(&start_time_seconds, &start_time_useconds);
 
             for (uint64_t k = 0; k < num_loop; k++) {
-                best_mse_ref = search_one_dual_c(lvl_luma_ref,
-                                                 lvl_chroma_ref,
-                                                 j,
-                                                 mse,
-                                                 sb_count,
-                                                 start_gi,
-                                                 end_gi);
+                best_mse_ref = svt_search_one_dual_c(lvl_luma_ref,
+                                                     lvl_chroma_ref,
+                                                     j,
+                                                     mse,
+                                                     sb_count,
+                                                     start_gi,
+                                                     end_gi);
             }
 
-            eb_start_time(&middle_time_seconds, &middle_time_useconds);
+            svt_av1_get_time(&middle_time_seconds, &middle_time_useconds);
 
             for (uint64_t k = 0; k < num_loop; k++) {
                 best_mse_tst = search_one_dual_func_table[i](lvl_luma_tst,
@@ -820,10 +818,10 @@ TEST(CdefToolTest, DISABLED_SearchOneDualSpeedTest) {
                                                              end_gi);
             }
 
-            eb_start_time(&finish_time_seconds, &finish_time_useconds);
+            svt_av1_get_time(&finish_time_seconds, &finish_time_useconds);
 
             ASSERT_EQ(best_mse_tst, best_mse_ref)
-                << "search_one_dual_avx2 return different best mse "
+                << "svt_search_one_dual_avx2 return different best mse "
                 << " nb_strength: " << nb_strengths;
             for (int h = 0; h < CDEF_MAX_STRENGTHS; ++h) {
                 ASSERT_EQ(lvl_luma_ref[h], lvl_luma_tst[h])
@@ -834,22 +832,22 @@ TEST(CdefToolTest, DISABLED_SearchOneDualSpeedTest) {
                     << " nb_strength: " << nb_strengths << " pos " << h;
             }
 
-            eb_compute_overall_elapsed_time_ms(start_time_seconds,
-                                          start_time_useconds,
-                                          middle_time_seconds,
-                                          middle_time_useconds,
-                                          &time_c);
-            eb_compute_overall_elapsed_time_ms(middle_time_seconds,
-                                          middle_time_useconds,
-                                          finish_time_seconds,
-                                          finish_time_useconds,
-                                          &time_o);
+            time_c =
+                svt_av1_compute_overall_elapsed_time_ms(start_time_seconds,
+                                                        start_time_useconds,
+                                                        middle_time_seconds,
+                                                        middle_time_useconds);
+            time_o =
+                svt_av1_compute_overall_elapsed_time_ms(middle_time_seconds,
+                                                        middle_time_useconds,
+                                                        finish_time_seconds,
+                                                        finish_time_useconds);
 
             printf("Average Nanoseconds per Function Call\n");
-            printf("    search_one_dual_c()       : %6.2f\n",
+            printf("    svt_search_one_dual_c()       : %6.2f\n",
                    1000000 * time_c / num_loop);
             printf(
-                "    search_one_dual_opt(%d, %d) : %6.2f   (Comparison: "
+                "    svt_search_one_dual_opt(%d, %d) : %6.2f   (Comparison: "
                 "%5.2fx)\n",
                 i,
                 j,

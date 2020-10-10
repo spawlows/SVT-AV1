@@ -1950,6 +1950,19 @@ void set_param_based_on_input(SequenceControlSet *scs_ptr)
     scs_ptr->static_config.source_width = scs_ptr->max_input_luma_width;
     scs_ptr->static_config.source_height = scs_ptr->max_input_luma_height;
 
+    if (use_output_stat(scs_ptr)) {
+        scs_ptr->static_config.enc_mode = MAX_ENC_PRESET;
+        scs_ptr->static_config.look_ahead_distance = 1;
+        scs_ptr->static_config.enable_tpl_la = 0;
+        scs_ptr->static_config.rate_control_mode = 0;
+        scs_ptr->static_config.intra_refresh_type     = 2;
+    }
+    else if (use_input_stat(scs_ptr)) {
+        scs_ptr->static_config.look_ahead_distance = 16;
+        scs_ptr->static_config.enable_tpl_la = 1;
+        scs_ptr->static_config.intra_refresh_type     = 2;
+    }
+
     derive_input_resolution(
         &scs_ptr->input_resolution,
         scs_ptr->seq_header.max_frame_width*scs_ptr->seq_header.max_frame_height);
@@ -2434,6 +2447,11 @@ static EbErrorType verify_settings(
         return_error = EB_ErrorBadParameter;
     }
 
+    if (config->rate_control_mode > 1 && (config->rc_firstpass_stats_out || config->rc_twopass_stats_in.buf)) {
+        SVT_LOG("Error Instance %u: Only rate control mode 0 and 1 are supported for 2-pass \n", channel_number + 1);
+        return_error = EB_ErrorBadParameter;
+    }
+
     if (config->enable_hme_flag) {
         if ((config->number_hme_search_region_in_width > (uint32_t)EB_HME_SEARCH_AREA_COLUMN_MAX_COUNT) || (config->number_hme_search_region_in_width == 0)) {
             SVT_LOG("Error Instance %u: Invalid number_hme_search_region_in_width. number_hme_search_region_in_width must be [1 - %d]\n", channel_number + 1, EB_HME_SEARCH_AREA_COLUMN_MAX_COUNT);
@@ -2891,6 +2909,8 @@ EbErrorType eb_svt_enc_init_parameter(
     config_ptr->target_bit_rate = 7000000;
     config_ptr->max_qp_allowed = 63;
     config_ptr->min_qp_allowed = 10;
+
+    config_ptr->enable_adaptive_quantization = 2;
     config_ptr->enc_mode = MAX_ENC_PRESET;
     config_ptr->intra_period_length = -2;
     config_ptr->intra_refresh_type = 1;
@@ -2952,13 +2972,15 @@ EbErrorType eb_svt_enc_init_parameter(
     config_ptr->palette_level = DEFAULT;
     config_ptr->enable_manual_pred_struct = EB_FALSE;
     config_ptr->encoder_color_format = EB_YUV420;
+    config_ptr->mrp_level = DEFAULT;
+
     // Bitstream options
     //config_ptr->codeVpsSpsPps = 0;
     //config_ptr->codeEosNal = 0;
     config_ptr->unrestricted_motion_vector = EB_TRUE;
 
     config_ptr->high_dynamic_range_input = 0;
-    config_ptr->screen_content_mode = 0;
+    config_ptr->screen_content_mode = 2;
 
     config_ptr->intrabc_mode = DEFAULT;
 
