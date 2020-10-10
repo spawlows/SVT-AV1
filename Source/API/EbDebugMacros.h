@@ -40,6 +40,17 @@ extern "C" {
 #define FIX_VBR_BUG 1 // Fix 1st pass bug (bug from rebasing the branch)
 #define FIX_10BIT     1 // fix 1st pass for 10bit input
 #define FIX_RC_TOKEN     1 // fix RC token check to include double dash
+
+#define FIX_PAD_CHROMA_AFTER_MCTF     1 // Padding chroma after altref
+#define FEATURE_NEW_DELAY             1 // Change delay some sorts of I in PicDecision
+#if FEATURE_NEW_DELAY
+#define FIX_LAD_DEADLOCK              1 // Fix deadlock when lad>0 + iperiod>0
+#endif
+
+
+
+
+
 //FOR DEBUGGING - Do not remove
 #define NO_ENCDEC         0 // bypass encDec to test cmpliance of MD. complained achieved when skip_flag is OFF. Port sample code from VCI-SW_AV1_Candidate1 branch
 

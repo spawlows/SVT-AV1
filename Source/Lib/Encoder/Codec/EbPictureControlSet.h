@@ -794,6 +794,33 @@ typedef struct PictureParentControlSet {
     EbObjectWrapper *me_data_wrapper_ptr;
     MotionEstimationData *pa_me_data;
     unsigned char gf_group_index;
+#if FEATURE_NEW_DELAY
+    struct PictureParentControlSet* tpl_group[MAX_TPL_GROUP_SIZE]; //stores pcs pictures needed for tpl algorithm
+    uint32_t tpl_group_size;             //size of above buffer
+    void* pd_window[PD_WINDOW_SIZE]; //stores previous, current, future pictures from pd-reord-queue. empty for first I.
+#if TUNE_TPL
+    uint8_t pd_window_count;
+#endif
+#if ENABLE_TPL_TRAILING
+    // For TPL, in addition to frames in the minigop size, we might process extra frames from the next minigop. These frames are
+    // called trailing frames. Trailing frames are available because of TF and their minigop is not determined yet. As a result,
+    // when used in RC there is a risk of race condition to access the PCS data. To prevent the problem, TplData should be used instead of PCS.
+    uint8_t tpl_trailing_frame_count;
+#endif
+#if TUNE_TPL_TOWARD_CHROMA
+    // Tune TPL for better chroma.Only for 240P
+    uint8_t tune_tpl_for_chroma;
+#endif
+#if FIX_LAD_DEADLOCK
+    uint8_t is_next_frame_intra;
+#endif
+#endif
+#if FEATURE_OPT_TF
+    TfControls tf_ctrls;
+#endif
+#if FEATURE_GM_OPT
+    GmControls gm_ctrls;
+#endif
 } PictureParentControlSet;
 
 typedef struct PictureControlSetInitData {
