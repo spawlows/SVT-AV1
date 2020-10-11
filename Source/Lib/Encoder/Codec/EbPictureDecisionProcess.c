@@ -816,7 +816,9 @@ EbErrorType signal_derivation_multi_processes_oq(
         pcs_ptr->disallow_nsq = EB_FALSE;
     else
         pcs_ptr->disallow_nsq = EB_TRUE;
+#if !TUNE_INL_TPL_ENHANCEMENT
     pcs_ptr->max_number_of_pus_per_sb = SQUARE_PU_COUNT;
+#endif
     // Set disallow_all_nsq_blocks_below_8x8: 8x4, 4x8
     if (pcs_ptr->enc_mode <= ENC_M9)
         pcs_ptr->disallow_all_nsq_blocks_below_8x8 = EB_FALSE;
@@ -3673,10 +3675,16 @@ void perform_simple_picture_analysis_for_overlay(PictureParentControlSet     *pc
         input_picture_ptr);
 
     // Pre processing operations performed on the input picture
+#if FEATURE_INL_ME
+    picture_pre_processing_operations(
+        pcs_ptr,
+        scs_ptr);
+#else
     picture_pre_processing_operations(
         pcs_ptr,
         scs_ptr,
         sb_total_count);
+#endif
 
     if (input_picture_ptr->color_format >= EB_YUV422) {
         // Jing: Do the conversion of 422/444=>420 here since it's multi-threaded kernel
@@ -4983,7 +4991,9 @@ void* picture_decision_kernel(void *input_ptr)
                                 }
                                 // Set the Slice type
                                 pcs_ptr->slice_type = picture_type;
+#if !FEATURE_INL_ME
                                 ((EbPaReferenceObject*)pcs_ptr->pa_reference_picture_wrapper_ptr->object_ptr)->slice_type = pcs_ptr->slice_type;
+#endif
 
                                 switch (picture_type) {
                                 case I_SLICE:
@@ -5312,7 +5322,10 @@ void* picture_decision_kernel(void *input_ptr)
                                     input_entry_ptr->dep_list1_count = input_entry_ptr->list1.list_count;
                                     input_entry_ptr->dependent_count = input_entry_ptr->dep_list0_count + input_entry_ptr->dep_list1_count;
 
+
+#if !FEATURE_INL_ME
                                     ((EbPaReferenceObject*)pcs_ptr->pa_reference_picture_wrapper_ptr->object_ptr)->dependent_pictures_count = input_entry_ptr->dependent_count;
+#endif
                                 }
 
                                 CHECK_REPORT_ERROR(
@@ -5509,11 +5522,33 @@ void* picture_decision_kernel(void *input_ptr)
                             //set the ref frame types used for this picture,
                             set_all_ref_frame_type(pcs_ptr, pcs_ptr->ref_frame_type_arr, &pcs_ptr->tot_ref_frame_types);
                             // Initialize Segments
+#if !FEATURE_INL_ME
                             pcs_ptr->me_segments_column_count = (uint8_t)(scs_ptr->me_segment_column_count_array[pcs_ptr->temporal_layer_index]);
                             pcs_ptr->me_segments_row_count = (uint8_t)(scs_ptr->me_segment_row_count_array[pcs_ptr->temporal_layer_index]);
                             pcs_ptr->me_segments_total_count = (uint16_t)(pcs_ptr->me_segments_column_count  * pcs_ptr->me_segments_row_count);
                             pcs_ptr->me_segments_completion_mask = 0;
+#else
+                            pcs_ptr->me_segments_completion_mask = 0;
+                            pcs_ptr->inloop_me_segments_completion_mask = 0;
+
+                            pcs_ptr->inloop_me_segments_column_count = 1;
+                            pcs_ptr->inloop_me_segments_row_count = 1;
+                            pcs_ptr->me_segments_column_count = (uint8_t)(scs_ptr->me_segment_column_count_array[pcs_ptr->temporal_layer_index]);
+                            pcs_ptr->me_segments_row_count = (uint8_t)(scs_ptr->me_segment_row_count_array[pcs_ptr->temporal_layer_index]);
+                            if (scs_ptr->in_loop_me) {
+                                pcs_ptr->inloop_me_segments_column_count =
+                                    (uint8_t)(scs_ptr->me_segment_column_count_array[pcs_ptr->temporal_layer_index]);
+                                pcs_ptr->inloop_me_segments_row_count =
+                                    (uint8_t)(scs_ptr->me_segment_row_count_array[pcs_ptr->temporal_layer_index]);
+                            }
+                            pcs_ptr->me_segments_total_count =
+                                (uint16_t)(pcs_ptr->me_segments_column_count * pcs_ptr->me_segments_row_count);
+                            pcs_ptr->inloop_me_segments_total_count =
+                                (uint16_t)(pcs_ptr->inloop_me_segments_column_count * pcs_ptr->inloop_me_segments_row_count);
+#endif
+#if !FIX_GM_BUG
                             pcs_ptr->me_processed_sb_count = 0;
+#endif
                             //****************************************************
                             // Picture resizing for super-res tool
                             //****************************************************

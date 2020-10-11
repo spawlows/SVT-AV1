@@ -46,6 +46,23 @@ extern "C" {
 #if FEATURE_NEW_DELAY
 #define FIX_LAD_DEADLOCK              1 // Fix deadlock when lad>0 + iperiod>0
 #endif
+#define FEATURE_INL_ME                1 //Enable in-loop ME
+#if FEATURE_INL_ME
+#define TUNE_IME_REUSE_TPL_RESULT     1 // Reuse TPL results for iLoopME
+#define TUNE_INL_TPL_ENHANCEMENT      1 // Refinement for TPL
+#define TUNE_INL_TPL_ME_DBG_MSG       0 // Turn off debug message
+#define TUNE_INL_ME_RECON_INPUT       1 // Perform ME on input/recon: 1 on input, 0 on recon
+#if TUNE_INL_ME_RECON_INPUT
+#define TUNE_INL_ME_ON_INPUT          1 // Perform ME on input
+#define TUNE_INL_GM_ON_INPUT          1 // Perform GM on input
+#define TUNE_INL_TPL_ON_INPUT         1 // Perform TPL on input
+#define TUNE_INL_ME_MEM_OPT           1 // Optimize memory usage when perform ME on input, only use 8bit luma
+#define TUNE_INL_ME_DECODE_ORDER      1 // Force decode order for inloopME
+#endif
+#if !TUNE_IME_REUSE_TPL_RESULT
+#define TUNE_SIGNAL_TPL_ME_OQ         1 // A separate signal_xxx_oq for TPL ME
+#endif
+#endif
 
 
 

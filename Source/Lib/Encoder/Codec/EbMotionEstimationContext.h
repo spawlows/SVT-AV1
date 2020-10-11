@@ -41,6 +41,14 @@ typedef struct MePredictionUnit {
     uint32_t sub_pel_direction;
 } MePredictionUnit;
 
+#if FEATURE_INL_ME
+typedef enum EbMeType {
+    ME_CLOSE_LOOP  = 0,
+    ME_MCTF = 1,
+    ME_TPL = 2,
+    ME_OPEN_LOOP = 3
+} EbMeType;
+#endif
 typedef enum EbMeTierZeroPu {
     // 2Nx2N [85 partitions]
     ME_TIER_ZERO_PU_64x64    = 0,
@@ -397,15 +405,41 @@ typedef struct MeContext {
     int16_t adjust_hme_l1_factor[MAX_NUM_OF_REF_PIC_LIST][REF_LIST_MAX_DEPTH];
     int16_t adjust_hme_l2_factor[MAX_NUM_OF_REF_PIC_LIST][REF_LIST_MAX_DEPTH];
     int16_t hme_factor;
+#if !FEATURE_GM_OPT // GmControls
     //exit gm search if first reference detection is identity
     uint8_t gm_identiy_exit;
+#if FEATURE_GM_OPT
+    uint8_t gm_rotzoom_model_only;
+#endif
+#endif
     // ------- Context for Alt-Ref ME ------
     uint16_t adj_search_area_width;
     uint16_t adj_search_area_height;
+#if !FEATURE_INL_ME
     EbBool   me_alt_ref;
+#endif
     void *   alt_ref_reference_ptr;
+#if FEATURE_INL_ME
+    // Open Loop ME
+    EbMeType me_type;
+    EbDownScaledBufDescPtrArray mctf_ref_desc_ptr_array;
+
+    uint8_t num_of_list_to_search;
+    uint8_t num_of_ref_pic_to_search[2];
+    uint8_t temporal_layer_index;
+    EbBool  is_used_as_reference_flag;
+    EbDownScaledBufDescPtrArray me_ds_ref_array[MAX_NUM_OF_REF_PIC_LIST][REF_LIST_MAX_DEPTH];
+#endif
     // tf
+#if FEATURE_OPT_TF
+    uint8_t tf_hp;
+    uint8_t tf_chroma;
+#if FEATURE_OPT_TF
+    uint64_t tf_block_32x32_16x16_th;
+#endif
+#else
     uint8_t high_precision;
+#endif
     int tf_frame_index;
     int tf_index_center;
     signed short tf_16x16_mv_x[16];
