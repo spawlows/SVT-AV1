@@ -65,6 +65,15 @@ extern "C" {
 #endif
 
 
+#define FEATURE_IN_LOOP_TPL 1 // Moving TPL to in loop
+#if FEATURE_IN_LOOP_TPL
+#define ENABLE_TPL_ZERO_LAD 1 // Enable TPL in loop to work with zero LAD
+#define TUNE_TPL 1   // Tuning TPL algorithm for QP assignment
+#define ENABLE_TPL_TRAILING 1 //enable trailing pictures for TPL
+#define FIX_TPL_TRAILING_FRAME_BUG          1 // fix bug related to ENABLE_TPL_TRAILING
+#define FIX_GM_BUG                                   1 // FIX GM r2r difference
+
+#endif
 
 
 

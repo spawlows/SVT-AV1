@@ -20,12 +20,14 @@
 #include "EbReferenceObject.h"
 #include "EbResize.h"
 #include "common_dsp_rtcd.h"
+#if !FEATURE_IN_LOOP_TPL
 #include "EbTransforms.h"
 #include "aom_dsp_rtcd.h"
 #include "EbRateDistortionCost.h"
 #include "EbLog.h"
 #include "EbIntraPrediction.h"
 #include "EbMotionEstimation.h"
+#endif
 /**************************************
  * Context
  **************************************/
@@ -334,6 +336,7 @@ void update_histogram_queue_entry(SequenceControlSet *scs_ptr, EncodeContext *en
     return;
 }
 
+#if !FEATURE_IN_LOOP_TPL
 static void generate_lambda_scaling_factor(PictureParentControlSet         *pcs_ptr, int64_t mc_dep_cost_base)
 {
     Av1Common *cm = pcs_ptr->av1_cm;
@@ -1307,6 +1310,12 @@ EbErrorType tpl_mc_flow(
 
     return EB_ErrorNone;
 }
+#endif
+#if FIX_OPTIMIZE_BUILD_QUANTIZER
+void eb_av1_build_quantizer(AomBitDepth bit_depth, int32_t y_dc_delta_q, int32_t u_dc_delta_q,
+    int32_t u_ac_delta_q, int32_t v_dc_delta_q, int32_t v_ac_delta_q,
+    Quants *const quants, Dequants *const deq);
+#endif
 /* Initial Rate Control Kernel */
 
 /*********************************************************************************
@@ -1600,11 +1609,13 @@ void *initial_rate_control_kernel(void *input_ptr) {
                                     ->reference_picture_wrapper_ptr,
                                 1);
                         }
+#if !FEATURE_IN_LOOP_TPL
                         if (scs_ptr->static_config.look_ahead_distance != 0 &&
                             scs_ptr->static_config.enable_tpl_la &&
                             pcs_ptr->temporal_layer_index == 0) {
                             tpl_mc_flow(encode_context_ptr, scs_ptr, pcs_ptr);
                         }
+#endif
                         // Get Empty Results Object
                         svt_get_empty_object(
                             context_ptr->initialrate_control_results_output_fifo_ptr,

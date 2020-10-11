@@ -674,8 +674,10 @@ typedef struct PictureParentControlSet {
     uint16_t *ois_distortion_histogram;
     uint32_t *intra_sad_interval_index;
     uint32_t *inter_sad_interval_index;
+#if !FIX_GM_BUG
     uint16_t me_processed_sb_count;
     EbHandle me_processed_sb_mutex;
+#endif
     EbHandle  rc_distortion_histogram_mutex;
     FirstPassData firstpass_data;
     RefreshFrameFlagsInfo refresh_frame;
@@ -690,7 +692,9 @@ typedef struct PictureParentControlSet {
     double       *tpl_rdmult_scaling_factors;
     double       *tpl_sb_rdmult_scaling_factors;
     EbBool       blk_lambda_tuning;
+#if !FIX_TPL_TRAILING_FRAME_BUG
     uint8_t       tpl_opt_flag;
+#endif
     // Dynamic GOP
     EbPred   pred_structure;
     uint8_t  hierarchical_levels;
