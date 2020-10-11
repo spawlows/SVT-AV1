@@ -5832,9 +5832,11 @@ static int cqp_qindex_calc_tpl_la(PictureControlSet *pcs_ptr, RATE_CONTROL *rc, 
         if (pcs_ptr->parent_pcs_ptr->input_resolution == INPUT_SIZE_240p_RANGE)
             q_adj_factor -= 0.15;
         // Make a further adjustment based on the kf zero motion measure.
+#if !TUNE_TPL
         q_adj_factor +=
             0.05 - (0.001 * (double)pcs_ptr->parent_pcs_ptr
                                 ->kf_zeromotion_pct /*(double)cpi->twopass.kf_zeromotion_pct*/);
+#endif
 
         // Convert the adjustment factor to a qindex delta
         // on active_best_quality.
@@ -5842,11 +5844,46 @@ static int cqp_qindex_calc_tpl_la(PictureControlSet *pcs_ptr, RATE_CONTROL *rc, 
         active_best_quality += eb_av1_compute_qdelta(q_val, q_val * q_adj_factor, bit_depth);
     } else if (refresh_golden_frame || is_intrl_arf_boost || refresh_alt_ref_frame) {
         double min_boost_factor = sqrt(1 << pcs_ptr->parent_pcs_ptr->hierarchical_levels);
+#if TUNE_TPL
+        // The new tpl only looks at pictures in tpl group, which is fewer than before,
+        // As a results, we defined a factor to adjust r0
+        if (pcs_ptr->parent_pcs_ptr->temporal_layer_index == 0) {
+            double div_factor = 1;
+#if ENABLE_TPL_TRAILING
+            double factor;
+            if (pcs_ptr->parent_pcs_ptr->tpl_trailing_frame_count == 0)
+                factor = 2;
+            else if (pcs_ptr->parent_pcs_ptr->tpl_trailing_frame_count <= 6)
+                factor = 1.5;
+            else
+                factor = 1;
+
+            if (pcs_ptr->parent_pcs_ptr->pd_window_count == scs_ptr->scd_delay)
+                div_factor = factor;
+            else if (pcs_ptr->parent_pcs_ptr->pd_window_count <= 1)
+                div_factor = 1.0 / factor;
+#else
+            if (pcs_ptr->parent_pcs_ptr->pd_window_count == scs_ptr->scd_delay)
+                div_factor = 2;
+            else if (pcs_ptr->parent_pcs_ptr->pd_window_count <= 1)
+                div_factor = 0.5;
+#endif
+            pcs_ptr->parent_pcs_ptr->r0 = pcs_ptr->parent_pcs_ptr->r0 / div_factor;
+        }
+
+        int num_stats_required_for_gfu_boost = pcs_ptr->parent_pcs_ptr->tpl_group_size + (1 << pcs_ptr->parent_pcs_ptr->hierarchical_levels);
+
+#else
         int num_stats_required_for_gfu_boost = pcs_ptr->parent_pcs_ptr->frames_in_sw + (1 << pcs_ptr->parent_pcs_ptr->hierarchical_levels);
+#endif
         rc->gfu_boost = get_gfu_boost_from_r0_lap(min_boost_factor, MAX_GFUBOOST_FACTOR, pcs_ptr->parent_pcs_ptr->r0, num_stats_required_for_gfu_boost);
         rc->arf_boost_factor =
             (pcs_ptr->ref_slice_type_array[0][0] == I_SLICE &&
+#if TUNE_TPL
+                pcs_ptr->ref_pic_r0[0][0] - pcs_ptr->parent_pcs_ptr->r0 >= 0.08)
+#else
                 pcs_ptr->ref_pic_r0[0][0] - pcs_ptr->parent_pcs_ptr->r0 >= 0.1)
+#endif
             ? (float_t)1.3
             : (float_t)1;
         q = active_worst_quality;
@@ -6257,6 +6294,34 @@ void process_tpl_stats_frame_kf_gfu_boost(PictureControlSet *pcs_ptr) {
                 min_boost_factor, MAX_BOOST_COMBINE_FACTOR, rc->gfu_boost,
                 gfu_boost, rc->num_stats_used_for_gfu_boost);
     } else {
+#if TUNE_TPL
+        // The new tpl only looks at pictures in tpl group, which is fewer than before,
+        // As a results, we defined a factor to adjust r0
+        if (pcs_ptr->parent_pcs_ptr->slice_type != 2) {
+            double div_factor = 1;
+#if ENABLE_TPL_TRAILING
+            double factor;
+            if (pcs_ptr->parent_pcs_ptr->tpl_trailing_frame_count == 0)
+                factor = 2;
+            else if (pcs_ptr->parent_pcs_ptr->tpl_trailing_frame_count <= 6)
+                factor = 1.5;
+            else
+                factor = 1;
+
+            if (rc->frames_to_key > (int)pcs_ptr->parent_pcs_ptr->tpl_group_size * 3 / 2)
+                div_factor = factor;
+            else if (rc->frames_to_key <= (int)pcs_ptr->parent_pcs_ptr->tpl_group_size)
+                div_factor = 1.0 / factor;
+#else
+
+            if (rc->frames_to_key > (int) pcs_ptr->parent_pcs_ptr->tpl_group_size * 3 / 2)
+                div_factor = 2;
+            else if (rc->frames_to_key <= (int)pcs_ptr->parent_pcs_ptr->tpl_group_size)
+                div_factor = 0.5;
+#endif
+            pcs_ptr->parent_pcs_ptr->r0 = pcs_ptr->parent_pcs_ptr->r0 / div_factor;
+        }
+#endif
         rc->gfu_boost       = get_gfu_boost_from_r0_lap(MIN_BOOST_COMBINE_FACTOR,
                                                   MAX_GFUBOOST_FACTOR,
                                                   pcs_ptr->parent_pcs_ptr->r0,
@@ -6330,8 +6395,10 @@ static void get_intra_q_and_bounds(PictureControlSet *pcs_ptr,
         if (pcs_ptr->parent_pcs_ptr->input_resolution <= INPUT_SIZE_240p_RANGE)
             q_adj_factor -= 0.15;
         // Make a further adjustment based on the kf zero motion measure.
+#if !TUNE_TPL
         q_adj_factor +=
             0.05 - (0.001 * (double)MAX(twopass->kf_zeromotion_pct, pcs_ptr->parent_pcs_ptr->kf_zeromotion_pct));
+#endif
 
         // Convert the adjustment factor to a qindex delta
         // on active_best_quality.
@@ -6405,7 +6472,11 @@ static int get_active_best_quality(PictureControlSet *pcs_ptr,
 
     rc->arf_boost_factor =
         (pcs_ptr->ref_slice_type_array[0][0] == I_SLICE &&
+#if TUNE_TPL
+            pcs_ptr->ref_pic_r0[0][0] - pcs_ptr->parent_pcs_ptr->r0 >= 0.08)
+#else
             pcs_ptr->ref_pic_r0[0][0] - pcs_ptr->parent_pcs_ptr->r0 >= 0.1)
+#endif
         ? (float_t)1.3
         : (float_t)1;
     active_best_quality = min_boost - (int)(boost * rc->arf_boost_factor);
@@ -7211,12 +7282,18 @@ void *rate_control_kernel(void *input_ptr) {
                         // Content adaptive qp assignment
                         // 1pass QPS with tpl_la
                             if (!use_input_stat(scs_ptr) &&
+#if !ENABLE_TPL_ZERO_LAD
                                  scs_ptr->static_config.look_ahead_distance != 0 &&
+#endif
                                  scs_ptr->static_config.enable_tpl_la)
                             new_qindex = cqp_qindex_calc_tpl_la(pcs_ptr, &rc, qindex);
                         else
-                        if (use_input_stat(scs_ptr) &&
-                            scs_ptr->static_config.look_ahead_distance != 0) {
+                        if (use_input_stat(scs_ptr)
+#if !ENABLE_TPL_ZERO_LAD
+                            &&
+                            scs_ptr->static_config.look_ahead_distance != 0
+#endif
+                            ) {
                             int32_t update_type = scs_ptr->encode_context_ptr->gf_group.update_type[pcs_ptr->parent_pcs_ptr->gf_group_index];
                             frm_hdr->quantization_params.base_q_idx = quantizer_to_qindex[pcs_ptr->picture_qp];
                             if (scs_ptr->static_config.enable_tpl_la && pcs_ptr->parent_pcs_ptr->r0 != 0 &&
@@ -7257,8 +7334,12 @@ void *rate_control_kernel(void *input_ptr) {
             } else {
                 // ***Rate Control***
                 if (scs_ptr->static_config.rate_control_mode == 1) {
-                    if (use_input_stat(scs_ptr) &&
-                        scs_ptr->static_config.look_ahead_distance != 0) {
+                    if (use_input_stat(scs_ptr)
+#if !ENABLE_TPL_ZERO_LAD
+                        &&
+                        scs_ptr->static_config.look_ahead_distance != 0
+#endif
+                        ) {
                         int32_t new_qindex = quantizer_to_qindex[(uint8_t)scs_ptr->static_config.qp];
                         int32_t update_type = scs_ptr->encode_context_ptr->gf_group.update_type[pcs_ptr->parent_pcs_ptr->gf_group_index];
                         frm_hdr->quantization_params.base_q_idx = quantizer_to_qindex[pcs_ptr->picture_qp];
@@ -7302,11 +7383,14 @@ void *rate_control_kernel(void *input_ptr) {
                 pcs_ptr->picture_qp = (uint8_t)CLIP3(scs_ptr->static_config.min_qp_allowed,
                                                      scs_ptr->static_config.max_qp_allowed,
                                                      pcs_ptr->picture_qp);
+
+#if !TUNE_TPL
                 if (scs_ptr->static_config.rate_control_mode == 1 &&
                     use_input_stat(scs_ptr) &&
-                    scs_ptr->static_config.look_ahead_distance != 0)
+                    scs_ptr->static_config.look_ahead_distance != 0) //anaghdin what is this?>
                     ;//hack skip base_q_idx writeback for accuracy loss like 89 to 88
                 else
+#endif
                 frm_hdr->quantization_params.base_q_idx = quantizer_to_qindex[pcs_ptr->picture_qp];
             }
 
@@ -7348,7 +7432,9 @@ void *rate_control_kernel(void *input_ptr) {
             if (scs_ptr->static_config.enable_adaptive_quantization == 2 &&
                 !use_output_stat(scs_ptr) &&
                 use_input_stat(scs_ptr) &&
+#if !ENABLE_TPL_ZERO_LAD
                 scs_ptr->static_config.look_ahead_distance != 0 &&
+#endif
                 scs_ptr->static_config.enable_tpl_la &&
                 pcs_ptr->parent_pcs_ptr->r0 != 0)
                 sb_qp_derivation_tpl_la(pcs_ptr);
@@ -7357,7 +7443,9 @@ void *rate_control_kernel(void *input_ptr) {
             if (scs_ptr->static_config.enable_adaptive_quantization == 2 &&
                 !use_output_stat(scs_ptr) &&
                 !use_input_stat(scs_ptr) &&
+#if !ENABLE_TPL_ZERO_LAD
                 scs_ptr->static_config.look_ahead_distance != 0 &&
+#endif
                 scs_ptr->static_config.enable_tpl_la &&
                 pcs_ptr->parent_pcs_ptr->r0 != 0)
                 sb_qp_derivation_tpl_la(pcs_ptr);
@@ -7434,9 +7522,12 @@ void *rate_control_kernel(void *input_ptr) {
                         ? context_ptr->rate_control_param_queue[PARALLEL_GOP_MAX_NUMBER - 1]
                         : context_ptr->rate_control_param_queue[interval_index_temp - 1];
             }
-            if (scs_ptr->static_config.rate_control_mode == 0 &&
+            if (scs_ptr->static_config.rate_control_mode == 0
+#if !ENABLE_TPL_ZERO_LAD
+                &&
                 use_input_stat(scs_ptr) &&
                 1//scs_ptr->static_config.look_ahead_distance != 0
+#endif
                 ) {
                 av1_rc_postencode_update(parentpicture_control_set_ptr, (parentpicture_control_set_ptr->total_num_bits + 7) >> 3);
                 svt_av1_twopass_postencode_update(parentpicture_control_set_ptr);
@@ -7449,14 +7540,22 @@ void *rate_control_kernel(void *input_ptr) {
                     (int64_t)parentpicture_control_set_ptr->total_num_bits -
                     (int64_t)context_ptr->high_level_rate_control_ptr->channel_bit_rate_per_frame;
 
-                if (use_input_stat(scs_ptr) &&
-                    scs_ptr->static_config.look_ahead_distance != 0) {
+                if (use_input_stat(scs_ptr)
+#if !ENABLE_TPL_ZERO_LAD
+                    &&
+                    scs_ptr->static_config.look_ahead_distance != 0
+#endif
+                    ) {
                     ;
                 } else
                 high_level_rc_feed_back_picture(parentpicture_control_set_ptr, scs_ptr);
                 if (scs_ptr->static_config.rate_control_mode == 1)
-                    if (use_input_stat(scs_ptr) &&
-                        scs_ptr->static_config.look_ahead_distance != 0) {
+                    if (use_input_stat(scs_ptr)
+#if !ENABLE_TPL_ZERO_LAD
+                        &&
+                        scs_ptr->static_config.look_ahead_distance != 0
+#endif
+                        ) {
                         av1_rc_postencode_update(parentpicture_control_set_ptr, (parentpicture_control_set_ptr->total_num_bits + 7) >> 3);
                         svt_av1_twopass_postencode_update(parentpicture_control_set_ptr);
                     } else

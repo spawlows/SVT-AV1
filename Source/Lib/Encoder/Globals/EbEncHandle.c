@@ -2248,7 +2248,9 @@ void set_param_based_on_input(SequenceControlSet *scs_ptr)
         scs_ptr->static_config.intra_refresh_type     = 2;
     }
     else if (use_input_stat(scs_ptr)) {
+#if !ENABLE_TPL_ZERO_LAD
         scs_ptr->static_config.look_ahead_distance = 16;
+#endif
         scs_ptr->static_config.enable_tpl_la = 1;
         scs_ptr->static_config.intra_refresh_type     = 2;
     }

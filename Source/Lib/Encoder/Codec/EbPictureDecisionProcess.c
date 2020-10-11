@@ -4693,6 +4693,13 @@ void* picture_decision_kernel(void *input_ptr)
 #endif
                     }
                 }
+#if TUNE_TPL
+                for (window_index = 0; window_index < scs_ptr->scd_delay; window_index++)
+                    if (pcs_ptr->pd_window[2 + window_index])
+                        pcs_ptr->pd_window_count++;
+                    else
+                        break;
+#endif
             }
 
             pcs_ptr = (PictureParentControlSet*)queue_entry_ptr->parent_pcs_wrapper_ptr->object_ptr;

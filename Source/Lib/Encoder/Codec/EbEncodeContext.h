@@ -189,8 +189,13 @@ typedef struct EncodeContext {
     EbBool  is_i_slice_in_last_mini_gop;
     uint64_t i_slice_picture_number_in_last_mini_gop;
     uint64_t poc_map_idx[MAX_TPL_LA_SW];
+#if FEATURE_IN_LOOP_TPL
+    EbPictureBufferDesc *mc_flow_rec_picture_buffer[MAX_TPL_LA_SW];
+    EbPictureBufferDesc *mc_flow_rec_picture_buffer_noref;
+#else
     EbByte  mc_flow_rec_picture_buffer[MAX_TPL_LA_SW];
     EbByte  mc_flow_rec_picture_buffer_saved;
+#endif
     FrameInfo      frame_info;
     TwoPassCfg     two_pass_cfg; // two pass datarate control
     RATE_CONTROL   rc;
