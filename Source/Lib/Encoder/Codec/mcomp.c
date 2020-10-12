@@ -49,18 +49,6 @@ static INLINE int svt_mv_cost(const MV *mv, const int *joint_cost,
          comp_cost[1][mv->col];
 }
 
-#define CONVERT_TO_CONST_MVCOST(ptr) ((const int *const *)(ptr))
-// Returns the cost of encoding the motion vector diff := *mv - *ref. The cost
-// is defined as the rate required to encode diff * weight, rounded to the
-// nearest 2 ** 7.
-// This is NOT used during motion compensation.
-int svt_av1_mv_bit_cost(const MV *mv, const MV *ref_mv, const int *mvjcost,
-                    int *mvcost[2], int weight) {
-  const MV diff = { mv->row - ref_mv->row, mv->col - ref_mv->col };
-  return ROUND_POWER_OF_TWO(
-      svt_mv_cost(&diff, mvjcost, CONVERT_TO_CONST_MVCOST(mvcost)) * weight, 7);
-}
-
 // Returns the cost of using the current mv during the motion search. This is
 // used when var is used as the error metric.
 #define PIXEL_TRANSFORM_ERROR_SCALE 4

@@ -330,13 +330,13 @@ static void highbd_blend_a64_vmask_ref(
 
 // C
 TEST_CLASS(BlendA64Mask1DTestHBD, highbd_blend_a64_hmask_ref,
-           eb_aom_highbd_blend_a64_hmask_c_8bit, Horz_Blend_Hbd_C)
+           eb_aom_highbd_blend_a64_hmask_8bit_c, Horz_Blend_Hbd_C)
 TEST_CLASS(BlendA64Mask1DTestHBD, highbd_blend_a64_vmask_ref,
-           eb_aom_highbd_blend_a64_vmask_c_8bit, Vert_Blend_Hbd_C)
+           eb_aom_highbd_blend_a64_vmask_8bit_c, Vert_Blend_Hbd_C)
 // Intrinsic
 TEST_CLASS(BlendA64Mask1DTestHBD, highbd_blend_a64_hmask_ref,
-           eb_aom_highbd_blend_a64_hmask_sse4_1_8bit, Horz_Blend_Hbd_SSE4_1)
+           eb_aom_highbd_blend_a64_hmask_8bit_sse4_1, Horz_Blend_Hbd_SSE4_1)
 TEST_CLASS(BlendA64Mask1DTestHBD, highbd_blend_a64_vmask_ref,
-           eb_aom_highbd_blend_a64_vmask_sse4_1_8bit, Vert_Blend_Hbd_SSE4_1)
+           eb_aom_highbd_blend_a64_vmask_8bit_sse4_1, Vert_Blend_Hbd_SSE4_1)
 
 }; // namespace

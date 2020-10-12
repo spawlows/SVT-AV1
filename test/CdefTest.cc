@@ -15,7 +15,7 @@
  * @brief Unit test for cdef tools:
  * * eb_cdef_find_dir_avx2
  * * eb_cdef_filter_block_avx2
- * * compute_cdef_dist_avx2
+ * * compute_cdef_dist_16bit_avx2
  * * copy_rect8_8bit_to_16bit_avx2
  * * svt_search_one_dual_avx2
  *
@@ -515,7 +515,7 @@ TEST(CdefToolTest, CopyRectMatchTest) {
 }
 
 /**
- * @brief Unit test for compute_cdef_dist_avx2
+ * @brief Unit test for compute_cdef_dist_16bit_avx2
  *
  * Test strategy:
  * Feed cdef list, src buffer, dst buffer generated randomly to targeted
@@ -577,16 +577,16 @@ TEST(CdefToolTest, ComputeCdefDistMatchTest) {
                                                                test_bs[i],
                                                                coeff_shift,
                                                                plane);
-                    const uint64_t avx_mse = compute_cdef_dist_avx2(dst_data_,
-                                                                    stride,
-                                                                    src_data_,
-                                                                    dlist,
-                                                                    cdef_count,
-                                                                    test_bs[i],
-                                                                    coeff_shift,
-                                                                    plane);
+                    const uint64_t avx_mse = compute_cdef_dist_16bit_avx2(dst_data_,
+                                                                          stride,
+                                                                          src_data_,
+                                                                          dlist,
+                                                                          cdef_count,
+                                                                          test_bs[i],
+                                                                          coeff_shift,
+                                                                          plane);
                     ASSERT_EQ(c_mse, avx_mse)
-                        << "compute_cdef_dist_avx2 failed "
+                        << "compute_cdef_dist_16bit_avx2 failed "
                         << "bitdepth: " << bd << " plane: " << plane
                         << " BlockSize " << test_bs[i] << " loop: " << k;
                 }
