@@ -213,8 +213,9 @@ void highbd_upscale_normative_rect(const uint8_t *const input, int height, int w
     }
 }
 
-void eb_av1_upscale_normative_rows(const Av1Common *cm, const uint8_t *src, int src_stride,
-                                   uint8_t *dst, int dst_stride, int rows, int sub_x, int bd, EbBool is_16bit_pipeline) {
+void svt_av1_upscale_normative_rows(const Av1Common *cm, const uint8_t *src, int src_stride,
+                                    uint8_t *dst, int dst_stride, int rows, int sub_x, int bd,
+                                    EbBool is_16bit_pipeline) {
     int       high_bd                = bd > EB_8BIT || is_16bit_pipeline;
     const int downscaled_plane_width = ROUND_POWER_OF_TWO(cm->frm_size.frame_width, sub_x);
     const int upscaled_plane_width =
@@ -227,7 +228,7 @@ void eb_av1_upscale_normative_rows(const Av1Common *cm, const uint8_t *src, int 
     int32_t x0_qn =
         get_upscale_convolve_x0(downscaled_plane_width, upscaled_plane_width, x_step_qn);
     for (int j = 0; j < cm->tiles_info.tile_cols; j++) {
-        eb_av1_tile_set_col(&tile_col, &cm->tiles_info, cm->mi_cols, j);
+        svt_av1_tile_set_col(&tile_col, &cm->tiles_info, cm->mi_cols, j);
 
         /*Determine the limits of this tile column in both the source
         and destination images.

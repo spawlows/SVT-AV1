@@ -74,7 +74,7 @@ void AV1FrameErrorTest::RandomValues(frame_error_func test_impl, int width,
         ref[i] = rnd_->Rand8();
     }
     const int64_t ref_error =
-        eb_av1_calc_frame_error_c(ref, stride, dst, width, height, stride);
+        svt_av1_calc_frame_error_c(ref, stride, dst, width, height, stride);
     const int64_t test_error =
         test_impl(ref, stride, dst, width, height, stride);
     ASSERT_EQ(test_error, ref_error) << width << "x" << height;
@@ -101,7 +101,7 @@ void AV1FrameErrorTest::ExtremeValues(frame_error_func test_impl, int width,
             memset(ref, 0, max_blk_size);
         }
         const int64_t ref_error =
-            eb_av1_calc_frame_error_c(ref, stride, dst, width, height, stride);
+            svt_av1_calc_frame_error_c(ref, stride, dst, width, height, stride);
         const int64_t test_error =
             test_impl(ref, stride, dst, width, height, stride);
         ASSERT_EQ(test_error, ref_error) << width << "x" << height;
@@ -124,7 +124,7 @@ void AV1FrameErrorTest::RunSpeedTest(frame_error_func test_impl, int width,
         dst[i] = ref[i] = rnd_->Rand8();
     }
     const int num_loops = 10000000 / (width + height);
-    frame_error_func funcs[2] = {eb_av1_calc_frame_error_c, test_impl};
+    frame_error_func funcs[2] = {svt_av1_calc_frame_error_c, test_impl};
     double elapsed_time[2] = {0};
     for (int i = 0; i < 2; ++i) {
         double time;
@@ -164,7 +164,7 @@ TEST_P(AV1FrameErrorTest, DISABLED_Speed) {
 
 INSTANTIATE_TEST_CASE_P(
     AVX2, AV1FrameErrorTest,
-    ::testing::Combine(::testing::Values(&eb_av1_calc_frame_error_avx2),
+    ::testing::Combine(::testing::Values(&svt_av1_calc_frame_error_avx2),
                        ::testing::ValuesIn(kBlockWidth),
                        ::testing::ValuesIn(kBlockHeight)));
 

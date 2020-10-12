@@ -256,44 +256,44 @@ void setup_common_rtcd_internal(CPU_FLAGS flags) {
     eb_cfl_predict_lbd = eb_cfl_predict_lbd_c;
     eb_cfl_predict_hbd = eb_cfl_predict_hbd_c;
 
-    eb_av1_filter_intra_predictor = eb_av1_filter_intra_predictor_c;
+    svt_av1_filter_intra_predictor = svt_av1_filter_intra_predictor_c;
 
-    eb_av1_filter_intra_edge_high = eb_av1_filter_intra_edge_high_c;
+    svt_av1_filter_intra_edge_high = svt_av1_filter_intra_edge_high_c;
 
-    eb_av1_filter_intra_edge = eb_av1_filter_intra_edge_c;
+    svt_av1_filter_intra_edge = svt_av1_filter_intra_edge_c;
 
-    eb_av1_upsample_intra_edge = eb_av1_upsample_intra_edge_c;
+    svt_av1_upsample_intra_edge = svt_av1_upsample_intra_edge_c;
 
-    eb_av1_build_compound_diffwtd_mask_d16 = eb_av1_build_compound_diffwtd_mask_d16_c;
+    svt_av1_build_compound_diffwtd_mask_d16 = svt_av1_build_compound_diffwtd_mask_d16_c;
 
-    eb_av1_highbd_wiener_convolve_add_src = eb_av1_highbd_wiener_convolve_add_src_c;
+    svt_av1_highbd_wiener_convolve_add_src = svt_av1_highbd_wiener_convolve_add_src_c;
 
     eb_apply_selfguided_restoration = eb_apply_selfguided_restoration_c;
 
-    eb_av1_selfguided_restoration = eb_av1_selfguided_restoration_c;
+    svt_av1_selfguided_restoration = svt_av1_selfguided_restoration_c;
 
-    eb_av1_inv_txfm2d_add_16x16 = eb_av1_inv_txfm2d_add_16x16_c;
-    eb_av1_inv_txfm2d_add_32x32 = eb_av1_inv_txfm2d_add_32x32_c;
-    eb_av1_inv_txfm2d_add_4x4 = eb_av1_inv_txfm2d_add_4x4_c;
+    svt_av1_inv_txfm2d_add_16x16 = svt_av1_inv_txfm2d_add_16x16_c;
+    svt_av1_inv_txfm2d_add_32x32 = svt_av1_inv_txfm2d_add_32x32_c;
+    svt_av1_inv_txfm2d_add_4x4 = svt_av1_inv_txfm2d_add_4x4_c;
     svt_av1_inv_txfm2d_add_64x64 = svt_av1_inv_txfm2d_add_64x64_c;
-    eb_av1_inv_txfm2d_add_8x8 = eb_av1_inv_txfm2d_add_8x8_c;
+    svt_av1_inv_txfm2d_add_8x8 = svt_av1_inv_txfm2d_add_8x8_c;
 
-    eb_av1_inv_txfm2d_add_8x16 = eb_av1_inv_txfm2d_add_8x16_c;
-    eb_av1_inv_txfm2d_add_16x8 = eb_av1_inv_txfm2d_add_16x8_c;
-    eb_av1_inv_txfm2d_add_16x32 = eb_av1_inv_txfm2d_add_16x32_c;
-    eb_av1_inv_txfm2d_add_32x16 = eb_av1_inv_txfm2d_add_32x16_c;
-    eb_av1_inv_txfm2d_add_32x8 = eb_av1_inv_txfm2d_add_32x8_c;
-    eb_av1_inv_txfm2d_add_8x32 = eb_av1_inv_txfm2d_add_8x32_c;
-    eb_av1_inv_txfm2d_add_32x64 = eb_av1_inv_txfm2d_add_32x64_c;
-    eb_av1_inv_txfm2d_add_64x32 = eb_av1_inv_txfm2d_add_64x32_c;
-    eb_av1_inv_txfm2d_add_16x64 = eb_av1_inv_txfm2d_add_16x64_c;
-    eb_av1_inv_txfm2d_add_64x16 = eb_av1_inv_txfm2d_add_64x16_c;
-    eb_av1_inv_txfm2d_add_4x8 = eb_av1_inv_txfm2d_add_4x8_c;
-    eb_av1_inv_txfm2d_add_8x4 = eb_av1_inv_txfm2d_add_8x4_c;
-    eb_av1_inv_txfm2d_add_4x16 = eb_av1_inv_txfm2d_add_4x16_c;
-    eb_av1_inv_txfm2d_add_16x4 = eb_av1_inv_txfm2d_add_16x4_c;
+    svt_av1_inv_txfm2d_add_8x16 = svt_av1_inv_txfm2d_add_8x16_c;
+    svt_av1_inv_txfm2d_add_16x8 = svt_av1_inv_txfm2d_add_16x8_c;
+    svt_av1_inv_txfm2d_add_16x32 = svt_av1_inv_txfm2d_add_16x32_c;
+    svt_av1_inv_txfm2d_add_32x16 = svt_av1_inv_txfm2d_add_32x16_c;
+    svt_av1_inv_txfm2d_add_32x8 = svt_av1_inv_txfm2d_add_32x8_c;
+    svt_av1_inv_txfm2d_add_8x32 = svt_av1_inv_txfm2d_add_8x32_c;
+    svt_av1_inv_txfm2d_add_32x64 = svt_av1_inv_txfm2d_add_32x64_c;
+    svt_av1_inv_txfm2d_add_64x32 = svt_av1_inv_txfm2d_add_64x32_c;
+    svt_av1_inv_txfm2d_add_16x64 = svt_av1_inv_txfm2d_add_16x64_c;
+    svt_av1_inv_txfm2d_add_64x16 = svt_av1_inv_txfm2d_add_64x16_c;
+    svt_av1_inv_txfm2d_add_4x8 = svt_av1_inv_txfm2d_add_4x8_c;
+    svt_av1_inv_txfm2d_add_8x4 = svt_av1_inv_txfm2d_add_8x4_c;
+    svt_av1_inv_txfm2d_add_4x16 = svt_av1_inv_txfm2d_add_4x16_c;
+    svt_av1_inv_txfm2d_add_16x4 = svt_av1_inv_txfm2d_add_16x4_c;
 
-    eb_av1_inv_txfm_add = eb_av1_inv_txfm_add_c;
+    svt_av1_inv_txfm_add = svt_av1_inv_txfm_add_c;
 
     svt_compressed_packmsb = svt_compressed_packmsb_c;
     svt_c_pack = svt_c_pack_c;
@@ -318,41 +318,41 @@ void setup_common_rtcd_internal(CPU_FLAGS flags) {
 
     svt_picture_average_kernel = svt_picture_average_kernel_c;
     svt_picture_average_kernel1_line = svt_picture_average_kernel1_line_c;
-    eb_av1_wiener_convolve_add_src = eb_av1_wiener_convolve_add_src_c,
+    svt_av1_wiener_convolve_add_src = svt_av1_wiener_convolve_add_src_c,
 
 
-    eb_av1_convolve_2d_copy_sr = eb_av1_convolve_2d_copy_sr_c;
+    svt_av1_convolve_2d_copy_sr = svt_av1_convolve_2d_copy_sr_c;
 
-    eb_av1_convolve_2d_scale = eb_av1_convolve_2d_scale_c;
+    svt_av1_convolve_2d_scale = svt_av1_convolve_2d_scale_c;
 
-    eb_av1_highbd_convolve_2d_copy_sr = eb_av1_highbd_convolve_2d_copy_sr_c;
-    eb_av1_highbd_jnt_convolve_2d_copy = eb_av1_highbd_jnt_convolve_2d_copy_c;
-    eb_av1_highbd_convolve_y_sr = eb_av1_highbd_convolve_y_sr_c;
-    eb_av1_highbd_convolve_2d_sr = eb_av1_highbd_convolve_2d_sr_c;
+    svt_av1_highbd_convolve_2d_copy_sr = svt_av1_highbd_convolve_2d_copy_sr_c;
+    svt_av1_highbd_jnt_convolve_2d_copy = svt_av1_highbd_jnt_convolve_2d_copy_c;
+    svt_av1_highbd_convolve_y_sr = svt_av1_highbd_convolve_y_sr_c;
+    svt_av1_highbd_convolve_2d_sr = svt_av1_highbd_convolve_2d_sr_c;
 
-    eb_av1_highbd_convolve_2d_scale = eb_av1_highbd_convolve_2d_scale_c;
+    svt_av1_highbd_convolve_2d_scale = svt_av1_highbd_convolve_2d_scale_c;
 
-    eb_av1_highbd_jnt_convolve_2d = eb_av1_highbd_jnt_convolve_2d_c;
-    eb_av1_highbd_jnt_convolve_x = eb_av1_highbd_jnt_convolve_x_c;
-    eb_av1_highbd_jnt_convolve_y = eb_av1_highbd_jnt_convolve_y_c;
-    eb_av1_highbd_convolve_x_sr = eb_av1_highbd_convolve_x_sr_c;
+    svt_av1_highbd_jnt_convolve_2d = svt_av1_highbd_jnt_convolve_2d_c;
+    svt_av1_highbd_jnt_convolve_x = svt_av1_highbd_jnt_convolve_x_c;
+    svt_av1_highbd_jnt_convolve_y = svt_av1_highbd_jnt_convolve_y_c;
+    svt_av1_highbd_convolve_x_sr = svt_av1_highbd_convolve_x_sr_c;
 
-    eb_av1_convolve_2d_sr = eb_av1_convolve_2d_sr_c;
-    eb_av1_convolve_2d_copy_sr = eb_av1_convolve_2d_copy_sr_c;
-    eb_av1_convolve_x_sr = eb_av1_convolve_x_sr_c;
-    eb_av1_convolve_y_sr = eb_av1_convolve_y_sr_c;
-    eb_av1_jnt_convolve_2d = eb_av1_jnt_convolve_2d_c;
-    eb_av1_jnt_convolve_2d_copy = eb_av1_jnt_convolve_2d_copy_c;
-    eb_av1_jnt_convolve_x = eb_av1_jnt_convolve_x_c;
-    eb_av1_jnt_convolve_y = eb_av1_jnt_convolve_y_c;
+    svt_av1_convolve_2d_sr = svt_av1_convolve_2d_sr_c;
+    svt_av1_convolve_2d_copy_sr = svt_av1_convolve_2d_copy_sr_c;
+    svt_av1_convolve_x_sr = svt_av1_convolve_x_sr_c;
+    svt_av1_convolve_y_sr = svt_av1_convolve_y_sr_c;
+    svt_av1_jnt_convolve_2d = svt_av1_jnt_convolve_2d_c;
+    svt_av1_jnt_convolve_2d_copy = svt_av1_jnt_convolve_2d_copy_c;
+    svt_av1_jnt_convolve_x = svt_av1_jnt_convolve_x_c;
+    svt_av1_jnt_convolve_y = svt_av1_jnt_convolve_y_c;
 
     svt_aom_convolve8_horiz = svt_aom_convolve8_horiz_c;
     svt_aom_convolve8_vert = svt_aom_convolve8_vert_c;
 
 
-    eb_av1_build_compound_diffwtd_mask = eb_av1_build_compound_diffwtd_mask_c;
-    eb_av1_build_compound_diffwtd_mask_highbd = eb_av1_build_compound_diffwtd_mask_highbd_c;
-    eb_av1_wedge_sse_from_residuals = eb_av1_wedge_sse_from_residuals_c;
+    svt_av1_build_compound_diffwtd_mask = svt_av1_build_compound_diffwtd_mask_c;
+    svt_av1_build_compound_diffwtd_mask_highbd = svt_av1_build_compound_diffwtd_mask_highbd_c;
+    svt_av1_wedge_sse_from_residuals = svt_av1_wedge_sse_from_residuals_c;
 
     svt_aom_subtract_block = svt_aom_subtract_block_c;
 
@@ -383,12 +383,12 @@ void setup_common_rtcd_internal(CPU_FLAGS flags) {
     svt_aom_highbd_smooth_v_predictor_8x8 = svt_aom_highbd_smooth_v_predictor_8x8_c;
 
 
-    eb_av1_dr_prediction_z1 = eb_av1_dr_prediction_z1_c;
-    eb_av1_dr_prediction_z2 = eb_av1_dr_prediction_z2_c;
-    eb_av1_dr_prediction_z3 = eb_av1_dr_prediction_z3_c;
-    eb_av1_highbd_dr_prediction_z1 = eb_av1_highbd_dr_prediction_z1_c;
-    eb_av1_highbd_dr_prediction_z2 = eb_av1_highbd_dr_prediction_z2_c;
-    eb_av1_highbd_dr_prediction_z3 = eb_av1_highbd_dr_prediction_z3_c;
+    svt_av1_dr_prediction_z1 = svt_av1_dr_prediction_z1_c;
+    svt_av1_dr_prediction_z2 = svt_av1_dr_prediction_z2_c;
+    svt_av1_dr_prediction_z3 = svt_av1_dr_prediction_z3_c;
+    svt_av1_highbd_dr_prediction_z1 = svt_av1_highbd_dr_prediction_z1_c;
+    svt_av1_highbd_dr_prediction_z2 = svt_av1_highbd_dr_prediction_z2_c;
+    svt_av1_highbd_dr_prediction_z3 = svt_av1_highbd_dr_prediction_z3_c;
 
     svt_aom_paeth_predictor_16x16 = svt_aom_paeth_predictor_16x16_c;
     svt_aom_paeth_predictor_16x32 = svt_aom_paeth_predictor_16x32_c;
@@ -616,9 +616,9 @@ void setup_common_rtcd_internal(CPU_FLAGS flags) {
     eb_copy_rect8_8bit_to_16bit = eb_copy_rect8_8bit_to_16bit_c;
 
 
-    eb_av1_highbd_warp_affine = eb_av1_highbd_warp_affine_c;
+    svt_av1_highbd_warp_affine = svt_av1_highbd_warp_affine_c;
 
-    eb_av1_warp_affine = eb_av1_warp_affine_c;
+    svt_av1_warp_affine = svt_av1_warp_affine_c;
 
     svt_aom_highbd_lpf_horizontal_14 = svt_aom_highbd_lpf_horizontal_14_c;
     svt_aom_highbd_lpf_horizontal_4 = svt_aom_highbd_lpf_horizontal_4_c;
@@ -822,52 +822,52 @@ void setup_common_rtcd_internal(CPU_FLAGS flags) {
     if (flags & HAS_SSE4_1) svt_aom_highbd_blend_a64_hmask_16bit = svt_aom_highbd_blend_a64_hmask_16bit_sse4_1;
     if (flags & HAS_AVX2) eb_cfl_predict_lbd = eb_cfl_predict_lbd_avx2;
     if (flags & HAS_AVX2) eb_cfl_predict_hbd = eb_cfl_predict_hbd_avx2;
-    if (flags & HAS_SSE4_1) eb_av1_filter_intra_predictor = eb_av1_filter_intra_predictor_sse4_1;
-    if (flags & HAS_SSE4_1) eb_av1_filter_intra_edge_high = eb_av1_filter_intra_edge_high_sse4_1;
-    if (flags & HAS_SSE4_1) eb_av1_filter_intra_edge = eb_av1_filter_intra_edge_sse4_1;
-    if (flags & HAS_SSE4_1) eb_av1_upsample_intra_edge = eb_av1_upsample_intra_edge_sse4_1;
-    if (flags & HAS_AVX2) eb_av1_build_compound_diffwtd_mask_d16 = eb_av1_build_compound_diffwtd_mask_d16_avx2;
-    if (flags & HAS_AVX2) eb_av1_highbd_wiener_convolve_add_src = eb_av1_highbd_wiener_convolve_add_src_avx2;
+    if (flags & HAS_SSE4_1) svt_av1_filter_intra_predictor = svt_av1_filter_intra_predictor_sse4_1;
+    if (flags & HAS_SSE4_1) svt_av1_filter_intra_edge_high = svt_av1_filter_intra_edge_high_sse4_1;
+    if (flags & HAS_SSE4_1) svt_av1_filter_intra_edge = svt_av1_filter_intra_edge_sse4_1;
+    if (flags & HAS_SSE4_1) svt_av1_upsample_intra_edge = svt_av1_upsample_intra_edge_sse4_1;
+    if (flags & HAS_AVX2) svt_av1_build_compound_diffwtd_mask_d16 = svt_av1_build_compound_diffwtd_mask_d16_avx2;
+    if (flags & HAS_AVX2) svt_av1_highbd_wiener_convolve_add_src = svt_av1_highbd_wiener_convolve_add_src_avx2;
     if (flags & HAS_AVX2) eb_apply_selfguided_restoration = eb_apply_selfguided_restoration_avx2;
-    if (flags & HAS_AVX2) eb_av1_selfguided_restoration = eb_av1_selfguided_restoration_avx2;
-    if (flags & HAS_AVX2) eb_av1_inv_txfm2d_add_4x4 = eb_av1_inv_txfm2d_add_4x4_avx2;
-    if (flags & HAS_AVX2) eb_av1_inv_txfm2d_add_8x8 = eb_av1_inv_txfm2d_add_8x8_avx2;
-    if (flags & HAS_AVX2) eb_av1_inv_txfm2d_add_8x16 = eb_av1_highbd_inv_txfm_add_avx2;
-    if (flags & HAS_AVX2) eb_av1_inv_txfm2d_add_16x8 = eb_av1_highbd_inv_txfm_add_avx2;
-    if (flags & HAS_AVX2) eb_av1_inv_txfm2d_add_32x8 = eb_av1_highbd_inv_txfm_add_avx2;
-    if (flags & HAS_AVX2) eb_av1_inv_txfm2d_add_8x32 = eb_av1_highbd_inv_txfm_add_avx2;
-    if (flags & HAS_SSE4_1) eb_av1_inv_txfm2d_add_4x8 = eb_av1_inv_txfm2d_add_4x8_sse4_1;
-    if (flags & HAS_SSE4_1) eb_av1_inv_txfm2d_add_8x4 = eb_av1_inv_txfm2d_add_8x4_sse4_1;
-    if (flags & HAS_SSE4_1) eb_av1_inv_txfm2d_add_4x16 = eb_av1_inv_txfm2d_add_4x16_sse4_1;
-    if (flags & HAS_SSE4_1) eb_av1_inv_txfm2d_add_16x4 = eb_av1_inv_txfm2d_add_16x4_sse4_1;
-    if (flags & HAS_AVX2) eb_av1_inv_txfm2d_add_16x16 = eb_av1_inv_txfm2d_add_16x16_avx2;
-    if (flags & HAS_AVX2) eb_av1_inv_txfm2d_add_32x32 = eb_av1_inv_txfm2d_add_32x32_avx2;
+    if (flags & HAS_AVX2) svt_av1_selfguided_restoration = svt_av1_selfguided_restoration_avx2;
+    if (flags & HAS_AVX2) svt_av1_inv_txfm2d_add_4x4 = svt_av1_inv_txfm2d_add_4x4_avx2;
+    if (flags & HAS_AVX2) svt_av1_inv_txfm2d_add_8x8 = svt_av1_inv_txfm2d_add_8x8_avx2;
+    if (flags & HAS_AVX2) svt_av1_inv_txfm2d_add_8x16 = svt_av1_highbd_inv_txfm_add_avx2;
+    if (flags & HAS_AVX2) svt_av1_inv_txfm2d_add_16x8 = svt_av1_highbd_inv_txfm_add_avx2;
+    if (flags & HAS_AVX2) svt_av1_inv_txfm2d_add_32x8 = svt_av1_highbd_inv_txfm_add_avx2;
+    if (flags & HAS_AVX2) svt_av1_inv_txfm2d_add_8x32 = svt_av1_highbd_inv_txfm_add_avx2;
+    if (flags & HAS_SSE4_1) svt_av1_inv_txfm2d_add_4x8 = svt_av1_inv_txfm2d_add_4x8_sse4_1;
+    if (flags & HAS_SSE4_1) svt_av1_inv_txfm2d_add_8x4 = svt_av1_inv_txfm2d_add_8x4_sse4_1;
+    if (flags & HAS_SSE4_1) svt_av1_inv_txfm2d_add_4x16 = svt_av1_inv_txfm2d_add_4x16_sse4_1;
+    if (flags & HAS_SSE4_1) svt_av1_inv_txfm2d_add_16x4 = svt_av1_inv_txfm2d_add_16x4_sse4_1;
+    if (flags & HAS_AVX2) svt_av1_inv_txfm2d_add_16x16 = svt_av1_inv_txfm2d_add_16x16_avx2;
+    if (flags & HAS_AVX2) svt_av1_inv_txfm2d_add_32x32 = svt_av1_inv_txfm2d_add_32x32_avx2;
     SET_SSE41_AVX2(svt_av1_inv_txfm2d_add_64x64,
                    svt_av1_inv_txfm2d_add_64x64_c,
                    svt_av1_inv_txfm2d_add_64x64_sse4_1,
                    svt_av1_inv_txfm2d_add_64x64_avx2);
-    if (flags & HAS_AVX2) eb_av1_inv_txfm2d_add_16x64 = eb_av1_highbd_inv_txfm_add_avx2;
-    if (flags & HAS_AVX2) eb_av1_inv_txfm2d_add_64x16 = eb_av1_highbd_inv_txfm_add_avx2;
-    if (flags & HAS_AVX2) eb_av1_inv_txfm2d_add_32x64 = eb_av1_highbd_inv_txfm_add_avx2;
-    if (flags & HAS_AVX2) eb_av1_inv_txfm2d_add_64x32 = eb_av1_highbd_inv_txfm_add_avx2;
-    if (flags & HAS_AVX2) eb_av1_inv_txfm2d_add_16x32 = eb_av1_highbd_inv_txfm_add_avx2;
-    if (flags & HAS_AVX2) eb_av1_inv_txfm2d_add_32x16 = eb_av1_highbd_inv_txfm_add_avx2;
+    if (flags & HAS_AVX2) svt_av1_inv_txfm2d_add_16x64 = svt_av1_highbd_inv_txfm_add_avx2;
+    if (flags & HAS_AVX2) svt_av1_inv_txfm2d_add_64x16 = svt_av1_highbd_inv_txfm_add_avx2;
+    if (flags & HAS_AVX2) svt_av1_inv_txfm2d_add_32x64 = svt_av1_highbd_inv_txfm_add_avx2;
+    if (flags & HAS_AVX2) svt_av1_inv_txfm2d_add_64x32 = svt_av1_highbd_inv_txfm_add_avx2;
+    if (flags & HAS_AVX2) svt_av1_inv_txfm2d_add_16x32 = svt_av1_highbd_inv_txfm_add_avx2;
+    if (flags & HAS_AVX2) svt_av1_inv_txfm2d_add_32x16 = svt_av1_highbd_inv_txfm_add_avx2;
 #ifndef NON_AVX512_SUPPORT
     if (flags & HAS_AVX512F) {
-        eb_av1_inv_txfm2d_add_16x16 = eb_av1_inv_txfm2d_add_16x16_avx512;
-        eb_av1_inv_txfm2d_add_32x32 = eb_av1_inv_txfm2d_add_32x32_avx512;
+        svt_av1_inv_txfm2d_add_16x16 = svt_av1_inv_txfm2d_add_16x16_avx512;
+        svt_av1_inv_txfm2d_add_32x32 = svt_av1_inv_txfm2d_add_32x32_avx512;
         svt_av1_inv_txfm2d_add_64x64 = svt_av1_inv_txfm2d_add_64x64_avx512;
-        eb_av1_inv_txfm2d_add_16x64 = eb_av1_inv_txfm2d_add_16x64_avx512;
-        eb_av1_inv_txfm2d_add_64x16 = eb_av1_inv_txfm2d_add_64x16_avx512;
-        eb_av1_inv_txfm2d_add_32x64 = eb_av1_inv_txfm2d_add_32x64_avx512;
-        eb_av1_inv_txfm2d_add_64x32 = eb_av1_inv_txfm2d_add_64x32_avx512;
-        eb_av1_inv_txfm2d_add_16x32 = eb_av1_inv_txfm2d_add_16x32_avx512;
-        eb_av1_inv_txfm2d_add_32x16 = eb_av1_inv_txfm2d_add_32x16_avx512;
+        svt_av1_inv_txfm2d_add_16x64 = svt_av1_inv_txfm2d_add_16x64_avx512;
+        svt_av1_inv_txfm2d_add_64x16 = svt_av1_inv_txfm2d_add_64x16_avx512;
+        svt_av1_inv_txfm2d_add_32x64 = svt_av1_inv_txfm2d_add_32x64_avx512;
+        svt_av1_inv_txfm2d_add_64x32 = svt_av1_inv_txfm2d_add_64x32_avx512;
+        svt_av1_inv_txfm2d_add_16x32 = svt_av1_inv_txfm2d_add_16x32_avx512;
+        svt_av1_inv_txfm2d_add_32x16 = svt_av1_inv_txfm2d_add_32x16_avx512;
     }
 #endif
 
-        if (flags & HAS_SSSE3) eb_av1_inv_txfm_add = eb_av1_inv_txfm_add_ssse3;
-        if (flags & HAS_AVX2) eb_av1_inv_txfm_add = eb_av1_inv_txfm_add_avx2;
+        if (flags & HAS_SSSE3) svt_av1_inv_txfm_add = svt_av1_inv_txfm_add_ssse3;
+        if (flags & HAS_AVX2) svt_av1_inv_txfm_add = svt_av1_inv_txfm_add_avx2;
         SET_AVX2(svt_compressed_packmsb, svt_compressed_packmsb_c, svt_compressed_packmsb_avx2_intrin);
         SET_AVX2(svt_c_pack, svt_c_pack_c, svt_c_pack_avx2_intrin);
         SET_SSE2_AVX2(svt_unpack_avg, svt_unpack_avg_c, svt_unpack_avg_sse2_intrin, svt_unpack_avg_avx2_intrin);
@@ -915,58 +915,58 @@ void setup_common_rtcd_internal(CPU_FLAGS flags) {
         SET_SSE2(svt_picture_average_kernel1_line,
                  svt_picture_average_kernel1_line_c,
                  svt_picture_average_kernel1_line_sse2_intrin);
-        SET_AVX2_AVX512(eb_av1_wiener_convolve_add_src,
-            eb_av1_wiener_convolve_add_src_c,
-            eb_av1_wiener_convolve_add_src_avx2,
-            eb_av1_wiener_convolve_add_src_avx512);
+        SET_AVX2_AVX512(svt_av1_wiener_convolve_add_src,
+            svt_av1_wiener_convolve_add_src_c,
+            svt_av1_wiener_convolve_add_src_avx2,
+            svt_av1_wiener_convolve_add_src_avx512);
 
-        if (flags & HAS_AVX2) eb_av1_convolve_2d_copy_sr = eb_av1_convolve_2d_copy_sr_avx2;
-        if (flags & HAS_AVX2) eb_av1_highbd_convolve_2d_copy_sr = eb_av1_highbd_convolve_2d_copy_sr_avx2;
-        if (flags & HAS_AVX2) eb_av1_highbd_jnt_convolve_2d_copy = eb_av1_highbd_jnt_convolve_2d_copy_avx2;
-        if (flags & HAS_AVX2) eb_av1_highbd_convolve_y_sr = eb_av1_highbd_convolve_y_sr_avx2;
-        if (flags & HAS_AVX2) eb_av1_highbd_convolve_2d_sr = eb_av1_highbd_convolve_2d_sr_avx2;
-        if (flags & HAS_AVX2) eb_av1_highbd_jnt_convolve_2d = eb_av1_highbd_jnt_convolve_2d_avx2;
-        if (flags & HAS_AVX2) eb_av1_highbd_jnt_convolve_x = eb_av1_highbd_jnt_convolve_x_avx2;
-        if (flags & HAS_AVX2) eb_av1_highbd_jnt_convolve_y = eb_av1_highbd_jnt_convolve_y_avx2;
-        if (flags & HAS_AVX2) eb_av1_highbd_convolve_x_sr = eb_av1_highbd_convolve_x_sr_avx2;
-        SET_AVX2_AVX512(eb_av1_convolve_2d_sr,
-            eb_av1_convolve_2d_sr_c,
-            eb_av1_convolve_2d_sr_avx2,
-            eb_av1_convolve_2d_sr_avx512);
-        SET_AVX2_AVX512(eb_av1_convolve_2d_copy_sr,
-            eb_av1_convolve_2d_copy_sr_c,
-            eb_av1_convolve_2d_copy_sr_avx2,
-            eb_av1_convolve_2d_copy_sr_avx512);
-        SET_AVX2_AVX512(eb_av1_convolve_x_sr,
-            eb_av1_convolve_x_sr_c,
-            eb_av1_convolve_x_sr_avx2,
-            eb_av1_convolve_x_sr_avx512);
-        SET_AVX2_AVX512(eb_av1_convolve_y_sr,
-            eb_av1_convolve_y_sr_c,
-            eb_av1_convolve_y_sr_avx2,
-            eb_av1_convolve_y_sr_avx512);
-        SET_AVX2_AVX512(eb_av1_jnt_convolve_2d,
-            eb_av1_jnt_convolve_2d_c,
-            eb_av1_jnt_convolve_2d_avx2,
-            eb_av1_jnt_convolve_2d_avx512);
-        SET_AVX2_AVX512(eb_av1_jnt_convolve_2d_copy,
-            eb_av1_jnt_convolve_2d_copy_c,
-            eb_av1_jnt_convolve_2d_copy_avx2,
-            eb_av1_jnt_convolve_2d_copy_avx512);
-        SET_AVX2_AVX512(eb_av1_jnt_convolve_x,
-            eb_av1_jnt_convolve_x_c,
-            eb_av1_jnt_convolve_x_avx2,
-            eb_av1_jnt_convolve_x_avx512);
-        SET_AVX2_AVX512(eb_av1_jnt_convolve_y,
-            eb_av1_jnt_convolve_y_c,
-            eb_av1_jnt_convolve_y_avx2,
-            eb_av1_jnt_convolve_y_avx512);
+        if (flags & HAS_AVX2) svt_av1_convolve_2d_copy_sr = svt_av1_convolve_2d_copy_sr_avx2;
+        if (flags & HAS_AVX2) svt_av1_highbd_convolve_2d_copy_sr = svt_av1_highbd_convolve_2d_copy_sr_avx2;
+        if (flags & HAS_AVX2) svt_av1_highbd_jnt_convolve_2d_copy = svt_av1_highbd_jnt_convolve_2d_copy_avx2;
+        if (flags & HAS_AVX2) svt_av1_highbd_convolve_y_sr = svt_av1_highbd_convolve_y_sr_avx2;
+        if (flags & HAS_AVX2) svt_av1_highbd_convolve_2d_sr = svt_av1_highbd_convolve_2d_sr_avx2;
+        if (flags & HAS_AVX2) svt_av1_highbd_jnt_convolve_2d = svt_av1_highbd_jnt_convolve_2d_avx2;
+        if (flags & HAS_AVX2) svt_av1_highbd_jnt_convolve_x = svt_av1_highbd_jnt_convolve_x_avx2;
+        if (flags & HAS_AVX2) svt_av1_highbd_jnt_convolve_y = svt_av1_highbd_jnt_convolve_y_avx2;
+        if (flags & HAS_AVX2) svt_av1_highbd_convolve_x_sr = svt_av1_highbd_convolve_x_sr_avx2;
+        SET_AVX2_AVX512(svt_av1_convolve_2d_sr,
+            svt_av1_convolve_2d_sr_c,
+            svt_av1_convolve_2d_sr_avx2,
+            svt_av1_convolve_2d_sr_avx512);
+        SET_AVX2_AVX512(svt_av1_convolve_2d_copy_sr,
+            svt_av1_convolve_2d_copy_sr_c,
+            svt_av1_convolve_2d_copy_sr_avx2,
+            svt_av1_convolve_2d_copy_sr_avx512);
+        SET_AVX2_AVX512(svt_av1_convolve_x_sr,
+            svt_av1_convolve_x_sr_c,
+            svt_av1_convolve_x_sr_avx2,
+            svt_av1_convolve_x_sr_avx512);
+        SET_AVX2_AVX512(svt_av1_convolve_y_sr,
+            svt_av1_convolve_y_sr_c,
+            svt_av1_convolve_y_sr_avx2,
+            svt_av1_convolve_y_sr_avx512);
+        SET_AVX2_AVX512(svt_av1_jnt_convolve_2d,
+            svt_av1_jnt_convolve_2d_c,
+            svt_av1_jnt_convolve_2d_avx2,
+            svt_av1_jnt_convolve_2d_avx512);
+        SET_AVX2_AVX512(svt_av1_jnt_convolve_2d_copy,
+            svt_av1_jnt_convolve_2d_copy_c,
+            svt_av1_jnt_convolve_2d_copy_avx2,
+            svt_av1_jnt_convolve_2d_copy_avx512);
+        SET_AVX2_AVX512(svt_av1_jnt_convolve_x,
+            svt_av1_jnt_convolve_x_c,
+            svt_av1_jnt_convolve_x_avx2,
+            svt_av1_jnt_convolve_x_avx512);
+        SET_AVX2_AVX512(svt_av1_jnt_convolve_y,
+            svt_av1_jnt_convolve_y_c,
+            svt_av1_jnt_convolve_y_avx2,
+            svt_av1_jnt_convolve_y_avx512);
 
         if (flags & HAS_AVX2) svt_aom_convolve8_horiz = svt_aom_convolve8_horiz_avx2;
         if (flags & HAS_AVX2) svt_aom_convolve8_vert = svt_aom_convolve8_vert_avx2;
-        if (flags & HAS_AVX2) eb_av1_build_compound_diffwtd_mask = eb_av1_build_compound_diffwtd_mask_avx2;
-        if (flags & HAS_AVX2) eb_av1_build_compound_diffwtd_mask_highbd = eb_av1_build_compound_diffwtd_mask_highbd_avx2;
-        if (flags & HAS_AVX2) eb_av1_wedge_sse_from_residuals = eb_av1_wedge_sse_from_residuals_avx2;
+        if (flags & HAS_AVX2) svt_av1_build_compound_diffwtd_mask = svt_av1_build_compound_diffwtd_mask_avx2;
+        if (flags & HAS_AVX2) svt_av1_build_compound_diffwtd_mask_highbd = svt_av1_build_compound_diffwtd_mask_highbd_avx2;
+        if (flags & HAS_AVX2) svt_av1_wedge_sse_from_residuals = svt_av1_wedge_sse_from_residuals_avx2;
         if (flags & HAS_AVX2) svt_aom_subtract_block = svt_aom_subtract_block_avx2;
         if (flags & HAS_AVX2) svt_aom_lowbd_blend_a64_d16_mask = svt_aom_lowbd_blend_a64_d16_mask_avx2;
         if (flags & HAS_AVX2) svt_aom_highbd_blend_a64_d16_mask = svt_aom_highbd_blend_a64_d16_mask_avx2;
@@ -1003,12 +1003,12 @@ void setup_common_rtcd_internal(CPU_FLAGS flags) {
         }
 #endif // !NON_AVX512_SUPPORT
 
-        if (flags & HAS_AVX2) eb_av1_dr_prediction_z1 = eb_av1_dr_prediction_z1_avx2;
-        if (flags & HAS_AVX2) eb_av1_dr_prediction_z2 = eb_av1_dr_prediction_z2_avx2;
-        if (flags & HAS_AVX2) eb_av1_dr_prediction_z3 = eb_av1_dr_prediction_z3_avx2;
-        if (flags & HAS_AVX2) eb_av1_highbd_dr_prediction_z1 = eb_av1_highbd_dr_prediction_z1_avx2;
-        if (flags & HAS_AVX2) eb_av1_highbd_dr_prediction_z2 = eb_av1_highbd_dr_prediction_z2_avx2;
-        if (flags & HAS_AVX2) eb_av1_highbd_dr_prediction_z3 = eb_av1_highbd_dr_prediction_z3_avx2;
+        if (flags & HAS_AVX2) svt_av1_dr_prediction_z1 = svt_av1_dr_prediction_z1_avx2;
+        if (flags & HAS_AVX2) svt_av1_dr_prediction_z2 = svt_av1_dr_prediction_z2_avx2;
+        if (flags & HAS_AVX2) svt_av1_dr_prediction_z3 = svt_av1_dr_prediction_z3_avx2;
+        if (flags & HAS_AVX2) svt_av1_highbd_dr_prediction_z1 = svt_av1_highbd_dr_prediction_z1_avx2;
+        if (flags & HAS_AVX2) svt_av1_highbd_dr_prediction_z2 = svt_av1_highbd_dr_prediction_z2_avx2;
+        if (flags & HAS_AVX2) svt_av1_highbd_dr_prediction_z3 = svt_av1_highbd_dr_prediction_z3_avx2;
         if (flags & HAS_SSSE3) svt_aom_paeth_predictor_16x16 = svt_aom_paeth_predictor_16x16_ssse3;
         if (flags & HAS_AVX2) svt_aom_paeth_predictor_16x16 = svt_aom_paeth_predictor_16x16_avx2;
         if (flags & HAS_SSSE3) svt_aom_paeth_predictor_16x32 = svt_aom_paeth_predictor_16x32_ssse3;
@@ -1239,9 +1239,8 @@ void setup_common_rtcd_internal(CPU_FLAGS flags) {
             eb_cdef_filter_block_8x8_16 = eb_cdef_filter_block_8x8_16_avx512;
         }
 #endif
-        SET_AVX2(
-            eb_av1_highbd_warp_affine, eb_av1_highbd_warp_affine_c, eb_av1_highbd_warp_affine_avx2);
-        if (flags & HAS_AVX2) eb_av1_warp_affine = eb_av1_warp_affine_avx2;
+        SET_AVX2(svt_av1_highbd_warp_affine, svt_av1_highbd_warp_affine_c, svt_av1_highbd_warp_affine_avx2);
+        if (flags & HAS_AVX2) svt_av1_warp_affine = svt_av1_warp_affine_avx2;
         SET_SSE2(svt_aom_highbd_lpf_horizontal_14, svt_aom_highbd_lpf_horizontal_14_c, svt_aom_highbd_lpf_horizontal_14_sse2);
         SET_SSE2(svt_aom_highbd_lpf_horizontal_4, svt_aom_highbd_lpf_horizontal_4_c, svt_aom_highbd_lpf_horizontal_4_sse2);
         SET_SSE2(svt_aom_highbd_lpf_horizontal_6, svt_aom_highbd_lpf_horizontal_6_c, svt_aom_highbd_lpf_horizontal_6_sse2);

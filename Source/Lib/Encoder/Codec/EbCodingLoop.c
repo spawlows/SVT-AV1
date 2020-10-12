@@ -1391,7 +1391,7 @@ void perform_intra_coding_loop(PictureControlSet *pcs_ptr, SuperBlock *sb_ptr, u
 
             mode = blk_ptr->pred_mode;
 
-            eb_av1_predict_intra_block_16bit(
+            svt_av1_predict_intra_block_16bit(
                 bit_depth,
                 &sb_ptr->tile_info,
                 ED_STAGE,
@@ -1452,7 +1452,7 @@ void perform_intra_coding_loop(PictureControlSet *pcs_ptr, SuperBlock *sb_ptr, u
 
             // Hsan: if CHROMA_MODE_2, then CFL will be evaluated @ EP as no CHROMA @ MD
             // If that's the case then you should ensure than the 1st chroma prediction uses UV_DC_PRED (that's the default configuration for CHROMA_MODE_2 if CFL applicable (set @ fast loop candidates injection) then MD assumes chroma mode always UV_DC_PRED)
-            eb_av1_predict_intra_block(
+            svt_av1_predict_intra_block(
                 &sb_ptr->tile_info,
                 ED_STAGE,
                 context_ptr->blk_geom,
@@ -1668,7 +1668,7 @@ void perform_intra_coding_loop(PictureControlSet *pcs_ptr, SuperBlock *sb_ptr, u
                            ? (PredictionMode)UV_DC_PRED
                            : (PredictionMode)pu_ptr->intra_chroma_mode;
 
-                eb_av1_predict_intra_block_16bit(
+                svt_av1_predict_intra_block_16bit(
                     bit_depth,
                     &sb_ptr->tile_info,
                     ED_STAGE,
@@ -1760,7 +1760,7 @@ void perform_intra_coding_loop(PictureControlSet *pcs_ptr, SuperBlock *sb_ptr, u
 
                 // Hsan: if CHROMA_MODE_2, then CFL will be evaluated @ EP as no CHROMA @ MD
                 // If that's the case then you should ensure than the 1st chroma prediction uses UV_DC_PRED (that's the default configuration for CHROMA_MODE_2 if CFL applicable (set @ fast loop candidates injection) then MD assumes chroma mode always UV_DC_PRED)
-                eb_av1_predict_intra_block(
+                svt_av1_predict_intra_block(
                     &sb_ptr->tile_info,
                     ED_STAGE,
                     context_ptr->blk_geom,
@@ -2238,15 +2238,15 @@ EB_EXTERN void av1_encode_decode(SequenceControlSet *scs_ptr, PictureControlSet 
 
     if (dlf_enable_flag && pcs_ptr->parent_pcs_ptr->loop_filter_mode == 1 && total_tile_cnt == 1) {
         if (sb_addr == 0) {
-            eb_av1_loop_filter_init(pcs_ptr);
+            svt_av1_loop_filter_init(pcs_ptr);
 
-            eb_av1_pick_filter_level(
+            svt_av1_pick_filter_level(
                 0,
                 (EbPictureBufferDesc *)pcs_ptr->parent_pcs_ptr->enhanced_picture_ptr,
                 pcs_ptr,
                 LPF_PICK_FROM_Q);
 
-            eb_av1_loop_filter_frame_init(
+            svt_av1_loop_filter_frame_init(
                 &pcs_ptr->parent_pcs_ptr->frm_hdr, &pcs_ptr->parent_pcs_ptr->lf_info, 0, 3);
         }
     }
@@ -2380,7 +2380,7 @@ EB_EXTERN void av1_encode_decode(SequenceControlSet *scs_ptr, PictureControlSet 
                                                        pcs_ptr);
 
                                 IntMv nearestmv, nearmv;
-                                eb_av1_find_best_ref_mvs_from_stack(
+                                svt_av1_find_best_ref_mvs_from_stack(
                                     0,
                                     context_ptr->md_context->md_local_blk_unit[blk_geom->blkidx_mds]
                                         .ed_ref_mv_stack,

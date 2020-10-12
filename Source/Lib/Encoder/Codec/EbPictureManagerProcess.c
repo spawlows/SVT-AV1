@@ -824,10 +824,10 @@ void *picture_manager_kernel(void *input_ptr) {
                         unsigned int tile_tok = 0;
                         //Tile Loop
                         for (tile_row = 0; tile_row < tile_rows; tile_row++) {
-                            eb_av1_tile_set_row(&tile_info, &cm->tiles_info, cm->mi_rows, tile_row);
+                            svt_av1_tile_set_row(&tile_info, &cm->tiles_info, cm->mi_rows, tile_row);
 
                             for (tile_col = 0; tile_col < tile_cols; tile_col++) {
-                                eb_av1_tile_set_col(
+                                svt_av1_tile_set_col(
                                     &tile_info, &cm->tiles_info, cm->mi_cols, tile_col);
                                 tile_info.tile_rs_index = tile_col + tile_row * tile_cols;
 

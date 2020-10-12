@@ -3206,8 +3206,8 @@ void downsample_decimation_input_picture(PictureParentControlSet *pcs_ptr,
                      sixteenth_decimated_picture_ptr->origin_y);
 }
 
-int eb_av1_count_colors_highbd(uint16_t *src, int stride, int rows, int cols, int bit_depth,
-                               int *val_count) {
+int svt_av1_count_colors_highbd(uint16_t *src, int stride, int rows, int cols, int bit_depth,
+                                int *val_count) {
     assert(bit_depth <= 12);
     const int max_pix_val = 1 << bit_depth;
     // const uint16_t *src = CONVERT_TO_SHORTPTR(src8);
@@ -3227,7 +3227,7 @@ int eb_av1_count_colors_highbd(uint16_t *src, int stride, int rows, int cols, in
     return n;
 }
 
-int eb_av1_count_colors(const uint8_t *src, int stride, int rows, int cols, int *val_count) {
+int svt_av1_count_colors(const uint8_t *src, int stride, int rows, int cols, int *val_count) {
     const int max_pix_val = 1 << 8;
     memset(val_count, 0, max_pix_val * sizeof(val_count[0]));
     for (int r = 0; r < rows; ++r) {
@@ -3276,10 +3276,10 @@ static const uint16_t eb_AV1_HIGH_VAR_OFFS_10[MAX_SB_SIZE] = {
   128 * 4, 128 * 4, 128 * 4, 128 * 4, 128 * 4, 128 * 4, 128 * 4, 128 * 4
 };
 
-unsigned int eb_av1_get_sby_perpixel_variance(const AomVarianceFnPtr *fn_ptr, //const AV1_COMP *cpi,
-                                              const uint8_t *         src,
-                                              int       stride, //const struct Buf2D *ref,
-                                              BlockSize bs) {
+unsigned int svt_av1_get_sby_perpixel_variance(const AomVarianceFnPtr *fn_ptr, //const AV1_COMP *cpi,
+                                               const uint8_t *         src,
+                                               int       stride, //const struct Buf2D *ref,
+                                               BlockSize bs) {
     unsigned int       sse;
     const unsigned int var =
         //cpi->fn_ptr[bs].vf(ref->buf, ref->stride, eb_av1_var_offs, 0, &sse);
@@ -3287,9 +3287,9 @@ unsigned int eb_av1_get_sby_perpixel_variance(const AomVarianceFnPtr *fn_ptr, //
     return ROUND_POWER_OF_TWO(var, num_pels_log2_lookup[bs]);
 }
 
-unsigned int eb_av1_high_get_sby_perpixel_variance(const AomVarianceFnPtr *fn_ptr,
-                                                   const uint16_t *src, int stride,
-                                                   BlockSize bs) {
+unsigned int svt_av1_high_get_sby_perpixel_variance(const AomVarianceFnPtr *fn_ptr,
+                                                    const uint16_t *src, int stride,
+                                                    BlockSize bs) {
   unsigned int sse;
   const unsigned int var =
      fn_ptr->vf_hbd_10(CONVERT_TO_BYTEPTR(src), stride,
@@ -3410,8 +3410,8 @@ static void is_screen_content(PictureParentControlSet *pcs_ptr, int bit_depth) {
                                                       bit_depth))
                 {
                     ++counts_1;
-                    int var = eb_av1_high_get_sby_perpixel_variance(fn_ptr, src, blk_w,
-                                                                    BLOCK_16X16);
+                    int var = svt_av1_high_get_sby_perpixel_variance(fn_ptr, src, blk_w,
+                                                                     BLOCK_16X16);
                     if (var > var_thresh)
                         ++counts_2;
                 }
@@ -3426,8 +3426,8 @@ static void is_screen_content(PictureParentControlSet *pcs_ptr, int bit_depth) {
                                                blk_w, blk_h, color_thresh))
                 {
                     ++counts_1;
-                    int var = eb_av1_get_sby_perpixel_variance(fn_ptr, src, input_picture_ptr->stride_y,
-                                                               BLOCK_16X16);
+                    int var = svt_av1_get_sby_perpixel_variance(fn_ptr, src, input_picture_ptr->stride_y,
+                                                                BLOCK_16X16);
                     if (var > var_thresh)
                         ++counts_2;
                 }

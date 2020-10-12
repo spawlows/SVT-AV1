@@ -48,8 +48,8 @@ void pack_highbd_pic(const EbPictureBufferDesc *pic_ptr, uint16_t *buffer_16bit[
                      uint32_t ss_y, EbBool include_padding);
 void copy_buffer_info(EbPictureBufferDesc *src_ptr, EbPictureBufferDesc *dst_ptr);
 void recon_output(PictureControlSet *pcs_ptr, SequenceControlSet *scs_ptr);
-void eb_av1_loop_restoration_filter_frame(Yv12BufferConfig *frame, Av1Common *cm,
-                                          int32_t optimized_lr);
+void svt_av1_loop_restoration_filter_frame(Yv12BufferConfig *frame, Av1Common *cm,
+                                           int32_t optimized_lr);
 void copy_statistics_to_ref_obj_ect(PictureControlSet *pcs_ptr, SequenceControlSet *scs_ptr);
 void psnr_calculations(PictureControlSet *pcs_ptr, SequenceControlSet *scs_ptr, EbBool free_memory);
 void ssim_calculations(PictureControlSet *pcs_ptr, SequenceControlSet *scs_ptr, EbBool free_memory);
@@ -62,8 +62,9 @@ void restoration_seg_search(int32_t *rst_tmpbuf, Yv12BufferConfig *org_fts,
                             PictureControlSet *pcs_ptr, uint32_t segment_index);
 void rest_finish_search(PictureParentControlSet *p_pcs_ptr, Macroblock *x, Av1Common *const cm);
 
-void eb_av1_upscale_normative_rows(const Av1Common *cm, const uint8_t *src,
-                                   int src_stride, uint8_t *dst, int dst_stride, int rows, int sub_x, int bd, EbBool is_16bit_pipeline);
+void svt_av1_upscale_normative_rows(const Av1Common *cm, const uint8_t *src,
+                                    int src_stride, uint8_t *dst, int dst_stride, int rows, int sub_x, int bd,
+                                    EbBool is_16bit_pipeline);
 
 #if DEBUG_UPSCALING
 void save_YUV_to_file(char *filename, EbByte buffer_y, EbByte buffer_u, EbByte buffer_v,
@@ -415,9 +416,9 @@ void get_recon_pic(PictureControlSet *pcs_ptr,
     }
 }
 
-void eb_av1_superres_upscale_frame(struct Av1Common *cm,
-                                   PictureControlSet *pcs_ptr,
-                                   SequenceControlSet *scs_ptr)
+void svt_av1_superres_upscale_frame(struct Av1Common *cm,
+                                    PictureControlSet *pcs_ptr,
+                                    SequenceControlSet *scs_ptr)
 {
     // Set these parameters for testing since they are not correctly populated yet
     EbPictureBufferDesc *recon_ptr;
@@ -460,9 +461,9 @@ void eb_av1_superres_upscale_frame(struct Av1Common *cm,
         derive_blk_pointers_enc(dst, plane, 0, 0, (void *) &dst_buf, &dst_stride,
                                 sub_x, sub_y);
 
-        eb_av1_upscale_normative_rows(cm, (const uint8_t *) src_buf, src_stride, dst_buf,
-                                      dst_stride, src->height >> sub_x,
-                                      sub_x, bit_depth, is_16bit);
+        svt_av1_upscale_normative_rows(cm, (const uint8_t *) src_buf, src_stride, dst_buf,
+                                       dst_stride, src->height >> sub_x,
+                                       sub_x, bit_depth, is_16bit);
     }
 
     // free the memory
@@ -508,9 +509,9 @@ void *rest_kernel(void *input_ptr) {
 
             // ------- start: Normative upscaling - super-resolution tool
             if(!av1_superres_unscaled(&cm->frm_size)) {
-                eb_av1_superres_upscale_frame(cm,
-                                              pcs_ptr,
-                                              scs_ptr);
+                svt_av1_superres_upscale_frame(cm,
+                                               pcs_ptr,
+                                               scs_ptr);
 
                 if(scs_ptr->static_config.is_16bit_pipeline || is_16bit){
                     set_unscaled_input_16bit(pcs_ptr);
@@ -560,7 +561,7 @@ void *rest_kernel(void *input_ptr) {
                 if (cm->rst_info[0].frame_restoration_type != RESTORE_NONE ||
                     cm->rst_info[1].frame_restoration_type != RESTORE_NONE ||
                     cm->rst_info[2].frame_restoration_type != RESTORE_NONE) {
-                    eb_av1_loop_restoration_filter_frame(cm->frame_to_show, cm, 0);
+                    svt_av1_loop_restoration_filter_frame(cm->frame_to_show, cm, 0);
                 }
             } else {
                 cm->rst_info[0].frame_restoration_type = RESTORE_NONE;

@@ -40,8 +40,8 @@
 
 /**
  * @brief Unit test of wiener convolbe add source:
- * - eb_av1_wiener_convolve_add_src_avx2
- * - eb_av1_highbd_wiener_convolve_add_src_avx2
+ * - svt_av1_wiener_convolve_add_src_avx2
+ * - svt_av1_highbd_wiener_convolve_add_src_avx2
  *
  * Test strategy:
  * Verify this assembly code by comparing with reference c implementation.
@@ -106,14 +106,14 @@ static const BlkSize test_block_size_table[] = {BlkSize(96, 96),
 static const int test_tap_table[] = {7, 5, 3};
 
 static const WienerConvolveFunc wiener_convolve_func_table[] = {
-    eb_av1_wiener_convolve_add_src_avx2,
+    svt_av1_wiener_convolve_add_src_avx2,
 #ifndef NON_AVX512_SUPPORT
-    eb_av1_wiener_convolve_add_src_avx512
+    svt_av1_wiener_convolve_add_src_avx512
 #endif
 };
 
 static const HbdWienerConvolveFunc hbd_wiener_convolve_func_table[] = {
-    eb_av1_highbd_wiener_convolve_add_src_avx2,
+    svt_av1_highbd_wiener_convolve_add_src_avx2,
 };
 
 template <typename Sample, typename FuncType, typename ParamType>
@@ -334,7 +334,7 @@ class AV1WienerConvolveLbdTest
         // Choose random locations within the source block
         int offset_r = 3 + pseudo_uniform(h - out_h_ - 7);
         int offset_c = 3 + pseudo_uniform(input_stride - out_w_ - 7);
-        eb_av1_wiener_convolve_add_src_c(
+        svt_av1_wiener_convolve_add_src_c(
             input + offset_r * input_stride + offset_c,
             input_stride,
             output_ref_,
@@ -380,7 +380,7 @@ class AV1WienerConvolveLbdTest
         svt_av1_get_time(&start_time_seconds, &start_time_useconds);
 
         for (uint64_t i = 0; i < num_loop; i++) {
-            eb_av1_wiener_convolve_add_src_c(
+            svt_av1_wiener_convolve_add_src_c(
                 input + offset_r * input_stride + offset_c,
                 input_stride,
                 output_ref_,
@@ -444,7 +444,7 @@ class AV1WienerConvolveHbdTest
         // Choose random locations within the source block
         int offset_r = 3 + pseudo_uniform(h - out_h_ - 7);
         int offset_c = 3 + pseudo_uniform(input_stride - out_w_ - 7);
-        eb_av1_highbd_wiener_convolve_add_src_c(
+        svt_av1_highbd_wiener_convolve_add_src_c(
             input + offset_r * input_stride + offset_c,
             input_stride,
             out_ref,

@@ -465,7 +465,7 @@ void svt_make_inter_predictor(PartitionInfo *part_info, int32_t ref, void *src, 
                                                 bh,
                                                 ss_x,
                                                 ss_y);
-        scaled_mv = eb_av1_scale_mv(&temp_mv, (pre_x + 0), (pre_y + 0), sf);
+        scaled_mv = svt_av1_scale_mv(&temp_mv, (pre_x + 0), (pre_y + 0), sf);
         scaled_mv.row += SCALE_EXTRA_OFF;
         scaled_mv.col += SCALE_EXTRA_OFF;
         int32_t src_offset = (block.y0 * src_stride ) + block.x0;
@@ -520,22 +520,22 @@ void svt_make_inter_predictor(PartitionInfo *part_info, int32_t ref, void *src, 
         const EbWarpedMotionParams *wm_params = mi->motion_mode == WARPED_CAUSAL ? wm_local
                                                                                  : wm_global;
 
-        eb_av1_warp_plane((EbWarpedMotionParams *)wm_params,
-                          highbd,
-                          bit_depth,
-                          src,
-                          ref_buf->ps_pic_buf->width >> ss_x,
-                          ref_buf->ps_pic_buf->height >> ss_y,
-                          src_stride,
-                          dst_mod,
-                          pre_x,
-                          pre_y,
-                          bw,
-                          bh,
-                          dst_stride,
-                          ss_x,
-                          ss_y,
-                          conv_params);
+        svt_av1_warp_plane((EbWarpedMotionParams *)wm_params,
+                           highbd,
+                           bit_depth,
+                           src,
+                           ref_buf->ps_pic_buf->width >> ss_x,
+                           ref_buf->ps_pic_buf->height >> ss_y,
+                           src_stride,
+                           dst_mod,
+                           pre_x,
+                           pre_y,
+                           bw,
+                           bh,
+                           dst_stride,
+                           ss_x,
+                           ss_y,
+                           conv_params);
     } else if (highbd) {
         uint16_t *src16 = (uint16_t *)src_mod;
 
@@ -612,16 +612,16 @@ void svt_make_masked_inter_predictor(PartitionInfo *part_info, int32_t ref, void
         //CHKN  for DIFF: need to compute the mask  comp_data->seg_mask is
         //the output computed from the two preds org_dst and tmp_buf16
         //for WEDGE the mask is fixed from the table based on wedge_sign/index
-        eb_av1_build_compound_diffwtd_mask_d16(seg_mask,
-                                               comp_data->mask_type,
-                                               org_dst,
-                                               org_dst_stride,
-                                               tmp_buf16,
-                                               tmp_buf_stride,
-                                               bh,
-                                               bw,
-                                               conv_params,
-                                               bit_depth);
+        svt_av1_build_compound_diffwtd_mask_d16(seg_mask,
+                                                comp_data->mask_type,
+                                                org_dst,
+                                                org_dst_stride,
+                                                tmp_buf16,
+                                                tmp_buf_stride,
+                                                bh,
+                                                bw,
+                                                conv_params,
+                                                bit_depth);
     }
 
     build_masked_compound_no_round((uint8_t *)dst_ptr,
@@ -841,16 +841,16 @@ void svtav1_predict_inter_block_plane(DecModCtxt *dec_mod_ctx, EbDecHandle *dec_
         fwd_frame_index = fwd_buf->order_hint;
 
     /*Distantance WTD compound inter prediction */
-    eb_av1_dist_wtd_comp_weight_assign(seq_header,
-                                       cur_frame_index,
-                                       bck_frame_index,
-                                       fwd_frame_index,
-                                       (int)mi->compound_idx,
-                                       0,
-                                       &conv_params.fwd_offset,
-                                       &conv_params.bck_offset,
-                                       &conv_params.use_dist_wtd_comp_avg,
-                                       is_compound);
+    svt_av1_dist_wtd_comp_weight_assign(seq_header,
+                                        cur_frame_index,
+                                        bck_frame_index,
+                                        fwd_frame_index,
+                                        (int)mi->compound_idx,
+                                        0,
+                                        &conv_params.fwd_offset,
+                                        &conv_params.bck_offset,
+                                        &conv_params.use_dist_wtd_comp_avg,
+                                        is_compound);
     conv_params.use_jnt_comp_avg = conv_params.use_dist_wtd_comp_avg;
 
     for (int32_t ref = 0; ref < 1 + is_compound; ++ref) {

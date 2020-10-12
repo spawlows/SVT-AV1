@@ -87,7 +87,7 @@ int32_t use_intra_edge_upsample(int32_t bs0, int32_t bs1, int32_t delta, int32_t
 
 #define INTRA_EDGE_FILT 3
 #define INTRA_EDGE_TAPS 5
-void eb_av1_filter_intra_edge_c(uint8_t *p, int32_t sz, int32_t strength)
+void svt_av1_filter_intra_edge_c(uint8_t *p, int32_t sz, int32_t strength)
 {
     if (!strength) return;
 
@@ -245,7 +245,7 @@ static INLINE uint16_t get_dx(int32_t angle)
 }
 
 // Directional prediction, zone 3: 180 < angle < 270
-void eb_av1_dr_prediction_z3_c(uint8_t *dst, ptrdiff_t stride, int32_t bw, int32_t bh,
+void svt_av1_dr_prediction_z3_c(uint8_t *dst, ptrdiff_t stride, int32_t bw, int32_t bh,
     const uint8_t *above, const uint8_t *left,
     int32_t upsample_left, int32_t dx, int32_t dy)
 {
@@ -275,7 +275,7 @@ void eb_av1_dr_prediction_z3_c(uint8_t *dst, ptrdiff_t stride, int32_t bw, int32
         }
     }
 }
-void eb_av1_dr_prediction_z1_c(uint8_t *dst, ptrdiff_t stride, int32_t bw, int32_t bh,
+void svt_av1_dr_prediction_z1_c(uint8_t *dst, ptrdiff_t stride, int32_t bw, int32_t bh,
     const uint8_t *above, const uint8_t *left,
     int32_t upsample_above, int32_t dx, int32_t dy)
 {
@@ -312,7 +312,7 @@ void eb_av1_dr_prediction_z1_c(uint8_t *dst, ptrdiff_t stride, int32_t bw, int32
 }
 
 // Directional prediction, zone 2: 90 < angle < 180
-void eb_av1_dr_prediction_z2_c(uint8_t *dst, ptrdiff_t stride, int32_t bw, int32_t bh,
+void svt_av1_dr_prediction_z2_c(uint8_t *dst, ptrdiff_t stride, int32_t bw, int32_t bh,
     const uint8_t *above, const uint8_t *left,
     int32_t upsample_above, int32_t upsample_left, int32_t dx,
     int32_t dy)
@@ -2270,15 +2270,15 @@ void dr_predictor(uint8_t *dst, ptrdiff_t stride, TxSize tx_size,
     assert(angle > 0 && angle < 270);
 
     if (angle > 0 && angle < 90) {
-        eb_av1_dr_prediction_z1(dst, stride, bw, bh, above, left, upsample_above, dx,
+        svt_av1_dr_prediction_z1(dst, stride, bw, bh, above, left, upsample_above, dx,
             dy);
     }
     else if (angle > 90 && angle < 180) {
-        eb_av1_dr_prediction_z2(dst, stride, bw, bh, above, left, upsample_above,
+        svt_av1_dr_prediction_z2(dst, stride, bw, bh, above, left, upsample_above,
             upsample_left, dx, dy);
     }
     else if (angle > 180 && angle < 270) {
-        eb_av1_dr_prediction_z3(dst, stride, bw, bh, above, left, upsample_left, dx,
+        svt_av1_dr_prediction_z3(dst, stride, bw, bh, above, left, upsample_left, dx,
             dy);
     }
     else if (angle == 90)
@@ -2299,7 +2299,7 @@ void filter_intra_edge_corner(uint8_t *p_above, uint8_t *p_left)
 }
 
 // Directional prediction, zone 1: 0 < angle < 90
-void eb_av1_highbd_dr_prediction_z1_c(uint16_t *dst, ptrdiff_t stride, int32_t bw,
+void svt_av1_highbd_dr_prediction_z1_c(uint16_t *dst, ptrdiff_t stride, int32_t bw,
     int32_t bh, const uint16_t *above,
     const uint16_t *left, int32_t upsample_above,
     int32_t dx, int32_t dy, int32_t bd)
@@ -2338,7 +2338,7 @@ void eb_av1_highbd_dr_prediction_z1_c(uint16_t *dst, ptrdiff_t stride, int32_t b
 }
 
 // Directional prediction, zone 2: 90 < angle < 180
-void eb_av1_highbd_dr_prediction_z2_c(uint16_t *dst, ptrdiff_t stride, int32_t bw,
+void svt_av1_highbd_dr_prediction_z2_c(uint16_t *dst, ptrdiff_t stride, int32_t bw,
     int32_t bh, const uint16_t *above,
     const uint16_t *left, int32_t upsample_above,
     int32_t upsample_left, int32_t dx, int32_t dy, int32_t bd)
@@ -2385,15 +2385,15 @@ void highbd_dr_predictor(uint16_t *dst, ptrdiff_t stride,
     assert(angle > 0 && angle < 270);
 
     if (angle > 0 && angle < 90) {
-        eb_av1_highbd_dr_prediction_z1(dst, stride, bw, bh, above, left,
+        svt_av1_highbd_dr_prediction_z1(dst, stride, bw, bh, above, left,
             upsample_above, dx, dy, bd);
     }
     else if (angle > 90 && angle < 180) {
-        eb_av1_highbd_dr_prediction_z2(dst, stride, bw, bh, above, left,
+        svt_av1_highbd_dr_prediction_z2(dst, stride, bw, bh, above, left,
             upsample_above, upsample_left, dx, dy, bd);
     }
     else if (angle > 180 && angle < 270) {
-        eb_av1_highbd_dr_prediction_z3(dst, stride, bw, bh, above, left, upsample_left,
+        svt_av1_highbd_dr_prediction_z3(dst, stride, bw, bh, above, left, upsample_left,
             dx, dy, bd);
     }
     else if (angle == 90)
@@ -2402,7 +2402,7 @@ void highbd_dr_predictor(uint16_t *dst, ptrdiff_t stride,
         pred_high[H_PRED][tx_size](dst, stride, above, left, bd);
 }
 
-void eb_av1_filter_intra_edge_high_c(uint16_t *p, int32_t sz, int32_t strength)
+void svt_av1_filter_intra_edge_high_c(uint16_t *p, int32_t sz, int32_t strength)
 {
     if (!strength) return;
 
@@ -2581,26 +2581,26 @@ void filter_intra_edge(OisMbResults *ois_mb_results_ptr, uint8_t mode, uint16_t 
             const int strength =
                 intra_edge_filter_strength(txwpx, txhpx, p_angle - 90, filt_type);
             const int n_px = n_top_px + ab_le + (need_right ? txhpx : 0);
-            eb_av1_filter_intra_edge(above_row - ab_le, n_px, strength);
+            svt_av1_filter_intra_edge(above_row - ab_le, n_px, strength);
         }
         if (need_left && n_left_px > 0) {
             const int strength = intra_edge_filter_strength(
                     txhpx, txwpx, p_angle - 180, filt_type);
             const int n_px = n_left_px + ab_le + (need_bottom ? txwpx : 0);
-            eb_av1_filter_intra_edge(left_col - ab_le, n_px, strength);
+            svt_av1_filter_intra_edge(left_col - ab_le, n_px, strength);
         }
     }
     int upsample_above =
         use_intra_edge_upsample(txwpx, txhpx, p_angle - 90, filt_type);
     if (need_above && upsample_above) {
         const int n_px = txwpx + (need_right ? txhpx : 0);
-        eb_av1_upsample_intra_edge(above_row, n_px);
+        svt_av1_upsample_intra_edge(above_row, n_px);
     }
     int upsample_left =
         use_intra_edge_upsample(txhpx, txwpx, p_angle - 180, filt_type);
     if (need_left && upsample_left) {
         const int n_px = txhpx + (need_bottom ? txwpx : 0);
-        eb_av1_upsample_intra_edge(left_col, n_px);
+        svt_av1_upsample_intra_edge(left_col, n_px);
     }
     return;
 }

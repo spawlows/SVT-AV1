@@ -1026,10 +1026,10 @@ void *resource_coordination_kernel(void *input_ptr) {
                 int       sb_size_log2 = scs_ptr->seq_header.sb_size_log2;
                 //Tile Loop
                 for (tile_row = 0; tile_row < tile_rows; tile_row++) {
-                    eb_av1_tile_set_row(&tile_info, &cm->tiles_info, cm->mi_rows, tile_row);
+                    svt_av1_tile_set_row(&tile_info, &cm->tiles_info, cm->mi_rows, tile_row);
 
                     for (tile_col = 0; tile_col < tile_cols; tile_col++) {
-                        eb_av1_tile_set_col(&tile_info, &cm->tiles_info, cm->mi_cols, tile_col);
+                        svt_av1_tile_set_col(&tile_info, &cm->tiles_info, cm->mi_cols, tile_col);
 
                         for ((y_sb_index =
                                   cm->tiles_info.tile_row_start_mi[tile_row] >> sb_size_log2);

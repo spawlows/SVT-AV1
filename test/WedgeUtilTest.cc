@@ -13,9 +13,9 @@
  * @file WedgeUtilTest.cc
  *
  * @brief Unit test for util functions in wedge prediction:
- * - eb_av1_wedge_sign_from_residuals_avx2
- * - eb_av1_wedge_compute_delta_squares_avx2
- * - eb_av1_wedge_sse_from_residuals_avx2
+ * - svt_av1_wedge_sign_from_residuals_avx2
+ * - svt_av1_wedge_compute_delta_squares_avx2
+ * - svt_av1_wedge_sse_from_residuals_avx2
  * - svt_aom_sum_squares_i16_sse2
  *
  * @author Cidana-Wenyao
@@ -30,7 +30,7 @@
 
 using svt_av1_test_tool::SVTRandom;
 namespace {
-// test eb_av1_wedge_sign_from_residuals_avx2
+// test svt_av1_wedge_sign_from_residuals_avx2
 // Choose the mask sign for a compound predictor.
 class WedgeUtilTest : public ::testing::Test {
   public:
@@ -60,11 +60,11 @@ class WedgeUtilTest : public ::testing::Test {
         for (int i = 0; i < N; ++i)
             ds[i] = clamp(r0[i] * r0[i] - r1[i] * r1[i], INT16_MIN, INT16_MAX);
         const int8_t ref_sign =
-            eb_av1_wedge_sign_from_residuals_c(ds, m, N, limit);
+            svt_av1_wedge_sign_from_residuals_c(ds, m, N, limit);
         const int8_t tst_sign =
-            eb_av1_wedge_sign_from_residuals_avx2(ds, m, N, limit);
+            svt_av1_wedge_sign_from_residuals_avx2(ds, m, N, limit);
         ASSERT_EQ(ref_sign, tst_sign)
-            << "unit test for eb_av1_wedge_sign_from_residuals_avx2 fail at "
+            << "unit test for svt_av1_wedge_sign_from_residuals_avx2 fail at "
                "iteration "
             << k;
     }
@@ -91,7 +91,7 @@ TEST_F(WedgeUtilTest, MaskSignRandomTest) {
         }
 
         // N should be multiple of 64, required by
-        // eb_av1_wedge_sign_from_residuals_avx2
+        // svt_av1_wedge_sign_from_residuals_avx2
         const int N = 64 * n_rnd.random();
         wedge_sign_test(N, k);
     }
@@ -136,14 +136,14 @@ TEST_F(WedgeUtilTest, MaskSignExtremeTest) {
             m[i] = MAX_MASK_VALUE;
 
         // N should be multiple of 64, required by
-        // eb_av1_wedge_sign_from_residuals_avx2
+        // svt_av1_wedge_sign_from_residuals_avx2
         const int N = 64 * n_rnd.random();
 
         wedge_sign_test(N, k);
     }
 }
 
-// test eb_av1_wedge_compute_delta_squares_avx2
+// test svt_av1_wedge_compute_delta_squares_avx2
 // element-by-element calculate the difference of square
 TEST_F(WedgeUtilTest, ComputeDeltaSquareTest) {
     const int iterations = 10000;
@@ -162,23 +162,23 @@ TEST_F(WedgeUtilTest, ComputeDeltaSquareTest) {
         memset(tst_diff, 0, sizeof(ref_diff));
 
         // N should be multiple of 64, required by
-        // eb_av1_wedge_compute_delta_squares_avx2
+        // svt_av1_wedge_compute_delta_squares_avx2
         const int N = 64 * n_rnd.random();
 
-        eb_av1_wedge_compute_delta_squares_c(ref_diff, r0, r1, N);
-        eb_av1_wedge_compute_delta_squares_avx2(tst_diff, r0, r1, N);
+        svt_av1_wedge_compute_delta_squares_c(ref_diff, r0, r1, N);
+        svt_av1_wedge_compute_delta_squares_avx2(tst_diff, r0, r1, N);
 
         // check the output
         for (int i = 0; i < N; ++i) {
             ASSERT_EQ(ref_diff[i], tst_diff[i])
-                << "unit test for eb_av1_wedge_compute_delta_squares_avx2 fail at "
+                << "unit test for svt_av1_wedge_compute_delta_squares_avx2 fail at "
                    "iteration "
                 << k;
         }
     }
 }
 
-// test eb_av1_wedge_sse_from_residuals_avx2
+// test svt_av1_wedge_sse_from_residuals_avx2
 // calculate the sse of two prediction combined with mask m
 TEST_F(WedgeUtilTest, SseFromResidualRandomTest) {
     const int iterations = 10000;
@@ -195,15 +195,15 @@ TEST_F(WedgeUtilTest, SseFromResidualRandomTest) {
         }
 
         // N should be multiple of 64, required by
-        // eb_av1_wedge_sse_from_residuals_avx2
+        // svt_av1_wedge_sse_from_residuals_avx2
         const int N = 64 * n_rnd.random();
 
-        uint64_t ref_sse = eb_av1_wedge_sse_from_residuals_c(r0, r1, m, N);
-        uint64_t tst_sse = eb_av1_wedge_sse_from_residuals_avx2(r0, r1, m, N);
+        uint64_t ref_sse = svt_av1_wedge_sse_from_residuals_c(r0, r1, m, N);
+        uint64_t tst_sse = svt_av1_wedge_sse_from_residuals_avx2(r0, r1, m, N);
 
         // check output
         ASSERT_EQ(ref_sse, tst_sse)
-            << "unit test for eb_av1_wedge_sse_from_residuals_avx2 fail at "
+            << "unit test for svt_av1_wedge_sse_from_residuals_avx2 fail at "
                "iteration "
             << k;
     }
@@ -248,15 +248,15 @@ TEST_F(WedgeUtilTest, SseFromResidualExtremeTest) {
             m[i] = MAX_MASK_VALUE;
 
         // N should be multiple of 64, required by
-        // eb_av1_wedge_sse_from_residuals_avx2
+        // svt_av1_wedge_sse_from_residuals_avx2
         const int N = 64 * n_rnd.random();
 
-        uint64_t ref_sse = eb_av1_wedge_sse_from_residuals_c(r0, r1, m, N);
-        uint64_t tst_sse = eb_av1_wedge_sse_from_residuals_avx2(r0, r1, m, N);
+        uint64_t ref_sse = svt_av1_wedge_sse_from_residuals_c(r0, r1, m, N);
+        uint64_t tst_sse = svt_av1_wedge_sse_from_residuals_avx2(r0, r1, m, N);
 
         // check output
         ASSERT_EQ(ref_sse, tst_sse)
-            << "unit test for eb_av1_wedge_sse_from_residuals_avx2 fail at "
+            << "unit test for svt_av1_wedge_sse_from_residuals_avx2 fail at "
                "iteration "
             << k;
     }

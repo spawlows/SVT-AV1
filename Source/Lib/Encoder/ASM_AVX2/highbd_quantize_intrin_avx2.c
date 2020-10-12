@@ -308,12 +308,12 @@ static INLINE void update_qp_fp(__m256i *qp) {
     qp[2] = _mm256_permute2x128_si256(qp[2], qp[2], 0x11);
 }
 
-void eb_av1_highbd_quantize_fp_avx2(const TranLow *coeff_ptr, intptr_t n_coeffs,
-                                    const int16_t *zbin_ptr, const int16_t *round_ptr,
-                                    const int16_t *quant_ptr, const int16_t *quant_shift_ptr,
-                                    TranLow *qcoeff_ptr, TranLow *dqcoeff_ptr,
-                                    const int16_t *dequant_ptr, uint16_t *eob_ptr,
-                                    const int16_t *scan, const int16_t *iscan, int16_t log_scale) {
+void svt_av1_highbd_quantize_fp_avx2(const TranLow *coeff_ptr, intptr_t n_coeffs,
+                                     const int16_t *zbin_ptr, const int16_t *round_ptr,
+                                     const int16_t *quant_ptr, const int16_t *quant_shift_ptr,
+                                     TranLow *qcoeff_ptr, TranLow *dqcoeff_ptr,
+                                     const int16_t *dequant_ptr, uint16_t *eob_ptr,
+                                     const int16_t *scan, const int16_t *iscan, int16_t log_scale) {
     (void)scan;
     (void)zbin_ptr;
     (void)quant_shift_ptr;

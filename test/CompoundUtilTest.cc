@@ -770,7 +770,7 @@ class BuildCompDiffwtdMaskTest
                 src1[j] = rnd_.random();
             }
 
-            eb_av1_build_compound_diffwtd_mask_c(
+            svt_av1_build_compound_diffwtd_mask_c(
                 mask_ref, type, src0, width, src1, width, height, width);
 
             test_impl(mask_test, type, src0, width, src1, width, height, width);
@@ -797,7 +797,7 @@ INSTANTIATE_TEST_CASE_P(
     CompUtilTest, BuildCompDiffwtdMaskTest,
     ::testing::Combine(
         ::testing::Range(BLOCK_4X4, BlockSizeS_ALL),
-        ::testing::Values(eb_av1_build_compound_diffwtd_mask_avx2)));
+        ::testing::Values(svt_av1_build_compound_diffwtd_mask_avx2)));
 
 typedef void (*BuildCompDiffwtdMaskedHighbdFunc)(uint8_t *mask,
                                            DIFFWTD_MASK_TYPE mask_type,
@@ -834,15 +834,15 @@ class BuildCompDiffwtdMaskHighbdTest
                 src1[j] = rnd_.random();
             }
 
-            eb_av1_build_compound_diffwtd_mask_highbd_c(mask_ref,
-                                                        type,
-                                                        (uint8_t *)src0,
-                                                        width,
-                                                        (uint8_t *)src1,
-                                                        width,
-                                                        height,
-                                                        width,
-                                                        bd);
+            svt_av1_build_compound_diffwtd_mask_highbd_c(mask_ref,
+                                                         type,
+                                                         (uint8_t *)src0,
+                                                         width,
+                                                         (uint8_t *)src1,
+                                                         width,
+                                                         height,
+                                                         width,
+                                                         bd);
 
             test_impl(mask_test,
                       type,
@@ -880,10 +880,10 @@ INSTANTIATE_TEST_CASE_P(
     CompUtilTest, BuildCompDiffwtdMaskHighbdTest,
     ::testing::Combine(
         ::testing::Range(BLOCK_4X4, BlockSizeS_ALL),
-        ::testing::Values(eb_av1_build_compound_diffwtd_mask_highbd_ssse3,
-                          eb_av1_build_compound_diffwtd_mask_highbd_avx2)));
+        ::testing::Values(svt_av1_build_compound_diffwtd_mask_highbd_ssse3,
+                          svt_av1_build_compound_diffwtd_mask_highbd_avx2)));
 
-// test eb_av1_build_compound_diffwtd_mask_d16_avx2
+// test svt_av1_build_compound_diffwtd_mask_d16_avx2
 typedef void (*BuildCompDiffwtdMaskD16Func)(
     uint8_t *mask, DIFFWTD_MASK_TYPE mask_type, const CONV_BUF_TYPE *src0,
     int src0_stride, const CONV_BUF_TYPE *src1, int src1_stride, int h, int w,
@@ -929,16 +929,16 @@ class BuildCompDiffwtdMaskD16Test
         }
 
         for (int mask_type = 0; mask_type < DIFFWTD_MASK_TYPES; mask_type++) {
-            eb_av1_build_compound_diffwtd_mask_d16_c(mask_ref,
-                                                  (DIFFWTD_MASK_TYPE)mask_type,
-                                                  src0,
-                                                  width,
-                                                  src1,
-                                                  width,
-                                                  height,
-                                                  width,
-                                                  &conv_params,
-                                                  bd);
+            svt_av1_build_compound_diffwtd_mask_d16_c(mask_ref,
+                                                      (DIFFWTD_MASK_TYPE)mask_type,
+                                                      src0,
+                                                      width,
+                                                      src1,
+                                                      width,
+                                                      height,
+                                                      width,
+                                                      &conv_params,
+                                                      bd);
 
             tst_func(mask_test,
                      (DIFFWTD_MASK_TYPE)mask_type,
@@ -975,7 +975,7 @@ INSTANTIATE_TEST_CASE_P(
     SSE4_1, BuildCompDiffwtdMaskD16Test,
     ::testing::Combine(
         ::testing::Range(8, 13, 2),
-        ::testing::Values(eb_av1_build_compound_diffwtd_mask_d16_avx2),
+        ::testing::Values(svt_av1_build_compound_diffwtd_mask_d16_avx2),
         ::testing::Range(BLOCK_4X4, BlockSizeS_ALL)));
 
 typedef int64_t (*AomSseFunc)(const uint8_t *, int, const uint8_t *, int, int,

@@ -32,7 +32,7 @@
 namespace {
 using svt_av1_test_tool::SVTRandom;
 
-extern "C" void eb_av1_build_quantizer(
+extern "C" void svt_av1_build_quantizer(
     AomBitDepth bit_depth, int32_t y_dc_delta_q, int32_t u_dc_delta_q,
     int32_t u_ac_delta_q, int32_t v_dc_delta_q, int32_t v_ac_delta_q,
     Quants *const quants, Dequants *const deq);
@@ -95,7 +95,7 @@ class QuantizeTest : public ::testing::TestWithParam<ParamType> {
     }
 
     void InitQuantizer() {
-        eb_av1_build_quantizer(
+        svt_av1_build_quantizer(
             bd_, 0, 0, 0, 0, 0, &qtab_->quant, &qtab_->dequant);
     }
 
@@ -599,55 +599,55 @@ using std::make_tuple;
 
 #if HAS_AVX2
 const QuantizeParam kQParamArrayAvx2[] = {
-    make_tuple(&eb_av1_quantize_fp_c, &eb_av1_quantize_fp_avx2,
+    make_tuple(&svt_av1_quantize_fp_c, &svt_av1_quantize_fp_avx2,
                static_cast<TxSize>(TX_16X16), TYPE_FP, AOM_BITS_8),
-    make_tuple(&eb_av1_quantize_fp_c, &eb_av1_quantize_fp_avx2,
+    make_tuple(&svt_av1_quantize_fp_c, &svt_av1_quantize_fp_avx2,
                static_cast<TxSize>(TX_4X16), TYPE_FP, AOM_BITS_8),
-    make_tuple(&eb_av1_quantize_fp_c, &eb_av1_quantize_fp_avx2,
+    make_tuple(&svt_av1_quantize_fp_c, &svt_av1_quantize_fp_avx2,
                static_cast<TxSize>(TX_16X4), TYPE_FP, AOM_BITS_8),
-    make_tuple(&eb_av1_quantize_fp_c, &eb_av1_quantize_fp_avx2,
+    make_tuple(&svt_av1_quantize_fp_c, &svt_av1_quantize_fp_avx2,
                static_cast<TxSize>(TX_32X8), TYPE_FP, AOM_BITS_8),
-    make_tuple(&eb_av1_quantize_fp_c, &eb_av1_quantize_fp_avx2,
+    make_tuple(&svt_av1_quantize_fp_c, &svt_av1_quantize_fp_avx2,
                static_cast<TxSize>(TX_8X32), TYPE_FP, AOM_BITS_8),
-    make_tuple(&eb_av1_quantize_fp_32x32_c, &eb_av1_quantize_fp_32x32_avx2,
+    make_tuple(&svt_av1_quantize_fp_32x32_c, &svt_av1_quantize_fp_32x32_avx2,
                static_cast<TxSize>(TX_32X32), TYPE_FP, AOM_BITS_8),
-    make_tuple(&eb_av1_quantize_fp_32x32_c, &eb_av1_quantize_fp_32x32_avx2,
+    make_tuple(&svt_av1_quantize_fp_32x32_c, &svt_av1_quantize_fp_32x32_avx2,
                static_cast<TxSize>(TX_16X64), TYPE_FP, AOM_BITS_8),
-    make_tuple(&eb_av1_quantize_fp_32x32_c, &eb_av1_quantize_fp_32x32_avx2,
+    make_tuple(&svt_av1_quantize_fp_32x32_c, &svt_av1_quantize_fp_32x32_avx2,
                static_cast<TxSize>(TX_64X16), TYPE_FP, AOM_BITS_8),
-    make_tuple(&eb_av1_quantize_fp_64x64_c, &eb_av1_quantize_fp_64x64_avx2,
+    make_tuple(&svt_av1_quantize_fp_64x64_c, &svt_av1_quantize_fp_64x64_avx2,
                static_cast<TxSize>(TX_64X64), TYPE_FP, AOM_BITS_8)};
 
 const QuantizeHbdParam kQHbdParamArrayAvx2[] = {
-    make_tuple(&eb_av1_highbd_quantize_fp_c, &eb_av1_highbd_quantize_fp_avx2,
+    make_tuple(&svt_av1_highbd_quantize_fp_c, &svt_av1_highbd_quantize_fp_avx2,
                static_cast<TxSize>(TX_16X16), TYPE_FP, AOM_BITS_8),
-    make_tuple(&eb_av1_highbd_quantize_fp_c, &eb_av1_highbd_quantize_fp_avx2,
+    make_tuple(&svt_av1_highbd_quantize_fp_c, &svt_av1_highbd_quantize_fp_avx2,
                static_cast<TxSize>(TX_4X16), TYPE_FP, AOM_BITS_8),
-    make_tuple(&eb_av1_highbd_quantize_fp_c, &eb_av1_highbd_quantize_fp_avx2,
+    make_tuple(&svt_av1_highbd_quantize_fp_c, &svt_av1_highbd_quantize_fp_avx2,
                static_cast<TxSize>(TX_16X4), TYPE_FP, AOM_BITS_8),
-    make_tuple(&eb_av1_highbd_quantize_fp_c, &eb_av1_highbd_quantize_fp_avx2,
+    make_tuple(&svt_av1_highbd_quantize_fp_c, &svt_av1_highbd_quantize_fp_avx2,
                static_cast<TxSize>(TX_32X8), TYPE_FP, AOM_BITS_8),
-    make_tuple(&eb_av1_highbd_quantize_fp_c, &eb_av1_highbd_quantize_fp_avx2,
+    make_tuple(&svt_av1_highbd_quantize_fp_c, &svt_av1_highbd_quantize_fp_avx2,
                static_cast<TxSize>(TX_8X32), TYPE_FP, AOM_BITS_8),
-    make_tuple(&eb_av1_highbd_quantize_fp_c, &eb_av1_highbd_quantize_fp_avx2,
+    make_tuple(&svt_av1_highbd_quantize_fp_c, &svt_av1_highbd_quantize_fp_avx2,
                static_cast<TxSize>(TX_16X16), TYPE_FP, AOM_BITS_10),
-    make_tuple(&eb_av1_highbd_quantize_fp_c, &eb_av1_highbd_quantize_fp_avx2,
+    make_tuple(&svt_av1_highbd_quantize_fp_c, &svt_av1_highbd_quantize_fp_avx2,
                static_cast<TxSize>(TX_4X16), TYPE_FP, AOM_BITS_10),
-    make_tuple(&eb_av1_highbd_quantize_fp_c, &eb_av1_highbd_quantize_fp_avx2,
+    make_tuple(&svt_av1_highbd_quantize_fp_c, &svt_av1_highbd_quantize_fp_avx2,
                static_cast<TxSize>(TX_16X4), TYPE_FP, AOM_BITS_10),
-    make_tuple(&eb_av1_highbd_quantize_fp_c, &eb_av1_highbd_quantize_fp_avx2,
+    make_tuple(&svt_av1_highbd_quantize_fp_c, &svt_av1_highbd_quantize_fp_avx2,
                static_cast<TxSize>(TX_32X8), TYPE_FP, AOM_BITS_10),
-    make_tuple(&eb_av1_highbd_quantize_fp_c, &eb_av1_highbd_quantize_fp_avx2,
+    make_tuple(&svt_av1_highbd_quantize_fp_c, &svt_av1_highbd_quantize_fp_avx2,
                static_cast<TxSize>(TX_8X32), TYPE_FP, AOM_BITS_10),
-    make_tuple(&eb_av1_highbd_quantize_fp_c, &eb_av1_highbd_quantize_fp_avx2,
+    make_tuple(&svt_av1_highbd_quantize_fp_c, &svt_av1_highbd_quantize_fp_avx2,
                static_cast<TxSize>(TX_16X16), TYPE_FP, AOM_BITS_12),
-    make_tuple(&eb_av1_highbd_quantize_fp_c, &eb_av1_highbd_quantize_fp_avx2,
+    make_tuple(&svt_av1_highbd_quantize_fp_c, &svt_av1_highbd_quantize_fp_avx2,
                static_cast<TxSize>(TX_4X16), TYPE_FP, AOM_BITS_12),
-    make_tuple(&eb_av1_highbd_quantize_fp_c, &eb_av1_highbd_quantize_fp_avx2,
+    make_tuple(&svt_av1_highbd_quantize_fp_c, &svt_av1_highbd_quantize_fp_avx2,
                static_cast<TxSize>(TX_16X4), TYPE_FP, AOM_BITS_12),
-    make_tuple(&eb_av1_highbd_quantize_fp_c, &eb_av1_highbd_quantize_fp_avx2,
+    make_tuple(&svt_av1_highbd_quantize_fp_c, &svt_av1_highbd_quantize_fp_avx2,
                static_cast<TxSize>(TX_32X8), TYPE_FP, AOM_BITS_12),
-    make_tuple(&eb_av1_highbd_quantize_fp_c, &eb_av1_highbd_quantize_fp_avx2,
+    make_tuple(&svt_av1_highbd_quantize_fp_c, &svt_av1_highbd_quantize_fp_avx2,
                static_cast<TxSize>(TX_8X32), TYPE_FP, AOM_BITS_12)};
 
 INSTANTIATE_TEST_CASE_P(AVX2, QuantizeLbdTest,

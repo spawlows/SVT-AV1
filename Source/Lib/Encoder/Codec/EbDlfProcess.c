@@ -21,8 +21,8 @@
 #include "EbPictureControlSet.h"
 #include "aom_dsp_rtcd.h"
 
-void eb_av1_loop_restoration_save_boundary_lines(const Yv12BufferConfig *frame, Av1Common *cm,
-                                                 int32_t after_cdef);
+void svt_av1_loop_restoration_save_boundary_lines(const Yv12BufferConfig *frame, Av1Common *cm,
+                                                  int32_t after_cdef);
 
 static void dlf_context_dctor(EbPtr p) {
     EbThreadContext *thread_context_ptr = (EbThreadContext *)p;
@@ -198,17 +198,17 @@ void *dlf_kernel(void *input_ptr) {
                     ? pcs_ptr->recon_picture16bit_ptr
                     : pcs_ptr->recon_picture_ptr;
 
-            eb_av1_loop_filter_init(pcs_ptr);
+            svt_av1_loop_filter_init(pcs_ptr);
 
             if (pcs_ptr->parent_pcs_ptr->loop_filter_mode == 2) {
-                eb_av1_pick_filter_level(
+                svt_av1_pick_filter_level(
                     context_ptr,
                     (EbPictureBufferDesc *)pcs_ptr->parent_pcs_ptr->enhanced_picture_ptr,
                     pcs_ptr,
                     LPF_PICK_FROM_Q);
             }
 
-            eb_av1_pick_filter_level(
+            svt_av1_pick_filter_level(
                 context_ptr,
                 (EbPictureBufferDesc *)pcs_ptr->parent_pcs_ptr->enhanced_picture_ptr,
                 pcs_ptr,
@@ -221,7 +221,7 @@ void *dlf_kernel(void *input_ptr) {
             pcs_ptr->parent_pcs_ptr->lf.filter_level_u  = 0;
             pcs_ptr->parent_pcs_ptr->lf.filter_level_v  = 0;
 #endif
-            eb_av1_loop_filter_frame(recon_buffer, pcs_ptr, 0, 3);
+            svt_av1_loop_filter_frame(recon_buffer, pcs_ptr, 0, 3);
         }
 
         //pre-cdef prep
@@ -256,7 +256,7 @@ void *dlf_kernel(void *input_ptr) {
             }
             link_eb_to_aom_buffer_desc(recon_picture_ptr, cm->frame_to_show, scs_ptr->max_input_pad_right, scs_ptr->max_input_pad_bottom, is_16bit || scs_ptr->static_config.is_16bit_pipeline);
             if (scs_ptr->seq_header.enable_restoration)
-                eb_av1_loop_restoration_save_boundary_lines(cm->frame_to_show, cm, 0);
+                svt_av1_loop_restoration_save_boundary_lines(cm->frame_to_show, cm, 0);
             if (scs_ptr->seq_header.cdef_level && pcs_ptr->parent_pcs_ptr->cdef_level) {
                 if (scs_ptr->static_config.is_16bit_pipeline || is_16bit) {
                     pcs_ptr->src[0] = (uint16_t *)recon_picture_ptr->buffer_y +

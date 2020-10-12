@@ -292,7 +292,7 @@ void asm_set_convolve_asm_table(void);
 void asm_set_convolve_hbd_asm_table(void);
 void init_intra_dc_predictors_c_internal(void);
 void init_intra_predictors_internal(void);
-void eb_av1_init_me_luts(void);
+void svt_av1_init_me_luts(void);
 
 static void enc_switch_to_real_time(){
 #ifndef _WIN32
@@ -942,7 +942,7 @@ EbErrorType rest_results_creator(
 }
 
 void init_fn_ptr(void);
-void eb_av1_init_wedge_masks(void);
+void svt_av1_init_wedge_masks(void);
 /**********************************
 * Initialize Encoder Library
 **********************************/
@@ -974,9 +974,9 @@ EB_API EbErrorType svt_av1_enc_init(EbComponentType *svt_enc_component)
 
     build_blk_geom(scs_init.sb_size == 128);
 
-    eb_av1_init_me_luts();
+    svt_av1_init_me_luts();
     init_fn_ptr();
-    eb_av1_init_wedge_masks();
+    svt_av1_init_wedge_masks();
     /************************************
     * Sequence Control Set
     ************************************/
@@ -1822,7 +1822,7 @@ EB_API EbErrorType svt_av1_enc_init_handle(
 /**********************************
 * Encoder Componenet DeInit
 **********************************/
-EbErrorType eb_av1_enc_component_de_init(EbComponentType  *svt_enc_component)
+EbErrorType svt_av1_enc_component_de_init(EbComponentType  *svt_enc_component)
 {
     EbErrorType       return_error = EB_ErrorNone;
 
@@ -1843,7 +1843,7 @@ EB_API EbErrorType svt_av1_enc_deinit_handle(
     EbComponentType  *svt_enc_component)
 {
     if (svt_enc_component) {
-        EbErrorType return_error = eb_av1_enc_component_de_init(svt_enc_component);
+        EbErrorType return_error = svt_av1_enc_component_de_init(svt_enc_component);
 
         free(svt_enc_component);
 #if  defined(__linux__)
