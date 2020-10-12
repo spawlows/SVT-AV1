@@ -27,18 +27,18 @@
 
 #define FC_SKIP_TX_SR_TH025 125 // Fast cost skip tx search threshold.
 #define FC_SKIP_TX_SR_TH010 110 // Fast cost skip tx search threshold.
-void eb_av1_cdef_search(EncDecContext *context_ptr, SequenceControlSet *scs_ptr,
-                        PictureControlSet *pcs_ptr);
+void svt_av1_cdef_search(EncDecContext *context_ptr, SequenceControlSet *scs_ptr,
+                         PictureControlSet *pcs_ptr);
 
 void av1_cdef_frame16bit(uint8_t is_16bit, SequenceControlSet *scs_ptr, PictureControlSet *pCs);
 
-void eb_av1_add_film_grain(EbPictureBufferDesc *src, EbPictureBufferDesc *dst,
-                           AomFilmGrain *film_grain_ptr);
+void svt_av1_add_film_grain(EbPictureBufferDesc *src, EbPictureBufferDesc *dst,
+                            AomFilmGrain *film_grain_ptr);
 
-void eb_av1_loop_restoration_save_boundary_lines(const Yv12BufferConfig *frame, Av1Common *cm,
-                                                 int32_t after_cdef);
-void eb_av1_loop_restoration_filter_frame(Yv12BufferConfig *frame, Av1Common *cm,
-                                          int32_t optimized_lr);
+void svt_av1_loop_restoration_save_boundary_lines(const Yv12BufferConfig *frame, Av1Common *cm,
+                                                  int32_t after_cdef);
+void svt_av1_loop_restoration_filter_frame(Yv12BufferConfig *frame, Av1Common *cm,
+                                           int32_t optimized_lr);
 
 static void enc_dec_context_dctor(EbPtr p) {
     EbThreadContext *thread_context_ptr = (EbThreadContext *)p;
@@ -477,7 +477,7 @@ void recon_output(PictureControlSet *pcs_ptr, SequenceControlSet *scs_ptr) {
                 else
                     film_grain_ptr = &pcs_ptr->parent_pcs_ptr->frm_hdr.film_grain_params;
 
-                eb_av1_add_film_grain(recon_ptr, intermediate_buffer_ptr, film_grain_ptr);
+                svt_av1_add_film_grain(recon_ptr, intermediate_buffer_ptr, film_grain_ptr);
                 recon_ptr = intermediate_buffer_ptr;
             }
 
@@ -4330,8 +4330,8 @@ void *mode_decision_kernel(void *input_ptr) {
     return NULL;
 }
 
-void eb_av1_add_film_grain(EbPictureBufferDesc *src, EbPictureBufferDesc *dst,
-                           AomFilmGrain *film_grain_ptr) {
+void svt_av1_add_film_grain(EbPictureBufferDesc *src, EbPictureBufferDesc *dst,
+                            AomFilmGrain *film_grain_ptr) {
     uint8_t *luma, *cb, *cr;
     int32_t  height, width, luma_stride, chroma_stride;
     int32_t  use_high_bit_depth = 0;
@@ -4410,16 +4410,16 @@ void eb_av1_add_film_grain(EbPictureBufferDesc *src, EbPictureBufferDesc *dst,
     width  = dst->width;
     height = dst->height;
 
-    eb_av1_add_film_grain_run(&params,
-                              luma,
-                              cb,
-                              cr,
-                              height,
-                              width,
-                              luma_stride,
-                              chroma_stride,
-                              use_high_bit_depth,
-                              chroma_subsamp_y,
-                              chroma_subsamp_x);
+    svt_av1_add_film_grain_run(&params,
+                               luma,
+                               cb,
+                               cr,
+                               height,
+                               width,
+                               luma_stride,
+                               chroma_stride,
+                               use_high_bit_depth,
+                               chroma_subsamp_y,
+                               chroma_subsamp_x);
     return;
 }

@@ -14,7 +14,7 @@
  * @file FilterIntraPredTest.cc
  *
  * @brief Unit test for filter intra predictor functions:
- * - eb_av1_filter_intra_predictor_sse4_1
+ * - svt_av1_filter_intra_predictor_sse4_1
  *
  * @author Cidana-Edmond
  *
@@ -66,9 +66,9 @@ class FilterIntraPredTest : public ::testing::TestWithParam<PredParams> {
         const uint8_t* above = input_ + MAX_TX_SIZE;
         for (size_t i = 0; i < test_num; i++) {
             prepare_data();
-            eb_av1_filter_intra_predictor_c(
+            svt_av1_filter_intra_predictor_c(
                 pred_ref_, stride, tx_size_, &above[1], left, pred_mode_);
-            eb_av1_filter_intra_predictor_sse4_1(
+            svt_av1_filter_intra_predictor_sse4_1(
                 pred_tst_, stride, tx_size_, &above[1], left, pred_mode_);
             check_output(i);
         }

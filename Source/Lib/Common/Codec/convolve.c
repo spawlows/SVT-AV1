@@ -102,11 +102,11 @@ static void convolve_add_src_vert_hip(const uint16_t *src, ptrdiff_t src_stride,
     }
 }
 
-void eb_av1_wiener_convolve_add_src_c(const uint8_t *const src, const ptrdiff_t src_stride,
-                                      uint8_t *const dst, const ptrdiff_t dst_stride,
-                                      const int16_t *const filter_x, const int16_t *const filter_y,
-                                      const int32_t w, const int32_t h,
-                                      const ConvolveParams *const conv_params) {
+void svt_av1_wiener_convolve_add_src_c(const uint8_t *const src, const ptrdiff_t src_stride,
+                                       uint8_t *const dst, const ptrdiff_t dst_stride,
+                                       const int16_t *const filter_x, const int16_t *const filter_y,
+                                       const int32_t w, const int32_t h,
+                                       const ConvolveParams *const conv_params) {
     const int32_t             x_step_q4 = 16;
     const int32_t             y_step_q4 = 16;
     const InterpKernel *const filters_x = get_filter_base(filter_x);
@@ -195,7 +195,7 @@ static void highbd_convolve_add_src_vert_hip(const uint16_t *src, ptrdiff_t src_
     }
 }
 
-void eb_av1_highbd_wiener_convolve_add_src_c(
+void svt_av1_highbd_wiener_convolve_add_src_c(
     const uint8_t *const src, const ptrdiff_t src_stride, uint8_t *const dst,
     const ptrdiff_t dst_stride, const int16_t *const filter_x, const int16_t *const filter_y,
     const int32_t w, const int32_t h, const ConvolveParams *const conv_params, const int32_t bd) {

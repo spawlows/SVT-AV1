@@ -254,14 +254,14 @@ class PixelProjErrorTest
 
         printf("Average Nanoseconds per Function Call\n");
         printf(
-            "    eb_av1_lowbd_pixel_proj_error_c(size: %d, r0: %d, r1: %d)   : "
+            "   svt_av1_lowbd_pixel_proj_error_c(size: %d, r0: %d, r1: %d)   : "
             "%6.2f\n",
             size,
             r0,
             r1,
             1000000 * time_c / num_loop);
         printf(
-            "    eb_av1_lowbd_pixel_proj_error_optsize: %d, r0: %d, r1: %d) : "
+            "   svt_av1_lowbd_pixel_proj_error_optsize: %d, r0: %d, r1: %d) : "
             "%6.2f   (Comparison: "
             "%5.2fx)\n",
             size,
@@ -329,11 +329,11 @@ TEST_P(PixelProjErrorLbdTest, DISABLED_SpeedTest) {
 }
 
 static const PixelProjErrorTestParam lbd_test_vector[] = {
-    make_tuple(eb_av1_lowbd_pixel_proj_error_avx2,
-               eb_av1_lowbd_pixel_proj_error_c),
+    make_tuple(svt_av1_lowbd_pixel_proj_error_avx2,
+               svt_av1_lowbd_pixel_proj_error_c),
 #ifndef NON_AVX512_SUPPORT
-    make_tuple(eb_av1_lowbd_pixel_proj_error_avx512,
-               eb_av1_lowbd_pixel_proj_error_c)
+    make_tuple(svt_av1_lowbd_pixel_proj_error_avx512,
+               svt_av1_lowbd_pixel_proj_error_c)
 #endif
 };
 
@@ -378,7 +378,7 @@ TEST_P(PixelProjErrorHbdTest, MatchTestWithExtremeValue) {
 }
 
 static const PixelProjErrorTestParam hbd_test_vector[] = {make_tuple(
-    eb_av1_highbd_pixel_proj_error_avx2, eb_av1_highbd_pixel_proj_error_c)};
+    svt_av1_highbd_pixel_proj_error_avx2, svt_av1_highbd_pixel_proj_error_c)};
 
 INSTANTIATE_TEST_CASE_P(RST, PixelProjErrorHbdTest,
                         ::testing::ValuesIn(hbd_test_vector));
@@ -427,16 +427,16 @@ TEST(SelfGuidedToolsTest, GetProjSubspaceMatchTest) {
                     int32_t *flt1_p = flt1 + k * flt_stride + j;
                     assert(w * h <= RESTORATION_UNITPELS_MAX);
 
-                    eb_av1_selfguided_restoration_avx2(output_p,
-                                                       w,
-                                                       h,
-                                                       out_stride,
-                                                       flt0_p,
-                                                       flt1_p,
-                                                       flt_stride,
-                                                       ep,
-                                                       8,
-                                                       0);
+                    svt_av1_selfguided_restoration_avx2(output_p,
+                                                        w,
+                                                        h,
+                                                        out_stride,
+                                                        flt0_p,
+                                                        flt1_p,
+                                                        flt_stride,
+                                                        ep,
+                                                        8,
+                                                        0);
                 }
             }
 

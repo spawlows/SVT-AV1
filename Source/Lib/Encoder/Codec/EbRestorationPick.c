@@ -25,10 +25,10 @@ void av1_foreach_rest_unit_in_frame_seg(Av1Common *cm, int32_t plane, RestTileSt
                                         uint8_t  rest_segments_column_count,
                                         uint8_t  rest_segments_row_count, uint32_t segment_index);
 
-void eb_av1_selfguided_restoration_c(const uint8_t *dgd8, int32_t width, int32_t height,
-                                     int32_t dgd_stride, int32_t *flt0, int32_t *flt1,
-                                     int32_t flt_stride, int32_t sgr_params_idx, int32_t bit_depth,
-                                     int32_t highbd);
+void svt_av1_selfguided_restoration_c(const uint8_t *dgd8, int32_t width, int32_t height,
+                                      int32_t dgd_stride, int32_t *flt0, int32_t *flt1,
+                                      int32_t flt_stride, int32_t sgr_params_idx, int32_t bit_depth,
+                                      int32_t highbd);
 void av1_foreach_rest_unit_in_frame(Av1Common *cm, int32_t plane, RestTileStartVisitor on_tile,
                                     RestUnitVisitor on_rest_unit, void *priv);
 
@@ -150,32 +150,32 @@ static int64_t try_restoration_unit_seg(const RestSearchCtxt *       rsc,
 
     const int32_t optimized_lr = 0;
 
-    eb_av1_loop_restoration_filter_unit(1,
-                                        limits,
-                                        rui,
-                                        &rsi->boundaries,
-                                        &rlbs,
-                                        tile_rect,
-                                        rsc->tile_stripe0,
-                                        is_uv && cm->subsampling_x,
-                                        is_uv && cm->subsampling_y,
-                                        highbd,
-                                        bit_depth,
-                                        fts->buffers[plane],
-                                        fts->strides[is_uv],
-                                        rsc->dst->buffers[plane],
-                                        rsc->dst->strides[is_uv],
-                                        rsc->tmpbuf,
-                                        optimized_lr);
+    svt_av1_loop_restoration_filter_unit(1,
+                                         limits,
+                                         rui,
+                                         &rsi->boundaries,
+                                         &rlbs,
+                                         tile_rect,
+                                         rsc->tile_stripe0,
+                                         is_uv && cm->subsampling_x,
+                                         is_uv && cm->subsampling_y,
+                                         highbd,
+                                         bit_depth,
+                                         fts->buffers[plane],
+                                         fts->strides[is_uv],
+                                         rsc->dst->buffers[plane],
+                                         rsc->dst->strides[is_uv],
+                                         rsc->tmpbuf,
+                                         optimized_lr);
 
     return sse_restoration_unit(limits, rsc->src, rsc->dst, plane, highbd);
 }
 
-int64_t eb_av1_lowbd_pixel_proj_error_c(const uint8_t *src8, int32_t width, int32_t height,
-                                        int32_t src_stride, const uint8_t *dat8, int32_t dat_stride,
-                                        int32_t *flt0, int32_t flt0_stride, int32_t *flt1,
-                                        int32_t flt1_stride, int32_t xq[2],
-                                        const SgrParamsType *params) {
+int64_t svt_av1_lowbd_pixel_proj_error_c(const uint8_t *src8, int32_t width, int32_t height,
+                                         int32_t src_stride, const uint8_t *dat8, int32_t dat_stride,
+                                         int32_t *flt0, int32_t flt0_stride, int32_t *flt1,
+                                         int32_t flt1_stride, int32_t xq[2],
+                                         const SgrParamsType *params) {
     int32_t        i, j;
     const uint8_t *src = src8;
     const uint8_t *dat = dat8;
@@ -241,11 +241,11 @@ int64_t eb_av1_lowbd_pixel_proj_error_c(const uint8_t *src8, int32_t width, int3
     return err;
 }
 
-int64_t eb_av1_highbd_pixel_proj_error_c(const uint8_t *src8, int32_t width, int32_t height,
-                                         int32_t src_stride, const uint8_t *dat8,
-                                         int32_t dat_stride, int32_t *flt0, int32_t flt0_stride,
-                                         int32_t *flt1, int32_t flt1_stride, int32_t xq[2],
-                                         const SgrParamsType *params) {
+int64_t svt_av1_highbd_pixel_proj_error_c(const uint8_t *src8, int32_t width, int32_t height,
+                                          int32_t src_stride, const uint8_t *dat8,
+                                          int32_t dat_stride, int32_t *flt0, int32_t flt0_stride,
+                                          int32_t *flt1, int32_t flt1_stride, int32_t xq[2],
+                                          const SgrParamsType *params) {
     const uint16_t *src = CONVERT_TO_SHORTPTR(src8);
     const uint16_t *dat = CONVERT_TO_SHORTPTR(dat8);
     int32_t         i, j;
@@ -322,20 +322,7 @@ static int64_t get_pixel_proj_error(const uint8_t *src8, int32_t width, int32_t 
     int32_t xq[2];
     eb_decode_xq(xqd, xq, params);
     if (!use_highbitdepth) {
-        return eb_av1_lowbd_pixel_proj_error(src8,
-                                             width,
-                                             height,
-                                             src_stride,
-                                             dat8,
-                                             dat_stride,
-                                             flt0,
-                                             flt0_stride,
-                                             flt1,
-                                             flt1_stride,
-                                             xq,
-                                             params);
-    } else {
-        return eb_av1_highbd_pixel_proj_error(src8,
+        return svt_av1_lowbd_pixel_proj_error(src8,
                                               width,
                                               height,
                                               src_stride,
@@ -347,6 +334,19 @@ static int64_t get_pixel_proj_error(const uint8_t *src8, int32_t width, int32_t 
                                               flt1_stride,
                                               xq,
                                               params);
+    } else {
+        return svt_av1_highbd_pixel_proj_error(src8,
+                                               width,
+                                               height,
+                                               src_stride,
+                                               dat8,
+                                               dat_stride,
+                                               flt0,
+                                               flt0_stride,
+                                               flt1,
+                                               flt1_stride,
+                                               xq,
+                                               params);
     }
 }
 
@@ -559,16 +559,16 @@ static INLINE void apply_sgr(int32_t sgr_params_idx, const uint8_t *dat8, int32_
             const int32_t w = AOMMIN(pu_width, width - j);
 
             //CHKN SSE
-            eb_av1_selfguided_restoration(dat8_row + j,
-                                          w,
-                                          h,
-                                          dat_stride,
-                                          flt0_row + j,
-                                          flt1_row + j,
-                                          flt_stride,
-                                          sgr_params_idx,
-                                          bit_depth,
-                                          use_highbd);
+            svt_av1_selfguided_restoration(dat8_row + j,
+                                           w,
+                                           h,
+                                           dat_stride,
+                                           flt0_row + j,
+                                           flt1_row + j,
+                                           flt_stride,
+                                           sgr_params_idx,
+                                           bit_depth,
+                                           use_highbd);
         }
     }
 }
@@ -697,9 +697,9 @@ int8_t get_sg_step(int8_t sg_filter_mode) {
     }
     return step;
 }
-void eb_av1_compute_stats_c(int32_t wiener_win, const uint8_t *dgd, const uint8_t *src,
-                            int32_t h_start, int32_t h_end, int32_t v_start, int32_t v_end,
-                            int32_t dgd_stride, int32_t src_stride, int64_t *M, int64_t *H) {
+void svt_av1_compute_stats_c(int32_t wiener_win, const uint8_t *dgd, const uint8_t *src,
+                             int32_t h_start, int32_t h_end, int32_t v_start, int32_t v_end,
+                             int32_t dgd_stride, int32_t src_stride, int64_t *M, int64_t *H) {
     int32_t       i, j, k, l;
     int16_t       y[WIENER_WIN2] = {0};
     const int32_t wiener_win2    = wiener_win * wiener_win;
@@ -734,10 +734,10 @@ void eb_av1_compute_stats_c(int32_t wiener_win, const uint8_t *dgd, const uint8_
         for (l = k + 1; l < wiener_win2; ++l) H[l * wiener_win2 + k] = H[k * wiener_win2 + l];
     }
 }
-void eb_av1_compute_stats_highbd_c(int32_t wiener_win, const uint8_t *dgd8, const uint8_t *src8,
-                                   int32_t h_start, int32_t h_end, int32_t v_start, int32_t v_end,
-                                   int32_t dgd_stride, int32_t src_stride, int64_t *M, int64_t *H,
-                                   AomBitDepth bit_depth) {
+void svt_av1_compute_stats_highbd_c(int32_t wiener_win, const uint8_t *dgd8, const uint8_t *src8,
+                                    int32_t h_start, int32_t h_end, int32_t v_start, int32_t v_end,
+                                    int32_t dgd_stride, int32_t src_stride, int64_t *M, int64_t *H,
+                                    AomBitDepth bit_depth) {
     int32_t         i, j, k, l;
     int32_t         y[WIENER_WIN2] = {0};
     const int32_t   wiener_win2    = wiener_win * wiener_win;
@@ -1342,30 +1342,30 @@ static void search_wiener_seg(const RestorationTileLimits *limits, const Av1Pixe
     int32_t              vfilterd[WIENER_WIN], hfilterd[WIENER_WIN];
 
     if (cm->use_highbitdepth)
-        eb_av1_compute_stats_highbd(wiener_win,
-                                    rsc->dgd_buffer,
-                                    rsc->src_buffer,
-                                    limits->h_start,
-                                    limits->h_end,
-                                    limits->v_start,
-                                    limits->v_end,
-                                    rsc->dgd_stride,
-                                    rsc->src_stride,
-                                    M,
-                                    H,
-                                    (AomBitDepth)cm->bit_depth);
+        svt_av1_compute_stats_highbd(wiener_win,
+                                     rsc->dgd_buffer,
+                                     rsc->src_buffer,
+                                     limits->h_start,
+                                     limits->h_end,
+                                     limits->v_start,
+                                     limits->v_end,
+                                     rsc->dgd_stride,
+                                     rsc->src_stride,
+                                     M,
+                                     H,
+                                     (AomBitDepth)cm->bit_depth);
     else
-        eb_av1_compute_stats(wiener_win,
-                             rsc->dgd_buffer,
-                             rsc->src_buffer,
-                             limits->h_start,
-                             limits->h_end,
-                             limits->v_start,
-                             limits->v_end,
-                             rsc->dgd_stride,
-                             rsc->src_stride,
-                             M,
-                             H);
+        svt_av1_compute_stats(wiener_win,
+                              rsc->dgd_buffer,
+                              rsc->src_buffer,
+                              limits->h_start,
+                              limits->h_end,
+                              limits->v_start,
+                              limits->v_end,
+                              rsc->dgd_stride,
+                              rsc->src_stride,
+                              M,
+                              H);
 
     if (!wiener_decompose_sep_sym(wiener_win, M, H, vfilterd, hfilterd)) {
         SVT_LOG("CHKN never get here\n");

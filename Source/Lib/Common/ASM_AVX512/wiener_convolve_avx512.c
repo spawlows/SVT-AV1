@@ -301,12 +301,12 @@ static INLINE void pack_store_32x2_avx512(const __m512i res0, const __m512i res1
 // several locations before coeffs_x is referenced.
 // 1. const __m128i coeffs_x = xx_loadu_128(filter_x);
 // 2. const int cnt_zero_coef = calc_zero_coef(filter_x, filter_y);
-void eb_av1_wiener_convolve_add_src_avx512(const uint8_t* const src, const ptrdiff_t src_stride,
-                                           uint8_t* const dst, const ptrdiff_t dst_stride,
-                                           const int16_t* const filter_x,
-                                           const int16_t* const filter_y, const int32_t w,
-                                           const int32_t               h,
-                                           const ConvolveParams* const conv_params) {
+void svt_av1_wiener_convolve_add_src_avx512(const uint8_t* const src, const ptrdiff_t src_stride,
+                                            uint8_t* const dst, const ptrdiff_t dst_stride,
+                                            const int16_t* const filter_x,
+                                            const int16_t* const filter_y, const int32_t w,
+                                            const int32_t               h,
+                                            const ConvolveParams* const conv_params) {
     const int32_t  bd            = 8;
     const int      center_tap    = (SUBPEL_TAPS - 1) / 2;
     const int      round_0       = WIENER_ROUND0_BITS;

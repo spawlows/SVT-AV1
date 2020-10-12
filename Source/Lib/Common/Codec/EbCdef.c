@@ -299,8 +299,8 @@ void eb_cdef_filter_fb(uint8_t *dst8, uint16_t *dst16, int32_t dstride, uint16_t
     if (dirinit && pri_strength == 0 && sec_strength == 0) {
         // If we're here, both primary and secondary strengths are 0, and
         // we still haven't written anything to y[] yet, so we just copy
-        // the input to y[]. This is necessary only for eb_av1_cdef_search()
-        // and only eb_av1_cdef_search() sets dirinit.
+        // the input to y[]. This is necessary only for svt_av1_cdef_search()
+        // and only svt_av1_cdef_search() sets dirinit.
         for (bi = 0; bi < cdef_count; bi++) {
             by = dlist[bi].by << bsizey;
             bx = dlist[bi].bx << bsizex;

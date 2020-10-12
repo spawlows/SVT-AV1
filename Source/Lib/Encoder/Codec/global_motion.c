@@ -132,9 +132,9 @@ static void force_wmtype(EbWarpedMotionParams *wm, TransformationType wmtype) {
 }
 
 int64_t svt_av1_refine_integerized_param(EbWarpedMotionParams *wm, TransformationType wmtype,
-                                     int use_hbd, int bd, uint8_t *ref, int r_width, int r_height,
-                                     int r_stride, uint8_t *dst, int d_width, int d_height,
-                                     int d_stride, int n_refinements, int64_t best_frame_error) {
+                                         int use_hbd, int bd, uint8_t *ref, int r_width, int r_height,
+                                         int r_stride, uint8_t *dst, int d_width, int d_height,
+                                         int d_stride, int n_refinements, int64_t best_frame_error) {
     static const int max_trans_model_params[TRANS_TYPES] = {0, 2, 4, 6};
     const int        border                              = ERRORADV_BORDER;
     int              i                                   = 0, p;
@@ -147,22 +147,22 @@ int64_t svt_av1_refine_integerized_param(EbWarpedMotionParams *wm, Transformatio
     int32_t          best_param;
 
     force_wmtype(wm, wmtype);
-    best_error = eb_av1_warp_error(wm,
-                                   use_hbd,
-                                   bd,
-                                   ref,
-                                   r_width,
-                                   r_height,
-                                   r_stride,
-                                   dst + border * d_stride + border,
-                                   border,
-                                   border,
-                                   d_width - 2 * border,
-                                   d_height - 2 * border,
-                                   d_stride,
-                                   0,
-                                   0,
-                                   best_frame_error);
+    best_error = svt_av1_warp_error(wm,
+                                    use_hbd,
+                                    bd,
+                                    ref,
+                                    r_width,
+                                    r_height,
+                                    r_stride,
+                                    dst + border * d_stride + border,
+                                    border,
+                                    border,
+                                    d_width - 2 * border,
+                                    d_height - 2 * border,
+                                    d_stride,
+                                    0,
+                                    0,
+                                    best_frame_error);
     best_error = AOMMIN(best_error, best_frame_error);
     step       = 1 << (n_refinements - 1);
     for (i = 0; i < n_refinements; i++, step >>= 1) {
@@ -174,22 +174,22 @@ int64_t svt_av1_refine_integerized_param(EbWarpedMotionParams *wm, Transformatio
             best_param = curr_param;
             // look to the left
             *param     = add_param_offset(p, curr_param, -step);
-            step_error = eb_av1_warp_error(wm,
-                                           use_hbd,
-                                           bd,
-                                           ref,
-                                           r_width,
-                                           r_height,
-                                           r_stride,
-                                           dst + border * d_stride + border,
-                                           border,
-                                           border,
-                                           d_width - 2 * border,
-                                           d_height - 2 * border,
-                                           d_stride,
-                                           0,
-                                           0,
-                                           best_error);
+            step_error = svt_av1_warp_error(wm,
+                                            use_hbd,
+                                            bd,
+                                            ref,
+                                            r_width,
+                                            r_height,
+                                            r_stride,
+                                            dst + border * d_stride + border,
+                                            border,
+                                            border,
+                                            d_width - 2 * border,
+                                            d_height - 2 * border,
+                                            d_stride,
+                                            0,
+                                            0,
+                                            best_error);
             if (step_error < best_error) {
                 best_error = step_error;
                 best_param = *param;
@@ -198,22 +198,22 @@ int64_t svt_av1_refine_integerized_param(EbWarpedMotionParams *wm, Transformatio
 
             // look to the right
             *param     = add_param_offset(p, curr_param, step);
-            step_error = eb_av1_warp_error(wm,
-                                           use_hbd,
-                                           bd,
-                                           ref,
-                                           r_width,
-                                           r_height,
-                                           r_stride,
-                                           dst + border * d_stride + border,
-                                           border,
-                                           border,
-                                           d_width - 2 * border,
-                                           d_height - 2 * border,
-                                           d_stride,
-                                           0,
-                                           0,
-                                           best_error);
+            step_error = svt_av1_warp_error(wm,
+                                            use_hbd,
+                                            bd,
+                                            ref,
+                                            r_width,
+                                            r_height,
+                                            r_stride,
+                                            dst + border * d_stride + border,
+                                            border,
+                                            border,
+                                            d_width - 2 * border,
+                                            d_height - 2 * border,
+                                            d_stride,
+                                            0,
+                                            0,
+                                            best_error);
             if (step_error < best_error) {
                 best_error = step_error;
                 best_param = *param;
@@ -225,22 +225,22 @@ int64_t svt_av1_refine_integerized_param(EbWarpedMotionParams *wm, Transformatio
             // for the biggest step size
             while (step_dir) {
                 *param     = add_param_offset(p, best_param, step * step_dir);
-                step_error = eb_av1_warp_error(wm,
-                                               use_hbd,
-                                               bd,
-                                               ref,
-                                               r_width,
-                                               r_height,
-                                               r_stride,
-                                               dst + border * d_stride + border,
-                                               border,
-                                               border,
-                                               d_width - 2 * border,
-                                               d_height - 2 * border,
-                                               d_stride,
-                                               0,
-                                               0,
-                                               best_error);
+                step_error = svt_av1_warp_error(wm,
+                                                use_hbd,
+                                                bd,
+                                                ref,
+                                                r_width,
+                                                r_height,
+                                                r_stride,
+                                                dst + border * d_stride + border,
+                                                border,
+                                                border,
+                                                d_width - 2 * border,
+                                                d_height - 2 * border,
+                                                d_stride,
+                                                0,
+                                                0,
+                                                best_error);
                 if (step_error < best_error) {
                     best_error = step_error;
                     best_param = *param;
@@ -291,16 +291,16 @@ static int compute_global_motion_feature_based(TransformationType type, unsigned
     // find correspondences between the two images
     correspondences     = (int *)malloc(num_frm_corners * 4 * sizeof(*correspondences));
     num_correspondences = svt_av1_determine_correspondence(frm_buffer,
-                                                       (int *)frm_corners,
-                                                       num_frm_corners,
-                                                       ref_buffer,
-                                                       (int *)ref_corners,
-                                                       num_ref_corners,
-                                                       frm_width,
-                                                       frm_height,
-                                                       frm_stride,
-                                                       ref_stride,
-                                                       correspondences);
+                                                           (int *)frm_corners,
+                                                           num_frm_corners,
+                                                           ref_buffer,
+                                                           (int *)ref_corners,
+                                                           num_ref_corners,
+                                                           frm_width,
+                                                           frm_height,
+                                                           frm_stride,
+                                                           ref_stride,
+                                                           correspondences);
 
     ransac(
         correspondences, num_correspondences, num_inliers_by_motion, params_by_motion, num_motions);
@@ -325,11 +325,11 @@ static int compute_global_motion_feature_based(TransformationType type, unsigned
 }
 
 int svt_av1_compute_global_motion(TransformationType type, unsigned char *frm_buffer, int frm_width,
-                              int frm_height, int frm_stride, int *frm_corners, int num_frm_corners,
-                              uint8_t *ref, int ref_stride, int bit_depth,
-                              GlobalMotionEstimationType gm_estimation_type,
-                              int *num_inliers_by_motion, MotionModel *params_by_motion,
-                              int num_motions) {
+                                  int frm_height, int frm_stride, int *frm_corners, int num_frm_corners,
+                                  uint8_t *ref, int ref_stride, int bit_depth,
+                                  GlobalMotionEstimationType gm_estimation_type,
+                                  int *num_inliers_by_motion, MotionModel *params_by_motion,
+                                  int num_motions) {
     switch (gm_estimation_type) {
     case GLOBAL_MOTION_FEATURE_BASED:
         return compute_global_motion_feature_based(type,

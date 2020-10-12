@@ -77,7 +77,7 @@ void        asm_set_convolve_asm_table(void);
 void        init_intra_dc_predictors_c_internal(void);
 void        asm_set_convolve_hbd_asm_table(void);
 void        init_intra_predictors_internal(void);
-extern void eb_av1_init_wedge_masks(void);
+extern void svt_av1_init_wedge_masks(void);
 void        dec_sync_all_threads(EbDecHandle *dec_handle_ptr);
 
 EbErrorType decode_multiple_obu(EbDecHandle *dec_handle_ptr, uint8_t **data, size_t data_size,
@@ -393,17 +393,17 @@ int svt_dec_out_buf(EbDecHandle *dec_handle_ptr, EbBufferHeaderType *p_buffer) {
             default: assert(0);
             }
             copy_even(luma, wd, ht, out_img->y_stride, use_high_bit_depth);
-            eb_av1_add_film_grain_run(film_grain_ptr,
-                                      luma,
-                                      cb,
-                                      cr,
-                                      even_h,/*(ht & 1 ? ht + 1 : ht),*/
-                                      even_w,/*(wd & 1 ? wd + 1 : ht),*/
-                                      out_img->y_stride,
-                                      out_img->cb_stride,
-                                      use_high_bit_depth,
-                                      sy,
-                                      sx);
+            svt_av1_add_film_grain_run(film_grain_ptr,
+                                       luma,
+                                       cb,
+                                       cr,
+                                       even_h,/*(ht & 1 ? ht + 1 : ht),*/
+                                       even_w,/*(wd & 1 ? wd + 1 : ht),*/
+                                       out_img->y_stride,
+                                       out_img->cb_stride,
+                                       use_high_bit_depth,
+                                       sy,
+                                       sx);
         }
     }
 
@@ -560,7 +560,7 @@ svt_av1_dec_init(EbComponentType *svt_dec_component) {
 
     init_intra_predictors_internal();
 
-    eb_av1_init_wedge_masks();
+    svt_av1_init_wedge_masks();
 
     /************************************
     * Decoder Memory Init

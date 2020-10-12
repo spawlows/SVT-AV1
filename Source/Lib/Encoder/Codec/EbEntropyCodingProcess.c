@@ -21,7 +21,7 @@
 #include "EbLog.h"
 #include "common_dsp_rtcd.h"
 #define AV1_MIN_TILE_SIZE_BYTES 1
-void eb_av1_reset_loop_restoration(PictureControlSet *piCSetPtr, uint16_t tile_idx);
+void svt_av1_reset_loop_restoration(PictureControlSet *piCSetPtr, uint16_t tile_idx);
 
 static void rest_context_dctor(EbPtr p) {
     EbThreadContext *     thread_context_ptr = (EbThreadContext *)p;
@@ -81,7 +81,7 @@ static void entropy_coding_reset_neighbor_arrays(PictureControlSet *pcs_ptr, uin
 
 void av1_get_syntax_rate_from_cdf(int32_t *costs, const AomCdfProb *cdf, const int32_t *inv_map);
 
-void eb_av1_cost_tokens_from_cdf(int32_t *costs, const AomCdfProb *cdf, const int32_t *inv_map) {
+void svt_av1_cost_tokens_from_cdf(int32_t *costs, const AomCdfProb *cdf, const int32_t *inv_map) {
     // int32_t i;
     // AomCdfProb prev_cdf = 0;
     // for (i = 0;; ++i) {
@@ -109,18 +109,18 @@ static void build_nmv_component_cost_table(int32_t *mvcost, const NmvComponent *
     int32_t class0_fp_cost[CLASS0_SIZE][MV_FP_SIZE], fp_cost[MV_FP_SIZE];
     int32_t class0_hp_cost[2], hp_cost[2];
 
-    eb_av1_cost_tokens_from_cdf(sign_cost, mvcomp->sign_cdf, NULL);
-    eb_av1_cost_tokens_from_cdf(class_cost, mvcomp->classes_cdf, NULL);
-    eb_av1_cost_tokens_from_cdf(class0_cost, mvcomp->class0_cdf, NULL);
+    svt_av1_cost_tokens_from_cdf(sign_cost, mvcomp->sign_cdf, NULL);
+    svt_av1_cost_tokens_from_cdf(class_cost, mvcomp->classes_cdf, NULL);
+    svt_av1_cost_tokens_from_cdf(class0_cost, mvcomp->class0_cdf, NULL);
     for (i = 0; i < MV_OFFSET_BITS; ++i)
-        eb_av1_cost_tokens_from_cdf(bits_cost[i], mvcomp->bits_cdf[i], NULL);
+        svt_av1_cost_tokens_from_cdf(bits_cost[i], mvcomp->bits_cdf[i], NULL);
     for (i = 0; i < CLASS0_SIZE; ++i)
-        eb_av1_cost_tokens_from_cdf(class0_fp_cost[i], mvcomp->class0_fp_cdf[i], NULL);
-    eb_av1_cost_tokens_from_cdf(fp_cost, mvcomp->fp_cdf, NULL);
+        svt_av1_cost_tokens_from_cdf(class0_fp_cost[i], mvcomp->class0_fp_cdf[i], NULL);
+    svt_av1_cost_tokens_from_cdf(fp_cost, mvcomp->fp_cdf, NULL);
 
     if (precision > MV_SUBPEL_LOW_PRECISION) {
-        eb_av1_cost_tokens_from_cdf(class0_hp_cost, mvcomp->class0_hp_cdf, NULL);
-        eb_av1_cost_tokens_from_cdf(hp_cost, mvcomp->hp_cdf, NULL);
+        svt_av1_cost_tokens_from_cdf(class0_hp_cost, mvcomp->class0_hp_cdf, NULL);
+        svt_av1_cost_tokens_from_cdf(hp_cost, mvcomp->hp_cdf, NULL);
     }
     mvcost[0] = 0;
     for (v = 1; v <= MV_MAX; ++v) {
@@ -153,9 +153,9 @@ static void build_nmv_component_cost_table(int32_t *mvcost, const NmvComponent *
         mvcost[-v] = cost + sign_cost[1];
     }
 }
-void eb_av1_build_nmv_cost_table(int32_t *mvjoint, int32_t *mvcost[2], const NmvContext *ctx,
-                                 MvSubpelPrecision precision) {
-    eb_av1_cost_tokens_from_cdf(mvjoint, ctx->joints_cdf, NULL);
+void svt_av1_build_nmv_cost_table(int32_t *mvjoint, int32_t *mvcost[2], const NmvContext *ctx,
+                                  MvSubpelPrecision precision) {
+    svt_av1_cost_tokens_from_cdf(mvjoint, ctx->joints_cdf, NULL);
     build_nmv_component_cost_table(mvcost[0], &ctx->comps[0], precision);
     build_nmv_component_cost_table(mvcost[1], &ctx->comps[1], precision);
 }
@@ -400,7 +400,7 @@ void *entropy_coding_kernel(void *input_ptr) {
                     context_ptr->sb_origin_x = (x_sb_index + tile_sb_start_x) << sb_size_log2;
                     context_ptr->sb_origin_y = (y_sb_index + tile_sb_start_y) << sb_size_log2;
                     if (x_sb_index == 0 && y_sb_index == 0) {
-                        eb_av1_reset_loop_restoration(pcs_ptr, tile_idx);
+                        svt_av1_reset_loop_restoration(pcs_ptr, tile_idx);
                         context_ptr->tok = pcs_ptr->tile_tok[tile_row][tile_col];
                     }
                     sb_ptr->total_bits = 0;

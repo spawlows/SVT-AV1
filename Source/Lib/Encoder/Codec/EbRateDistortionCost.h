@@ -26,12 +26,12 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-extern uint64_t eb_av1_cost_coeffs_txb(uint8_t allow_update_cdf, FRAME_CONTEXT *ec_ctx,
-                                       struct ModeDecisionCandidateBuffer *candidate_buffer_ptr,
-                                       const TranLow *const qcoeff, uint16_t eob,
-                                       PlaneType plane_type, TxSize transform_size,
-                                       TxType transform_type, int16_t txb_skip_ctx,
-                                       int16_t dc_sign_ctx, EbBool reduced_transform_set_flag);
+extern uint64_t svt_av1_cost_coeffs_txb(uint8_t allow_update_cdf, FRAME_CONTEXT *ec_ctx,
+                                        struct ModeDecisionCandidateBuffer *candidate_buffer_ptr,
+                                        const TranLow *const qcoeff, uint16_t eob,
+                                        PlaneType plane_type, TxSize transform_size,
+                                        TxType transform_type, int16_t txb_skip_ctx,
+                                        int16_t dc_sign_ctx, EbBool reduced_transform_set_flag);
 
 extern void coding_loop_context_generation(
     ModeDecisionContext *context_ptr, BlkStruct *blk_ptr, uint32_t blk_origin_x,

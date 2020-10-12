@@ -39,7 +39,7 @@ EbErrorType generate_md_stage_0_cand(SuperBlock *sb_ptr, ModeDecisionContext *co
                                      uint32_t *         fast_candidate_total_count,
                                      PictureControlSet *pcs_ptr);
 
-int16_t eb_av1_dc_quant_qtx(int32_t qindex, int32_t delta, AomBitDepth bit_depth);
+int16_t svt_av1_dc_quant_qtx(int32_t qindex, int32_t delta, AomBitDepth bit_depth);
 
 static INLINE int is_interintra_allowed_bsize(const BlockSize bsize) {
     return (bsize >= BLOCK_8X8) && (bsize <= BLOCK_32X32);
@@ -60,7 +60,7 @@ int svt_av1_allow_palette(int allow_palette, BlockSize sb_type);
 *******************************************/
 
 const EbPredictionFunc svt_product_prediction_fun_table[3] = {
-    NULL, inter_pu_prediction_av1, eb_av1_intra_prediction_cl};
+    NULL, inter_pu_prediction_av1, svt_av1_intra_prediction_cl};
 
 const EbFastCostFunc av1_product_fast_cost_func_table[3] = {
     NULL,
@@ -2355,7 +2355,7 @@ int md_subpel_search(PictureControlSet *pcs_ptr, ModeDecisionContext *context_pt
     mv_limits.col_min = -(((mi_col + mi_width) * MI_SIZE) + AOM_INTERP_EXTEND);
     mv_limits.row_max = (cm->mi_rows - mi_row) * MI_SIZE + AOM_INTERP_EXTEND;
     mv_limits.col_max = (cm->mi_cols - mi_col) * MI_SIZE + AOM_INTERP_EXTEND;
-    eb_av1_set_mv_search_range(&mv_limits, &ref_mv);
+    svt_av1_set_mv_search_range(&mv_limits, &ref_mv);
     svt_av1_set_subpel_mv_search_range(&ms_params->mv_limits, (FullMvLimits *)&mv_limits, &ref_mv);
 
     // Mvcost params
@@ -3761,7 +3761,7 @@ EbErrorType av1_first_pass_intra_luma_prediction(EbPictureBufferDesc *src, uint3
                 //    ->top_left_array[MAX_PICTURE_HEIGHT_SIZE + txb_origin_x - txb_origin_y];
 
         mode = candidate_buffer_ptr->candidate_ptr->pred_mode;
-        eb_av1_predict_intra_block(
+        svt_av1_predict_intra_block(
             &md_context_ptr->sb_ptr->tile_info,
             !ED_STAGE,
             md_context_ptr->blk_geom,
@@ -3823,7 +3823,7 @@ EbErrorType av1_first_pass_intra_luma_prediction(EbPictureBufferDesc *src, uint3
                  MAX_PICTURE_HEIGHT_SIZE + txb_origin_x - txb_origin_y)[0];
 
         mode = candidate_buffer_ptr->candidate_ptr->pred_mode;
-        eb_av1_predict_intra_block_16bit(
+        svt_av1_predict_intra_block_16bit(
             EB_10BIT,
             &md_context_ptr->sb_ptr->tile_info,
             !ED_STAGE,
@@ -3932,7 +3932,7 @@ EbErrorType av1_intra_luma_prediction(ModeDecisionContext *        md_context_pt
                     ->top_left_array[MAX_PICTURE_HEIGHT_SIZE + txb_origin_x - txb_origin_y];
 
         mode = candidate_buffer_ptr->candidate_ptr->pred_mode;
-        eb_av1_predict_intra_block(
+        svt_av1_predict_intra_block(
             &md_context_ptr->sb_ptr->tile_info,
             !ED_STAGE,
             md_context_ptr->blk_geom,
@@ -3994,7 +3994,7 @@ EbErrorType av1_intra_luma_prediction(ModeDecisionContext *        md_context_pt
                  MAX_PICTURE_HEIGHT_SIZE + txb_origin_x - txb_origin_y)[0];
 
         mode = candidate_buffer_ptr->candidate_ptr->pred_mode;
-        eb_av1_predict_intra_block_16bit(
+        svt_av1_predict_intra_block_16bit(
             EB_10BIT,
             &md_context_ptr->sb_ptr->tile_info,
             !ED_STAGE,

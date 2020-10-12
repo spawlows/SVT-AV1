@@ -262,14 +262,14 @@ void compute_global_motion(EbPictureBufferDesc *input_pic, EbPictureBufferDesc *
 
             if (global_motion.wmtype == IDENTITY) continue;
 
-            const int64_t ref_frame_error = eb_av1_frame_error(EB_FALSE,
-                                                               EB_8BIT,
-                                                               ref_buffer,
-                                                               ref_pic->stride_y,
-                                                               frm_buffer,
-                                                               input_pic->width,
-                                                               input_pic->height,
-                                                               input_pic->stride_y);
+            const int64_t ref_frame_error = svt_av1_frame_error(EB_FALSE,
+                                                                EB_8BIT,
+                                                                ref_buffer,
+                                                                ref_pic->stride_y,
+                                                                frm_buffer,
+                                                                input_pic->width,
+                                                                input_pic->height,
+                                                                input_pic->stride_y);
 
             if (ref_frame_error == 0) continue;
 

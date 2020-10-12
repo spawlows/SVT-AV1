@@ -65,18 +65,18 @@ void setup_rtcd_internal(CPU_FLAGS flags) {
 
     svt_aom_highbd_sse = svt_aom_highbd_sse_c;
 
-    eb_av1_wedge_compute_delta_squares = eb_av1_wedge_compute_delta_squares_c;
-    eb_av1_wedge_sign_from_residuals = eb_av1_wedge_sign_from_residuals_c;
+    svt_av1_wedge_compute_delta_squares = svt_av1_wedge_compute_delta_squares_c;
+    svt_av1_wedge_sign_from_residuals = svt_av1_wedge_sign_from_residuals_c;
 
     eb_compute_cdef_dist_16bit = compute_cdef_dist_c;
     eb_compute_cdef_dist_8bit = compute_cdef_dist_8bit_c;
 
-    eb_av1_compute_stats = eb_av1_compute_stats_c;
-    eb_av1_compute_stats_highbd = eb_av1_compute_stats_highbd_c;
+    svt_av1_compute_stats = svt_av1_compute_stats_c;
+    svt_av1_compute_stats_highbd = svt_av1_compute_stats_highbd_c;
 
-    eb_av1_lowbd_pixel_proj_error = eb_av1_lowbd_pixel_proj_error_c;
-    eb_av1_highbd_pixel_proj_error = eb_av1_highbd_pixel_proj_error_c;
-    eb_av1_calc_frame_error = eb_av1_calc_frame_error_c;
+    svt_av1_lowbd_pixel_proj_error = svt_av1_lowbd_pixel_proj_error_c;
+    svt_av1_highbd_pixel_proj_error = svt_av1_highbd_pixel_proj_error_c;
+    svt_av1_calc_frame_error = svt_av1_calc_frame_error_c;
 
     eb_subtract_average = eb_subtract_average_c;
 
@@ -88,13 +88,13 @@ void setup_rtcd_internal(CPU_FLAGS flags) {
 
     svt_aom_highbd_quantize_b = svt_aom_highbd_quantize_b_c;
 
-    eb_av1_quantize_fp = eb_av1_quantize_fp_c;
+    svt_av1_quantize_fp = svt_av1_quantize_fp_c;
 
-    eb_av1_quantize_fp_32x32 = eb_av1_quantize_fp_32x32_c;
+    svt_av1_quantize_fp_32x32 = svt_av1_quantize_fp_32x32_c;
 
-    eb_av1_quantize_fp_64x64 = eb_av1_quantize_fp_64x64_c;
+    svt_av1_quantize_fp_64x64 = svt_av1_quantize_fp_64x64_c;
 
-    eb_av1_highbd_quantize_fp = eb_av1_highbd_quantize_fp_c;
+    svt_av1_highbd_quantize_fp = svt_av1_highbd_quantize_fp_c;
 
     svt_aom_highbd_8_mse16x16 = svt_aom_highbd_8_mse16x16_c;
 
@@ -145,7 +145,7 @@ void setup_rtcd_internal(CPU_FLAGS flags) {
     svt_aom_sad128x128x4d = svt_aom_sad128x128x4d_c;
     svt_aom_sad128x64 = svt_aom_sad128x64_c;
     svt_aom_sad128x64x4d = svt_aom_sad128x64x4d_c;
-    eb_av1_txb_init_levels = eb_av1_txb_init_levels_c;
+    svt_av1_txb_init_levels = svt_av1_txb_init_levels_c;
     svt_aom_satd = svt_aom_satd_c;
     svt_av1_block_error = svt_av1_block_error_c;
     svt_aom_upsampled_pred = svt_aom_upsampled_pred_c;
@@ -267,29 +267,29 @@ void setup_rtcd_internal(CPU_FLAGS flags) {
 
     //QIQ
     // transform
-    eb_av1_fwd_txfm2d_16x8 = eb_av1_fwd_txfm2d_16x8_c;
-    eb_av1_fwd_txfm2d_8x16 = eb_av1_fwd_txfm2d_8x16_c;
+    svt_av1_fwd_txfm2d_16x8 = svt_av1_fwd_txfm2d_16x8_c;
+    svt_av1_fwd_txfm2d_8x16 = svt_av1_fwd_txfm2d_8x16_c;
 
-    eb_av1_fwd_txfm2d_16x4 = eb_av1_fwd_txfm2d_16x4_c;
-    eb_av1_fwd_txfm2d_4x16 = eb_av1_fwd_txfm2d_4x16_c;
+    svt_av1_fwd_txfm2d_16x4 = svt_av1_fwd_txfm2d_16x4_c;
+    svt_av1_fwd_txfm2d_4x16 = svt_av1_fwd_txfm2d_4x16_c;
 
-    eb_av1_fwd_txfm2d_8x4 = eb_av1_fwd_txfm2d_8x4_c;
-    eb_av1_fwd_txfm2d_4x8 = eb_av1_fwd_txfm2d_4x8_c;
+    svt_av1_fwd_txfm2d_8x4 = svt_av1_fwd_txfm2d_8x4_c;
+    svt_av1_fwd_txfm2d_4x8 = svt_av1_fwd_txfm2d_4x8_c;
 
-    eb_av1_fwd_txfm2d_32x16 = eb_av1_fwd_txfm2d_32x16_c;
-    eb_av1_fwd_txfm2d_32x8 = eb_av1_fwd_txfm2d_32x8_c;
-    eb_av1_fwd_txfm2d_8x32 = eb_av1_fwd_txfm2d_8x32_c;
-    eb_av1_fwd_txfm2d_16x32 = eb_av1_fwd_txfm2d_16x32_c;
-    eb_av1_fwd_txfm2d_32x64 = eb_av1_fwd_txfm2d_32x64_c;
-    eb_av1_fwd_txfm2d_64x32 = eb_av1_fwd_txfm2d_64x32_c;
-    eb_av1_fwd_txfm2d_16x64 = eb_av1_fwd_txfm2d_16x64_c;
-    eb_av1_fwd_txfm2d_64x16 = eb_av1_fwd_txfm2d_64x16_c;
-    eb_av1_fwd_txfm2d_64x64 = svt_av1_transform_two_d_64x64_c;
-    eb_av1_fwd_txfm2d_32x32 = svt_av1_transform_two_d_32x32_c;
-    eb_av1_fwd_txfm2d_16x16 = svt_av1_transform_two_d_16x16_c;
+    svt_av1_fwd_txfm2d_32x16 = svt_av1_fwd_txfm2d_32x16_c;
+    svt_av1_fwd_txfm2d_32x8 = svt_av1_fwd_txfm2d_32x8_c;
+    svt_av1_fwd_txfm2d_8x32 = svt_av1_fwd_txfm2d_8x32_c;
+    svt_av1_fwd_txfm2d_16x32 = svt_av1_fwd_txfm2d_16x32_c;
+    svt_av1_fwd_txfm2d_32x64 = svt_av1_fwd_txfm2d_32x64_c;
+    svt_av1_fwd_txfm2d_64x32 = svt_av1_fwd_txfm2d_64x32_c;
+    svt_av1_fwd_txfm2d_16x64 = svt_av1_fwd_txfm2d_16x64_c;
+    svt_av1_fwd_txfm2d_64x16 = svt_av1_fwd_txfm2d_64x16_c;
+    svt_av1_fwd_txfm2d_64x64 = svt_av1_transform_two_d_64x64_c;
+    svt_av1_fwd_txfm2d_32x32 = svt_av1_transform_two_d_32x32_c;
+    svt_av1_fwd_txfm2d_16x16 = svt_av1_transform_two_d_16x16_c;
 
-    eb_av1_fwd_txfm2d_8x8 = svt_av1_transform_two_d_8x8_c;
-    eb_av1_fwd_txfm2d_4x4 = svt_av1_transform_two_d_4x4_c;
+    svt_av1_fwd_txfm2d_8x8 = svt_av1_transform_two_d_8x8_c;
+    svt_av1_fwd_txfm2d_4x4 = svt_av1_transform_two_d_4x4_c;
 
     svt_handle_transform16x64 = svt_handle_transform16x64_c;
     svt_handle_transform32x64 = svt_handle_transform32x64_c;
@@ -327,51 +327,51 @@ void setup_rtcd_internal(CPU_FLAGS flags) {
     svt_compute_sub_mean_8x8 = svt_compute_sub_mean_8x8_c;
     svt_compute_interm_var_four8x8 = svt_compute_interm_var_four8x8_c;
     sad_16b_kernel = sad_16b_kernel_c;
-    eb_av1_compute_cross_correlation = eb_av1_compute_cross_correlation_c;
-    eb_av1_k_means_dim1 = av1_k_means_dim1_c;
-    eb_av1_k_means_dim2 = av1_k_means_dim2_c;
-    eb_av1_calc_indices_dim1 = av1_calc_indices_dim1_c;
-    eb_av1_calc_indices_dim2 = av1_calc_indices_dim2_c;
+    svt_av1_compute_cross_correlation = svt_av1_compute_cross_correlation_c;
+    svt_av1_k_means_dim1 = av1_k_means_dim1_c;
+    svt_av1_k_means_dim2 = av1_k_means_dim2_c;
+    svt_av1_calc_indices_dim1 = av1_calc_indices_dim1_c;
+    svt_av1_calc_indices_dim2 = av1_calc_indices_dim2_c;
 
-    eb_av1_get_nz_map_contexts = eb_av1_get_nz_map_contexts_c;
+    svt_av1_get_nz_map_contexts = svt_av1_get_nz_map_contexts_c;
 
     variance_highbd = variance_highbd_c;
-    eb_av1_haar_ac_sad_8x8_uint8_input = eb_av1_haar_ac_sad_8x8_uint8_input_c;
+    svt_av1_haar_ac_sad_8x8_uint8_input = svt_av1_haar_ac_sad_8x8_uint8_input_c;
 
 #ifdef ARCH_X86_64
     flags &= get_cpu_flags_to_use();
     if (flags & HAS_AVX2) svt_aom_sse = svt_aom_sse_avx2;
     if (flags & HAS_AVX2) svt_aom_highbd_sse = svt_aom_highbd_sse_avx2;
-    if (flags & HAS_AVX2) eb_av1_wedge_compute_delta_squares = eb_av1_wedge_compute_delta_squares_avx2;
-    if (flags & HAS_AVX2) eb_av1_wedge_sign_from_residuals = eb_av1_wedge_sign_from_residuals_avx2;
+    if (flags & HAS_AVX2) svt_av1_wedge_compute_delta_squares = svt_av1_wedge_compute_delta_squares_avx2;
+    if (flags & HAS_AVX2) svt_av1_wedge_sign_from_residuals = svt_av1_wedge_sign_from_residuals_avx2;
     if (flags & HAS_AVX2) eb_compute_cdef_dist_16bit = compute_cdef_dist_16bit_avx2;
     if (flags & HAS_AVX2) eb_compute_cdef_dist_8bit = compute_cdef_dist_8bit_avx2;
-    if (flags & HAS_AVX2) eb_av1_compute_stats = eb_av1_compute_stats_avx2;
-    if (flags & HAS_AVX2) eb_av1_compute_stats_highbd = eb_av1_compute_stats_highbd_avx2;
+    if (flags & HAS_AVX2) svt_av1_compute_stats = svt_av1_compute_stats_avx2;
+    if (flags & HAS_AVX2) svt_av1_compute_stats_highbd = svt_av1_compute_stats_highbd_avx2;
 #ifndef NON_AVX512_SUPPORT
     if (flags & HAS_AVX512F) {
-        eb_av1_compute_stats = eb_av1_compute_stats_avx512;
-        eb_av1_compute_stats_highbd = eb_av1_compute_stats_highbd_avx512;
+        svt_av1_compute_stats = svt_av1_compute_stats_avx512;
+        svt_av1_compute_stats_highbd = svt_av1_compute_stats_highbd_avx512;
     }
 #endif
-        if (flags & HAS_AVX2) eb_av1_highbd_pixel_proj_error = eb_av1_highbd_pixel_proj_error_avx2;
-        if (flags & HAS_AVX2) eb_av1_calc_frame_error = eb_av1_calc_frame_error_avx2;
+        if (flags & HAS_AVX2) svt_av1_highbd_pixel_proj_error = svt_av1_highbd_pixel_proj_error_avx2;
+        if (flags & HAS_AVX2) svt_av1_calc_frame_error = svt_av1_calc_frame_error_avx2;
         if (flags & HAS_AVX2) eb_subtract_average = eb_subtract_average_avx2;
         if (flags & HAS_AVX2) svt_get_proj_subspace = svt_get_proj_subspace_avx2;
         if (flags & HAS_AVX2) svt_search_one_dual = svt_search_one_dual_avx2;
         if (flags & HAS_AVX2) svt_aom_mse16x16 = svt_aom_mse16x16_avx2;
         if (flags & HAS_AVX2) svt_aom_quantize_b = svt_aom_quantize_b_avx2;
         if (flags & HAS_AVX2) svt_aom_highbd_quantize_b = svt_aom_highbd_quantize_b_avx2;
-        if (flags & HAS_AVX2) eb_av1_lowbd_pixel_proj_error = eb_av1_lowbd_pixel_proj_error_avx2;
+        if (flags & HAS_AVX2) svt_av1_lowbd_pixel_proj_error = svt_av1_lowbd_pixel_proj_error_avx2;
 #ifndef NON_AVX512_SUPPORT
         if (flags & HAS_AVX512F) {
-            eb_av1_lowbd_pixel_proj_error = eb_av1_lowbd_pixel_proj_error_avx512;
+            svt_av1_lowbd_pixel_proj_error = svt_av1_lowbd_pixel_proj_error_avx512;
         }
 #endif
-            if (flags & HAS_AVX2) eb_av1_quantize_fp = eb_av1_quantize_fp_avx2;
-            if (flags & HAS_AVX2) eb_av1_quantize_fp_32x32 = eb_av1_quantize_fp_32x32_avx2;
-            if (flags & HAS_AVX2) eb_av1_quantize_fp_64x64 = eb_av1_quantize_fp_64x64_avx2;
-            if (flags & HAS_AVX2) eb_av1_highbd_quantize_fp = eb_av1_highbd_quantize_fp_avx2;
+            if (flags & HAS_AVX2) svt_av1_quantize_fp = svt_av1_quantize_fp_avx2;
+            if (flags & HAS_AVX2) svt_av1_quantize_fp_32x32 = svt_av1_quantize_fp_32x32_avx2;
+            if (flags & HAS_AVX2) svt_av1_quantize_fp_64x64 = svt_av1_quantize_fp_64x64_avx2;
+            if (flags & HAS_AVX2) svt_av1_highbd_quantize_fp = svt_av1_highbd_quantize_fp_avx2;
             if (flags & HAS_SSE2) svt_aom_highbd_8_mse16x16 = svt_aom_highbd_8_mse16x16_sse2;
             if (flags & HAS_AVX2) svt_aom_sad4x4 = svt_aom_sad4x4_avx2;
             if (flags & HAS_AVX2) svt_aom_sad4x4x4d = svt_aom_sad4x4x4d_avx2;
@@ -417,7 +417,7 @@ void setup_rtcd_internal(CPU_FLAGS flags) {
             if (flags & HAS_AVX2) svt_aom_sad128x128x4d = svt_aom_sad128x128x4d_avx2;
             if (flags & HAS_AVX2) svt_aom_sad128x64 = svt_aom_sad128x64_avx2;
             if (flags & HAS_AVX2) svt_aom_sad128x64x4d = svt_aom_sad128x64x4d_avx2;
-            if (flags & HAS_AVX2) eb_av1_txb_init_levels = eb_av1_txb_init_levels_avx2;
+            if (flags & HAS_AVX2) svt_av1_txb_init_levels = svt_av1_txb_init_levels_avx2;
             if (flags & HAS_AVX2) svt_aom_satd = svt_aom_satd_avx2;
             if (flags & HAS_AVX2) svt_av1_block_error = svt_av1_block_error_avx2;
 #ifndef NON_AVX512_SUPPORT
@@ -430,7 +430,7 @@ void setup_rtcd_internal(CPU_FLAGS flags) {
                 svt_aom_sad128x128x4d = svt_aom_sad128x128x4d_avx512;
                 svt_aom_sad128x64 = svt_aom_sad128x64_avx512;
                 svt_aom_sad128x64x4d = svt_aom_sad128x64x4d_avx512;
-                eb_av1_txb_init_levels = eb_av1_txb_init_levels_avx512;
+                svt_av1_txb_init_levels = svt_av1_txb_init_levels_avx512;
             }
 #endif // !NON_AVX512_SUPPORT
                 if (flags & HAS_AVX2) svt_aom_upsampled_pred = svt_aom_upsampled_pred_sse2;
@@ -540,38 +540,38 @@ void setup_rtcd_internal(CPU_FLAGS flags) {
                 if (flags & HAS_AVX2) svt_aom_highbd_10_variance64x128 = svt_aom_highbd_10_variance64x128_avx2;
                 if (flags & HAS_AVX2) svt_aom_highbd_10_variance128x64 = svt_aom_highbd_10_variance128x64_avx2;
                 if (flags & HAS_AVX2) svt_aom_highbd_10_variance128x128 = svt_aom_highbd_10_variance128x128_avx2;
-                if (flags & HAS_AVX2) eb_av1_fwd_txfm2d_16x8 = eb_av1_fwd_txfm2d_16x8_avx2;
-                if (flags & HAS_AVX2) eb_av1_fwd_txfm2d_8x16 = eb_av1_fwd_txfm2d_8x16_avx2;
-                if (flags & HAS_AVX2) eb_av1_fwd_txfm2d_16x4 = eb_av1_fwd_txfm2d_16x4_avx2;
-                if (flags & HAS_AVX2) eb_av1_fwd_txfm2d_4x16 = eb_av1_fwd_txfm2d_4x16_avx2;
-                if (flags & HAS_AVX2) eb_av1_fwd_txfm2d_8x4 = eb_av1_fwd_txfm2d_8x4_avx2;
-                if (flags & HAS_AVX2) eb_av1_fwd_txfm2d_4x8 = eb_av1_fwd_txfm2d_4x8_avx2;
-                if (flags & HAS_AVX2) eb_av1_fwd_txfm2d_32x8 = eb_av1_fwd_txfm2d_32x8_avx2;
-                if (flags & HAS_AVX2) eb_av1_fwd_txfm2d_8x32 = eb_av1_fwd_txfm2d_8x32_avx2;
-                if (flags & HAS_AVX2) eb_av1_fwd_txfm2d_64x64 = eb_av1_fwd_txfm2d_64x64_avx2;
-                if (flags & HAS_AVX2) eb_av1_fwd_txfm2d_32x32 = eb_av1_fwd_txfm2d_32x32_avx2;
-                if (flags & HAS_AVX2) eb_av1_fwd_txfm2d_16x16 = eb_av1_fwd_txfm2d_16x16_avx2;
-                if (flags & HAS_AVX2) eb_av1_fwd_txfm2d_32x64 = eb_av1_fwd_txfm2d_32x64_avx2;
-                if (flags & HAS_AVX2) eb_av1_fwd_txfm2d_64x32 = eb_av1_fwd_txfm2d_64x32_avx2;
-                if (flags & HAS_AVX2) eb_av1_fwd_txfm2d_16x64 = eb_av1_fwd_txfm2d_16x64_avx2;
-                if (flags & HAS_AVX2) eb_av1_fwd_txfm2d_64x16 = eb_av1_fwd_txfm2d_64x16_avx2;
-                if (flags & HAS_AVX2) eb_av1_fwd_txfm2d_32x16 = eb_av1_fwd_txfm2d_32x16_avx2;
-                if (flags & HAS_AVX2) eb_av1_fwd_txfm2d_16x32 = eb_av1_fwd_txfm2d_16x32_avx2;
+                if (flags & HAS_AVX2) svt_av1_fwd_txfm2d_16x8 = svt_av1_fwd_txfm2d_16x8_avx2;
+                if (flags & HAS_AVX2) svt_av1_fwd_txfm2d_8x16 = svt_av1_fwd_txfm2d_8x16_avx2;
+                if (flags & HAS_AVX2) svt_av1_fwd_txfm2d_16x4 = svt_av1_fwd_txfm2d_16x4_avx2;
+                if (flags & HAS_AVX2) svt_av1_fwd_txfm2d_4x16 = svt_av1_fwd_txfm2d_4x16_avx2;
+                if (flags & HAS_AVX2) svt_av1_fwd_txfm2d_8x4 = svt_av1_fwd_txfm2d_8x4_avx2;
+                if (flags & HAS_AVX2) svt_av1_fwd_txfm2d_4x8 = svt_av1_fwd_txfm2d_4x8_avx2;
+                if (flags & HAS_AVX2) svt_av1_fwd_txfm2d_32x8 = svt_av1_fwd_txfm2d_32x8_avx2;
+                if (flags & HAS_AVX2) svt_av1_fwd_txfm2d_8x32 = svt_av1_fwd_txfm2d_8x32_avx2;
+                if (flags & HAS_AVX2) svt_av1_fwd_txfm2d_64x64 = svt_av1_fwd_txfm2d_64x64_avx2;
+                if (flags & HAS_AVX2) svt_av1_fwd_txfm2d_32x32 = svt_av1_fwd_txfm2d_32x32_avx2;
+                if (flags & HAS_AVX2) svt_av1_fwd_txfm2d_16x16 = svt_av1_fwd_txfm2d_16x16_avx2;
+                if (flags & HAS_AVX2) svt_av1_fwd_txfm2d_32x64 = svt_av1_fwd_txfm2d_32x64_avx2;
+                if (flags & HAS_AVX2) svt_av1_fwd_txfm2d_64x32 = svt_av1_fwd_txfm2d_64x32_avx2;
+                if (flags & HAS_AVX2) svt_av1_fwd_txfm2d_16x64 = svt_av1_fwd_txfm2d_16x64_avx2;
+                if (flags & HAS_AVX2) svt_av1_fwd_txfm2d_64x16 = svt_av1_fwd_txfm2d_64x16_avx2;
+                if (flags & HAS_AVX2) svt_av1_fwd_txfm2d_32x16 = svt_av1_fwd_txfm2d_32x16_avx2;
+                if (flags & HAS_AVX2) svt_av1_fwd_txfm2d_16x32 = svt_av1_fwd_txfm2d_16x32_avx2;
 #ifndef NON_AVX512_SUPPORT
                 if (flags & HAS_AVX512F) {
-                    eb_av1_fwd_txfm2d_64x64 = av1_fwd_txfm2d_64x64_avx512;
-                    eb_av1_fwd_txfm2d_32x32 = av1_fwd_txfm2d_32x32_avx512;
-                    eb_av1_fwd_txfm2d_16x16 = av1_fwd_txfm2d_16x16_avx512;
-                    eb_av1_fwd_txfm2d_32x64 = av1_fwd_txfm2d_32x64_avx512;
-                    eb_av1_fwd_txfm2d_64x32 = av1_fwd_txfm2d_64x32_avx512;
-                    eb_av1_fwd_txfm2d_16x64 = av1_fwd_txfm2d_16x64_avx512;
-                    eb_av1_fwd_txfm2d_64x16 = av1_fwd_txfm2d_64x16_avx512;
-                    eb_av1_fwd_txfm2d_32x16 = av1_fwd_txfm2d_32x16_avx512;
-                    eb_av1_fwd_txfm2d_16x32 = av1_fwd_txfm2d_16x32_avx512;
+                    svt_av1_fwd_txfm2d_64x64 = av1_fwd_txfm2d_64x64_avx512;
+                    svt_av1_fwd_txfm2d_32x32 = av1_fwd_txfm2d_32x32_avx512;
+                    svt_av1_fwd_txfm2d_16x16 = av1_fwd_txfm2d_16x16_avx512;
+                    svt_av1_fwd_txfm2d_32x64 = av1_fwd_txfm2d_32x64_avx512;
+                    svt_av1_fwd_txfm2d_64x32 = av1_fwd_txfm2d_64x32_avx512;
+                    svt_av1_fwd_txfm2d_16x64 = av1_fwd_txfm2d_16x64_avx512;
+                    svt_av1_fwd_txfm2d_64x16 = av1_fwd_txfm2d_64x16_avx512;
+                    svt_av1_fwd_txfm2d_32x16 = av1_fwd_txfm2d_32x16_avx512;
+                    svt_av1_fwd_txfm2d_16x32 = av1_fwd_txfm2d_16x32_avx512;
                 }
 #endif
-                    if (flags & HAS_AVX2) eb_av1_fwd_txfm2d_8x8 = eb_av1_fwd_txfm2d_8x8_avx2;
-                    if (flags & HAS_SSE4_1) eb_av1_fwd_txfm2d_4x4 = eb_av1_fwd_txfm2d_4x4_sse4_1;
+                    if (flags & HAS_AVX2) svt_av1_fwd_txfm2d_8x8 = svt_av1_fwd_txfm2d_8x8_avx2;
+                    if (flags & HAS_SSE4_1) svt_av1_fwd_txfm2d_4x4 = svt_av1_fwd_txfm2d_4x4_sse4_1;
                     if (flags & HAS_AVX2) svt_handle_transform16x64 = svt_handle_transform16x64_avx2;
                     if (flags & HAS_AVX2) svt_handle_transform32x64 = svt_handle_transform32x64_avx2;
                     if (flags & HAS_AVX2) svt_handle_transform64x16 = svt_handle_transform64x16_avx2;
@@ -638,19 +638,19 @@ void setup_rtcd_internal(CPU_FLAGS flags) {
                                   svt_compute_interm_var_four8x8_helper_sse2,
                                   svt_compute_interm_var_four8x8_avx2_intrin);
                     SET_AVX2(sad_16b_kernel, sad_16b_kernel_c, sad_16bit_kernel_avx2);
-                    SET_AVX2(eb_av1_compute_cross_correlation,
-                        eb_av1_compute_cross_correlation_c,
-                        eb_av1_compute_cross_correlation_avx2);
-                    SET_AVX2(eb_av1_k_means_dim1, av1_k_means_dim1_c, av1_k_means_dim1_avx2);
-                    SET_AVX2(eb_av1_k_means_dim2, av1_k_means_dim2_c, av1_k_means_dim2_avx2);
-                    SET_AVX2(eb_av1_calc_indices_dim1, av1_calc_indices_dim1_c, av1_calc_indices_dim1_avx2);
-                    SET_AVX2(eb_av1_calc_indices_dim2, av1_calc_indices_dim2_c, av1_calc_indices_dim2_avx2);
-                    if (flags & HAS_SSE2) eb_av1_get_nz_map_contexts = eb_av1_get_nz_map_contexts_sse2;
+                    SET_AVX2(svt_av1_compute_cross_correlation,
+                        svt_av1_compute_cross_correlation_c,
+                        svt_av1_compute_cross_correlation_avx2);
+                    SET_AVX2(svt_av1_k_means_dim1, av1_k_means_dim1_c, av1_k_means_dim1_avx2);
+                    SET_AVX2(svt_av1_k_means_dim2, av1_k_means_dim2_c, av1_k_means_dim2_avx2);
+                    SET_AVX2(svt_av1_calc_indices_dim1, av1_calc_indices_dim1_c, av1_calc_indices_dim1_avx2);
+                    SET_AVX2(svt_av1_calc_indices_dim2, av1_calc_indices_dim2_c, av1_calc_indices_dim2_avx2);
+                    if (flags & HAS_SSE2) svt_av1_get_nz_map_contexts = svt_av1_get_nz_map_contexts_sse2;
 
                     SET_AVX2(variance_highbd, variance_highbd_c, variance_highbd_avx2);
-                    SET_AVX2(eb_av1_haar_ac_sad_8x8_uint8_input,
-                             eb_av1_haar_ac_sad_8x8_uint8_input_c,
-                             eb_av1_haar_ac_sad_8x8_uint8_input_avx2);
+                    SET_AVX2(svt_av1_haar_ac_sad_8x8_uint8_input,
+                             svt_av1_haar_ac_sad_8x8_uint8_input_c,
+                             svt_av1_haar_ac_sad_8x8_uint8_input_avx2);
 #endif
 
 }

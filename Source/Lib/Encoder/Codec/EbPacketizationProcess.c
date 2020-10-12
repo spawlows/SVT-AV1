@@ -706,7 +706,7 @@ void *packetization_kernel(void *input_ptr) {
                 pcs_ptr->parent_pcs_ptr->reference_picture_wrapper_ptr &&
                 pcs_ptr->parent_pcs_ptr->frame_end_cdf_update_mode) {
                 for (uint16_t tile_idx = 0; tile_idx < tile_cnt; tile_idx++) {
-                    eb_av1_reset_cdf_symbol_counters(
+                    svt_av1_reset_cdf_symbol_counters(
                         pcs_ptr->entropy_coding_info[tile_idx]->entropy_coder_ptr->fc);
                     ((EbReferenceObject *)
                          pcs_ptr->parent_pcs_ptr->reference_picture_wrapper_ptr->object_ptr)
