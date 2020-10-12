@@ -933,10 +933,10 @@ static void hor_boundary_overlap(int32_t *top_block, int32_t top_stride, int32_t
     }
 }
 
-void eb_av1_add_film_grain_run(AomFilmGrain *params, uint8_t *luma, uint8_t *cb, uint8_t *cr,
-                               int32_t height, int32_t width, int32_t luma_stride,
-                               int32_t chroma_stride, int32_t use_high_bit_depth,
-                               int32_t chroma_subsamp_y, int32_t chroma_subsamp_x) {
+void svt_av1_add_film_grain_run(AomFilmGrain *params, uint8_t *luma, uint8_t *cb, uint8_t *cr,
+                                int32_t height, int32_t width, int32_t luma_stride,
+                                int32_t chroma_stride, int32_t use_high_bit_depth,
+                                int32_t chroma_subsamp_y, int32_t chroma_subsamp_x) {
     int32_t **pred_pos_luma;
     int32_t **pred_pos_chroma;
     int32_t * luma_grain_block;

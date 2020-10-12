@@ -1222,9 +1222,9 @@ static void dr_prediction_z1_64xn_avx2(int32_t N, uint8_t *dst, ptrdiff_t stride
 }
 
 // Directional prediction, zone 1: 0 < angle < 90
-void eb_av1_dr_prediction_z1_avx2(uint8_t *dst, ptrdiff_t stride, int32_t bw, int32_t bh,
-                                  const uint8_t *above, const uint8_t *left, int32_t upsample_above,
-                                  int32_t dx, int32_t dy) {
+void svt_av1_dr_prediction_z1_avx2(uint8_t *dst, ptrdiff_t stride, int32_t bw, int32_t bh,
+                                   const uint8_t *above, const uint8_t *left, int32_t upsample_above,
+                                   int32_t dx, int32_t dy) {
     (void)left;
     (void)dy;
     switch (bw) {
@@ -1736,10 +1736,10 @@ static void highbd_dr_prediction_z1_64xn_avx2(int32_t N, uint16_t *dst, ptrdiff_
 }
 
 // Directional prediction, zone 1: 0 < angle < 90
-void eb_av1_highbd_dr_prediction_z1_avx2(uint16_t *dst, ptrdiff_t stride, int32_t bw, int32_t bh,
-                                         const uint16_t *above, const uint16_t *left,
-                                         int32_t upsample_above, int32_t dx, int32_t dy,
-                                         int32_t bd) {
+void svt_av1_highbd_dr_prediction_z1_avx2(uint16_t *dst, ptrdiff_t stride, int32_t bw, int32_t bh,
+                                          const uint16_t *above, const uint16_t *left,
+                                          int32_t upsample_above, int32_t dx, int32_t dy,
+                                          int32_t bd) {
     (void)left;
     (void)dy;
     (void)bd;
@@ -2175,9 +2175,9 @@ static void dr_prediction_z2_hxw_avx2(int32_t H, int32_t W, uint8_t *dst, ptrdif
 }
 
 // Directional prediction, zone 2: 90 < angle < 180
-void eb_av1_dr_prediction_z2_avx2(uint8_t *dst, ptrdiff_t stride, int32_t bw, int32_t bh,
-                                  const uint8_t *above, const uint8_t *left, int32_t upsample_above,
-                                  int32_t upsample_left, int32_t dx, int32_t dy) {
+void svt_av1_dr_prediction_z2_avx2(uint8_t *dst, ptrdiff_t stride, int32_t bw, int32_t bh,
+                                   const uint8_t *above, const uint8_t *left, int32_t upsample_above,
+                                   int32_t upsample_left, int32_t dx, int32_t dy) {
     assert(dx > 0);
     assert(dy > 0);
     switch (bw) {
@@ -2711,9 +2711,9 @@ static void dr_prediction_z3_64x16_avx2(uint8_t *dst, ptrdiff_t stride, const ui
     }
 }
 
-void eb_av1_dr_prediction_z3_avx2(uint8_t *dst, ptrdiff_t stride, int32_t bw, int32_t bh,
-                                  const uint8_t *above, const uint8_t *left, int32_t upsample_left,
-                                  int32_t dx, int32_t dy) {
+void svt_av1_dr_prediction_z3_avx2(uint8_t *dst, ptrdiff_t stride, int32_t bw, int32_t bh,
+                                   const uint8_t *above, const uint8_t *left, int32_t upsample_left,
+                                   int32_t dx, int32_t dy) {
     (void)above;
     (void)dx;
     assert(dx == 1);
@@ -3848,10 +3848,10 @@ static void highbd_dr_prediction_z2_hxw_32bit_avx2(int32_t H, int32_t W, uint16_
 }
 
 // Directional prediction, zone 2: 90 < angle < 180
-void eb_av1_highbd_dr_prediction_z2_avx2(uint16_t *dst, ptrdiff_t stride, int32_t bw, int32_t bh,
-                                         const uint16_t *above, const uint16_t *left,
-                                         int32_t upsample_above, int32_t upsample_left, int32_t dx,
-                                         int32_t dy, int32_t bd) {
+void svt_av1_highbd_dr_prediction_z2_avx2(uint16_t *dst, ptrdiff_t stride, int32_t bw, int32_t bh,
+                                          const uint16_t *above, const uint16_t *left,
+                                          int32_t upsample_above, int32_t upsample_left, int32_t dx,
+                                          int32_t dy, int32_t bd) {
     (void)bd;
     assert(dx > 0);
     assert(dy > 0);
@@ -4232,10 +4232,10 @@ static void highbd_dr_prediction_z3_64x16_avx2(uint16_t *dst, ptrdiff_t stride,
     }
 }
 
-void eb_av1_highbd_dr_prediction_z3_avx2(uint16_t *dst, ptrdiff_t stride, int32_t bw, int32_t bh,
-                                         const uint16_t *above, const uint16_t *left,
-                                         int32_t upsample_left, int32_t dx, int32_t dy,
-                                         int32_t bd) {
+void svt_av1_highbd_dr_prediction_z3_avx2(uint16_t *dst, ptrdiff_t stride, int32_t bw, int32_t bh,
+                                          const uint16_t *above, const uint16_t *left,
+                                          int32_t upsample_left, int32_t dx, int32_t dy,
+                                          int32_t bd) {
     (void)above;
     (void)dx;
     (void)bd;

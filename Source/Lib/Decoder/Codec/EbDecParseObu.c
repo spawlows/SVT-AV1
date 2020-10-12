@@ -1464,7 +1464,7 @@ int get_qindex(SegmentationParams *seg_params, int segment_id, int base_q_idx) {
 EbErrorType reset_parse_ctx(FRAME_CONTEXT *frm_ctx, uint8_t base_qp) {
     EbErrorType return_error = EB_ErrorNone;
 
-    eb_av1_default_coef_probs(frm_ctx, base_qp);
+    svt_av1_default_coef_probs(frm_ctx, base_qp);
     init_mode_probs(frm_ctx);
 
     return return_error;
@@ -2031,11 +2031,11 @@ void read_uncompressed_header(Bitstrm *bs, EbDecHandle *dec_handle_ptr, ObuHeade
             const EbDecPicBuf *const   ref_buf           = get_ref_frame_buf(dec_handle_ptr, i);
             struct ScaleFactors *const ref_scale_factors = get_ref_scale_factors(dec_handle_ptr, i);
 
-            eb_av1_setup_scale_factors_for_frame(ref_scale_factors,
-                                                 ref_buf->superres_upscaled_width,
-                                                 ref_buf->frame_height,
-                                                 frame_info->frame_size.frame_width,
-                                                 frame_info->frame_size.frame_height);
+            svt_av1_setup_scale_factors_for_frame(ref_scale_factors,
+                                                  ref_buf->superres_upscaled_width,
+                                                  ref_buf->frame_height,
+                                                  frame_info->frame_size.frame_width,
+                                                  frame_info->frame_size.frame_height);
 
             if ((!av1_is_valid_scale(ref_scale_factors))) {
                 SVT_LOG("\n Reference frame has invalid dimensions \n");
@@ -2192,11 +2192,11 @@ EbErrorType read_frame_header_obu(Bitstrm *bs, EbDecHandle *dec_handle_ptr, ObuH
     read_uncompressed_header(bs, dec_handle_ptr, obu_header, num_planes);
 
     if (allow_intrabc(dec_handle_ptr)) {
-        eb_av1_setup_scale_factors_for_frame(&dec_handle_ptr->sf_identity,
-                                             dec_handle_ptr->cur_pic_buf[0]->frame_width,
-                                             dec_handle_ptr->cur_pic_buf[0]->frame_height,
-                                             dec_handle_ptr->cur_pic_buf[0]->frame_width,
-                                             dec_handle_ptr->cur_pic_buf[0]->frame_height);
+        svt_av1_setup_scale_factors_for_frame(&dec_handle_ptr->sf_identity,
+                                              dec_handle_ptr->cur_pic_buf[0]->frame_width,
+                                              dec_handle_ptr->cur_pic_buf[0]->frame_height,
+                                              dec_handle_ptr->cur_pic_buf[0]->frame_width,
+                                              dec_handle_ptr->cur_pic_buf[0]->frame_height);
     }
 
     if (trailing_bit) {

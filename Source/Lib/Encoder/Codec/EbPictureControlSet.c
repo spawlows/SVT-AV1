@@ -24,7 +24,7 @@ void *svt_aom_memalign(size_t align, size_t size);
 void  svt_aom_free(void *memblk);
 void *svt_aom_malloc(size_t size);
 
-EbErrorType eb_av1_alloc_restoration_buffers(Av1Common *cm);
+EbErrorType svt_av1_alloc_restoration_buffers(Av1Common *cm);
 
 EbErrorType svt_av1_hash_table_create(HashTable *p_hash_table);
 
@@ -1326,7 +1326,7 @@ EbErrorType picture_parent_control_set_ctor(PictureParentControlSet *object_ptr,
                               1,
                               object_ptr->av1_cm->rst_info);
 
-    return_error = eb_av1_alloc_restoration_buffers(object_ptr->av1_cm);
+    return_error = svt_av1_alloc_restoration_buffers(object_ptr->av1_cm);
 
     memset(&object_ptr->av1_cm->rst_frame, 0, sizeof(Yv12BufferConfig));
 

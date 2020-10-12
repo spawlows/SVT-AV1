@@ -44,10 +44,10 @@
 #include "random.h"
 
 namespace QuantizeAsmTest {
-extern "C" void eb_av1_build_quantizer(AomBitDepth bit_depth, int32_t y_dc_delta_q,
-                                    int32_t u_dc_delta_q, int32_t u_ac_delta_q,
-                                    int32_t v_dc_delta_q, int32_t v_ac_delta_q,
-                                    Quants *const quants, Dequants *const deq);
+extern "C" void svt_av1_build_quantizer(AomBitDepth bit_depth, int32_t y_dc_delta_q,
+                                        int32_t u_dc_delta_q, int32_t u_ac_delta_q,
+                                        int32_t v_dc_delta_q, int32_t v_ac_delta_q,
+                                        Quants *const quants, Dequants *const deq);
 
 using QuantizeFunc = void (*)(const TranLow *coeff_ptr, intptr_t n_coeffs,
                               const int16_t *zbin_ptr,
@@ -97,7 +97,7 @@ class QuantizeBTest : public ::testing::TestWithParam<QuantizeParam> {
         coeff_max_ = (1 << (7 + bd_)) - 1;
         rnd_ = new SVTRandom(coeff_min_, coeff_max_);
 
-        eb_av1_build_quantizer(bd_, 0, 0, 0, 0, 0, &qtab_quants_, &qtab_deq_);
+        svt_av1_build_quantizer(bd_, 0, 0, 0, 0, 0, &qtab_quants_, &qtab_deq_);
         setup_func_ptrs();
     }
 

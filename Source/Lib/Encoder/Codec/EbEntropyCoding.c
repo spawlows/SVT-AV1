@@ -41,10 +41,10 @@ static void mem_put_varsize(uint8_t *const dst, const int sz, const int val) {
 }
 
 int     svt_av1_allow_palette(int allow_palette, BlockSize sb_type);
-int32_t eb_av1_loop_restoration_corners_in_sb(Av1Common *cm, SeqHeader *seq_header_p, int32_t plane, int32_t mi_row,
-                                              int32_t mi_col, BlockSize bsize, int32_t *rcol0,
-                                              int32_t *rcol1, int32_t *rrow0, int32_t *rrow1,
-                                              int32_t *tile_tl_idx);
+int32_t svt_av1_loop_restoration_corners_in_sb(Av1Common *cm, SeqHeader *seq_header_p, int32_t plane, int32_t mi_row,
+                                               int32_t mi_col, BlockSize bsize, int32_t *rcol0,
+                                               int32_t *rcol1, int32_t *rrow0, int32_t *rrow1,
+                                               int32_t *tile_tl_idx);
 int     has_second_ref(const MbModeInfo *mbmi) { return mbmi->block_mi.ref_frame[1] > INTRA_FRAME; }
 int     has_uni_comp_refs(const MbModeInfo *mbmi) {
     return has_second_ref(mbmi) && (!((mbmi->block_mi.ref_frame[0] >= BWDREF_FRAME) ^
@@ -59,10 +59,10 @@ int32_t is_inter_block(const BlockModeInfo *mbmi);
 #define OD_CLZ(x) (-get_msb(x))
 #define OD_ILOG_NZ(x) (OD_CLZ0 - OD_CLZ(x))
 
-//int32_t eb_av1_loop_restoration_corners_in_sb(Av1Common *cm, int32_t plane, int32_t mi_row,
-//                                              int32_t mi_col, BlockSize bsize, int32_t *rcol0,
-//                                              int32_t *rcol1, int32_t *rrow0, int32_t *rrow1,
-//                                              int32_t *tile_tl_idx);
+//int32_t svt_av1_loop_restoration_corners_in_sb(Av1Common *cm, int32_t plane, int32_t mi_row,
+//                                               int32_t mi_col, BlockSize bsize, int32_t *rcol0,
+//                                               int32_t *rcol1, int32_t *rrow0, int32_t *rrow1,
+//                                               int32_t *tile_tl_idx);
 
 extern void av1_set_ref_frame(MvReferenceFrame *rf, int8_t ref_frame_type);
 int         get_relative_dist_enc(SeqHeader *seq_header, int ref_hint, int order_hint);
@@ -647,7 +647,7 @@ int32_t av1_write_coeffs_txb_1d(PictureParentControlSet *parent_pcs_ptr,
         }
     }
 
-    eb_av1_get_nz_map_contexts(
+    svt_av1_get_nz_map_contexts(
         levels, scan, eob, tx_size, tx_type_to_class[tx_type], coeff_contexts);
 
     for (c = eob - 1; c >= 0; --c) {
@@ -1561,7 +1561,7 @@ EbErrorType reset_entropy_coder(EncodeContext *encode_context_ptr, EntropyCoder 
 
     (void)encode_context_ptr;
     (void)slice_type;
-    eb_av1_default_coef_probs(entropy_coder_ptr->fc, qp);
+    svt_av1_default_coef_probs(entropy_coder_ptr->fc, qp);
     init_mode_probs(entropy_coder_ptr->fc);
 
     return return_error;
@@ -1803,8 +1803,8 @@ MvJointType av1_get_mv_joint_diff(int32_t diff[2]) {
         return diff[1] == 0 ? MV_JOINT_HZVNZ : MV_JOINT_HNZVNZ;
 }
 
-void eb_av1_encode_mv(PictureParentControlSet *pcs_ptr, AomWriter *ec_writer, const MV *mv,
-                      const MV *ref, NmvContext *mvctx, int32_t usehp) {
+void svt_av1_encode_mv(PictureParentControlSet *pcs_ptr, AomWriter *ec_writer, const MV *mv,
+                       const MV *ref, NmvContext *mvctx, int32_t usehp) {
     if (is_mv_valid(mv) == 0) SVT_LOG("Corrupted MV\n");
 
     int32_t           diff[2] = {mv->row - ref->row, mv->col - ref->col};
@@ -1833,7 +1833,7 @@ void eb_av1_encode_mv(PictureParentControlSet *pcs_ptr, AomWriter *ec_writer, co
 #define INTER_FILTER_COMP_OFFSET (SWITCHABLE_FILTERS + 1)
 #define INTER_FILTER_DIR_OFFSET ((SWITCHABLE_FILTERS + 1) * 2)
 
-int32_t eb_av1_get_pred_context_switchable_interp(
+int32_t svt_av1_get_pred_context_switchable_interp(
     NeighborArrayUnit *ref_frame_type_neighbor_array, MvReferenceFrame rf0, MvReferenceFrame rf1,
     NeighborArrayUnit32 *interpolation_type_neighbor_array, uint32_t blk_origin_x,
     uint32_t blk_origin_y,
@@ -1948,14 +1948,14 @@ void write_mb_interp_filter(NeighborArrayUnit *ref_frame_type_neighbor_array, Bl
         for (dir = 0; dir < 2; ++dir) {
             // SVT_LOG("\nP:%d\tX: %d\tY:%d\t %d",(pcs_ptr)->picture_number,blk_origin_x,blk_origin_y ,((ec_writer)->ec).rng);
             const int32_t ctx =
-                eb_av1_get_pred_context_switchable_interp(ref_frame_type_neighbor_array,
-                                                          rf0,
-                                                          rf1,
-                                                          interpolation_type_neighbor_array,
-                                                          blk_origin_x,
-                                                          blk_origin_y,
-                                                          //xd,
-                                                          dir);
+                svt_av1_get_pred_context_switchable_interp(ref_frame_type_neighbor_array,
+                                                           rf0,
+                                                           rf1,
+                                                           interpolation_type_neighbor_array,
+                                                           blk_origin_x,
+                                                           blk_origin_y,
+                                                           //xd,
+                                                           dir);
             InterpFilter filter = av1_extract_interp_filter(blk_ptr->interp_filters, dir);
             assert(ctx < SWITCHABLE_FILTER_CONTEXTS);
             assert(filter < CDF_SIZE(SWITCHABLE_FILTERS));
@@ -1979,9 +1979,9 @@ static void write_inter_compound_mode(FRAME_CONTEXT *frame_context, AomWriter *e
                      INTER_COMPOUND_MODES);
 }
 
-int32_t eb_av1_get_reference_mode_context(uint32_t blk_origin_x, uint32_t blk_origin_y,
-                                          NeighborArrayUnit *mode_type_neighbor_array,
-                                          NeighborArrayUnit *inter_pred_dir_neighbor_array) {
+int32_t svt_av1_get_reference_mode_context(uint32_t blk_origin_x, uint32_t blk_origin_y,
+                                           NeighborArrayUnit *mode_type_neighbor_array,
+                                           NeighborArrayUnit *inter_pred_dir_neighbor_array) {
     uint32_t mode_type_left_neighbor_index =
         get_neighbor_array_unit_left_index(mode_type_neighbor_array, blk_origin_y);
     uint32_t mode_type_top_neighbor_index =
@@ -2063,7 +2063,7 @@ int32_t eb_av1_get_reference_mode_context(uint32_t blk_origin_x, uint32_t blk_or
     assert(ctx >= 0 && ctx < COMP_INTER_CONTEXTS);
     return ctx;
 }
-int         eb_av1_get_intra_inter_context(const MacroBlockD *xd);
+int         svt_av1_get_intra_inter_context(const MacroBlockD *xd);
 int         av1_get_reference_mode_context_new(const MacroBlockD *xd);
 AomCdfProb *av1_get_reference_mode_cdf(const MacroBlockD *xd) {
     return xd->tile_ctx->comp_inter_cdf[av1_get_reference_mode_context_new(xd)];
@@ -2073,53 +2073,53 @@ int av1_get_comp_reference_type_context_new(const MacroBlockD *xd);
 
 // == Uni-directional contexts ==
 
-int eb_av1_get_pred_context_uni_comp_ref_p(const MacroBlockD *xd);
+int svt_av1_get_pred_context_uni_comp_ref_p(const MacroBlockD *xd);
 
-int eb_av1_get_pred_context_uni_comp_ref_p1(const MacroBlockD *xd);
+int svt_av1_get_pred_context_uni_comp_ref_p1(const MacroBlockD *xd);
 
-int         eb_av1_get_pred_context_uni_comp_ref_p2(const MacroBlockD *xd);
+int         svt_av1_get_pred_context_uni_comp_ref_p2(const MacroBlockD *xd);
 AomCdfProb *av1_get_comp_reference_type_cdf(const MacroBlockD *xd) {
     const int pred_context = av1_get_comp_reference_type_context_new(xd);
     return xd->tile_ctx->comp_ref_type_cdf[pred_context];
 }
 
 AomCdfProb *av1_get_pred_cdf_uni_comp_ref_p(const MacroBlockD *xd) {
-    const int pred_context = eb_av1_get_pred_context_uni_comp_ref_p(xd);
+    const int pred_context = svt_av1_get_pred_context_uni_comp_ref_p(xd);
     return xd->tile_ctx->uni_comp_ref_cdf[pred_context][0];
 }
 
 AomCdfProb *av1_get_pred_cdf_uni_comp_ref_p1(const MacroBlockD *xd) {
-    const int pred_context = eb_av1_get_pred_context_uni_comp_ref_p1(xd);
+    const int pred_context = svt_av1_get_pred_context_uni_comp_ref_p1(xd);
     return xd->tile_ctx->uni_comp_ref_cdf[pred_context][1];
 }
 
 AomCdfProb *av1_get_pred_cdf_uni_comp_ref_p2(const MacroBlockD *xd) {
-    const int pred_context = eb_av1_get_pred_context_uni_comp_ref_p2(xd);
+    const int pred_context = svt_av1_get_pred_context_uni_comp_ref_p2(xd);
     return xd->tile_ctx->uni_comp_ref_cdf[pred_context][2];
 }
 
 AomCdfProb *av1_get_pred_cdf_comp_ref_p(const MacroBlockD *xd) {
-    const int pred_context = eb_av1_get_pred_context_comp_ref_p(xd);
+    const int pred_context = svt_av1_get_pred_context_comp_ref_p(xd);
     return xd->tile_ctx->comp_ref_cdf[pred_context][0];
 }
 
 AomCdfProb *av1_get_pred_cdf_comp_ref_p1(const MacroBlockD *xd) {
-    const int pred_context = eb_av1_get_pred_context_comp_ref_p1(xd);
+    const int pred_context = svt_av1_get_pred_context_comp_ref_p1(xd);
     return xd->tile_ctx->comp_ref_cdf[pred_context][1];
 }
 
 AomCdfProb *av1_get_pred_cdf_comp_ref_p2(const MacroBlockD *xd) {
-    const int pred_context = eb_av1_get_pred_context_comp_ref_p2(xd);
+    const int pred_context = svt_av1_get_pred_context_comp_ref_p2(xd);
     return xd->tile_ctx->comp_ref_cdf[pred_context][2];
 }
 
 AomCdfProb *av1_get_pred_cdf_comp_bwdref_p(const MacroBlockD *xd) {
-    const int pred_context = eb_av1_get_pred_context_comp_bwdref_p(xd);
+    const int pred_context = svt_av1_get_pred_context_comp_bwdref_p(xd);
     return xd->tile_ctx->comp_bwdref_cdf[pred_context][0];
 }
 
 AomCdfProb *av1_get_pred_cdf_comp_bwdref_p1(const MacroBlockD *xd) {
-    const int pred_context = eb_av1_get_pred_context_comp_bwdref_p1(xd);
+    const int pred_context = svt_av1_get_pred_context_comp_bwdref_p1(xd);
     return xd->tile_ctx->comp_bwdref_cdf[pred_context][1];
 }
 
@@ -2200,7 +2200,7 @@ int av1_get_comp_reference_type_context_new(const MacroBlockD *xd) {
 //
 // 3 contexts: Voting is used to compare the count of forward references with
 //             that of backward references from the spatial neighbors.
-int eb_av1_get_pred_context_uni_comp_ref_p(const MacroBlockD *xd) {
+int svt_av1_get_pred_context_uni_comp_ref_p(const MacroBlockD *xd) {
     const uint8_t *const ref_counts = &xd->neighbors_ref_counts[0];
 
     // Count of forward references (L, L2, L3, or G)
@@ -2224,7 +2224,7 @@ int eb_av1_get_pred_context_uni_comp_ref_p(const MacroBlockD *xd) {
 //
 // 3 contexts: Voting is used to compare the count of LAST2_FRAME with the
 //             total count of LAST3/GOLDEN from the spatial neighbors.
-int eb_av1_get_pred_context_uni_comp_ref_p1(const MacroBlockD *xd) {
+int svt_av1_get_pred_context_uni_comp_ref_p1(const MacroBlockD *xd) {
     const uint8_t *const ref_counts = &xd->neighbors_ref_counts[0];
 
     // Count of LAST2
@@ -2247,7 +2247,7 @@ int eb_av1_get_pred_context_uni_comp_ref_p1(const MacroBlockD *xd) {
 //
 // 3 contexts: Voting is used to compare the count of LAST3_FRAME with the
 //             total count of GOLDEN_FRAME from the spatial neighbors.
-int eb_av1_get_pred_context_uni_comp_ref_p2(const MacroBlockD *xd) {
+int svt_av1_get_pred_context_uni_comp_ref_p2(const MacroBlockD *xd) {
     const uint8_t *const ref_counts = &xd->neighbors_ref_counts[0];
 
     // Count of LAST3
@@ -2325,9 +2325,9 @@ INLINE void av1_collect_neighbors_ref_counts_new(MacroBlockD *const xd) {
     }
 }
 
-int32_t eb_av1_get_comp_reference_type_context(uint32_t blk_origin_x, uint32_t blk_origin_y,
-                                               NeighborArrayUnit *mode_type_neighbor_array,
-                                               NeighborArrayUnit *inter_pred_dir_neighbor_array) {
+int32_t svt_av1_get_comp_reference_type_context(uint32_t blk_origin_x, uint32_t blk_origin_y,
+                                                NeighborArrayUnit *mode_type_neighbor_array,
+                                                NeighborArrayUnit *inter_pred_dir_neighbor_array) {
     int32_t pred_context = 0;
 
     uint32_t mode_type_left_neighbor_index =
@@ -2507,33 +2507,33 @@ static int32_t get_pred_context_brf_or_arf2(const MacroBlockD *xd) {
 // Returns a context number for the given MB prediction signal
 // Signal the first reference frame for a compound mode be either
 // GOLDEN/LAST3, or LAST/LAST2.
-int32_t eb_av1_get_pred_context_comp_ref_p(const MacroBlockD *xd) {
+int32_t svt_av1_get_pred_context_comp_ref_p(const MacroBlockD *xd) {
     return get_pred_context_ll2_or_l3gld(xd);
 }
 
 // Returns a context number for the given MB prediction signal
 // Signal the first reference frame for a compound mode be LAST,
 // conditioning on that it is known either LAST/LAST2.
-int32_t eb_av1_get_pred_context_comp_ref_p1(const MacroBlockD *xd) {
+int32_t svt_av1_get_pred_context_comp_ref_p1(const MacroBlockD *xd) {
     return get_pred_context_last_or_last2(xd);
 }
 
 // Returns a context number for the given MB prediction signal
 // Signal the first reference frame for a compound mode be GOLDEN,
 // conditioning on that it is known either GOLDEN or LAST3.
-int32_t eb_av1_get_pred_context_comp_ref_p2(const MacroBlockD *xd) {
+int32_t svt_av1_get_pred_context_comp_ref_p2(const MacroBlockD *xd) {
     return get_pred_context_last3_or_gld(xd);
 }
 
 // Signal the 2nd reference frame for a compound mode be either
 // ALTREF, or ALTREF2/BWDREF.
-int32_t eb_av1_get_pred_context_comp_bwdref_p(const MacroBlockD *xd) {
+int32_t svt_av1_get_pred_context_comp_bwdref_p(const MacroBlockD *xd) {
     return get_pred_context_brfarf2_or_arf(xd);
 }
 
 // Signal the 2nd reference frame for a compound mode be either
 // ALTREF2 or BWDREF.
-int32_t eb_av1_get_pred_context_comp_bwdref_p1(const MacroBlockD *xd) {
+int32_t svt_av1_get_pred_context_comp_bwdref_p1(const MacroBlockD *xd) {
     return get_pred_context_brf_or_arf2(xd);
 }
 
@@ -2541,7 +2541,7 @@ int32_t eb_av1_get_pred_context_comp_bwdref_p1(const MacroBlockD *xd) {
 //
 // For the bit to signal whether the single reference is a forward reference
 // frame or a backward reference frame.
-int32_t eb_av1_get_pred_context_single_ref_p1(const MacroBlockD *xd) {
+int32_t svt_av1_get_pred_context_single_ref_p1(const MacroBlockD *xd) {
     const uint8_t *const ref_counts = &xd->neighbors_ref_counts[0];
 
     // Count of forward reference frames
@@ -2557,52 +2557,52 @@ int32_t eb_av1_get_pred_context_single_ref_p1(const MacroBlockD *xd) {
     return pred_context;
 }
 AomCdfProb *av1_get_pred_cdf_single_ref_p1(const MacroBlockD *xd) {
-    return xd->tile_ctx->single_ref_cdf[eb_av1_get_pred_context_single_ref_p1(xd)][0];
+    return xd->tile_ctx->single_ref_cdf[svt_av1_get_pred_context_single_ref_p1(xd)][0];
 }
 AomCdfProb *av1_get_pred_cdf_single_ref_p2(const MacroBlockD *xd) {
-    return xd->tile_ctx->single_ref_cdf[eb_av1_get_pred_context_single_ref_p2(xd)][1];
+    return xd->tile_ctx->single_ref_cdf[svt_av1_get_pred_context_single_ref_p2(xd)][1];
 }
 AomCdfProb *av1_get_pred_cdf_single_ref_p3(const MacroBlockD *xd) {
-    return xd->tile_ctx->single_ref_cdf[eb_av1_get_pred_context_single_ref_p3(xd)][2];
+    return xd->tile_ctx->single_ref_cdf[svt_av1_get_pred_context_single_ref_p3(xd)][2];
 }
 AomCdfProb *av1_get_pred_cdf_single_ref_p4(const MacroBlockD *xd) {
-    return xd->tile_ctx->single_ref_cdf[eb_av1_get_pred_context_single_ref_p4(xd)][3];
+    return xd->tile_ctx->single_ref_cdf[svt_av1_get_pred_context_single_ref_p4(xd)][3];
 }
 AomCdfProb *av1_get_pred_cdf_single_ref_p5(const MacroBlockD *xd) {
-    return xd->tile_ctx->single_ref_cdf[eb_av1_get_pred_context_single_ref_p5(xd)][4];
+    return xd->tile_ctx->single_ref_cdf[svt_av1_get_pred_context_single_ref_p5(xd)][4];
 }
 AomCdfProb *av1_get_pred_cdf_single_ref_p6(const MacroBlockD *xd) {
-    return xd->tile_ctx->single_ref_cdf[eb_av1_get_pred_context_single_ref_p6(xd)][5];
+    return xd->tile_ctx->single_ref_cdf[svt_av1_get_pred_context_single_ref_p6(xd)][5];
 }
 
 // For the bit to signal whether the single reference is ALTREF_FRAME or
 // non-ALTREF backward reference frame, knowing that it shall be either of
 // these 2 choices.
-int32_t eb_av1_get_pred_context_single_ref_p2(const MacroBlockD *xd) {
+int32_t svt_av1_get_pred_context_single_ref_p2(const MacroBlockD *xd) {
     return get_pred_context_brfarf2_or_arf(xd);
 }
 
 // For the bit to signal whether the single reference is LAST3/GOLDEN or
 // LAST2/LAST, knowing that it shall be either of these 2 choices.
-int32_t eb_av1_get_pred_context_single_ref_p3(const MacroBlockD *xd) {
+int32_t svt_av1_get_pred_context_single_ref_p3(const MacroBlockD *xd) {
     return get_pred_context_ll2_or_l3gld(xd);
 }
 
 // For the bit to signal whether the single reference is LAST2_FRAME or
 // LAST_FRAME, knowing that it shall be either of these 2 choices.
-int32_t eb_av1_get_pred_context_single_ref_p4(const MacroBlockD *xd) {
+int32_t svt_av1_get_pred_context_single_ref_p4(const MacroBlockD *xd) {
     return get_pred_context_last_or_last2(xd);
 }
 
 // For the bit to signal whether the single reference is GOLDEN_FRAME or
 // LAST3_FRAME, knowing that it shall be either of these 2 choices.
-int32_t eb_av1_get_pred_context_single_ref_p5(const MacroBlockD *xd) {
+int32_t svt_av1_get_pred_context_single_ref_p5(const MacroBlockD *xd) {
     return get_pred_context_last3_or_gld(xd);
 }
 
 // For the bit to signal whether the single reference is ALTREF2_FRAME or
 // BWDREF_FRAME, knowing that it shall be either of these 2 choices.
-int32_t eb_av1_get_pred_context_single_ref_p6(const MacroBlockD *xd) {
+int32_t svt_av1_get_pred_context_single_ref_p6(const MacroBlockD *xd) {
     return get_pred_context_brf_or_arf2(xd);
 }
 /***************************************************************************************/
@@ -2953,7 +2953,7 @@ static void write_tile_info_max_tile(const PictureParentControlSet *const pcs_pt
     }
 }
 
-void eb_av1_get_tile_limits(PictureParentControlSet *pcs_ptr) {
+void svt_av1_get_tile_limits(PictureParentControlSet *pcs_ptr) {
     Av1Common *cm = pcs_ptr->av1_cm;
 
     int32_t mi_cols      = ALIGN_POWER_OF_TWO(cm->mi_cols, pcs_ptr->log2_sb_sz);
@@ -2973,7 +2973,7 @@ void eb_av1_get_tile_limits(PictureParentControlSet *pcs_ptr) {
         AOMMAX(cm->tiles_info.min_log2_tiles, cm->tiles_info.min_log2_tile_cols);
 }
 
-void eb_av1_calculate_tile_cols(PictureParentControlSet *pcs_ptr) {
+void svt_av1_calculate_tile_cols(PictureParentControlSet *pcs_ptr) {
     Av1Common *const cm = pcs_ptr->av1_cm;
 
     const int mi_cols      = ALIGN_POWER_OF_TWO(cm->mi_cols, pcs_ptr->log2_sb_sz);
@@ -3016,7 +3016,7 @@ void eb_av1_calculate_tile_cols(PictureParentControlSet *pcs_ptr) {
     }
 }
 
-void eb_av1_calculate_tile_rows(PictureParentControlSet *pcs_ptr) {
+void svt_av1_calculate_tile_rows(PictureParentControlSet *pcs_ptr) {
     Av1Common *const cm = pcs_ptr->av1_cm;
 
     int mi_rows      = ALIGN_POWER_OF_TWO(cm->mi_rows, pcs_ptr->log2_sb_sz);
@@ -3057,14 +3057,14 @@ void set_tile_info(PictureParentControlSet *pcs_ptr) {
     Av1Common *cm = pcs_ptr->av1_cm;
     //to connect later if non uniform tile spacing is needed.
 
-    eb_av1_get_tile_limits(pcs_ptr);
+    svt_av1_get_tile_limits(pcs_ptr);
 
     // configure tile columns
     cm->tiles_info.uniform_tile_spacing_flag = 1;
     cm->log2_tile_cols = AOMMAX(pcs_ptr->log2_tile_cols, cm->tiles_info.min_log2_tile_cols);
     cm->log2_tile_cols = AOMMIN(cm->log2_tile_cols, cm->tiles_info.max_log2_tile_cols);
 
-    eb_av1_calculate_tile_cols(pcs_ptr);
+    svt_av1_calculate_tile_cols(pcs_ptr);
 
     // configure tile rows
     if (cm->tiles_info.uniform_tile_spacing_flag) {
@@ -3082,7 +3082,7 @@ void set_tile_info(PictureParentControlSet *pcs_ptr) {
         cm->tiles_info.tile_rows            = i;
         cm->tiles_info.tile_row_start_mi[i] = sb_rows << sb_size_log2;
     }
-    eb_av1_calculate_tile_rows(pcs_ptr);
+    svt_av1_calculate_tile_rows(pcs_ptr);
 }
 
 static void write_tile_info(const PictureParentControlSet *const pcs_ptr,
@@ -3091,7 +3091,7 @@ static void write_tile_info(const PictureParentControlSet *const pcs_ptr,
     Av1Common *const cm       = pcs_ptr->av1_cm;
     uint16_t         tile_cnt = cm->tiles_info.tile_rows * cm->tiles_info.tile_cols;
     pcs_ptr->child_pcs->tile_size_bytes_minus_1 = 0;
-    eb_av1_get_tile_limits((PictureParentControlSet *)pcs_ptr);
+    svt_av1_get_tile_limits((PictureParentControlSet *)pcs_ptr);
     write_tile_info_max_tile(pcs_ptr, wb);
 
     if (pcs_ptr->av1_cm->tiles_info.tile_rows * pcs_ptr->av1_cm->tiles_info.tile_cols > 1) {
@@ -4342,7 +4342,7 @@ static void write_cdef(SequenceControlSet *seqCSetPtr, PictureControlSet *p_pcs_
     }
 }
 
-void eb_av1_reset_loop_restoration(PictureControlSet *piCSetPtr, uint16_t tile_idx) {
+void svt_av1_reset_loop_restoration(PictureControlSet *piCSetPtr, uint16_t tile_idx) {
     for (int32_t p = 0; p < 3; ++p) {
         set_default_wiener(piCSetPtr->wiener_info[tile_idx] + p);
         set_default_sgrproj(piCSetPtr->sgrproj_info[tile_idx] + p);
@@ -4650,14 +4650,14 @@ int av1_allow_palette(int allow_screen_content_tools, BlockSize sb_type) {
 int av1_get_palette_bsize_ctx(BlockSize bsize) {
     return num_pels_log2_lookup[bsize] - num_pels_log2_lookup[BLOCK_8X8];
 }
-void eb_av1_tokenize_color_map(FRAME_CONTEXT *frame_context, BlkStruct *blk_ptr, int plane,
-                               TOKENEXTRA **t, BlockSize bsize, TxSize tx_size, COLOR_MAP_TYPE type,
-                               int allow_update_cdf);
+void svt_av1_tokenize_color_map(FRAME_CONTEXT *frame_context, BlkStruct *blk_ptr, int plane,
+                                TOKENEXTRA **t, BlockSize bsize, TxSize tx_size, COLOR_MAP_TYPE type,
+                                int allow_update_cdf);
 void av1_get_block_dimensions(BlockSize bsize, int plane, const MacroBlockD *xd, int *width,
                               int *height, int *rows_within_bounds, int *cols_within_bounds);
 int  eb_get_palette_cache(const MacroBlockD *const xd, int plane, uint16_t *cache);
-int  eb_av1_index_color_cache(const uint16_t *color_cache, int n_cache, const uint16_t *colors,
-                              int n_colors, uint8_t *cache_color_found, int *out_cache_colors);
+int  svt_av1_index_color_cache(const uint16_t *color_cache, int n_cache, const uint16_t *colors,
+                               int n_colors, uint8_t *cache_color_found, int *out_cache_colors);
 
 int av1_get_palette_mode_ctx(const MacroBlockD *xd) {
     const MbModeInfo *const above_mi = xd->above_mbmi;
@@ -4732,7 +4732,7 @@ static AOM_INLINE void write_palette_colors_y(const MacroBlockD *const     xd,
     const int n_cache = eb_get_palette_cache(xd, 0, color_cache);
     int       out_cache_colors[PALETTE_MAX_SIZE];
     uint8_t   cache_color_found[2 * PALETTE_MAX_SIZE];
-    const int n_out_cache = eb_av1_index_color_cache(
+    const int n_out_cache = svt_av1_index_color_cache(
         color_cache, n_cache, pmi->palette_colors, n, cache_color_found, out_cache_colors);
     int n_in_cache = 0;
     for (int i = 0; i < n_cache && n_in_cache < n; ++i) {
@@ -4783,7 +4783,7 @@ static void write_palette_mode_info(PictureParentControlSet *ppcs, FRAME_CONTEXT
         aom_write_symbol(w, 0, ec_ctx->palette_uv_mode_cdf[palette_uv_mode_ctx], 2);
     }
 }
-void eb_av1_encode_dv(AomWriter *w, const MV *mv, const MV *ref, NmvContext *mvctx) {
+void svt_av1_encode_dv(AomWriter *w, const MV *mv, const MV *ref, NmvContext *mvctx) {
     // DV and ref DV should not have sub-pel.
     assert((mv->col & 7) == 0);
     assert((mv->row & 7) == 0);
@@ -4816,7 +4816,7 @@ static void write_intrabc_info(FRAME_CONTEXT *ec_ctx, BlkStruct *blk_ptr, AomWri
         mv.row = blk_ptr->prediction_unit_array[0].mv[INTRA_FRAME].y;
         mv.col = blk_ptr->prediction_unit_array[0].mv[INTRA_FRAME].x;
 
-        eb_av1_encode_dv(w, &mv, &dv_ref.as_mv, &ec_ctx->ndvc);
+        svt_av1_encode_dv(w, &mv, &dv_ref.as_mv, &ec_ctx->ndvc);
     }
 }
 
@@ -5183,7 +5183,7 @@ int get_spatial_seg_prediction(PictureControlSet *pcs_ptr, uint32_t blk_origin_x
     return (prev_ul == prev_u) ? prev_u : prev_l;
 }
 
-int eb_av1_neg_interleave(int x, int ref, int max) {
+int svt_av1_neg_interleave(int x, int ref, int max) {
     assert(x < max);
     const int diff = x - ref;
     if (!ref) return x;
@@ -5238,7 +5238,7 @@ void write_segment_id(PictureControlSet *pcs_ptr, FRAME_CONTEXT *frame_context, 
         blk_ptr->segment_id = spatial_pred;
         return;
     }
-    const int coded_id = eb_av1_neg_interleave(
+    const int coded_id = svt_av1_neg_interleave(
         blk_ptr->segment_id, spatial_pred, segmentation_params->last_active_seg_id + 1);
     struct segmentation_probs *segp     = &frame_context->seg;
     AomCdfProb *               pred_cdf = segp->spatial_pred_seg_cdf[cdf_num];
@@ -5516,7 +5516,7 @@ EbErrorType write_modes_b(PictureControlSet *pcs_ptr, EntropyCodingContext *cont
                         blk_ptr->palette_info.pmi.palette_size[plane];
                     if (palette_size_plane > 0) {
                         const MbModeInfo *const mbmi = &blk_ptr->av1xd->mi[0]->mbmi;
-                        eb_av1_tokenize_color_map(
+                        svt_av1_tokenize_color_map(
                             frame_context,
                             blk_ptr,
                             plane,
@@ -5734,12 +5734,12 @@ EbErrorType write_modes_b(PictureControlSet *pcs_ptr, EntropyCodingContext *cont
                             mv.col = blk_ptr->prediction_unit_array[0].mv[1].x;
                         }
 
-                        eb_av1_encode_mv(pcs_ptr->parent_pcs_ptr,
-                                         ec_writer,
-                                         &mv,
-                                         &ref_mv.as_mv,
-                                         nmvc,
-                                         frm_hdr->allow_high_precision_mv);
+                        svt_av1_encode_mv(pcs_ptr->parent_pcs_ptr,
+                                          ec_writer,
+                                          &mv,
+                                          &ref_mv.as_mv,
+                                          nmvc,
+                                          frm_hdr->allow_high_precision_mv);
                     }
                 } else if (inter_mode == NEAREST_NEWMV || inter_mode == NEAR_NEWMV) {
                     NmvContext *nmvc   = &frame_context->nmvc;
@@ -5749,12 +5749,12 @@ EbErrorType write_modes_b(PictureControlSet *pcs_ptr, EntropyCodingContext *cont
                     mv.row = blk_ptr->prediction_unit_array[0].mv[1].y;
                     mv.col = blk_ptr->prediction_unit_array[0].mv[1].x;
 
-                    eb_av1_encode_mv(pcs_ptr->parent_pcs_ptr,
-                                     ec_writer,
-                                     &mv,
-                                     &ref_mv.as_mv,
-                                     nmvc,
-                                     frm_hdr->allow_high_precision_mv);
+                    svt_av1_encode_mv(pcs_ptr->parent_pcs_ptr,
+                                      ec_writer,
+                                      &mv,
+                                      &ref_mv.as_mv,
+                                      nmvc,
+                                      frm_hdr->allow_high_precision_mv);
                 } else if (inter_mode == NEW_NEARESTMV || inter_mode == NEW_NEARMV) {
                     NmvContext *nmvc   = &frame_context->nmvc;
                     IntMv       ref_mv = blk_ptr->predmv[0];
@@ -5763,12 +5763,12 @@ EbErrorType write_modes_b(PictureControlSet *pcs_ptr, EntropyCodingContext *cont
                     mv.row = blk_ptr->prediction_unit_array[0].mv[0].y;
                     mv.col = blk_ptr->prediction_unit_array[0].mv[0].x;
 
-                    eb_av1_encode_mv(pcs_ptr->parent_pcs_ptr,
-                                     ec_writer,
-                                     &mv,
-                                     &ref_mv.as_mv,
-                                     nmvc,
-                                     frm_hdr->allow_high_precision_mv);
+                    svt_av1_encode_mv(pcs_ptr->parent_pcs_ptr,
+                                      ec_writer,
+                                      &mv,
+                                      &ref_mv.as_mv,
+                                      nmvc,
+                                      frm_hdr->allow_high_precision_mv);
                 }
                 MbModeInfo *mbmi = &mi_ptr->mbmi;
 
@@ -5905,7 +5905,7 @@ EbErrorType write_modes_b(PictureControlSet *pcs_ptr, EntropyCodingContext *cont
                         blk_ptr->palette_info.pmi.palette_size[plane];
                     if (palette_size_plane > 0) {
                         const MbModeInfo *const mbmi = &blk_ptr->av1xd->mi[0]->mbmi;
-                        eb_av1_tokenize_color_map(
+                        svt_av1_tokenize_color_map(
                             frame_context,
                             blk_ptr,
                             plane,
@@ -6032,17 +6032,17 @@ EB_EXTERN EbErrorType write_sb(EntropyCodingContext *context_ptr, SuperBlock *tb
             if (bsize >= BLOCK_8X8) {
                 for (int32_t plane = 0; plane < 3; ++plane) {
                     int32_t rcol0, rcol1, rrow0, rrow1, tile_tl_idx;
-                    if (eb_av1_loop_restoration_corners_in_sb(cm,
-                                                              &scs_ptr->seq_header,
-                                                              plane,
-                                                              mi_row,
-                                                              mi_col,
-                                                              bsize,
-                                                              &rcol0,
-                                                              &rcol1,
-                                                              &rrow0,
-                                                              &rrow1,
-                                                              &tile_tl_idx)) {
+                    if (svt_av1_loop_restoration_corners_in_sb(cm,
+                                                               &scs_ptr->seq_header,
+                                                               plane,
+                                                               mi_row,
+                                                               mi_col,
+                                                               bsize,
+                                                               &rcol0,
+                                                               &rcol1,
+                                                               &rrow0,
+                                                               &rrow1,
+                                                               &tile_tl_idx)) {
                         const int32_t rstride = cm->rst_info[plane].horz_units_per_tile;
                         for (int32_t rrow = rrow0; rrow < rrow1; ++rrow) {
                             for (int32_t rcol = rcol0; rcol < rcol1; ++rcol) {

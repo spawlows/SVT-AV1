@@ -39,10 +39,10 @@ void    finish_cdef_search(EncDecContext *context_ptr, PictureControlSet *pcs_pt
                            int32_t selected_strength_cnt[64]);
 void    av1_cdef_frame16bit(EncDecContext *context_ptr, SequenceControlSet *scs_ptr,
                             PictureControlSet *pCs);
-void    eb_av1_cdef_frame(EncDecContext *context_ptr, SequenceControlSet *scs_ptr,
-                          PictureControlSet *pCs);
-void    eb_av1_loop_restoration_save_boundary_lines(const Yv12BufferConfig *frame, Av1Common *cm,
-                                                    int32_t after_cdef);
+void    svt_av1_cdef_frame(EncDecContext *context_ptr, SequenceControlSet *scs_ptr,
+                           PictureControlSet *pCs);
+void    svt_av1_loop_restoration_save_boundary_lines(const Yv12BufferConfig *frame, Av1Common *cm,
+                                                     int32_t after_cdef);
 
 /**************************************
  * Cdef Context
@@ -535,7 +535,7 @@ void *cdef_kernel(void *input_ptr) {
                     if (scs_ptr->static_config.is_16bit_pipeline || is_16bit)
                         av1_cdef_frame16bit(0, scs_ptr, pcs_ptr);
                     else
-                        eb_av1_cdef_frame(0, scs_ptr, pcs_ptr);
+                        svt_av1_cdef_frame(0, scs_ptr, pcs_ptr);
                 }
             } else {
                 frm_hdr->cdef_params.cdef_bits             = 0;
@@ -547,7 +547,7 @@ void *cdef_kernel(void *input_ptr) {
             //restoration prep
 
             if (scs_ptr->seq_header.enable_restoration) {
-                eb_av1_loop_restoration_save_boundary_lines(cm->frame_to_show, cm, 1);
+                svt_av1_loop_restoration_save_boundary_lines(cm->frame_to_show, cm, 1);
 
                 //are these still needed here?/!!!
                 eb_extend_frame(cm->frame_to_show->buffers[0],

@@ -13,8 +13,8 @@
  * @file PaletteModeUtilTest.cc
  *
  * @brief Unit test for util functions in palette mode:
- * - eb_av1_count_colors
- * - eb_av1_count_colors_highbd
+ * - svt_av1_count_colors
+ * - svt_av1_count_colors_highbd
  * - av1_k_means_dim1
  * - av1_k_means_dim2
  *
@@ -44,15 +44,15 @@ using svt_av1_test_tool::SVTRandom;
 
 namespace {
 
-extern "C" int eb_av1_count_colors(const uint8_t *src, int stride, int rows,
-                                   int cols, int *val_count);
-extern "C" int eb_av1_count_colors_highbd(uint16_t *src, int stride, int rows,
-                                          int cols, int bit_depth, int *val_count);
+extern "C" int svt_av1_count_colors(const uint8_t *src, int stride, int rows,
+                                    int cols, int *val_count);
+extern "C" int svt_av1_count_colors_highbd(uint16_t *src, int stride, int rows,
+                                           int cols, int bit_depth, int *val_count);
 
 /**
  * @brief Unit test for counting colors:
- * - eb_av1_count_colors
- * - eb_av1_count_colors_highbd
+ * - svt_av1_count_colors
+ * - svt_av1_count_colors_highbd
  *
  * Test strategy:
  * Feeds the random value both into test function and the vector without
@@ -129,7 +129,7 @@ class ColorCountLbdTest : public ColorCountTest<uint8_t> {
         const int max_colors = (1 << bd_);
         memset(val_count_, 0, max_colors * sizeof(int));
         unsigned int colors =
-            (unsigned int)eb_av1_count_colors(input_, 64, 64, 64, val_count_);
+            (unsigned int)svt_av1_count_colors(input_, 64, 64, 64, val_count_);
         return colors;
     }
 };
@@ -143,7 +143,7 @@ class ColorCountHbdTest : public ColorCountTest<uint16_t> {
     unsigned int count_color() override {
         const int max_colors = (1 << bd_);
         memset(val_count_, 0, max_colors * sizeof(int));
-        unsigned int colors = (unsigned int)eb_av1_count_colors_highbd(
+        unsigned int colors = (unsigned int)svt_av1_count_colors_highbd(
             input_, 64, 64, 64, bd_, val_count_);
         return colors;
     }
@@ -211,7 +211,7 @@ class KMeansTest : public ::testing::TestWithParam<int> {
             data_[i] = tmp[i] = palette[rnd_.random() % max_colors];
         delete[] palette;
         int val_count[MAX_PALETTE_SQUARE] = {0};
-        return eb_av1_count_colors(tmp, 64, 64, 64, val_count);
+        return svt_av1_count_colors(tmp, 64, 64, 64, val_count);
     }
 
     void run_test(size_t times) {

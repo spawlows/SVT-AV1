@@ -188,8 +188,8 @@ MvReferenceFrame svt_get_ref_frame_type(uint8_t list, uint8_t ref_idx) {
 extern uint32_t stage1ModesArray[];
 
 uint8_t get_max_drl_index(uint8_t refmvCnt, PredictionMode mode);
-int32_t eb_av1_mv_bit_cost(const MV *mv, const MV *ref, const int32_t *mvjcost, int32_t *mvcost[2],
-                           int32_t weight);
+int32_t svt_av1_mv_bit_cost(const MV *mv, const MV *ref, const int32_t *mvjcost, int32_t *mvcost[2],
+                            int32_t weight);
 #define MV_COST_WEIGHT 108
 #define MAX_INTERINTRA_SB_SQUARE 32 * 32
 EbErrorType intra_luma_prediction_for_interintra(ModeDecisionContext *md_context_ptr,
@@ -542,21 +542,21 @@ void choose_best_av1_mv_pred(ModeDecisionContext *           context_ptr,
         mv.row = mv0y;
         mv.col = mv0x;
 
-        uint32_t mv_rate = (uint32_t)eb_av1_mv_bit_cost(&mv,
-                                                        &(ref_mv[0].as_mv),
-                                                        md_rate_estimation_ptr->nmv_vec_cost,
-                                                        md_rate_estimation_ptr->nmvcoststack,
-                                                        MV_COST_WEIGHT);
+        uint32_t mv_rate = (uint32_t)svt_av1_mv_bit_cost(&mv,
+                                                         &(ref_mv[0].as_mv),
+                                                         md_rate_estimation_ptr->nmv_vec_cost,
+                                                         md_rate_estimation_ptr->nmvcoststack,
+                                                         MV_COST_WEIGHT);
 
         if (is_compound) {
             mv.row = mv1y;
             mv.col = mv1x;
 
-            mv_rate += (uint32_t)eb_av1_mv_bit_cost(&mv,
-                                                    &(ref_mv[1].as_mv),
-                                                    md_rate_estimation_ptr->nmv_vec_cost,
-                                                    md_rate_estimation_ptr->nmvcoststack,
-                                                    MV_COST_WEIGHT);
+            mv_rate += (uint32_t)svt_av1_mv_bit_cost(&mv,
+                                                     &(ref_mv[1].as_mv),
+                                                     md_rate_estimation_ptr->nmv_vec_cost,
+                                                     md_rate_estimation_ptr->nmvcoststack,
+                                                     MV_COST_WEIGHT);
         }
 
         if (mv_rate < best_mv_cost) {
@@ -2755,8 +2755,8 @@ static INLINE void setup_pred_plane(struct Buf2D *dst, BlockSize bsize, uint8_t 
     dst->height = height;
     dst->stride = stride;
 }
-void eb_av1_setup_pred_block(BlockSize sb_type, struct Buf2D dst[MAX_MB_PLANE],
-                             const Yv12BufferConfig *src, int mi_row, int mi_col) {
+void svt_av1_setup_pred_block(BlockSize sb_type, struct Buf2D dst[MAX_MB_PLANE],
+                              const Yv12BufferConfig *src, int mi_row, int mi_col) {
 
     dst[0].buf    = src->y_buffer;
     dst[0].stride = src->y_stride;
@@ -2781,17 +2781,17 @@ static int sad_per_bit16lut_8[QINDEX_RANGE];
 static int sad_per_bit_lut_10[QINDEX_RANGE];
 extern AomVarianceFnPtr mefn_ptr[BlockSizeS_ALL];
 
-int eb_av1_find_best_obmc_sub_pixel_tree_up(ModeDecisionContext *context_ptr, IntraBcContext *x,
-                                            const AV1_COMMON *const cm, int mi_row, int mi_col,
-                                            MV *bestmv, const MV *ref_mv, int allow_hp,
-                                            int error_per_bit, const AomVarianceFnPtr *vfp,
-                                            int forced_stop, int iters_per_step, int *mvjcost,
-                                            int *mvcost[2], int *distortion, unsigned int *sse1,
-                                            int is_second, int use_accurate_subpel_search);
+int svt_av1_find_best_obmc_sub_pixel_tree_up(ModeDecisionContext *context_ptr, IntraBcContext *x,
+                                             const AV1_COMMON *const cm, int mi_row, int mi_col,
+                                             MV *bestmv, const MV *ref_mv, int allow_hp,
+                                             int error_per_bit, const AomVarianceFnPtr *vfp,
+                                             int forced_stop, int iters_per_step, int *mvjcost,
+                                             int *mvcost[2], int *distortion, unsigned int *sse1,
+                                             int is_second, int use_accurate_subpel_search);
 
-int eb_av1_obmc_full_pixel_search(ModeDecisionContext *context_ptr, IntraBcContext *x, MV *mvp_full,
-                                  int sadpb, const AomVarianceFnPtr *fn_ptr, const MV *ref_mv,
-                                  MV *dst_mv, int is_second);
+int svt_av1_obmc_full_pixel_search(ModeDecisionContext *context_ptr, IntraBcContext *x, MV *mvp_full,
+                                   int sadpb, const AomVarianceFnPtr *fn_ptr, const MV *ref_mv,
+                                   MV *dst_mv, int is_second);
 
 static void single_motion_search(PictureControlSet *pcs, ModeDecisionContext *context_ptr,
                                  ModeDecisionCandidate *candidate_ptr, const MvReferenceFrame *rf,
@@ -2830,7 +2830,7 @@ static void single_motion_search(PictureControlSet *pcs, ModeDecisionContext *co
 
     // Note: MV limits are modified here. Always restore the original values
     // after full-pixel motion search.
-    eb_av1_set_mv_search_range(&x->mv_limits, ref_mv);
+    svt_av1_set_mv_search_range(&x->mv_limits, ref_mv);
 
     mvp_full = best_pred_mv.as_mv; // mbmi->mv[0].as_mv;
 
@@ -2841,7 +2841,7 @@ static void single_motion_search(PictureControlSet *pcs, ModeDecisionContext *co
 
     switch (candidate_ptr->motion_mode) {
     case OBMC_CAUSAL:
-        bestsme = eb_av1_obmc_full_pixel_search(
+        bestsme = svt_av1_obmc_full_pixel_search(
             context_ptr, x, &mvp_full, sadpb, &mefn_ptr[bsize], ref_mv, &(x->best_mv.as_mv), 0);
         break;
     default: assert(0 && "Invalid motion mode!\n");
@@ -2854,29 +2854,29 @@ static void single_motion_search(PictureControlSet *pcs, ModeDecisionContext *co
         int dis; /* TODO: use dis in distortion calculation later. */
         switch (candidate_ptr->motion_mode) {
         case OBMC_CAUSAL:
-            eb_av1_find_best_obmc_sub_pixel_tree_up(context_ptr,
-                                                    x,
-                                                    cm,
-                                                    mi_row,
-                                                    mi_col,
-                                                    &x->best_mv.as_mv,
-                                                    ref_mv,
-                                                    frm_hdr->allow_high_precision_mv,
-                                                    x->errorperbit,
-                                                    &mefn_ptr[bsize],
-                                                    0, // mv.subpel_force_stop
-                                                    2, //  mv.subpel_iters_per_step
-                                                    x->nmv_vec_cost,
-                                                    x->mv_cost_stack,
-                                                    &dis,
-                                                    &context_ptr->pred_sse[rf[0]],
-                                                    0,
-                                                    USE_8_TAPS);
+            svt_av1_find_best_obmc_sub_pixel_tree_up(context_ptr,
+                                                     x,
+                                                     cm,
+                                                     mi_row,
+                                                     mi_col,
+                                                     &x->best_mv.as_mv,
+                                                     ref_mv,
+                                                     frm_hdr->allow_high_precision_mv,
+                                                     x->errorperbit,
+                                                     &mefn_ptr[bsize],
+                                                     0, // mv.subpel_force_stop
+                                                     2, //  mv.subpel_iters_per_step
+                                                     x->nmv_vec_cost,
+                                                     x->mv_cost_stack,
+                                                     &dis,
+                                                     &context_ptr->pred_sse[rf[0]],
+                                                     0,
+                                                     USE_8_TAPS);
             break;
         default: assert(0 && "Invalid motion mode!\n");
         }
     }
-    *rate_mv = eb_av1_mv_bit_cost(
+    *rate_mv = svt_av1_mv_bit_cost(
         &x->best_mv.as_mv, ref_mv, x->nmv_vec_cost, x->mv_cost_stack, MV_COST_WEIGHT);
 }
 
@@ -2909,7 +2909,7 @@ void obmc_motion_refinement(PictureControlSet *pcs_ptr, struct ModeDecisionConte
         link_eb_to_aom_buffer_desc_8bit(reference_picture, &ref_buf);
 
         struct Buf2D yv12_mb[MAX_MB_PLANE];
-        eb_av1_setup_pred_block(context_ptr->blk_geom->bsize, yv12_mb, &ref_buf, mi_row, mi_col);
+        svt_av1_setup_pred_block(context_ptr->blk_geom->bsize, yv12_mb, &ref_buf, mi_row, mi_col);
         for (int i = 0; i < 1; ++i) x->xdplane[i].pre[0] = yv12_mb[i]; //ref in ME
 
         x->plane[0].src.buf  = 0; // x->xdplane[0].pre[0];
@@ -4005,7 +4005,7 @@ void inject_inter_candidates(PictureControlSet *pcs_ptr, ModeDecisionContext *co
         ? EB_FALSE : EB_TRUE;
     uint32_t mi_row = context_ptr->blk_origin_y >> MI_SIZE_LOG2;
     uint32_t mi_col = context_ptr->blk_origin_x >> MI_SIZE_LOG2;
-    eb_av1_count_overlappable_neighbors(
+    svt_av1_count_overlappable_neighbors(
         pcs_ptr, context_ptr->blk_ptr, context_ptr->blk_geom->bsize, mi_row, mi_col);
     const uint8_t is_obmc_allowed = obmc_motion_mode_allowed(pcs_ptr,
                                                              context_ptr,
@@ -4134,7 +4134,7 @@ static INLINE TxType av1_get_tx_type(BlockSize sb_type, int32_t is_inter, Predic
     return tx_type;
 }
 
-double eb_av1_convert_qindex_to_q(int32_t qindex, AomBitDepth bit_depth);
+double svt_av1_convert_qindex_to_q(int32_t qindex, AomBitDepth bit_depth);
 
 // Values are now correlated to quantizer.
 static int sad_per_bit16lut_8[QINDEX_RANGE];
@@ -4146,11 +4146,11 @@ static void init_me_luts_bd(int *bit16lut, int range,
     // This is to make it easier to resolve the impact of experimental changes
     // to the quantizer tables.
     for (i = 0; i < range; i++) {
-        const double q = eb_av1_convert_qindex_to_q(i, bit_depth);
+        const double q = svt_av1_convert_qindex_to_q(i, bit_depth);
         bit16lut[i] = (int)(0.0418 * q + 2.4107);
     }
 }
-void eb_av1_init_me_luts(void) {
+void svt_av1_init_me_luts(void) {
     init_me_luts_bd(sad_per_bit16lut_8, QINDEX_RANGE, AOM_BITS_8);
     init_me_luts_bd(sad_per_bit_lut_10, QINDEX_RANGE, AOM_BITS_10);
 }
@@ -4214,7 +4214,7 @@ void intra_bc_search(PictureControlSet *pcs, ModeDecisionContext *context_ptr,
                 (uint32_t *)malloc(AOM_BUFFER_SIZE_FOR_BLOCK_HASH * sizeof(uint32_t));
 
     IntMv nearestmv, nearmv;
-    eb_av1_find_best_ref_mvs_from_stack(
+    svt_av1_find_best_ref_mvs_from_stack(
         0,
         context_ptr->md_local_blk_unit[context_ptr->blk_geom->blkidx_mds]
             .ed_ref_mv_stack /*mbmi_ext*/,
@@ -4239,7 +4239,7 @@ void intra_bc_search(PictureControlSet *pcs, ModeDecisionContext *context_ptr,
     Yv12BufferConfig cur_buf;
     link_eb_to_aom_buffer_desc_8bit(pcs->parent_pcs_ptr->enhanced_picture_ptr, &cur_buf);
     struct Buf2D yv12_mb[MAX_MB_PLANE];
-    eb_av1_setup_pred_block(bsize, yv12_mb, &cur_buf, mi_row, mi_col);
+    svt_av1_setup_pred_block(bsize, yv12_mb, &cur_buf, mi_row, mi_col);
     for (int i = 0; i < num_planes; ++i) x->xdplane[i].pre[0] = yv12_mb[i]; //ref in ME
     //setup src for DV search same as ref
     x->plane[0].src = x->xdplane[0].pre[0];
@@ -4278,7 +4278,7 @@ void intra_bc_search(PictureControlSet *pcs, ModeDecisionContext *context_ptr,
         assert_release(x->mv_limits.row_min >= tmp_mv_limits.row_min);
         assert_release(x->mv_limits.row_max <= tmp_mv_limits.row_max);
 
-        eb_av1_set_mv_search_range(&x->mv_limits, &dv_ref.as_mv);
+        svt_av1_set_mv_search_range(&x->mv_limits, &dv_ref.as_mv);
 
         if (x->mv_limits.col_max < x->mv_limits.col_min ||
             x->mv_limits.row_max < x->mv_limits.row_min) {
@@ -4295,21 +4295,21 @@ void intra_bc_search(PictureControlSet *pcs, ModeDecisionContext *context_ptr,
 
 #define INT_VAR_MAX 2147483647 // maximum (signed) int value
 
-        const int bestsme = eb_av1_full_pixel_search(pcs,
-                                                     x,
-                                                     bsize,
-                                                     &mvp_full,
-                                                     step_param,
-                                                     1,
-                                                     0,
-                                                     sadpb,
-                                                     NULL,
-                                                     &dv_ref.as_mv,
-                                                     INT_VAR_MAX,
-                                                     1,
-                                                     (MI_SIZE * mi_col),
-                                                     (MI_SIZE * mi_row),
-                                                     1);
+        const int bestsme = svt_av1_full_pixel_search(pcs,
+                                                      x,
+                                                      bsize,
+                                                      &mvp_full,
+                                                      step_param,
+                                                      1,
+                                                      0,
+                                                      sadpb,
+                                                      NULL,
+                                                      &dv_ref.as_mv,
+                                                      INT_VAR_MAX,
+                                                      1,
+                                                      (MI_SIZE * mi_col),
+                                                      (MI_SIZE * mi_row),
+                                                      1);
 
         x->mv_limits = tmp_mv_limits;
         if (bestsme == INT_VAR_MAX) continue;

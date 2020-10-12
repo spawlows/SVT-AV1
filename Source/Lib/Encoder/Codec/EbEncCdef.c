@@ -18,7 +18,7 @@
 #include "aom_dsp_rtcd.h"
 #include "EbLog.h"
 
-extern int16_t eb_av1_ac_quant_q3(int32_t qindex, int32_t delta, AomBitDepth bit_depth);
+extern int16_t svt_av1_ac_quant_q3(int32_t qindex, int32_t delta, AomBitDepth bit_depth);
 
 #include "EbRateDistortionCost.h"
 
@@ -297,8 +297,8 @@ int32_t eb_sb_compute_cdef_list(PictureControlSet *pcs_ptr, const Av1Common *con
     return count;
 }
 
-void eb_av1_cdef_frame(EncDecContext *context_ptr, SequenceControlSet *scs_ptr,
-                       PictureControlSet *pCs) {
+void svt_av1_cdef_frame(EncDecContext *context_ptr, SequenceControlSet *scs_ptr,
+                        PictureControlSet *pCs) {
     (void)context_ptr;
 
     struct PictureParentControlSet *ppcs    = pCs->parent_pcs_ptr;
@@ -342,7 +342,7 @@ void eb_av1_cdef_frame(EncDecContext *context_ptr, SequenceControlSet *scs_ptr,
     int32_t coeff_shift = AOMMAX(scs_ptr->static_config.encoder_bit_depth /*cm->bit_depth*/ - 8, 0);
     const int32_t nvfb  = (cm->mi_rows + MI_SIZE_64X64 - 1) / MI_SIZE_64X64;
     const int32_t nhfb  = (cm->mi_cols + MI_SIZE_64X64 - 1) / MI_SIZE_64X64;
-    //eb_av1_setup_dst_planes(xd->plane, cm->seq_params.sb_size, frame, 0, 0, 0, num_planes);
+    //svt_av1_setup_dst_planes(xd->plane, cm->seq_params.sb_size, frame, 0, 0, 0, num_planes);
     row_cdef = (uint8_t *)svt_aom_malloc(sizeof(*row_cdef) * (nhfb + 2) * 2);
     assert(row_cdef != NULL);
     memset(row_cdef, 1, sizeof(*row_cdef) * (nhfb + 2) * 2);

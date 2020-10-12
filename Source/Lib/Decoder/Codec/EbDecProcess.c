@@ -50,8 +50,8 @@ extern cpu_set_t      group_affinity;
 #endif
 void *dec_all_stage_kernel(void *input_ptr);
 /*ToDo : Remove all these replications */
-void eb_av1_loop_filter_frame_init(FrameHeader *frm_hdr, LoopFilterInfoN *lfi, int32_t plane_start,
-                                   int32_t plane_end);
+void svt_av1_loop_filter_frame_init(FrameHeader *frm_hdr, LoopFilterInfoN *lfi, int32_t plane_start,
+                                    int32_t plane_end);
 void dec_loop_filter_row(EbDecHandle *dec_handle_ptr,
                          EbPictureBufferDesc *recon_picture_buf,
                          LfCtxt *lf_ctxt,
@@ -795,10 +795,10 @@ void dec_av1_loop_filter_frame_mt(EbDecHandle *dec_handle,
         for (int lvl = 0; lvl <= MAX_LOOP_FILTER; lvl++)
              memset(lf_ctxt->lf_info.lfthr[lvl].hev_thr, (lvl >> 4), SIMD_WIDTH);
 
-        eb_av1_loop_filter_frame_init(frm_hdr,
-                                      &lf_ctxt->lf_info,
-                                      plane_start,
-                                      plane_end);
+        svt_av1_loop_filter_frame_init(frm_hdr,
+                                       &lf_ctxt->lf_info,
+                                       plane_start,
+                                       plane_end);
 
         dec_mt_lf_frame_info->lf_info_init_done = EB_TRUE;
     }

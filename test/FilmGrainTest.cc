@@ -251,17 +251,17 @@ class AddFilmGrainTest : public ::testing::Test {
 TEST_F(AddFilmGrainTest, MatchTest) {
     for (int i = 0; i < 3; ++i) {
         init_data();
-        eb_av1_add_film_grain_run(film_grain_test_vectors + i,
-                                  luma_,
-                                  cb_,
-                                  cr_,
-                                  kHeight,
-                                  kWidth,
-                                  kWidth,     /* luma stride */
-                                  kWidth / 2, /* chroma stride */
-                                  0,
-                                  1,
-                                  1);
+        svt_av1_add_film_grain_run(film_grain_test_vectors + i,
+                                   luma_,
+                                   cb_,
+                                   cr_,
+                                   kHeight,
+                                   kWidth,
+                                   kWidth,     /* luma stride */
+                                   kWidth / 2, /* chroma stride */
+                                   0,
+                                   1,
+                                   1);
         check_output(i);
         EXPECT_FALSE(HasFailure());
     }

@@ -101,17 +101,17 @@ class av1_compute_stats_test
             uint8_t *const d = dgd + WIENER_WIN * dgd_stride;
             uint8_t *const s = src + WIENER_WIN * src_stride;
 
-            eb_av1_compute_stats_c(wiener_win,
-                                   d,
-                                   s,
-                                   0,
-                                   width,
-                                   0,
-                                   height,
-                                   dgd_stride,
-                                   src_stride,
-                                   M_org,
-                                   H_org);
+            svt_av1_compute_stats_c(wiener_win,
+                                    d,
+                                    s,
+                                    0,
+                                    width,
+                                    0,
+                                    height,
+                                    dgd_stride,
+                                    src_stride,
+                                    M_org,
+                                    H_org);
 
             func(wiener_win,
                  d,
@@ -162,17 +162,17 @@ class av1_compute_stats_test
         svt_av1_get_time(&start_time_seconds, &start_time_useconds);
 
         for (uint64_t i = 0; i < num_loop; i++) {
-            eb_av1_compute_stats_c(wiener_win,
-                                   d,
-                                   s,
-                                   h_start,
-                                   h_end,
-                                   v_start,
-                                   v_end,
-                                   dgd_stride,
-                                   src_stride,
-                                   M_org,
-                                   H_org);
+            svt_av1_compute_stats_c(wiener_win,
+                                    d,
+                                    s,
+                                    h_start,
+                                    h_end,
+                                    v_start,
+                                    v_end,
+                                    dgd_stride,
+                                    src_stride,
+                                    M_org,
+                                    H_org);
         }
 
         svt_av1_get_time(&middle_time_seconds, &middle_time_useconds);
@@ -205,11 +205,11 @@ class av1_compute_stats_test
         ASSERT_EQ(0, memcmp(H_org, H_opt, sizeof(H_org)));
 
         printf("Average Nanoseconds per Function Call\n");
-        printf("    eb_av1_compute_stats_c(%d)   : %6.2f\n",
+        printf("    svt_av1_compute_stats_c(%d)   : %6.2f\n",
                 wiener_win,
                 1000000 * time_c / num_loop);
         printf(
-            "    eb_av1_compute_stats_opt(%d) : %6.2f   (Comparison: "
+            "    svt_av1_compute_stats_opt(%d) : %6.2f   (Comparison: "
             "%5.2fx)\n",
             wiener_win,
             1000000 * time_o / num_loop,
@@ -228,7 +228,7 @@ TEST_P(av1_compute_stats_test, DISABLED_speed) {
 INSTANTIATE_TEST_CASE_P(
     AV1_COMPUTE_STATS_AVX2, av1_compute_stats_test,
     ::testing::Combine(::testing::Range(BLOCK_4X4, BlockSizeS_ALL),
-                       ::testing::Values(eb_av1_compute_stats_avx2),
+                       ::testing::Values(svt_av1_compute_stats_avx2),
                        ::testing::Range(0, 6),
                        ::testing::Values(WIENER_WIN_CHROMA, WIENER_WIN,
                                          WIENER_WIN_3TAP)));
@@ -237,7 +237,7 @@ INSTANTIATE_TEST_CASE_P(
 INSTANTIATE_TEST_CASE_P(
     AV1_COMPUTE_STATS_AVX512, av1_compute_stats_test,
     ::testing::Combine(::testing::Range(BLOCK_4X4, BlockSizeS_ALL),
-                       ::testing::Values(eb_av1_compute_stats_avx512),
+                       ::testing::Values(svt_av1_compute_stats_avx512),
                        ::testing::Range(0, 6),
                        ::testing::Values(WIENER_WIN_CHROMA, WIENER_WIN,
                                          WIENER_WIN_3TAP)));
@@ -337,18 +337,18 @@ class av1_compute_stats_test_hbd
             const uint8_t *const dgd8 = CONVERT_TO_BYTEPTR(d);
             const uint8_t *const src8 = CONVERT_TO_BYTEPTR(s);
 
-            eb_av1_compute_stats_highbd_c(wiener_win,
-                                          dgd8,
-                                          src8,
-                                          0,
-                                          width,
-                                          0,
-                                          height,
-                                          dgd_stride,
-                                          src_stride,
-                                          M_org,
-                                          H_org,
-                                          bit_depth);
+            svt_av1_compute_stats_highbd_c(wiener_win,
+                                           dgd8,
+                                           src8,
+                                           0,
+                                           width,
+                                           0,
+                                           height,
+                                           dgd_stride,
+                                           src_stride,
+                                           M_org,
+                                           H_org,
+                                           bit_depth);
 
             func(wiener_win,
                  dgd8,
@@ -406,18 +406,18 @@ class av1_compute_stats_test_hbd
         svt_av1_get_time(&start_time_seconds, &start_time_useconds);
 
         for (uint64_t i = 0; i < num_loop; i++) {
-            eb_av1_compute_stats_highbd_c(wiener_win,
-                                            dgd8,
-                                            src8,
-                                            h_start,
-                                            h_end,
-                                            v_start,
-                                            v_end,
-                                            dgd_stride,
-                                            src_stride,
-                                            M_org,
-                                            H_org,
-                                            bit_depth);
+            svt_av1_compute_stats_highbd_c(wiener_win,
+                                           dgd8,
+                                           src8,
+                                           h_start,
+                                           h_end,
+                                           v_start,
+                                           v_end,
+                                           dgd_stride,
+                                           src_stride,
+                                           M_org,
+                                           H_org,
+                                           bit_depth);
         }
 
         svt_av1_get_time(&middle_time_seconds, &middle_time_useconds);
@@ -451,7 +451,7 @@ class av1_compute_stats_test_hbd
         ASSERT_EQ(0, memcmp(H_org, H_opt, sizeof(H_org)));
 
         printf("Average Nanoseconds per Function Call\n");
-        printf("    eb_av1_compute_stats_highbd_c(%d)   : %6.2f\n",
+        printf("    svt_av1_compute_stats_highbd_c(%d)   : %6.2f\n",
                 wiener_win,
                 1000000 * time_c / num_loop);
         printf(
@@ -476,7 +476,7 @@ INSTANTIATE_TEST_CASE_P(
     AV1_COMPUTE_STATS_HBD_AVX2, av1_compute_stats_test_hbd,
     ::testing::Combine(
         ::testing::Range(BLOCK_4X4, BlockSizeS_ALL),
-        ::testing::Values(eb_av1_compute_stats_highbd_avx2),
+        ::testing::Values(svt_av1_compute_stats_highbd_avx2),
         ::testing::Range(0, 8),
         ::testing::Values(WIENER_WIN_CHROMA, WIENER_WIN, WIENER_WIN_3TAP),
         ::testing::Values(AOM_BITS_8, AOM_BITS_10, AOM_BITS_12)));
@@ -486,7 +486,7 @@ INSTANTIATE_TEST_CASE_P(
     AV1_COMPUTE_STATS_HBD_AVX512, av1_compute_stats_test_hbd,
     ::testing::Combine(
         ::testing::Range(BLOCK_4X4, BlockSizeS_ALL),
-        ::testing::Values(eb_av1_compute_stats_highbd_avx512),
+        ::testing::Values(svt_av1_compute_stats_highbd_avx512),
         ::testing::Range(0, 8),
         ::testing::Values(WIENER_WIN_CHROMA, WIENER_WIN, WIENER_WIN_3TAP),
         ::testing::Values(AOM_BITS_8, AOM_BITS_10, AOM_BITS_12)));

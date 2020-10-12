@@ -176,8 +176,8 @@ static void build_intra_predictors(
         left_col[-1] = above_row[-1];
     }
     if (use_filter_intra) {
-        eb_av1_filter_intra_predictor(dst, dst_stride, tx_size, above_row, left_col,
-                                      filter_intra_mode);
+        svt_av1_filter_intra_predictor(dst, dst_stride, tx_size, above_row, left_col,
+                                       filter_intra_mode);
         return;
     }
 
@@ -197,26 +197,26 @@ static void build_intra_predictors(
                     const int32_t strength =
                             intra_edge_filter_strength(txwpx, txhpx, p_angle - 90, filt_type);
                     const int32_t n_px = n_top_px + ab_le + (need_right ? txhpx : 0);
-                    eb_av1_filter_intra_edge(above_row - ab_le, n_px, strength);
+                    svt_av1_filter_intra_edge(above_row - ab_le, n_px, strength);
                 }
                 if (need_left && n_left_px > 0) {
                     const int32_t strength = intra_edge_filter_strength(
                             txhpx, txwpx, p_angle - 180, filt_type);
                     const int32_t n_px = n_left_px + ab_le + (need_bottom ? txwpx : 0);
-                    eb_av1_filter_intra_edge(left_col - ab_le, n_px, strength);
+                    svt_av1_filter_intra_edge(left_col - ab_le, n_px, strength);
                 }
             }
             upsample_above =
                     use_intra_edge_upsample(txwpx, txhpx, p_angle - 90, filt_type);
             if (need_above && upsample_above) {
                 const int32_t n_px = txwpx + (need_right ? txhpx : 0);
-                eb_av1_upsample_intra_edge(above_row, n_px);
+                svt_av1_upsample_intra_edge(above_row, n_px);
             }
             upsample_left =
                     use_intra_edge_upsample(txhpx, txwpx, p_angle - 180, filt_type);
             if (need_left && upsample_left) {
                 const int32_t n_px = txhpx + (need_bottom ? txwpx : 0);
-                eb_av1_upsample_intra_edge(left_col, n_px);
+                svt_av1_upsample_intra_edge(left_col, n_px);
             }
         }
         dr_predictor(dst, dst_stride, tx_size, above_row, left_col, upsample_above,
@@ -387,14 +387,14 @@ static void build_intra_predictors_high(
                     const int32_t strength =
                             intra_edge_filter_strength(txwpx, txhpx, p_angle - 90, filt_type);
                     const int32_t n_px = n_top_px + ab_le + (need_right ? txhpx : 0);
-                    eb_av1_filter_intra_edge_high(above_row - ab_le, n_px, strength);
+                    svt_av1_filter_intra_edge_high(above_row - ab_le, n_px, strength);
                 }
                 if (need_left && n_left_px > 0) {
                     const int32_t strength = intra_edge_filter_strength(
                             txhpx, txwpx, p_angle - 180, filt_type);
                     const int32_t n_px = n_left_px + ab_le + (need_bottom ? txwpx : 0);
 
-                    eb_av1_filter_intra_edge_high(left_col - ab_le, n_px, strength);
+                    svt_av1_filter_intra_edge_high(left_col - ab_le, n_px, strength);
                 }
             }
             upsample_above =
@@ -402,14 +402,14 @@ static void build_intra_predictors_high(
             if (need_above && upsample_above) {
                 const int32_t n_px = txwpx + (need_right ? txhpx : 0);
                 //av1_upsample_intra_edge_high(above_row, n_px, bd);// AMIR : to be replaced by optimized code
-                eb_av1_upsample_intra_edge_high_c(above_row, n_px, bd);
+                svt_av1_upsample_intra_edge_high_c(above_row, n_px, bd);
             }
             upsample_left =
                     use_intra_edge_upsample(txhpx, txwpx, p_angle - 180, filt_type);
             if (need_left && upsample_left) {
                 const int32_t n_px = txhpx + (need_bottom ? txwpx : 0);
                 //av1_upsample_intra_edge_high(left_col, n_px, bd);// AMIR: to be replaced by optimized code
-                eb_av1_upsample_intra_edge_high_c(left_col, n_px, bd);
+                svt_av1_upsample_intra_edge_high_c(left_col, n_px, bd);
             }
         }
         highbd_dr_predictor(dst, dst_stride, tx_size, above_row, left_col,
@@ -427,7 +427,7 @@ static void build_intra_predictors_high(
 }
 
 
-void eb_av1_predict_intra_block(
+void svt_av1_predict_intra_block(
         TileInfo * tile,
         STAGE       stage,
         const BlockGeom * blk_geom,
@@ -655,7 +655,7 @@ void eb_av1_predict_intra_block(
             have_bottom_left ? AOMMIN(txhpx, yd) : 0, plane);
 }
 
-void eb_av1_predict_intra_block_16bit(
+void svt_av1_predict_intra_block_16bit(
         EbBitDepthEnum bit_depth,
         TileInfo * tile,
         STAGE       stage,
@@ -876,7 +876,7 @@ void eb_av1_predict_intra_block_16bit(
 /** IntraPrediction()
 is the main function to compute intra prediction for a PU
 */
-EbErrorType eb_av1_intra_prediction_cl(
+EbErrorType svt_av1_intra_prediction_cl(
         uint8_t                              hbd_mode_decision,
         ModeDecisionContext                  *md_context_ptr,
         PictureControlSet                    *pcs_ptr,
@@ -966,7 +966,7 @@ EbErrorType eb_av1_intra_prediction_cl(
             else
                 mode = candidate_buffer_ptr->candidate_ptr->pred_mode;
 
-            eb_av1_predict_intra_block(
+            svt_av1_predict_intra_block(
                     &md_context_ptr->sb_ptr->tile_info,
                     !ED_STAGE,
                     md_context_ptr->blk_geom,
@@ -1042,7 +1042,7 @@ EbErrorType eb_av1_intra_prediction_cl(
             else
                 mode = candidate_buffer_ptr->candidate_ptr->pred_mode;
 
-            eb_av1_predict_intra_block_16bit(
+            svt_av1_predict_intra_block_16bit(
                     EB_10BIT,
                     &md_context_ptr->sb_ptr->tile_info,
                     !ED_STAGE,
@@ -1123,7 +1123,7 @@ EbErrorType  intra_luma_prediction_for_interintra(
         if (md_context_ptr->blk_origin_y != 0 && md_context_ptr->blk_origin_x != 0)
             top_neigh_array[0] = left_neigh_array[0] = md_context_ptr->luma_recon_neighbor_array->top_left_array[MAX_PICTURE_HEIGHT_SIZE + md_context_ptr->blk_origin_x - md_context_ptr->blk_origin_y];
 
-        eb_av1_predict_intra_block(
+        svt_av1_predict_intra_block(
                 &md_context_ptr->sb_ptr->tile_info,
                 !ED_STAGE,
                 md_context_ptr->blk_geom,
@@ -1163,7 +1163,7 @@ EbErrorType  intra_luma_prediction_for_interintra(
         if (md_context_ptr->blk_origin_y != 0 && md_context_ptr->blk_origin_x != 0)
             top_neigh_array[0] = left_neigh_array[0] = ((uint16_t*)(md_context_ptr->luma_recon_neighbor_array16bit->top_left_array) + MAX_PICTURE_HEIGHT_SIZE + md_context_ptr->blk_origin_x - md_context_ptr->blk_origin_y)[0];
 
-        eb_av1_predict_intra_block_16bit(
+        svt_av1_predict_intra_block_16bit(
                 EB_10BIT,
                 &md_context_ptr->sb_ptr->tile_info,
                 !ED_STAGE,
