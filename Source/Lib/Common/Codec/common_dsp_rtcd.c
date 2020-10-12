@@ -247,11 +247,11 @@ void setup_common_rtcd_internal(CPU_FLAGS flags) {
     eb_aom_blend_a64_vmask = eb_aom_blend_a64_vmask_c;
 
     eb_aom_highbd_blend_a64_mask = eb_aom_highbd_blend_a64_mask_c;
-    eb_aom_highbd_blend_a64_hmask_8bit = eb_aom_highbd_blend_a64_hmask_c_8bit;
-    eb_aom_highbd_blend_a64_vmask_8bit = eb_aom_highbd_blend_a64_vmask_c_8bit;
+    eb_aom_highbd_blend_a64_hmask_8bit = eb_aom_highbd_blend_a64_hmask_8bit_c;
+    eb_aom_highbd_blend_a64_vmask_8bit = eb_aom_highbd_blend_a64_vmask_8bit_c;
 
-    eb_aom_highbd_blend_a64_vmask_16bit = eb_aom_highbd_blend_a64_vmask_c_16bit;
-    eb_aom_highbd_blend_a64_hmask_16bit = eb_aom_highbd_blend_a64_hmask_c_16bit;
+    eb_aom_highbd_blend_a64_vmask_16bit = eb_aom_highbd_blend_a64_vmask_16bit_c;
+    eb_aom_highbd_blend_a64_hmask_16bit = eb_aom_highbd_blend_a64_hmask_16bit_c;
 
     eb_cfl_predict_lbd = eb_cfl_predict_lbd_c;
     eb_cfl_predict_hbd = eb_cfl_predict_hbd_c;
@@ -260,7 +260,7 @@ void setup_common_rtcd_internal(CPU_FLAGS flags) {
 
     eb_av1_filter_intra_edge_high = eb_av1_filter_intra_edge_high_c;
 
-    eb_av1_filter_intra_edge = eb_av1_filter_intra_edge_high_c_old;
+    eb_av1_filter_intra_edge = eb_av1_filter_intra_edge_c;
 
     eb_av1_upsample_intra_edge = eb_av1_upsample_intra_edge_c;
 
@@ -815,11 +815,11 @@ void setup_common_rtcd_internal(CPU_FLAGS flags) {
     if (flags & HAS_AVX2) eb_aom_blend_a64_mask = eb_aom_blend_a64_mask_avx2;
     if (flags & HAS_SSE4_1) eb_aom_blend_a64_hmask = eb_aom_blend_a64_hmask_sse4_1;
     if (flags & HAS_SSE4_1) eb_aom_blend_a64_vmask = eb_aom_blend_a64_vmask_sse4_1;
-    if (flags & HAS_SSE4_1) eb_aom_highbd_blend_a64_mask = eb_aom_highbd_blend_a64_mask_sse4_1_8bit;
-    if (flags & HAS_SSE4_1) eb_aom_highbd_blend_a64_hmask_8bit = eb_aom_highbd_blend_a64_hmask_sse4_1_8bit;
-    if (flags & HAS_SSE4_1) eb_aom_highbd_blend_a64_vmask_8bit = eb_aom_highbd_blend_a64_vmask_sse4_1_8bit;
-    if (flags & HAS_SSE4_1) eb_aom_highbd_blend_a64_vmask_16bit = eb_aom_highbd_blend_a64_vmask_sse4_1_16bit;
-    if (flags & HAS_SSE4_1) eb_aom_highbd_blend_a64_hmask_16bit = eb_aom_highbd_blend_a64_hmask_sse4_1_16bit;
+    if (flags & HAS_SSE4_1) eb_aom_highbd_blend_a64_mask = eb_aom_highbd_blend_a64_mask_8bit_sse4_1;
+    if (flags & HAS_SSE4_1) eb_aom_highbd_blend_a64_hmask_8bit = eb_aom_highbd_blend_a64_hmask_8bit_sse4_1;
+    if (flags & HAS_SSE4_1) eb_aom_highbd_blend_a64_vmask_8bit = eb_aom_highbd_blend_a64_vmask_8bit_sse4_1;
+    if (flags & HAS_SSE4_1) eb_aom_highbd_blend_a64_vmask_16bit = eb_aom_highbd_blend_a64_vmask_16bit_sse4_1;
+    if (flags & HAS_SSE4_1) eb_aom_highbd_blend_a64_hmask_16bit = eb_aom_highbd_blend_a64_hmask_16bit_sse4_1;
     if (flags & HAS_AVX2) eb_cfl_predict_lbd = eb_cfl_predict_lbd_avx2;
     if (flags & HAS_AVX2) eb_cfl_predict_hbd = eb_cfl_predict_hbd_avx2;
     if (flags & HAS_SSE4_1) eb_av1_filter_intra_predictor = eb_av1_filter_intra_predictor_sse4_1;
