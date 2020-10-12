@@ -1115,20 +1115,20 @@ void svt_av1_convolve_2d_copy_sr_avx2(const uint8_t *src, int32_t src_stride, ui
 
     if (w == 2) {
         do {
-            eb_memcpy_intrin_sse(dst, src, 2 * sizeof(*src));
+            svt_memcpy_intrin_sse(dst, src, 2 * sizeof(*src));
             src += src_stride;
             dst += dst_stride;
-            eb_memcpy_intrin_sse(dst, src, 2 * sizeof(*src));
+            svt_memcpy_intrin_sse(dst, src, 2 * sizeof(*src));
             src += src_stride;
             dst += dst_stride;
             h -= 2;
         } while (h);
     } else if (w == 4) {
         do {
-            eb_memcpy_intrin_sse(dst, src, 4 * sizeof(*src));
+            svt_memcpy_intrin_sse(dst, src, 4 * sizeof(*src));
             src += src_stride;
             dst += dst_stride;
-            eb_memcpy_intrin_sse(dst, src, 4 * sizeof(*src));
+            svt_memcpy_intrin_sse(dst, src, 4 * sizeof(*src));
             src += src_stride;
             dst += dst_stride;
             h -= 2;

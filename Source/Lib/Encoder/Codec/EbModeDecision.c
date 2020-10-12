@@ -627,12 +627,12 @@ EbErrorType mode_decision_candidate_buffer_ctor(ModeDecisionCandidateBuffer *buf
 
     // Video Buffers
     EB_NEW(buffer_ptr->prediction_ptr,
-           eb_picture_buffer_desc_ctor,
+           svt_picture_buffer_desc_ctor,
            (EbPtr)&picture_buffer_desc_init_data);
     // Reuse the residual_ptr memory in MD context
     buffer_ptr->residual_ptr = temp_residual_ptr;
     EB_NEW(buffer_ptr->recon_coeff_ptr,
-           eb_picture_buffer_desc_ctor,
+           svt_picture_buffer_desc_ctor,
            (EbPtr)&thirty_two_width_picture_buffer_desc_init_data);
     // Reuse the recon_ptr memory in MD context
     buffer_ptr->recon_ptr = temp_recon_ptr;
@@ -691,17 +691,17 @@ EbErrorType mode_decision_scratch_candidate_buffer_ctor(ModeDecisionCandidateBuf
 
     // Video Buffers
     EB_NEW(buffer_ptr->prediction_ptr,
-           eb_picture_buffer_desc_ctor,
+           svt_picture_buffer_desc_ctor,
            (EbPtr)&picture_buffer_desc_init_data);
     EB_NEW(buffer_ptr->residual_ptr,
-           eb_picture_buffer_desc_ctor,
+           svt_picture_buffer_desc_ctor,
            (EbPtr)&double_width_picture_buffer_desc_init_data);
     EB_NEW(buffer_ptr->recon_coeff_ptr,
-           eb_picture_buffer_desc_ctor,
+           svt_picture_buffer_desc_ctor,
            (EbPtr)&thirty_two_width_picture_buffer_desc_init_data);
 
     EB_NEW(
-        buffer_ptr->recon_ptr, eb_picture_buffer_desc_ctor, (EbPtr)&picture_buffer_desc_init_data);
+        buffer_ptr->recon_ptr, svt_picture_buffer_desc_ctor, (EbPtr)&picture_buffer_desc_init_data);
     return EB_ErrorNone;
 }
 /***************************************
@@ -5230,21 +5230,21 @@ uint32_t product_full_mode_decision(
         context_ptr->md_local_blk_unit[context_ptr->blk_geom->blkidx_mds].ref_frame_index_l1 = candidate_ptr->ref_frame_index_l1;
         if (pu_ptr->inter_pred_direction_index == UNI_PRED_LIST_0)
         {
-            //eb_memcpy(&pu_ptr->mv[REF_LIST_0].x,&candidate_ptr->mvs_l0,4);
+            //svt_memcpy(&pu_ptr->mv[REF_LIST_0].x,&candidate_ptr->mvs_l0,4);
             pu_ptr->mv[REF_LIST_0].x = candidate_ptr->motion_vector_xl0;
             pu_ptr->mv[REF_LIST_0].y = candidate_ptr->motion_vector_yl0;
         }
 
         if (pu_ptr->inter_pred_direction_index == UNI_PRED_LIST_1)
         {
-            //eb_memcpy(&pu_ptr->mv[REF_LIST_1].x,&candidate_ptr->mvs_l1,4);
+            //svt_memcpy(&pu_ptr->mv[REF_LIST_1].x,&candidate_ptr->mvs_l1,4);
             pu_ptr->mv[REF_LIST_1].x = candidate_ptr->motion_vector_xl1;
             pu_ptr->mv[REF_LIST_1].y = candidate_ptr->motion_vector_yl1;
         }
 
         if (pu_ptr->inter_pred_direction_index == BI_PRED)
         {
-            //eb_memcpy(&pu_ptr->mv[REF_LIST_0].x,&candidate_ptr->mvs,8);
+            //svt_memcpy(&pu_ptr->mv[REF_LIST_0].x,&candidate_ptr->mvs,8);
             pu_ptr->mv[REF_LIST_0].x = candidate_ptr->motion_vector_xl0;
             pu_ptr->mv[REF_LIST_0].y = candidate_ptr->motion_vector_yl0;
             pu_ptr->mv[REF_LIST_1].x = candidate_ptr->motion_vector_xl1;
@@ -5269,8 +5269,8 @@ uint32_t product_full_mode_decision(
         pu_ptr->motion_mode = candidate_ptr->motion_mode;
         pu_ptr->num_proj_ref = candidate_ptr->num_proj_ref;
         if (pu_ptr->motion_mode == WARPED_CAUSAL) {
-            eb_memcpy(&context_ptr->md_local_blk_unit[context_ptr->blk_geom->blkidx_mds].wm_params_l0, &candidate_ptr->wm_params_l0, sizeof(EbWarpedMotionParams));
-            eb_memcpy(&context_ptr->md_local_blk_unit[context_ptr->blk_geom->blkidx_mds].wm_params_l1, &candidate_ptr->wm_params_l1, sizeof(EbWarpedMotionParams));
+            svt_memcpy(&context_ptr->md_local_blk_unit[context_ptr->blk_geom->blkidx_mds].wm_params_l0, &candidate_ptr->wm_params_l0, sizeof(EbWarpedMotionParams));
+            svt_memcpy(&context_ptr->md_local_blk_unit[context_ptr->blk_geom->blkidx_mds].wm_params_l1, &candidate_ptr->wm_params_l1, sizeof(EbWarpedMotionParams));
         }
     }
 
@@ -5343,7 +5343,7 @@ uint32_t product_full_mode_decision(
             uint32_t j;
 
             for (j = 0; j < bheight; j++)
-                eb_memcpy(dst_ptr + j * bwidth, src_ptr + j * bwidth, bwidth * sizeof(int32_t));
+                svt_memcpy(dst_ptr + j * bwidth, src_ptr + j * bwidth, bwidth * sizeof(int32_t));
             if (context_ptr->blk_geom->has_uv)
             {
                 // Cb
@@ -5354,12 +5354,12 @@ uint32_t product_full_mode_decision(
                 dst_ptr = &(((int32_t*)context_ptr->blk_ptr->coeff_tmp->buffer_cb)[txb_1d_offset_uv]);
 
                 for (j = 0; j < bheight; j++)
-                    eb_memcpy(dst_ptr + j * bwidth, src_ptr + j * bwidth, bwidth * sizeof(int32_t));
+                    svt_memcpy(dst_ptr + j * bwidth, src_ptr + j * bwidth, bwidth * sizeof(int32_t));
                 src_ptr = &(((int32_t*)buffer_ptr_array[lowest_cost_index]->residual_quant_coeff_ptr->buffer_cr)[txb_1d_offset_uv]);
                 dst_ptr = &(((int32_t*)context_ptr->blk_ptr->coeff_tmp->buffer_cr)[txb_1d_offset_uv]);
 
                 for (j = 0; j < bheight; j++)
-                    eb_memcpy(dst_ptr + j * bwidth, src_ptr + j * bwidth, bwidth * sizeof(int32_t));
+                    svt_memcpy(dst_ptr + j * bwidth, src_ptr + j * bwidth, bwidth * sizeof(int32_t));
             }
 
             txb_1d_offset += context_ptr->blk_geom->tx_width[txb_itr] * context_ptr->blk_geom->tx_height[txb_itr];

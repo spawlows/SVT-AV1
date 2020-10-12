@@ -1403,7 +1403,7 @@ void update_av1_mi_map(BlkStruct *blk_ptr, uint32_t blk_origin_x, uint32_t blk_o
             mi_ptr[mi_x + mi_y * mi_stride]
                 .mbmi.block_mi.interintra_mode_params.interintra_wedge_index =
                 blk_ptr->interintra_wedge_index; //in
-            eb_memcpy(&mi_ptr[mi_x + mi_y * mi_stride].mbmi.palette_mode_info,
+            svt_memcpy(&mi_ptr[mi_x + mi_y * mi_stride].mbmi.palette_mode_info,
                    &blk_ptr->palette_info.pmi,
                    sizeof(PaletteModeInfo));
             //needed for CDEF
@@ -1529,7 +1529,7 @@ void update_mi_map(struct ModeDecisionContext *context_ptr, BlkStruct *blk_ptr,
             mi_ptr[mi_x + mi_y * mi_stride]
                 .mbmi.block_mi.interintra_mode_params.interintra_wedge_index =
                 blk_ptr->interintra_wedge_index; //in
-            eb_memcpy(&mi_ptr[mi_x + mi_y * mi_stride].mbmi.palette_mode_info,
+            svt_memcpy(&mi_ptr[mi_x + mi_y * mi_stride].mbmi.palette_mode_info,
                    &blk_ptr->palette_info.pmi,
                    sizeof(PaletteModeInfo));
             mi_ptr[mi_x + mi_y * mi_stride].mbmi.block_mi.skip_mode  = (int8_t)blk_ptr->skip_flag;
@@ -1863,7 +1863,7 @@ EbBool warped_motion_parameters(PictureControlSet *pcs_ptr, BlkStruct *blk_ptr, 
     if (nsamples > 1) nsamples = select_samples(&mv, pts, pts_inref, nsamples, bsize);
     *num_samples = nsamples;
 
-    apply_wm = !eb_find_projection(
+    apply_wm = !svt_find_projection(
         (int)nsamples, pts, pts_inref, bsize, mv.row, mv.col, wm_params, (int)mi_row, (int)mi_col);
 
     return apply_wm;

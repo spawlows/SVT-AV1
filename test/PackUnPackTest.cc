@@ -128,7 +128,7 @@ class PackTest : public ::testing::TestWithParam<AreaSize> {
 
     void run_test() {
         for (int i = 0; i < RANDOM_TIME; i++) {
-            eb_buf_random_u8(in_bit_buffer_, test_size_);
+            svt_buf_random_u8(in_bit_buffer_, test_size_);
             svt_c_pack_avx2_intrin(in_bit_buffer_,
                                    in_stride_,
                                    in_compn_bit_buffer1_,
@@ -228,8 +228,8 @@ class PackMsbTest : public ::testing::TestWithParam<AreaSize> {
 
     void run_test() {
         for (int i = 0; i < RANDOM_TIME; i++) {
-            eb_buf_random_u8(inn_bit_buffer_, test_size_ >> 2);
-            eb_buf_random_u8(in_8bit_buffer_, test_size_);
+            svt_buf_random_u8(inn_bit_buffer_, test_size_ >> 2);
+            svt_buf_random_u8(in_8bit_buffer_, test_size_);
             svt_compressed_packmsb_avx2_intrin(in_8bit_buffer_,
                                            in8_stride_,
                                            inn_bit_buffer_,
@@ -348,8 +348,8 @@ class Pack2dTest : public ::testing::TestWithParam<AreaSize> {
 
     void run_2d_test() {
         for (int i = 0; i < RANDOM_TIME; i++) {
-            eb_buf_random_u8(in_8bit_buffer_, test_size_);
-            eb_buf_random_u8(inn_bit_buffer_, test_size_);
+            svt_buf_random_u8(in_8bit_buffer_, test_size_);
+            svt_buf_random_u8(inn_bit_buffer_, test_size_);
 
             svt_enc_msb_pack2d_avx2_intrin_al(in_8bit_buffer_,
                                               in_stride_,
@@ -472,7 +472,7 @@ class UnPackTest : public ::testing::TestWithParam<AreaSize> {
 
     void run_test() {
         for (int i = 0; i < RANDOM_TIME; i++) {
-            eb_buf_random_u16(in_16bit_buffer_, test_size_);
+            svt_buf_random_u16(in_16bit_buffer_, test_size_);
             svt_enc_un_pack8_bit_data_avx2_intrin(in_16bit_buffer_,
                                                      in_stride_,
                                                      out_8bit_buffer1_,
@@ -500,7 +500,7 @@ class UnPackTest : public ::testing::TestWithParam<AreaSize> {
 
     void run_2d_test() {
         for (int i = 0; i < RANDOM_TIME; i++) {
-            eb_buf_random_u16(in_16bit_buffer_, test_size_);
+            svt_buf_random_u16(in_16bit_buffer_, test_size_);
             svt_enc_msb_un_pack2d_sse2_intrin(in_16bit_buffer_,
                                               in_stride_,
                                               out_8bit_buffer1_,

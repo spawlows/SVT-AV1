@@ -405,9 +405,9 @@ EbErrorType mode_decision_configuration_context_ctor(EbThreadContext *  thread_c
     thread_context_ptr->dctor = mode_decision_configuration_context_dctor;
 
     // Input/Output System Resource Manager FIFOs
-    context_ptr->rate_control_input_fifo_ptr = eb_system_resource_get_consumer_fifo(
+    context_ptr->rate_control_input_fifo_ptr = svt_system_resource_get_consumer_fifo(
         enc_handle_ptr->rate_control_results_resource_ptr, input_index);
-    context_ptr->mode_decision_configuration_output_fifo_ptr = eb_system_resource_get_producer_fifo(
+    context_ptr->mode_decision_configuration_output_fifo_ptr = svt_system_resource_get_producer_fifo(
         enc_handle_ptr->enc_dec_tasks_resource_ptr, output_index);
     // Rate estimation
     EB_MALLOC_ARRAY(context_ptr->md_rate_estimation_ptr, 1);
@@ -1328,8 +1328,8 @@ void *mode_decision_configuration_kernel(void *input_ptr) {
         uint16_t tg_count =
             pcs_ptr->parent_pcs_ptr->tile_group_cols * pcs_ptr->parent_pcs_ptr->tile_group_rows;
         for (uint16_t tile_group_idx = 0; tile_group_idx < tg_count; tile_group_idx++) {
-            eb_get_empty_object(context_ptr->mode_decision_configuration_output_fifo_ptr,
-                                &enc_dec_tasks_wrapper_ptr);
+            svt_get_empty_object(context_ptr->mode_decision_configuration_output_fifo_ptr,
+                                 &enc_dec_tasks_wrapper_ptr);
 
             EncDecTasks *enc_dec_tasks_ptr = (EncDecTasks *)enc_dec_tasks_wrapper_ptr->object_ptr;
             enc_dec_tasks_ptr->pcs_wrapper_ptr  = rate_control_results_ptr->pcs_wrapper_ptr;
@@ -1337,11 +1337,11 @@ void *mode_decision_configuration_kernel(void *input_ptr) {
             enc_dec_tasks_ptr->tile_group_index = tile_group_idx;
 
             // Post the Full Results Object
-            eb_post_full_object(enc_dec_tasks_wrapper_ptr);
+            svt_post_full_object(enc_dec_tasks_wrapper_ptr);
         }
 
         // Release Rate Control Results
-        eb_release_object(rate_control_results_wrapper_ptr);
+        svt_release_object(rate_control_results_wrapper_ptr);
     }
 
     return NULL;

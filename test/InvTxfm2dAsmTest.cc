@@ -510,7 +510,7 @@ class InvTxfm2dAsmTest : public ::testing::TestWithParam<InvTxfm2dParam> {
         for (int idx = 0; idx < num_htf_sizes; ++idx) {
             const TxSize tx_size = htf_tx_size[idx];
 
-            eb_buf_random_s32(input_, MAX_TX_SQUARE);
+            svt_buf_random_s32(input_, MAX_TX_SQUARE);
             memcpy(input, input_, MAX_TX_SQUARE * sizeof(int32_t));
 
             const uint64_t energy_ref = htf_ref_funcs[idx](input_);
@@ -558,7 +558,7 @@ class InvTxfm2dAsmTest : public ::testing::TestWithParam<InvTxfm2dParam> {
             const uint64_t num_loop = 10000000;
             uint64_t energy_ref, energy_asm;
 
-            eb_buf_random_s32(input_, MAX_TX_SQUARE);
+            svt_buf_random_s32(input_, MAX_TX_SQUARE);
             memcpy(input, input_, MAX_TX_SQUARE * sizeof(int32_t));
 
             svt_av1_get_time(&start_time_seconds, &start_time_useconds);

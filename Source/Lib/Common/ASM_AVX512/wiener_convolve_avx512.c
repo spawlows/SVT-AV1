@@ -325,7 +325,7 @@ void svt_av1_wiener_convolve_add_src_avx512(const uint8_t* const src, const ptrd
     const __m128i offset_0            = _mm_insert_epi16(zero_128, 1 << FILTER_BITS, 3);
     const __m128i coeffs_y            = _mm_add_epi16(xx_loadu_128(filter_y), offset_0);
     const __m256i filter_coeffs_y     = _mm256_broadcastsi128_si256(coeffs_y);
-    const __m512i filter_coeffs_y_512 = eb_mm512_broadcast_i64x2(coeffs_y);
+    const __m512i filter_coeffs_y_512 = svt_mm512_broadcast_i64x2(coeffs_y);
     int32_t       width               = w;
     uint8_t*      dst_ptr             = dst;
     __m256i       filt[4], coeffs_h[4], coeffs_v[2];

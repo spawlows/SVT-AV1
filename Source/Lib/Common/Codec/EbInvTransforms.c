@@ -2446,10 +2446,10 @@ void svt_av1_get_inv_txfm_cfg(TxType tx_type, TxSize tx_size, Txfm2dFlipCfg *cfg
     cfg->cos_bit_row              = inv_cos_bit_row[txw_idx][txh_idx];
     cfg->txfm_type_col            = av1_txfm_type_ls[txh_idx][tx_type_1d_col];
     if (cfg->txfm_type_col == TXFM_TYPE_ADST4)
-        eb_memcpy_c(cfg->stage_range_col, iadst4_range, sizeof(iadst4_range));
+        svt_memcpy_c(cfg->stage_range_col, iadst4_range, sizeof(iadst4_range));
     cfg->txfm_type_row = av1_txfm_type_ls[txw_idx][tx_type_1d_row];
     if (cfg->txfm_type_row == TXFM_TYPE_ADST4)
-        eb_memcpy_c(cfg->stage_range_row, iadst4_range, sizeof(iadst4_range));
+        svt_memcpy_c(cfg->stage_range_row, iadst4_range, sizeof(iadst4_range));
     cfg->stage_num_col = av1_txfm_stage_num_list[cfg->txfm_type_col];
     cfg->stage_num_row = av1_txfm_stage_num_list[cfg->txfm_type_row];
 }
@@ -2577,7 +2577,7 @@ void svt_av1_inv_txfm2d_add_64x64_c(const int32_t *input, uint16_t *output_r, in
     // - Setting the rest of the locations to 0.
     int32_t mod_input[64 * 64];
     for (int32_t row = 0; row < 32; ++row) {
-        eb_memcpy_c(mod_input + row * 64, input + row * 32, 32 * sizeof(*mod_input));
+        svt_memcpy_c(mod_input + row * 64, input + row * 32, 32 * sizeof(*mod_input));
         memset(mod_input + row * 64 + 32, 0, 32 * sizeof(*mod_input));
     }
     memset(mod_input + 32 * 64, 0, 32 * 64 * sizeof(*mod_input));
@@ -2654,7 +2654,7 @@ void svt_av1_inv_txfm2d_add_64x32_c(const int32_t *input, uint16_t *output_r, in
     // - Setting the rest of the locations to 0.
     int32_t mod_input[64 * 32];
     for (int32_t row = 0; row < 32; ++row) {
-        eb_memcpy_c(mod_input + row * 64, input + row * 32, 32 * sizeof(*mod_input));
+        svt_memcpy_c(mod_input + row * 64, input + row * 32, 32 * sizeof(*mod_input));
         memset(mod_input + row * 64 + 32, 0, 32 * sizeof(*mod_input));
     }
     DECLARE_ALIGNED(32, int32_t, txfm_buf[64 * 32 + 64 + 64]);
@@ -2671,7 +2671,7 @@ void svt_av1_inv_txfm2d_add_32x64_c(const int32_t *input, uint16_t *output_r, in
     // - Copying over these values in top-left 32x32 locations.
     // - Setting the rest of the locations to 0.
     int32_t mod_input[32 * 64];
-    eb_memcpy_c(mod_input, input, 32 * 32 * sizeof(*mod_input));
+    svt_memcpy_c(mod_input, input, 32 * 32 * sizeof(*mod_input));
     memset(mod_input + 32 * 32, 0, 32 * 32 * sizeof(*mod_input));
     DECLARE_ALIGNED(32, int32_t, txfm_buf[64 * 32 + 64 + 64]);
     inv_txfm2d_add_facade(
@@ -2687,7 +2687,7 @@ void svt_av1_inv_txfm2d_add_16x64_c(const int32_t *input, uint16_t *output_r, in
     // - Copying over these values in top-left 16x32 locations.
     // - Setting the rest of the locations to 0.
     int32_t mod_input[16 * 64];
-    eb_memcpy_c(mod_input, input, 16 * 32 * sizeof(*mod_input));
+    svt_memcpy_c(mod_input, input, 16 * 32 * sizeof(*mod_input));
     memset(mod_input + 16 * 32, 0, 16 * 32 * sizeof(*mod_input));
     DECLARE_ALIGNED(32, int32_t, txfm_buf[16 * 64 + 64 + 64]);
     inv_txfm2d_add_facade(
@@ -2704,7 +2704,7 @@ void svt_av1_inv_txfm2d_add_64x16_c(const int32_t *input, uint16_t *output_r, in
     // - Setting the rest of the locations to 0.
     int32_t mod_input[64 * 16];
     for (int32_t row = 0; row < 16; ++row) {
-        eb_memcpy_c(mod_input + row * 64, input + row * 32, 32 * sizeof(*mod_input));
+        svt_memcpy_c(mod_input + row * 64, input + row * 32, 32 * sizeof(*mod_input));
         memset(mod_input + row * 64 + 32, 0, 32 * sizeof(*mod_input));
     }
     DECLARE_ALIGNED(32, int32_t, txfm_buf[16 * 64 + 64 + 64]);

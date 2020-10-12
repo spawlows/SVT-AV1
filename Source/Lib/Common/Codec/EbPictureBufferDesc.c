@@ -14,7 +14,7 @@
 
 #include "EbPictureBufferDesc.h"
 
-static void eb_picture_buffer_desc_dctor(EbPtr p) {
+static void svt_picture_buffer_desc_dctor(EbPtr p) {
     EbPictureBufferDesc *obj = (EbPictureBufferDesc *)p;
     if (obj->buffer_enable_mask & PICTURE_BUFFER_DESC_Y_FLAG) {
         EB_FREE_ALIGNED_ARRAY(obj->buffer_y);
@@ -31,13 +31,13 @@ static void eb_picture_buffer_desc_dctor(EbPtr p) {
 }
 
 /*****************************************
- * eb_picture_buffer_desc_ctor
+ * svt_picture_buffer_desc_ctor
  *  Initializes the Buffer Descriptor's
  *  values that are fixed for the life of
  *  the descriptor.
  *****************************************/
-EbErrorType eb_picture_buffer_desc_ctor(EbPictureBufferDesc *pictureBufferDescPtr,
-                                        const EbPtr          object_init_data_ptr) {
+EbErrorType svt_picture_buffer_desc_ctor(EbPictureBufferDesc *pictureBufferDescPtr,
+                                         const EbPtr          object_init_data_ptr) {
     const EbPictureBufferDescInitData *picture_buffer_desc_init_data_ptr =
         (EbPictureBufferDescInitData *)object_init_data_ptr;
 
@@ -48,7 +48,7 @@ EbErrorType eb_picture_buffer_desc_ctor(EbPictureBufferDesc *pictureBufferDescPt
     const uint16_t subsampling_x =
         (picture_buffer_desc_init_data_ptr->color_format == EB_YUV444 ? 1 : 2) - 1;
 
-    pictureBufferDescPtr->dctor = eb_picture_buffer_desc_dctor;
+    pictureBufferDescPtr->dctor = svt_picture_buffer_desc_dctor;
 
     if (picture_buffer_desc_init_data_ptr->bit_depth > EB_8BIT &&
         picture_buffer_desc_init_data_ptr->bit_depth <= EB_16BIT &&
@@ -124,7 +124,7 @@ EbErrorType eb_picture_buffer_desc_ctor(EbPictureBufferDesc *pictureBufferDescPt
     return EB_ErrorNone;
 }
 
-static void eb_recon_picture_buffer_desc_dctor(EbPtr p) {
+static void svt_recon_picture_buffer_desc_dctor(EbPtr p) {
     EbPictureBufferDesc *obj = (EbPictureBufferDesc *)p;
     if (obj->buffer_enable_mask & PICTURE_BUFFER_DESC_Y_FLAG) EB_FREE_ALIGNED_ARRAY(obj->buffer_y);
     if (obj->buffer_enable_mask & PICTURE_BUFFER_DESC_Cb_FLAG)
@@ -133,13 +133,13 @@ static void eb_recon_picture_buffer_desc_dctor(EbPtr p) {
         EB_FREE_ALIGNED_ARRAY(obj->buffer_cr);
 }
 /*****************************************
- * eb_recon_picture_buffer_desc_ctor
+ * svt_recon_picture_buffer_desc_ctor
  *  Initializes the Buffer Descriptor's
  *  values that are fixed for the life of
  *  the descriptor.
  *****************************************/
-EbErrorType eb_recon_picture_buffer_desc_ctor(EbPictureBufferDesc *pictureBufferDescPtr,
-                                              EbPtr                object_init_data_ptr) {
+EbErrorType svt_recon_picture_buffer_desc_ctor(EbPictureBufferDesc *pictureBufferDescPtr,
+                                               EbPtr                object_init_data_ptr) {
     EbPictureBufferDescInitData *picture_buffer_desc_init_data_ptr =
         (EbPictureBufferDescInitData *)object_init_data_ptr;
     const uint16_t subsampling_x =
@@ -147,7 +147,7 @@ EbErrorType eb_recon_picture_buffer_desc_ctor(EbPictureBufferDesc *pictureBuffer
 
     uint32_t bytes_per_pixel = (picture_buffer_desc_init_data_ptr->bit_depth == EB_8BIT) ? 1 : 2;
 
-    pictureBufferDescPtr->dctor = eb_recon_picture_buffer_desc_dctor;
+    pictureBufferDescPtr->dctor = svt_recon_picture_buffer_desc_dctor;
     // Set the Picture Buffer Static variables
     pictureBufferDescPtr->max_width    = picture_buffer_desc_init_data_ptr->max_width;
     pictureBufferDescPtr->max_height   = picture_buffer_desc_init_data_ptr->max_height;

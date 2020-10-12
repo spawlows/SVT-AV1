@@ -46,10 +46,10 @@ EbErrorType entropy_coding_context_ctor(EbThreadContext *  thread_context_ptr,
 
     // Input/Output System Resource Manager FIFOs
     context_ptr->enc_dec_input_fifo_ptr =
-        eb_system_resource_get_consumer_fifo(enc_handle_ptr->rest_results_resource_ptr, index);
-    context_ptr->entropy_coding_output_fifo_ptr = eb_system_resource_get_producer_fifo(
+        svt_system_resource_get_consumer_fifo(enc_handle_ptr->rest_results_resource_ptr, index);
+    context_ptr->entropy_coding_output_fifo_ptr = svt_system_resource_get_producer_fifo(
         enc_handle_ptr->entropy_coding_results_resource_ptr, index);
-    context_ptr->rate_control_output_fifo_ptr = eb_system_resource_get_producer_fifo(
+    context_ptr->rate_control_output_fifo_ptr = svt_system_resource_get_producer_fifo(
         enc_handle_ptr->rate_control_tasks_resource_ptr, rate_control_index);
 
     return EB_ErrorNone;
@@ -207,9 +207,9 @@ static void reset_entropy_coding_picture(EntropyCodingContext *context_ptr,
 
         // ADD Reset here
         if (pcs_ptr->parent_pcs_ptr->frm_hdr.primary_ref_frame != PRIMARY_REF_NONE)
-            eb_memcpy(pcs_ptr->entropy_coding_info[tile_idx]->entropy_coder_ptr->fc,
-                   &pcs_ptr->ref_frame_context[pcs_ptr->parent_pcs_ptr->frm_hdr.primary_ref_frame],
-                   sizeof(FRAME_CONTEXT));
+            svt_memcpy(pcs_ptr->entropy_coding_info[tile_idx]->entropy_coder_ptr->fc,
+                       &pcs_ptr->ref_frame_context[pcs_ptr->parent_pcs_ptr->frm_hdr.primary_ref_frame],
+                       sizeof(FRAME_CONTEXT));
         else
             reset_entropy_coder(scs_ptr->encode_context_ptr,
                                 pcs_ptr->entropy_coding_info[tile_idx]->entropy_coder_ptr,
@@ -267,7 +267,7 @@ static EbBool update_entropy_coding_rows(PictureControlSet *pcs_ptr, uint32_t *r
     EntropyTileInfo *ec_ptr = pcs_ptr->entropy_coding_info[tile_idx];
 
     // Note, any writes & reads to status variables (e.g. in_progress) in MD-CTRL must be thread-safe
-    eb_block_on_mutex(ec_ptr->entropy_coding_mutex);
+    svt_block_on_mutex(ec_ptr->entropy_coding_mutex);
 
     // Update availability mask
     if (*initial_process_call == EB_TRUE) {
@@ -300,7 +300,7 @@ static EbBool update_entropy_coding_rows(PictureControlSet *pcs_ptr, uint32_t *r
 
     *initial_process_call = EB_FALSE;
 
-    eb_release_mutex(ec_ptr->entropy_coding_mutex);
+    svt_release_mutex(ec_ptr->entropy_coding_mutex);
 
     return process_next_row;
 }
@@ -348,7 +348,7 @@ void *entropy_coding_kernel(void *input_ptr) {
 
         uint8_t sb_sz = (uint8_t)scs_ptr->sb_size_pix;
 
-        uint8_t sb_size_log2      = (uint8_t)eb_log2f(sb_sz);
+        uint8_t sb_size_log2      = (uint8_t)svt_log2f(sb_sz);
         context_ptr->sb_sz = sb_sz;
         uint32_t pic_width_in_sb  = (pcs_ptr->parent_pcs_ptr->aligned_width + sb_sz - 1) >>
             sb_size_log2;
@@ -378,13 +378,13 @@ void *entropy_coding_kernel(void *input_ptr) {
                 uint32_t row_total_bits = 0;
 
                 if (y_sb_index == 0) {
-                    eb_block_on_mutex(pcs_ptr->entropy_coding_pic_mutex);
+                    svt_block_on_mutex(pcs_ptr->entropy_coding_pic_mutex);
                     if (pcs_ptr->entropy_coding_pic_reset_flag) {
                         pcs_ptr->entropy_coding_pic_reset_flag = EB_FALSE;
 
                         reset_entropy_coding_picture(context_ptr, pcs_ptr, scs_ptr);
                     }
-                    eb_release_mutex(pcs_ptr->entropy_coding_pic_mutex);
+                    svt_release_mutex(pcs_ptr->entropy_coding_pic_mutex);
                     pcs_ptr->entropy_coding_info[tile_idx]->entropy_coding_tile_done = EB_FALSE;
                 }
 
@@ -436,8 +436,8 @@ void *entropy_coding_kernel(void *input_ptr) {
                     RateControlTasks *rate_control_task_ptr;
 
                     // Get Empty EncDec Results
-                    eb_get_empty_object(context_ptr->rate_control_output_fifo_ptr,
-                                        &rate_control_task_wrapper_ptr);
+                    svt_get_empty_object(context_ptr->rate_control_output_fifo_ptr,
+                                         &rate_control_task_wrapper_ptr);
                     rate_control_task_ptr =
                         (RateControlTasks *)rate_control_task_wrapper_ptr->object_ptr;
                     rate_control_task_ptr->task_type      = RC_ENTROPY_CODING_ROW_FEEDBACK_RESULT;
@@ -449,10 +449,10 @@ void *entropy_coding_kernel(void *input_ptr) {
                     rate_control_task_ptr->segment_index   = ~0u;
 
                     // Post EncDec Results
-                    eb_post_full_object(rate_control_task_wrapper_ptr);
+                    svt_post_full_object(rate_control_task_wrapper_ptr);
                 }
 
-                eb_block_on_mutex(pcs_ptr->entropy_coding_info[tile_idx]->entropy_coding_mutex);
+                svt_block_on_mutex(pcs_ptr->entropy_coding_info[tile_idx]->entropy_coding_mutex);
                 if (pcs_ptr->entropy_coding_info[tile_idx]->entropy_coding_tile_done == EB_FALSE) {
                     // If the picture is complete, terminate the slice
                     if (pcs_ptr->entropy_coding_info[tile_idx]->entropy_coding_current_row ==
@@ -464,7 +464,7 @@ void *entropy_coding_kernel(void *input_ptr) {
                         encode_slice_finish(
                             pcs_ptr->entropy_coding_info[tile_idx]->entropy_coder_ptr);
 
-                        eb_block_on_mutex(pcs_ptr->entropy_coding_pic_mutex);
+                        svt_block_on_mutex(pcs_ptr->entropy_coding_pic_mutex);
                         pcs_ptr->entropy_coding_info[tile_idx]->entropy_coding_tile_done = EB_TRUE;
                         for (uint16_t i = 0; i < tile_cnt; i++) {
                             if (pcs_ptr->entropy_coding_info[i]->entropy_coding_tile_done ==
@@ -473,14 +473,14 @@ void *entropy_coding_kernel(void *input_ptr) {
                                 break;
                             }
                         }
-                        eb_release_mutex(pcs_ptr->entropy_coding_pic_mutex);
+                        svt_release_mutex(pcs_ptr->entropy_coding_pic_mutex);
                         if (pic_ready) {
                             // Release the List 0 Reference Pictures
                             for (uint32_t ref_idx = 0;
                                  ref_idx < pcs_ptr->parent_pcs_ptr->ref_list0_count;
                                  ++ref_idx) {
                                 if (pcs_ptr->ref_pic_ptr_array[0][ref_idx] != NULL) {
-                                    eb_release_object(pcs_ptr->ref_pic_ptr_array[0][ref_idx]);
+                                    svt_release_object(pcs_ptr->ref_pic_ptr_array[0][ref_idx]);
                                 }
                             }
 
@@ -489,7 +489,7 @@ void *entropy_coding_kernel(void *input_ptr) {
                                  ref_idx < pcs_ptr->parent_pcs_ptr->ref_list1_count;
                                  ++ref_idx) {
                                 if (pcs_ptr->ref_pic_ptr_array[1][ref_idx] != NULL)
-                                    eb_release_object(pcs_ptr->ref_pic_ptr_array[1][ref_idx]);
+                                    svt_release_object(pcs_ptr->ref_pic_ptr_array[1][ref_idx]);
                             }
 
                             //free palette data
@@ -500,13 +500,13 @@ void *entropy_coding_kernel(void *input_ptr) {
                         }
                     } // End if(PictureCompleteFlag)
                 }
-                eb_release_mutex(pcs_ptr->entropy_coding_info[tile_idx]->entropy_coding_mutex);
+                svt_release_mutex(pcs_ptr->entropy_coding_info[tile_idx]->entropy_coding_mutex);
             }
             // Move the post here.
             // In some cases, PAK ends fast, pcs will be released before we quit the while-loop
             if (frame_entropy_done) {
                 // Get Empty Entropy Coding Results
-                eb_get_empty_object(context_ptr->entropy_coding_output_fifo_ptr,
+                svt_get_empty_object(context_ptr->entropy_coding_output_fifo_ptr,
                         &entropy_coding_results_wrapper_ptr);
                 entropy_coding_results_ptr =
                     (EntropyCodingResults *)
@@ -515,11 +515,11 @@ void *entropy_coding_kernel(void *input_ptr) {
                     rest_results_ptr->pcs_wrapper_ptr;
 
                 // Post EntropyCoding Results
-                eb_post_full_object(entropy_coding_results_wrapper_ptr);
+                svt_post_full_object(entropy_coding_results_wrapper_ptr);
             }
         }
         // Release Mode Decision Results
-        eb_release_object(rest_results_wrapper_ptr);
+        svt_release_object(rest_results_wrapper_ptr);
     }
 
     return NULL;

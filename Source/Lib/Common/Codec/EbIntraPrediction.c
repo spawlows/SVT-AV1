@@ -97,7 +97,7 @@ void svt_av1_filter_intra_edge_c(uint8_t *p, int32_t sz, int32_t strength)
     const int32_t filt = strength - 1;
     uint8_t edge[129];
 
-    eb_memcpy(edge, p, sz * sizeof(*p));
+    svt_memcpy(edge, p, sz * sizeof(*p));
     for (int32_t i = 1; i < sz; i++) {
         int32_t s = 0;
         for (int32_t j = 0; j < INTRA_EDGE_TAPS; j++) {
@@ -376,7 +376,7 @@ void svt_cfl_luma_subsampling_420_hbd_c(
         }
     }
 }
-void eb_subtract_average_c(
+void svt_subtract_average_c(
     int16_t *pred_buf_q3,
     int32_t width,
     int32_t height,
@@ -881,7 +881,7 @@ static INLINE void v_predictor(uint8_t *dst, ptrdiff_t stride, int32_t bw, int32
     (void)left;
 
     for (int32_t r = 0; r < bh; r++) {
-        eb_memcpy(dst, above, bw);
+        svt_memcpy(dst, above, bw);
         dst += stride;
     }
 }
@@ -977,7 +977,7 @@ static INLINE void highbd_v_predictor(uint16_t *dst, ptrdiff_t stride, int32_t b
     (void)left;
     (void)bd;
     for (int32_t r = 0; r < bh; r++) {
-        eb_memcpy(dst, above, bw * sizeof(uint16_t));
+        svt_memcpy(dst, above, bw * sizeof(uint16_t));
         dst += stride;
     }
 }
@@ -2412,7 +2412,7 @@ void svt_av1_filter_intra_edge_high_c(uint16_t *p, int32_t sz, int32_t strength)
     const int32_t filt = strength - 1;
     uint16_t edge[129];
 
-    eb_memcpy_c(edge, p, sz * sizeof(*p));
+    svt_memcpy_c(edge, p, sz * sizeof(*p));
     for (int32_t i = 1; i < sz; i++) {
         int32_t s = 0;
         for (unsigned j = 0; j < INTRA_EDGE_TAPS; j++) {
@@ -2506,7 +2506,7 @@ void highbd_filter_intra_predictor(uint16_t *dst, ptrdiff_t stride,
         memset(buffer[r], 0, (bw + 1) * sizeof(buffer[0][0]));
 
     for (int r = 0; r < bh; ++r) buffer[r + 1][0] = left[r];
-    eb_memcpy(buffer[0], &above[-1], (bw + 1) * sizeof(buffer[0][0]));
+    svt_memcpy(buffer[0], &above[-1], (bw + 1) * sizeof(buffer[0][0]));
 
     for (int r = 1; r < bh + 1; r += 2)
         for (int c = 1; c < bw + 1; c += 4) {
@@ -2535,7 +2535,7 @@ void highbd_filter_intra_predictor(uint16_t *dst, ptrdiff_t stride,
         }
 
     for (int r = 0; r < bh; ++r) {
-        eb_memcpy(dst, &buffer[r + 1][1], bw * sizeof(dst[0]));
+        svt_memcpy(dst, &buffer[r + 1][1], bw * sizeof(dst[0]));
         dst += stride;
     }
 }

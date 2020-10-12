@@ -47,9 +47,9 @@ EbErrorType dlf_context_ctor(EbThreadContext *thread_context_ptr, const EbEncHan
 
     // Input/Output System Resource Manager FIFOs
     context_ptr->dlf_input_fifo_ptr =
-        eb_system_resource_get_consumer_fifo(enc_handle_ptr->enc_dec_results_resource_ptr, index);
+        svt_system_resource_get_consumer_fifo(enc_handle_ptr->enc_dec_results_resource_ptr, index);
     context_ptr->dlf_output_fifo_ptr =
-        eb_system_resource_get_producer_fifo(enc_handle_ptr->dlf_results_resource_ptr, index);
+        svt_system_resource_get_producer_fifo(enc_handle_ptr->dlf_results_resource_ptr, index);
 
     context_ptr->temp_lf_recon_picture16bit_ptr = (EbPictureBufferDesc *)NULL;
     context_ptr->temp_lf_recon_picture_ptr      = (EbPictureBufferDesc *)NULL;
@@ -69,14 +69,14 @@ EbErrorType dlf_context_ctor(EbThreadContext *thread_context_ptr, const EbEncHan
     if (scs_ptr->static_config.is_16bit_pipeline || is_16bit) {
         temp_lf_recon_desc_init_data.bit_depth = EB_16BIT;
         EB_NEW(context_ptr->temp_lf_recon_picture16bit_ptr,
-               eb_recon_picture_buffer_desc_ctor,
+               svt_recon_picture_buffer_desc_ctor,
                (EbPtr)&temp_lf_recon_desc_init_data);
         if(!is_16bit)
             context_ptr->temp_lf_recon_picture16bit_ptr->bit_depth = EB_8BIT;
     } else {
         temp_lf_recon_desc_init_data.bit_depth = EB_8BIT;
         EB_NEW(context_ptr->temp_lf_recon_picture_ptr,
-               eb_recon_picture_buffer_desc_ctor,
+               svt_recon_picture_buffer_desc_ctor,
                (EbPtr)&temp_lf_recon_desc_init_data);
     }
 
@@ -334,16 +334,16 @@ void *dlf_kernel(void *input_ptr) {
         for (segment_index = 0; segment_index < pcs_ptr->cdef_segments_total_count;
              ++segment_index) {
             // Get Empty DLF Results to Cdef
-            eb_get_empty_object(context_ptr->dlf_output_fifo_ptr, &dlf_results_wrapper_ptr);
+            svt_get_empty_object(context_ptr->dlf_output_fifo_ptr, &dlf_results_wrapper_ptr);
             dlf_results_ptr = (struct DlfResults *)dlf_results_wrapper_ptr->object_ptr;
             dlf_results_ptr->pcs_wrapper_ptr = enc_dec_results_ptr->pcs_wrapper_ptr;
             dlf_results_ptr->segment_index   = segment_index;
             // Post DLF Results
-            eb_post_full_object(dlf_results_wrapper_ptr);
+            svt_post_full_object(dlf_results_wrapper_ptr);
         }
 
         // Release EncDec Results
-        eb_release_object(enc_dec_results_wrapper_ptr);
+        svt_release_object(enc_dec_results_wrapper_ptr);
     }
 
     return NULL;
