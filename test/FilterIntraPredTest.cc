@@ -46,16 +46,16 @@ class FilterIntraPredTest : public ::testing::TestWithParam<PredParams> {
           tx_size_(TEST_GET_PARAM(1)),
           rnd_(8, false) {
         input_ = reinterpret_cast<uint8_t*>(
-            eb_aom_memalign(32, 2 * MAX_TX_SIZE + 1));
+            svt_aom_memalign(32, 2 * MAX_TX_SIZE + 1));
         pred_ref_ =
-            reinterpret_cast<uint8_t*>(eb_aom_memalign(32, MAX_TX_SQUARE));
+            reinterpret_cast<uint8_t*>(svt_aom_memalign(32, MAX_TX_SQUARE));
         pred_tst_ =
-            reinterpret_cast<uint8_t*>(eb_aom_memalign(32, MAX_TX_SQUARE));
+            reinterpret_cast<uint8_t*>(svt_aom_memalign(32, MAX_TX_SQUARE));
     }
     virtual ~FilterIntraPredTest() {
-        eb_aom_free(input_);
-        eb_aom_free(pred_ref_);
-        eb_aom_free(pred_tst_);
+        svt_aom_free(input_);
+        svt_aom_free(pred_ref_);
+        svt_aom_free(pred_tst_);
         aom_clear_system_state();
     }
 

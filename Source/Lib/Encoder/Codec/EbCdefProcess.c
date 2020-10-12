@@ -28,9 +28,9 @@
 void copy_sb8_16(uint16_t *dst, int32_t dstride, const uint8_t *src, int32_t src_voffset,
                  int32_t src_hoffset, int32_t sstride, int32_t vsize, int32_t hsize);
 
-void *  eb_aom_memalign(size_t align, size_t size);
-void    eb_aom_free(void *memblk);
-void *  eb_aom_malloc(size_t size);
+void *  svt_aom_memalign(size_t align, size_t size);
+void    svt_aom_free(void *memblk);
+void *  svt_aom_malloc(size_t size);
 int32_t eb_sb_all_skip(PictureControlSet *pcs_ptr, const Av1Common *const cm, int32_t mi_row,
                        int32_t mi_col);
 int32_t eb_sb_compute_cdef_list(PictureControlSet *pcs_ptr, const Av1Common *const cm,

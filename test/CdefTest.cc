@@ -697,8 +697,8 @@ TEST(CdefToolTest, SearchOneDualMatchTest) {
     int lvl_luma_ref[CDEF_MAX_STRENGTHS], lvl_chroma_ref[CDEF_MAX_STRENGTHS];
     int lvl_luma_tst[CDEF_MAX_STRENGTHS], lvl_chroma_tst[CDEF_MAX_STRENGTHS];
     uint64_t(*mse[2])[TOTAL_STRENGTHS];
-    mse[0] = (uint64_t(*)[64])eb_aom_memalign(32, sizeof(**mse) * sb_count);
-    mse[1] = (uint64_t(*)[64])eb_aom_memalign(32, sizeof(**mse) * sb_count);
+    mse[0] = (uint64_t(*)[64])svt_aom_memalign(32, sizeof(**mse) * sb_count);
+    mse[1] = (uint64_t(*)[64])svt_aom_memalign(32, sizeof(**mse) * sb_count);
 
     SVTRandom rnd_(10, false);
     for (int k = 0; k < 100; ++k) {
@@ -754,8 +754,8 @@ TEST(CdefToolTest, SearchOneDualMatchTest) {
         }
     }
 
-    eb_aom_free(mse[0]);
-    eb_aom_free(mse[1]);
+    svt_aom_free(mse[0]);
+    svt_aom_free(mse[1]);
 }
 
 TEST(CdefToolTest, DISABLED_SearchOneDualSpeedTest) {
@@ -767,8 +767,8 @@ TEST(CdefToolTest, DISABLED_SearchOneDualSpeedTest) {
     int lvl_luma_ref[CDEF_MAX_STRENGTHS], lvl_chroma_ref[CDEF_MAX_STRENGTHS];
     int lvl_luma_tst[CDEF_MAX_STRENGTHS], lvl_chroma_tst[CDEF_MAX_STRENGTHS];
     uint64_t(*mse[2])[TOTAL_STRENGTHS];
-    mse[0] = (uint64_t(*)[64])eb_aom_memalign(32, sizeof(**mse) * sb_count);
-    mse[1] = (uint64_t(*)[64])eb_aom_memalign(32, sizeof(**mse) * sb_count);
+    mse[0] = (uint64_t(*)[64])svt_aom_memalign(32, sizeof(**mse) * sb_count);
+    mse[1] = (uint64_t(*)[64])svt_aom_memalign(32, sizeof(**mse) * sb_count);
 
     SVTRandom rnd_(10, false);
 
@@ -856,6 +856,6 @@ TEST(CdefToolTest, DISABLED_SearchOneDualSpeedTest) {
         }
     }
 
-    eb_aom_free(mse[0]);
-    eb_aom_free(mse[1]);
+    svt_aom_free(mse[0]);
+    svt_aom_free(mse[1]);
 }

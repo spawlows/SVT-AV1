@@ -235,8 +235,8 @@ struct DaalaWriter {
 
 typedef struct DaalaWriter DaalaWriter;
 
-void    eb_aom_daala_start_encode(DaalaWriter *w, uint8_t *buffer);
-int32_t eb_aom_daala_stop_encode(DaalaWriter *w);
+void    svt_aom_daala_start_encode(DaalaWriter *w, uint8_t *buffer);
+int32_t svt_aom_daala_stop_encode(DaalaWriter *w);
 
 static INLINE void aom_daala_write(DaalaWriter *w, int32_t bit, int32_t prob) {
     int32_t p = (0x7FFFFF - (prob << 15) + prob) >> 8;
@@ -260,10 +260,10 @@ static INLINE void daala_write_symbol(DaalaWriter *w, int32_t symb, const AomCdf
 typedef struct DaalaWriter AomWriter;
 
 static INLINE void aom_start_encode(AomWriter *bc, uint8_t *buffer) {
-    eb_aom_daala_start_encode(bc, buffer);
+    svt_aom_daala_start_encode(bc, buffer);
 }
 
-static INLINE int32_t aom_stop_encode(AomWriter *bc) { return eb_aom_daala_stop_encode(bc); }
+static INLINE int32_t aom_stop_encode(AomWriter *bc) { return svt_aom_daala_stop_encode(bc); }
 
 static INLINE void aom_write(AomWriter *br, int32_t bit, int32_t probability) {
     aom_daala_write(br, bit, probability);

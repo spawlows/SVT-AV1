@@ -538,7 +538,7 @@ static void decode_build_intra_predictors_high(PartitionInfo *part_info, uint16_
         else
             val = (n_left_px > 0) ? left_ref[0] : base - 1;
         for (i = 0; i < txhpx; ++i) {
-            eb_aom_memset16(dst, val, txwpx);
+            svt_aom_memset16(dst, val, txwpx);
             dst += dst_stride;
         }
         return;
@@ -558,12 +558,12 @@ static void decode_build_intra_predictors_high(PartitionInfo *part_info, uint16_
                 for (; i < txhpx + n_bottomleft_px; i++) left_col[i] = left_ref[i * ref_stride];
             }
             if (i < num_left_pixels_needed)
-                eb_aom_memset16(&left_col[i], left_col[i - 1], num_left_pixels_needed - i);
+                svt_aom_memset16(&left_col[i], left_col[i - 1], num_left_pixels_needed - i);
         } else {
             if (n_top_px > 0)
-                eb_aom_memset16(left_col, above_ref[0], num_left_pixels_needed);
+                svt_aom_memset16(left_col, above_ref[0], num_left_pixels_needed);
             else
-                eb_aom_memset16(left_col, base + 1, num_left_pixels_needed);
+                svt_aom_memset16(left_col, base + 1, num_left_pixels_needed);
         }
     }
 
@@ -582,12 +582,12 @@ static void decode_build_intra_predictors_high(PartitionInfo *part_info, uint16_
                 i += n_topright_px;
             }
             if (i < num_top_pixels_needed)
-                eb_aom_memset16(&above_row[i], above_row[i - 1], num_top_pixels_needed - i);
+                svt_aom_memset16(&above_row[i], above_row[i - 1], num_top_pixels_needed - i);
         } else {
             if (n_left_px > 0)
-                eb_aom_memset16(above_row, left_ref[0], num_top_pixels_needed);
+                svt_aom_memset16(above_row, left_ref[0], num_top_pixels_needed);
             else
-                eb_aom_memset16(above_row, base - 1, num_top_pixels_needed);
+                svt_aom_memset16(above_row, base - 1, num_top_pixels_needed);
         }
     }
 

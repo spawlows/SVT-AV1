@@ -257,7 +257,7 @@ int64_t svt_av1_refine_integerized_param(EbWarpedMotionParams *wm, Transformatio
 }
 
 static void get_inliers_from_indices(MotionModel *params, int *correspondences) {
-    int *inliers_tmp = (int *)eb_aom_malloc(2 * MAX_CORNERS * sizeof(*inliers_tmp));
+    int *inliers_tmp = (int *)svt_aom_malloc(2 * MAX_CORNERS * sizeof(*inliers_tmp));
     memset(inliers_tmp, 0, 2 * MAX_CORNERS * sizeof(*inliers_tmp));
 
     for (int i = 0; i < params->num_inliers; i++) {
@@ -266,7 +266,7 @@ static void get_inliers_from_indices(MotionModel *params, int *correspondences) 
         inliers_tmp[2 * i + 1] = correspondences[4 * index + 1];
     }
     eb_memcpy(params->inliers, inliers_tmp, sizeof(*inliers_tmp) * 2 * MAX_CORNERS);
-    eb_aom_free(inliers_tmp);
+    svt_aom_free(inliers_tmp);
 }
 
 static int compute_global_motion_feature_based(TransformationType type, unsigned char *frm_buffer,

@@ -3248,7 +3248,7 @@ void eb_av1_compute_stats_avx512(int32_t wiener_win, const uint8_t *dgd, const u
     // (9 / 4) * RESTORATION_UNITSIZE_MAX * RESTORATION_UNITSIZE_MAX. Enlarge to
     // 3 * RESTORATION_UNITSIZE_MAX * RESTORATION_UNITSIZE_MAX considering
     // paddings.
-    d = eb_aom_memalign(64, sizeof(*d) * 6 * RESTORATION_UNITSIZE_MAX * RESTORATION_UNITSIZE_MAX);
+    d = svt_aom_memalign(64, sizeof(*d) * 6 * RESTORATION_UNITSIZE_MAX * RESTORATION_UNITSIZE_MAX);
     s = d + 3 * RESTORATION_UNITSIZE_MAX * RESTORATION_UNITSIZE_MAX;
 
     sub_avg_block_avx512(
@@ -3274,7 +3274,7 @@ void eb_av1_compute_stats_avx512(int32_t wiener_win, const uint8_t *dgd, const u
     // We can copy it down to the lower triangle outside the (i, j) loops.
     diagonal_copy_stats_avx2(wiener_win2, H);
 
-    eb_aom_free(d);
+    svt_aom_free(d);
 }
 
 void eb_av1_compute_stats_highbd_avx512(int32_t wiener_win, const uint8_t *dgd8,
@@ -3299,7 +3299,7 @@ void eb_av1_compute_stats_highbd_avx512(int32_t wiener_win, const uint8_t *dgd8,
     // (9 / 4) * RESTORATION_UNITSIZE_MAX * RESTORATION_UNITSIZE_MAX. Enlarge to
     // 3 * RESTORATION_UNITSIZE_MAX * RESTORATION_UNITSIZE_MAX considering
     // paddings.
-    d = eb_aom_memalign(64, sizeof(*d) * 6 * RESTORATION_UNITSIZE_MAX * RESTORATION_UNITSIZE_MAX);
+    d = svt_aom_memalign(64, sizeof(*d) * 6 * RESTORATION_UNITSIZE_MAX * RESTORATION_UNITSIZE_MAX);
     s = d + 3 * RESTORATION_UNITSIZE_MAX * RESTORATION_UNITSIZE_MAX;
 
     sub_avg_block_highbd_avx512(
@@ -3362,7 +3362,7 @@ void eb_av1_compute_stats_highbd_avx512(int32_t wiener_win, const uint8_t *dgd8,
         div16_diagonal_copy_stats_avx2(wiener_win2, H);
     }
 
-    eb_aom_free(d);
+    svt_aom_free(d);
 }
 
 static INLINE __m512i pair_set_epi16_avx512(int32_t a, int32_t b) {

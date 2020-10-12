@@ -80,17 +80,17 @@ class QuantizeTest : public ::testing::TestWithParam<ParamType> {
 
     virtual void SetUp() {
         qtab_ =
-            reinterpret_cast<QuanTable *>(eb_aom_memalign(32, sizeof(*qtab_)));
+            reinterpret_cast<QuanTable *>(svt_aom_memalign(32, sizeof(*qtab_)));
         const int n_coeffs = coeff_num();
         coeff_ = reinterpret_cast<TranLow *>(
-            eb_aom_memalign(32, 6 * n_coeffs * sizeof(TranLow)));
+            svt_aom_memalign(32, 6 * n_coeffs * sizeof(TranLow)));
         InitQuantizer();
     }
 
     virtual void TearDown() {
-        eb_aom_free(qtab_);
+        svt_aom_free(qtab_);
         qtab_ = NULL;
-        eb_aom_free(coeff_);
+        svt_aom_free(coeff_);
         coeff_ = NULL;
     }
 

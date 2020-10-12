@@ -60,21 +60,21 @@ class ResidualTestBase : public ::testing::Test {
     }
 
     void SetUp() override {
-        input_ = (uint8_t *)eb_aom_memalign(8, test_size_);
-        pred_ = (uint8_t *)eb_aom_memalign(8, test_size_);
-        residual1_ = (int16_t *)eb_aom_memalign(16, 2 * test_size_);
-        residual2_ = (int16_t *)eb_aom_memalign(16, 2 * test_size_);
+        input_ = (uint8_t *)svt_aom_memalign(8, test_size_);
+        pred_ = (uint8_t *)svt_aom_memalign(8, test_size_);
+        residual1_ = (int16_t *)svt_aom_memalign(16, 2 * test_size_);
+        residual2_ = (int16_t *)svt_aom_memalign(16, 2 * test_size_);
     }
 
     void TearDown() override {
         if (input_)
-            eb_aom_free(input_);
+            svt_aom_free(input_);
         if (pred_)
-            eb_aom_free(pred_);
+            svt_aom_free(pred_);
         if (residual1_)
-            eb_aom_free(residual1_);
+            svt_aom_free(residual1_);
         if (residual2_)
-            eb_aom_free(residual2_);
+            svt_aom_free(residual2_);
     }
 
   protected:
@@ -153,15 +153,15 @@ class ResidualKernelTest
         area_height_ = std::get<1>(TEST_GET_PARAM(0));
         input_stride_ = pred_stride_ = residual_stride_ = MAX_SB_SIZE;
         test_size_ = MAX_SB_SQUARE;
-        input16bit_ = (uint16_t *)eb_aom_memalign(16, 2 * test_size_);
-        pred16bit_ = (uint16_t *)eb_aom_memalign(16, 2 * test_size_);
+        input16bit_ = (uint16_t *)svt_aom_memalign(16, 2 * test_size_);
+        pred16bit_ = (uint16_t *)svt_aom_memalign(16, 2 * test_size_);
     }
 
     ~ResidualKernelTest() {
         if (input16bit_)
-            eb_aom_free(input16bit_);
+            svt_aom_free(input16bit_);
         if (pred16bit_)
-            eb_aom_free(pred16bit_);
+            svt_aom_free(pred16bit_);
     }
 
   protected:
@@ -404,12 +404,12 @@ class ResidualSumTest : public ::testing::Test,
         test_pattern_ = TEST_GET_PARAM(1);
         size_ = TEST_GET_PARAM(0);
         residual_stride_ = MAX_SB_SIZE;
-        residual_ = (int16_t *)eb_aom_memalign(16, 2 * MAX_SB_SQUARE);
+        residual_ = (int16_t *)svt_aom_memalign(16, 2 * MAX_SB_SQUARE);
     }
 
     ~ResidualSumTest() {
         if (residual_)
-            eb_aom_free(residual_);
+            svt_aom_free(residual_);
     }
 
   protected:
