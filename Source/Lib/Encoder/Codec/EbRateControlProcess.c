@@ -616,7 +616,6 @@ void tpl_mc_flow_dispenser(
                     if (best_mode == NEWMV) {
                         // inter recon with rec_picture as reference pic
                         uint64_t ref_poc = best_ref_poc;
-                        uint32_t ref_frame_idx = 0;
                         uint32_t list_index = best_rf_idx < 4 ? 0 : 1;
                         uint32_t ref_pic_index = best_rf_idx >= 4 ? (best_rf_idx - 4) : best_rf_idx;
 #if TUNE_INL_TPL_ENHANCEMENT
@@ -624,6 +623,7 @@ void tpl_mc_flow_dispenser(
 #else
                         if (pcs_ptr->ref_in_slide_window[list_index][ref_pic_index]) {
 #endif
+                        uint32_t ref_frame_idx = 0;
                             while (ref_frame_idx < MAX_TPL_LA_SW && encode_context_ptr->poc_map_idx[ref_frame_idx] != ref_poc)
                                 ref_frame_idx++;
                             assert(ref_frame_idx != MAX_TPL_LA_SW);
@@ -669,7 +669,6 @@ void tpl_mc_flow_dispenser(
 
                         above_row = above_data + 16;
                         left_col = left_data + 16;
-                        TxSize tx_size = TX_16X16;
                         uint8_t *recon_buffer =
                             recon_picture_ptr->buffer_y + dst_basic_offset;
 
