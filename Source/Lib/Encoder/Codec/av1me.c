@@ -35,63 +35,63 @@ void init_fn_ptr(void) {
     mefn_ptr[BT].vf_hbd_10 = VF_HBD_10;            \
     mefn_ptr[BT].sdx4df = SDX4DF;
 
-    BFP0(BLOCK_4X16, eb_aom_sad4x16, eb_aom_variance4x16, eb_aom_highbd_10_variance4x16, eb_aom_sad4x16x4d)
-    BFP0(BLOCK_16X4, eb_aom_sad16x4, eb_aom_variance16x4, eb_aom_highbd_10_variance16x4, eb_aom_sad16x4x4d)
-    BFP0(BLOCK_8X32, eb_aom_sad8x32, eb_aom_variance8x32, eb_aom_highbd_10_variance8x32, eb_aom_sad8x32x4d)
-    BFP0(BLOCK_32X8, eb_aom_sad32x8, eb_aom_variance32x8, eb_aom_highbd_10_variance32x8, eb_aom_sad32x8x4d)
-    BFP0(BLOCK_16X64, eb_aom_sad16x64, eb_aom_variance16x64, eb_aom_highbd_10_variance16x64, eb_aom_sad16x64x4d)
-    BFP0(BLOCK_64X16, eb_aom_sad64x16, eb_aom_variance64x16, eb_aom_highbd_10_variance64x16, eb_aom_sad64x16x4d)
-    BFP0(BLOCK_128X128, eb_aom_sad128x128, eb_aom_variance128x128, eb_aom_highbd_10_variance128x128, eb_aom_sad128x128x4d)
-    BFP0(BLOCK_128X64, eb_aom_sad128x64, eb_aom_variance128x64, eb_aom_highbd_10_variance128x64, eb_aom_sad128x64x4d)
-    BFP0(BLOCK_64X128, eb_aom_sad64x128, eb_aom_variance64x128, eb_aom_highbd_10_variance64x128, eb_aom_sad64x128x4d)
-    BFP0(BLOCK_32X16, eb_aom_sad32x16, eb_aom_variance32x16, eb_aom_highbd_10_variance32x16, eb_aom_sad32x16x4d)
-    BFP0(BLOCK_16X32, eb_aom_sad16x32, eb_aom_variance16x32, eb_aom_highbd_10_variance16x32, eb_aom_sad16x32x4d)
-    BFP0(BLOCK_64X32, eb_aom_sad64x32, eb_aom_variance64x32, eb_aom_highbd_10_variance64x32, eb_aom_sad64x32x4d)
-    BFP0(BLOCK_32X64, eb_aom_sad32x64, eb_aom_variance32x64, eb_aom_highbd_10_variance32x64, eb_aom_sad32x64x4d)
-    BFP0(BLOCK_32X32, eb_aom_sad32x32, eb_aom_variance32x32, eb_aom_highbd_10_variance32x32, eb_aom_sad32x32x4d)
-    BFP0(BLOCK_64X64, eb_aom_sad64x64, eb_aom_variance64x64, eb_aom_highbd_10_variance64x64, eb_aom_sad64x64x4d)
-    BFP0(BLOCK_16X16, eb_aom_sad16x16, eb_aom_variance16x16, eb_aom_highbd_10_variance16x16, eb_aom_sad16x16x4d)
-    BFP0(BLOCK_16X8, eb_aom_sad16x8, eb_aom_variance16x8, eb_aom_highbd_10_variance16x8, eb_aom_sad16x8x4d)
-    BFP0(BLOCK_8X16, eb_aom_sad8x16, eb_aom_variance8x16, eb_aom_highbd_10_variance8x16, eb_aom_sad8x16x4d)
-    BFP0(BLOCK_8X8, eb_aom_sad8x8, eb_aom_variance8x8, eb_aom_highbd_10_variance8x8, eb_aom_sad8x8x4d)
-    BFP0(BLOCK_8X4, eb_aom_sad8x4, eb_aom_variance8x4, eb_aom_highbd_10_variance8x4, eb_aom_sad8x4x4d)
-    BFP0(BLOCK_4X8, eb_aom_sad4x8, eb_aom_variance4x8, eb_aom_highbd_10_variance4x8, eb_aom_sad4x8x4d)
-    BFP0(BLOCK_4X4, eb_aom_sad4x4, eb_aom_variance4x4, eb_aom_highbd_10_variance4x4, eb_aom_sad4x4x4d)
+    BFP0(BLOCK_4X16, svt_aom_sad4x16, svt_aom_variance4x16, svt_aom_highbd_10_variance4x16, svt_aom_sad4x16x4d)
+    BFP0(BLOCK_16X4, svt_aom_sad16x4, svt_aom_variance16x4, svt_aom_highbd_10_variance16x4, svt_aom_sad16x4x4d)
+    BFP0(BLOCK_8X32, svt_aom_sad8x32, svt_aom_variance8x32, svt_aom_highbd_10_variance8x32, svt_aom_sad8x32x4d)
+    BFP0(BLOCK_32X8, svt_aom_sad32x8, svt_aom_variance32x8, svt_aom_highbd_10_variance32x8, svt_aom_sad32x8x4d)
+    BFP0(BLOCK_16X64, svt_aom_sad16x64, svt_aom_variance16x64, svt_aom_highbd_10_variance16x64, svt_aom_sad16x64x4d)
+    BFP0(BLOCK_64X16, svt_aom_sad64x16, svt_aom_variance64x16, svt_aom_highbd_10_variance64x16, svt_aom_sad64x16x4d)
+    BFP0(BLOCK_128X128, svt_aom_sad128x128, svt_aom_variance128x128, svt_aom_highbd_10_variance128x128, svt_aom_sad128x128x4d)
+    BFP0(BLOCK_128X64, svt_aom_sad128x64, svt_aom_variance128x64, svt_aom_highbd_10_variance128x64, svt_aom_sad128x64x4d)
+    BFP0(BLOCK_64X128, svt_aom_sad64x128, svt_aom_variance64x128, svt_aom_highbd_10_variance64x128, svt_aom_sad64x128x4d)
+    BFP0(BLOCK_32X16, svt_aom_sad32x16, svt_aom_variance32x16, svt_aom_highbd_10_variance32x16, svt_aom_sad32x16x4d)
+    BFP0(BLOCK_16X32, svt_aom_sad16x32, svt_aom_variance16x32, svt_aom_highbd_10_variance16x32, svt_aom_sad16x32x4d)
+    BFP0(BLOCK_64X32, svt_aom_sad64x32, svt_aom_variance64x32, svt_aom_highbd_10_variance64x32, svt_aom_sad64x32x4d)
+    BFP0(BLOCK_32X64, svt_aom_sad32x64, svt_aom_variance32x64, svt_aom_highbd_10_variance32x64, svt_aom_sad32x64x4d)
+    BFP0(BLOCK_32X32, svt_aom_sad32x32, svt_aom_variance32x32, svt_aom_highbd_10_variance32x32, svt_aom_sad32x32x4d)
+    BFP0(BLOCK_64X64, svt_aom_sad64x64, svt_aom_variance64x64, svt_aom_highbd_10_variance64x64, svt_aom_sad64x64x4d)
+    BFP0(BLOCK_16X16, svt_aom_sad16x16, svt_aom_variance16x16, svt_aom_highbd_10_variance16x16, svt_aom_sad16x16x4d)
+    BFP0(BLOCK_16X8, svt_aom_sad16x8, svt_aom_variance16x8, svt_aom_highbd_10_variance16x8, svt_aom_sad16x8x4d)
+    BFP0(BLOCK_8X16, svt_aom_sad8x16, svt_aom_variance8x16, svt_aom_highbd_10_variance8x16, svt_aom_sad8x16x4d)
+    BFP0(BLOCK_8X8, svt_aom_sad8x8, svt_aom_variance8x8, svt_aom_highbd_10_variance8x8, svt_aom_sad8x8x4d)
+    BFP0(BLOCK_8X4, svt_aom_sad8x4, svt_aom_variance8x4, svt_aom_highbd_10_variance8x4, svt_aom_sad8x4x4d)
+    BFP0(BLOCK_4X8, svt_aom_sad4x8, svt_aom_variance4x8, svt_aom_highbd_10_variance4x8, svt_aom_sad4x8x4d)
+    BFP0(BLOCK_4X4, svt_aom_sad4x4, svt_aom_variance4x4, svt_aom_highbd_10_variance4x4, svt_aom_sad4x4x4d)
 #define OBFP(BT, OSDF, OVF, OSVF) \
     mefn_ptr[BT].osdf = OSDF;     \
     mefn_ptr[BT].ovf  = OVF;      \
     mefn_ptr[BT].osvf = OSVF;
     OBFP(BLOCK_128X128,
-         eb_aom_obmc_sad128x128,
-         eb_aom_obmc_variance128x128,
-         eb_aom_obmc_sub_pixel_variance128x128)
+         svt_aom_obmc_sad128x128,
+         svt_aom_obmc_variance128x128,
+         svt_aom_obmc_sub_pixel_variance128x128)
     OBFP(BLOCK_128X64,
-         eb_aom_obmc_sad128x64,
-         eb_aom_obmc_variance128x64,
-         eb_aom_obmc_sub_pixel_variance128x64)
+         svt_aom_obmc_sad128x64,
+         svt_aom_obmc_variance128x64,
+         svt_aom_obmc_sub_pixel_variance128x64)
     OBFP(BLOCK_64X128,
-         eb_aom_obmc_sad64x128,
-         eb_aom_obmc_variance64x128,
-         eb_aom_obmc_sub_pixel_variance64x128)
-    OBFP(BLOCK_64X64, eb_aom_obmc_sad64x64, eb_aom_obmc_variance64x64, eb_aom_obmc_sub_pixel_variance64x64)
-    OBFP(BLOCK_64X32, eb_aom_obmc_sad64x32, eb_aom_obmc_variance64x32, eb_aom_obmc_sub_pixel_variance64x32)
-    OBFP(BLOCK_32X64, eb_aom_obmc_sad32x64, eb_aom_obmc_variance32x64, eb_aom_obmc_sub_pixel_variance32x64)
-    OBFP(BLOCK_32X32, eb_aom_obmc_sad32x32, eb_aom_obmc_variance32x32, eb_aom_obmc_sub_pixel_variance32x32)
-    OBFP(BLOCK_32X16, eb_aom_obmc_sad32x16, eb_aom_obmc_variance32x16, eb_aom_obmc_sub_pixel_variance32x16)
-    OBFP(BLOCK_16X32, eb_aom_obmc_sad16x32, eb_aom_obmc_variance16x32, eb_aom_obmc_sub_pixel_variance16x32)
-    OBFP(BLOCK_16X16, eb_aom_obmc_sad16x16, eb_aom_obmc_variance16x16, eb_aom_obmc_sub_pixel_variance16x16)
-    OBFP(BLOCK_16X8, eb_aom_obmc_sad16x8, eb_aom_obmc_variance16x8, eb_aom_obmc_sub_pixel_variance16x8)
-    OBFP(BLOCK_8X16, eb_aom_obmc_sad8x16, eb_aom_obmc_variance8x16, eb_aom_obmc_sub_pixel_variance8x16)
-    OBFP(BLOCK_8X8, eb_aom_obmc_sad8x8, eb_aom_obmc_variance8x8, eb_aom_obmc_sub_pixel_variance8x8)
-    OBFP(BLOCK_4X8, eb_aom_obmc_sad4x8, eb_aom_obmc_variance4x8, eb_aom_obmc_sub_pixel_variance4x8)
-    OBFP(BLOCK_8X4, eb_aom_obmc_sad8x4, eb_aom_obmc_variance8x4, eb_aom_obmc_sub_pixel_variance8x4)
-    OBFP(BLOCK_4X4, eb_aom_obmc_sad4x4, eb_aom_obmc_variance4x4, eb_aom_obmc_sub_pixel_variance4x4)
-    OBFP(BLOCK_4X16, eb_aom_obmc_sad4x16, eb_aom_obmc_variance4x16, eb_aom_obmc_sub_pixel_variance4x16)
-    OBFP(BLOCK_16X4, eb_aom_obmc_sad16x4, eb_aom_obmc_variance16x4, eb_aom_obmc_sub_pixel_variance16x4)
-    OBFP(BLOCK_8X32, eb_aom_obmc_sad8x32, eb_aom_obmc_variance8x32, eb_aom_obmc_sub_pixel_variance8x32)
-    OBFP(BLOCK_32X8, eb_aom_obmc_sad32x8, eb_aom_obmc_variance32x8, eb_aom_obmc_sub_pixel_variance32x8)
-    OBFP(BLOCK_16X64, eb_aom_obmc_sad16x64, eb_aom_obmc_variance16x64, eb_aom_obmc_sub_pixel_variance16x64)
-    OBFP(BLOCK_64X16, eb_aom_obmc_sad64x16, eb_aom_obmc_variance64x16, eb_aom_obmc_sub_pixel_variance64x16)
+         svt_aom_obmc_sad64x128,
+         svt_aom_obmc_variance64x128,
+         svt_aom_obmc_sub_pixel_variance64x128)
+    OBFP(BLOCK_64X64, svt_aom_obmc_sad64x64, svt_aom_obmc_variance64x64, svt_aom_obmc_sub_pixel_variance64x64)
+    OBFP(BLOCK_64X32, svt_aom_obmc_sad64x32, svt_aom_obmc_variance64x32, svt_aom_obmc_sub_pixel_variance64x32)
+    OBFP(BLOCK_32X64, svt_aom_obmc_sad32x64, svt_aom_obmc_variance32x64, svt_aom_obmc_sub_pixel_variance32x64)
+    OBFP(BLOCK_32X32, svt_aom_obmc_sad32x32, svt_aom_obmc_variance32x32, svt_aom_obmc_sub_pixel_variance32x32)
+    OBFP(BLOCK_32X16, svt_aom_obmc_sad32x16, svt_aom_obmc_variance32x16, svt_aom_obmc_sub_pixel_variance32x16)
+    OBFP(BLOCK_16X32, svt_aom_obmc_sad16x32, svt_aom_obmc_variance16x32, svt_aom_obmc_sub_pixel_variance16x32)
+    OBFP(BLOCK_16X16, svt_aom_obmc_sad16x16, svt_aom_obmc_variance16x16, svt_aom_obmc_sub_pixel_variance16x16)
+    OBFP(BLOCK_16X8, svt_aom_obmc_sad16x8, svt_aom_obmc_variance16x8, svt_aom_obmc_sub_pixel_variance16x8)
+    OBFP(BLOCK_8X16, svt_aom_obmc_sad8x16, svt_aom_obmc_variance8x16, svt_aom_obmc_sub_pixel_variance8x16)
+    OBFP(BLOCK_8X8, svt_aom_obmc_sad8x8, svt_aom_obmc_variance8x8, svt_aom_obmc_sub_pixel_variance8x8)
+    OBFP(BLOCK_4X8, svt_aom_obmc_sad4x8, svt_aom_obmc_variance4x8, svt_aom_obmc_sub_pixel_variance4x8)
+    OBFP(BLOCK_8X4, svt_aom_obmc_sad8x4, svt_aom_obmc_variance8x4, svt_aom_obmc_sub_pixel_variance8x4)
+    OBFP(BLOCK_4X4, svt_aom_obmc_sad4x4, svt_aom_obmc_variance4x4, svt_aom_obmc_sub_pixel_variance4x4)
+    OBFP(BLOCK_4X16, svt_aom_obmc_sad4x16, svt_aom_obmc_variance4x16, svt_aom_obmc_sub_pixel_variance4x16)
+    OBFP(BLOCK_16X4, svt_aom_obmc_sad16x4, svt_aom_obmc_variance16x4, svt_aom_obmc_sub_pixel_variance16x4)
+    OBFP(BLOCK_8X32, svt_aom_obmc_sad8x32, svt_aom_obmc_variance8x32, svt_aom_obmc_sub_pixel_variance8x32)
+    OBFP(BLOCK_32X8, svt_aom_obmc_sad32x8, svt_aom_obmc_variance32x8, svt_aom_obmc_sub_pixel_variance32x8)
+    OBFP(BLOCK_16X64, svt_aom_obmc_sad16x64, svt_aom_obmc_variance16x64, svt_aom_obmc_sub_pixel_variance16x64)
+    OBFP(BLOCK_64X16, svt_aom_obmc_sad64x16, svt_aom_obmc_variance64x16, svt_aom_obmc_sub_pixel_variance64x16)
 }
 
 // #define NEW_DIAMOND_SEARCH

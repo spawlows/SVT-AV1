@@ -131,10 +131,10 @@ typedef struct CodedBlockStats {
     uint8_t  parent32x32_index;
 } CodedBlockStats;
 
-extern void* eb_aom_memalign(size_t align, size_t size);
-extern void* eb_aom_malloc(size_t size);
-extern void  eb_aom_free(void* memblk);
-extern void* eb_aom_memset16(void* dest, int32_t val, size_t length);
+extern void* svt_aom_memalign(size_t align, size_t size);
+extern void* svt_aom_malloc(size_t size);
+extern void  svt_aom_free(void* memblk);
+extern void* svt_aom_memset16(void* dest, int32_t val, size_t length);
 
 extern uint64_t log2f_high_precision(uint64_t x, uint8_t precision);
 

@@ -137,19 +137,19 @@ class AV1WienerConvolveTest : public ::testing::TestWithParam<ParamType> {
 
     void TearDown() override {
         if (input_) {
-            eb_aom_free(input_);
+            svt_aom_free(input_);
             input_ = nullptr;
         }
         if (output_) {
-            eb_aom_free(output_);
+            svt_aom_free(output_);
             output_ = nullptr;
         }
         if (output_tst_) {
-            eb_aom_free(output_tst_);
+            svt_aom_free(output_tst_);
             output_tst_ = nullptr;
         }
         if (output_ref_) {
-            eb_aom_free(output_ref_);
+            svt_aom_free(output_ref_);
             output_ref_ = nullptr;
         }
         aom_clear_system_state();
@@ -158,16 +158,16 @@ class AV1WienerConvolveTest : public ::testing::TestWithParam<ParamType> {
   protected:
     void malloc_data() {
         input_ = reinterpret_cast<Sample*>(
-            eb_aom_memalign(32, input_stride * h * sizeof(Sample)));
+            svt_aom_memalign(32, input_stride * h * sizeof(Sample)));
         ASSERT_NE(input_, nullptr) << "create input buffer failed!";
         output_ = reinterpret_cast<Sample*>(
-            eb_aom_memalign(32, output_stride * h * sizeof(Sample)));
+            svt_aom_memalign(32, output_stride * h * sizeof(Sample)));
         ASSERT_NE(output_, nullptr) << "create output buffer failed!";
         output_tst_ = reinterpret_cast<Sample*>(
-            eb_aom_memalign(32, output_stride * h * sizeof(Sample)));
+            svt_aom_memalign(32, output_stride * h * sizeof(Sample)));
         ASSERT_NE(output_tst_, nullptr) << "create test output buffer failed!";
         output_ref_ = reinterpret_cast<Sample*>(
-            eb_aom_memalign(32, output_stride * h * sizeof(Sample)));
+            svt_aom_memalign(32, output_stride * h * sizeof(Sample)));
         ASSERT_NE(output_ref_, nullptr) << "create ref output buffer failed!";
     }
 

@@ -108,7 +108,7 @@ typedef struct IntraReference16bitSamples {
 extern const int8_t eb_av1_filter_intra_taps[FILTER_INTRA_MODES][8][8];
 
 /////####.... To make functions common between EbIntraPrediction.c &
-void *eb_aom_memset16(void *dest, int32_t val, size_t length);
+void *svt_aom_memset16(void *dest, int32_t val, size_t length);
 
 int32_t use_intra_edge_upsample(int32_t bs0, int32_t bs1, int32_t delta, int32_t type);
 

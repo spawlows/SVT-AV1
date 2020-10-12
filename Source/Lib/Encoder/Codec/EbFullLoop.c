@@ -34,12 +34,12 @@ static PartitionType from_shape_to_part[] = {PARTITION_NONE,
                                              PARTITION_SPLIT};
 
 
-void eb_aom_quantize_b_c_ii(const TranLow *coeff_ptr, intptr_t n_coeffs,
-                            const int16_t *zbin_ptr, const int16_t *round_ptr,
-                            const int16_t *quant_ptr, const int16_t *quant_shift_ptr,
-                            TranLow *qcoeff_ptr, TranLow *dqcoeff_ptr, const int16_t *dequant_ptr,
-                            uint16_t *eob_ptr, const int16_t *scan, const int16_t *iscan,
-                            const QmVal *qm_ptr, const QmVal *iqm_ptr, const int32_t log_scale) {
+void svt_aom_quantize_b_c_ii(const TranLow *coeff_ptr, intptr_t n_coeffs,
+                             const int16_t *zbin_ptr, const int16_t *round_ptr,
+                             const int16_t *quant_ptr, const int16_t *quant_shift_ptr,
+                             TranLow *qcoeff_ptr, TranLow *dqcoeff_ptr, const int16_t *dequant_ptr,
+                             uint16_t *eob_ptr, const int16_t *scan, const int16_t *iscan,
+                             const QmVal *qm_ptr, const QmVal *iqm_ptr, const int32_t log_scale) {
     const int32_t zbins[2]  = {ROUND_POWER_OF_TWO(zbin_ptr[0], log_scale),
                               ROUND_POWER_OF_TWO(zbin_ptr[1], log_scale)};
     const int32_t nzbins[2] = {zbins[0] * -1, zbins[1] * -1};
@@ -93,13 +93,13 @@ void eb_aom_quantize_b_c_ii(const TranLow *coeff_ptr, intptr_t n_coeffs,
 }
 
 
-void eb_aom_quantize_b_c(const TranLow *coeff_ptr, int32_t stride,
-                            int32_t width, int32_t height, intptr_t n_coeffs,
-                            const int16_t *zbin_ptr, const int16_t *round_ptr,
-                            const int16_t *quant_ptr, const int16_t *quant_shift_ptr,
-                            TranLow *qcoeff_ptr, TranLow *dqcoeff_ptr, const int16_t *dequant_ptr,
-                            uint16_t *eob_ptr, const int16_t *scan, const int16_t *iscan,
-                            const QmVal *qm_ptr, const QmVal *iqm_ptr, const int32_t log_scale) {
+void svt_aom_quantize_b_c(const TranLow *coeff_ptr, int32_t stride,
+                          int32_t width, int32_t height, intptr_t n_coeffs,
+                          const int16_t *zbin_ptr, const int16_t *round_ptr,
+                          const int16_t *quant_ptr, const int16_t *quant_shift_ptr,
+                          TranLow *qcoeff_ptr, TranLow *dqcoeff_ptr, const int16_t *dequant_ptr,
+                          uint16_t *eob_ptr, const int16_t *scan, const int16_t *iscan,
+                          const QmVal *qm_ptr, const QmVal *iqm_ptr, const int32_t log_scale) {
     const int32_t zbins[2]       = {ROUND_POWER_OF_TWO(zbin_ptr[0], log_scale),
                               ROUND_POWER_OF_TWO(zbin_ptr[1], log_scale)};
     const int32_t nzbins[2]      = {zbins[0] * -1, zbins[1] * -1};
@@ -168,13 +168,13 @@ void eb_aom_quantize_b_c(const TranLow *coeff_ptr, int32_t stride,
 
     *eob_ptr = (uint16_t)(eob + 1);
 }
-void eb_aom_highbd_quantize_b_c(const TranLow *coeff_ptr, intptr_t n_coeffs,
-                                   const int16_t *zbin_ptr, const int16_t *round_ptr,
-                                   const int16_t *quant_ptr, const int16_t *quant_shift_ptr,
-                                   TranLow *qcoeff_ptr, TranLow *dqcoeff_ptr,
-                                   const int16_t *dequant_ptr, uint16_t *eob_ptr,
-                                   const int16_t *scan, const int16_t *iscan, const QmVal *qm_ptr,
-                                   const QmVal *iqm_ptr, const int32_t log_scale) {
+void svt_aom_highbd_quantize_b_c(const TranLow *coeff_ptr, intptr_t n_coeffs,
+                                 const int16_t *zbin_ptr, const int16_t *round_ptr,
+                                 const int16_t *quant_ptr, const int16_t *quant_shift_ptr,
+                                 TranLow *qcoeff_ptr, TranLow *dqcoeff_ptr,
+                                 const int16_t *dequant_ptr, uint16_t *eob_ptr,
+                                 const int16_t *scan, const int16_t *iscan, const QmVal *qm_ptr,
+                                 const QmVal *iqm_ptr, const int32_t log_scale) {
     intptr_t      eob = -1;
     (void)iscan;
 
@@ -231,34 +231,34 @@ void eb_av1_highbd_quantize_b_facade(const TranLow *coeff_ptr, intptr_t n_coeffs
     const QmVal * qm_ptr     = qparam->qmatrix;
     const QmVal * iqm_ptr    = qparam->iqmatrix;
     if (qm_ptr != NULL && iqm_ptr != NULL) {
-        eb_aom_highbd_quantize_b_c(coeff_ptr,
-                                      n_coeffs,
-                                      p->zbin_qtx,
-                                      p->round_qtx,
-                                      p->quant_qtx,
-                                      p->quant_shift_qtx,
-                                      qcoeff_ptr,
-                                      dqcoeff_ptr,
-                                      p->dequant_qtx,
-                                      eob_ptr,
-                                      sc->scan,
-                                      sc->iscan,
-                                      qm_ptr,
-                                      iqm_ptr,
-                                      qparam->log_scale);
+        svt_aom_highbd_quantize_b_c(coeff_ptr,
+                                    n_coeffs,
+                                    p->zbin_qtx,
+                                    p->round_qtx,
+                                    p->quant_qtx,
+                                    p->quant_shift_qtx,
+                                    qcoeff_ptr,
+                                    dqcoeff_ptr,
+                                    p->dequant_qtx,
+                                    eob_ptr,
+                                    sc->scan,
+                                    sc->iscan,
+                                    qm_ptr,
+                                    iqm_ptr,
+                                    qparam->log_scale);
     } else {
-                eb_aom_highbd_quantize_b(coeff_ptr,
-                                         n_coeffs,
-                                         p->zbin_qtx,
-                                         p->round_qtx,
-                                         p->quant_qtx,
-                                         p->quant_shift_qtx,
-                                         qcoeff_ptr,
-                                         dqcoeff_ptr,
-                                         p->dequant_qtx,
-                                         eob_ptr,
-                                         sc->scan,
-                                         sc->iscan,
+                svt_aom_highbd_quantize_b(coeff_ptr,
+                                          n_coeffs,
+                                          p->zbin_qtx,
+                                          p->round_qtx,
+                                          p->quant_qtx,
+                                          p->quant_shift_qtx,
+                                          qcoeff_ptr,
+                                          dqcoeff_ptr,
+                                          p->dequant_qtx,
+                                          eob_ptr,
+                                          sc->scan,
+                                          sc->iscan,
                     NULL,
                     NULL,
                     qparam->log_scale);
@@ -273,26 +273,26 @@ void av1_quantize_b_facade_ii(const TranLow *coeff_ptr, int32_t stride, int32_t 
     const QmVal * qm_ptr     = qparam->qmatrix;
     const QmVal * iqm_ptr    = qparam->iqmatrix;
     if (qm_ptr != NULL && iqm_ptr != NULL) {
-        eb_aom_quantize_b_c(coeff_ptr,
-                               stride,
-                               width,
-                               height,
-                               n_coeffs,
-                               p->zbin_qtx,
-                               p->round_qtx,
-                               p->quant_qtx,
-                               p->quant_shift_qtx,
-                               qcoeff_ptr,
-                               dqcoeff_ptr,
-                               p->dequant_qtx,
-                               eob_ptr,
-                               sc->scan,
-                               sc->iscan,
-                               qm_ptr,
-                               iqm_ptr,
-                               qparam->log_scale);
+        svt_aom_quantize_b_c(coeff_ptr,
+                             stride,
+                             width,
+                             height,
+                             n_coeffs,
+                             p->zbin_qtx,
+                             p->round_qtx,
+                             p->quant_qtx,
+                             p->quant_shift_qtx,
+                             qcoeff_ptr,
+                             dqcoeff_ptr,
+                             p->dequant_qtx,
+                             eob_ptr,
+                             sc->scan,
+                             sc->iscan,
+                             qm_ptr,
+                             iqm_ptr,
+                             qparam->log_scale);
     } else {
-            eb_aom_quantize_b(coeff_ptr,
+            svt_aom_quantize_b(coeff_ptr,
                 n_coeffs,
                 p->zbin_qtx,
                 p->round_qtx,

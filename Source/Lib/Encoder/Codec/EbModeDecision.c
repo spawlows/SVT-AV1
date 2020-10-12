@@ -220,12 +220,12 @@ static int64_t pick_interintra_wedge(ModeDecisionCandidate *candidate_ptr,
     DECLARE_ALIGNED(32, int16_t, residual1[MAX_SB_SQUARE]); // src - pred1
     DECLARE_ALIGNED(32, int16_t, diff10[MAX_SB_SQUARE]); // pred1 - pred0
     if (context_ptr->hbd_mode_decision) {
-        eb_aom_highbd_subtract_block(bh, bw, residual1, bw, src_buf, src_stride, p1, bw, EB_10BIT);
-        eb_aom_highbd_subtract_block(bh, bw, diff10, bw, p1, bw, p0, bw, EB_10BIT);
+        svt_aom_highbd_subtract_block(bh, bw, residual1, bw, src_buf, src_stride, p1, bw, EB_10BIT);
+        svt_aom_highbd_subtract_block(bh, bw, diff10, bw, p1, bw, p0, bw, EB_10BIT);
 
     } else {
-        eb_aom_subtract_block(bh, bw, residual1, bw, src_buf, src_stride, p1, bw);
-        eb_aom_subtract_block(bh, bw, diff10, bw, p1, bw, p0, bw);
+        svt_aom_subtract_block(bh, bw, residual1, bw, src_buf, src_stride, p1, bw);
+        svt_aom_subtract_block(bh, bw, diff10, bw, p1, bw, p0, bw);
     }
 
     int8_t  wedge_index = -1;

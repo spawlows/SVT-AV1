@@ -2576,10 +2576,10 @@ EbErrorType compute_block_mean_compute_variance(
 
 static int32_t apply_denoise_2d(SequenceControlSet *scs_ptr, PictureParentControlSet *pcs_ptr,
                                 EbPictureBufferDesc *inputPicturePointer) {
-    if (eb_aom_denoise_and_model_run(pcs_ptr->denoise_and_model,
-                                     inputPicturePointer,
-                                     &pcs_ptr->frm_hdr.film_grain_params,
-                                     scs_ptr->static_config.encoder_bit_depth > EB_8BIT)) {}
+    if (svt_aom_denoise_and_model_run(pcs_ptr->denoise_and_model,
+                                      inputPicturePointer,
+                                      &pcs_ptr->frm_hdr.film_grain_params,
+                                      scs_ptr->static_config.encoder_bit_depth > EB_8BIT)) {}
     return 0;
 }
 

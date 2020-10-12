@@ -1640,9 +1640,9 @@ static INLINE void aom_subtract_block_128xn_avx2(int rows, int16_t *diff_ptr, pt
         diff_ptr += diff_stride;
     }
 }
-void eb_aom_subtract_block_avx2(int rows, int cols, int16_t *diff_ptr, ptrdiff_t diff_stride,
-                                const uint8_t *src_ptr, ptrdiff_t src_stride, const uint8_t *pred_ptr,
-                                ptrdiff_t pred_stride) {
+void svt_aom_subtract_block_avx2(int rows, int cols, int16_t *diff_ptr, ptrdiff_t diff_stride,
+                                 const uint8_t *src_ptr, ptrdiff_t src_stride, const uint8_t *pred_ptr,
+                                 ptrdiff_t pred_stride) {
     switch (cols) {
     case 16:
         aom_subtract_block_16xn_avx2(
@@ -1661,7 +1661,7 @@ void eb_aom_subtract_block_avx2(int rows, int cols, int16_t *diff_ptr, ptrdiff_t
             rows, diff_ptr, diff_stride, src_ptr, src_stride, pred_ptr, pred_stride);
         break;
     default:
-        eb_aom_subtract_block_sse2(
+        svt_aom_subtract_block_sse2(
             rows, cols, diff_ptr, diff_stride, src_ptr, src_stride, pred_ptr, pred_stride);
         break;
     }
@@ -1725,8 +1725,8 @@ static INLINE int64_t summary_all_avx2(const __m256i *sum_all) {
     xx_storel_64(&sum, sum_1x64);
     return sum;
 }
-int64_t eb_aom_sse_avx2(const uint8_t *a, int a_stride, const uint8_t *b, int b_stride, int width,
-                        int height) {
+int64_t svt_aom_sse_avx2(const uint8_t *a, int a_stride, const uint8_t *b, int b_stride, int width,
+                         int height) {
     int32_t y    = 0;
     int64_t sse  = 0;
     __m256i sum  = _mm256_setzero_si256();
@@ -1991,14 +1991,14 @@ static uint64_t aom_sum_squares_i16_64n_sse2(const int16_t *src, uint32_t n) {
     return xx_cvtsi128_si64(v_acc0_q);
 }
 
-uint64_t eb_aom_sum_squares_i16_sse2(const int16_t *src, uint32_t n) {
+uint64_t svt_aom_sum_squares_i16_sse2(const int16_t *src, uint32_t n) {
     if (n % 64 == 0) {
         return aom_sum_squares_i16_64n_sse2(src, n);
     } else if (n > 64) {
         int k = n & ~(64 - 1);
-        return aom_sum_squares_i16_64n_sse2(src, k) + eb_aom_sum_squares_i16_c(src + k, n - k);
+        return aom_sum_squares_i16_64n_sse2(src, k) + svt_aom_sum_squares_i16_c(src + k, n - k);
     } else {
-        return eb_aom_sum_squares_i16_c(src, n);
+        return svt_aom_sum_squares_i16_c(src, n);
     }
 }
 

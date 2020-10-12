@@ -87,25 +87,25 @@ class PixelProjErrorTest
     }
 
     virtual void SetUp() {
-        src_ = (Sample *)(eb_aom_malloc(MAX_DATA_BLOCK * MAX_DATA_BLOCK *
+        src_ = (Sample *)(svt_aom_malloc(MAX_DATA_BLOCK * MAX_DATA_BLOCK *
                                         sizeof(*src_)));
         ASSERT_NE(src_, nullptr);
-        dgd_ = (Sample *)(eb_aom_malloc(MAX_DATA_BLOCK * MAX_DATA_BLOCK *
+        dgd_ = (Sample *)(svt_aom_malloc(MAX_DATA_BLOCK * MAX_DATA_BLOCK *
                                         sizeof(*dgd_)));
         ASSERT_NE(dgd_, nullptr);
-        flt0_ = (int32_t *)(eb_aom_malloc(MAX_DATA_BLOCK * MAX_DATA_BLOCK *
+        flt0_ = (int32_t *)(svt_aom_malloc(MAX_DATA_BLOCK * MAX_DATA_BLOCK *
                                           sizeof(*flt0_)));
         ASSERT_NE(flt0_, nullptr);
-        flt1_ = (int32_t *)(eb_aom_malloc(MAX_DATA_BLOCK * MAX_DATA_BLOCK *
+        flt1_ = (int32_t *)(svt_aom_malloc(MAX_DATA_BLOCK * MAX_DATA_BLOCK *
                                           sizeof(*flt1_)));
         ASSERT_NE(flt1_, nullptr);
     }
 
     virtual void TearDown() {
-        eb_aom_free(src_);
-        eb_aom_free(dgd_);
-        eb_aom_free(flt0_);
-        eb_aom_free(flt1_);
+        svt_aom_free(src_);
+        svt_aom_free(dgd_);
+        svt_aom_free(flt0_);
+        svt_aom_free(flt1_);
     }
 
     virtual void prepare_random_data() = 0;
@@ -391,11 +391,11 @@ TEST(SelfGuidedToolsTest, GetProjSubspaceMatchTest) {
     const int NUM_ITERS = 2000;
     int i, j, k;
 
-    uint8_t *input_ = (uint8_t *)eb_aom_memalign(
+    uint8_t *input_ = (uint8_t *)svt_aom_memalign(
         32, stride * (height + 32) * sizeof(uint8_t));
-    uint8_t *output_ = (uint8_t *)eb_aom_memalign(
+    uint8_t *output_ = (uint8_t *)svt_aom_memalign(
         32, out_stride * (height + 32) * sizeof(uint8_t));
-    int32_t *tmpbuf = (int32_t *)eb_aom_memalign(32, RESTORATION_TMPBUF_SIZE);
+    int32_t *tmpbuf = (int32_t *)svt_aom_memalign(32, RESTORATION_TMPBUF_SIZE);
     uint8_t *input = input_ + stride * 16 + 16;
     uint8_t *output = output_ + out_stride * 16 + 16;
     int32_t *flt0 = tmpbuf;
@@ -479,8 +479,8 @@ TEST(SelfGuidedToolsTest, GetProjSubspaceMatchTest) {
         }
     }
 
-    eb_aom_free(input_);
-    eb_aom_free(output_);
-    eb_aom_free(tmpbuf);
+    svt_aom_free(input_);
+    svt_aom_free(output_);
+    svt_aom_free(tmpbuf);
 }
 }  // namespace

@@ -61,13 +61,13 @@ EbErrorType output_bitstream_reset(OutputBitstreamUnit *bitstream_ptr) {
 /********************************************************************************************************************************/
 /********************************************************************************************************************************/
 // daalaboolwriter.c
-void eb_aom_daala_start_encode(DaalaWriter *br, uint8_t *source) {
+void svt_aom_daala_start_encode(DaalaWriter *br, uint8_t *source) {
     br->buffer = source;
     br->pos    = 0;
     eb_od_ec_enc_init(&br->ec, 62025);
 }
 
-int32_t eb_aom_daala_stop_encode(DaalaWriter *br) {
+int32_t svt_aom_daala_stop_encode(DaalaWriter *br) {
     int32_t  nb_bits;
     uint32_t daala_bytes = 0;
     uint8_t *daala_data;

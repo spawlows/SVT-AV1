@@ -23,14 +23,14 @@ void eb_av1_upscale_normative_rows(const Av1Common *cm, const uint8_t *src, int 
 void av1_foreach_rest_unit_in_frame(Av1Common *cm, int32_t plane, RestTileStartVisitor on_tile,
                                     RestUnitVisitor on_rest_unit, void *priv);
 
-void eb_aom_yv12_copy_y_c(const Yv12BufferConfig *src_ybc, Yv12BufferConfig *dst_ybc);
-void eb_aom_yv12_copy_u_c(const Yv12BufferConfig *src_bc, Yv12BufferConfig *dst_bc);
-void eb_aom_yv12_copy_v_c(const Yv12BufferConfig *src_bc, Yv12BufferConfig *dst_bc);
+void svt_aom_yv12_copy_y_c(const Yv12BufferConfig *src_ybc, Yv12BufferConfig *dst_ybc);
+void svt_aom_yv12_copy_u_c(const Yv12BufferConfig *src_bc, Yv12BufferConfig *dst_bc);
+void svt_aom_yv12_copy_v_c(const Yv12BufferConfig *src_bc, Yv12BufferConfig *dst_bc);
 
-int32_t eb_aom_realloc_frame_buffer(Yv12BufferConfig *ybf, int32_t width, int32_t height,
-                                    int32_t ss_x, int32_t ss_y, int32_t use_highbitdepth,
-                                    int32_t border, int32_t byte_alignment, AomCodecFrameBuffer *fb,
-                                    AomGetFrameBufferCbFn cb, void *cb_priv);
+int32_t svt_aom_realloc_frame_buffer(Yv12BufferConfig *ybf, int32_t width, int32_t height,
+                                     int32_t ss_x, int32_t ss_y, int32_t use_highbitdepth,
+                                     int32_t border, int32_t byte_alignment, AomCodecFrameBuffer *fb,
+                                     AomGetFrameBufferCbFn cb, void *cb_priv);
 
 ///---filter.h
 #define MAX_FILTER_TAP 8
@@ -60,7 +60,7 @@ typedef uint32_t InterpFilters;
 InterpFilterParams av1_get_interp_filter_params_with_block_size(const InterpFilter interp_filter,
                                                                 const int32_t      w);
 
-void *eb_aom_memset16(void *dest, int32_t val, size_t length);
+void *svt_aom_memset16(void *dest, int32_t val, size_t length);
 
 ///---convolve.h
 #define FILTER_BITS 7
@@ -128,8 +128,8 @@ static INLINE ConvolveParams get_conv_params_wiener(int32_t bd) {
     return conv_params;
 }
 
-void *eb_aom_memalign(size_t align, size_t size);
-void  eb_aom_free(void *memblk);
+void *svt_aom_memalign(size_t align, size_t size);
+void  svt_aom_free(void *memblk);
 
 // The 's' values are calculated based on original 'r' and 'e' values in the
 // spec using GenSgrprojVtable().
@@ -1293,23 +1293,23 @@ void eb_av1_loop_restoration_filter_frame(Yv12BufferConfig *frame, Av1Common *cm
     const int32_t num_planes = 3; // av1_num_planes(cm);
     typedef void (*CopyFun)(const Yv12BufferConfig *src, Yv12BufferConfig *dst);
     static const CopyFun copy_funs[3] = {
-        eb_aom_yv12_copy_y_c, eb_aom_yv12_copy_u_c, eb_aom_yv12_copy_v_c}; //CHKN SSE
+        svt_aom_yv12_copy_y_c, svt_aom_yv12_copy_u_c, svt_aom_yv12_copy_v_c}; //CHKN SSE
 
     Yv12BufferConfig *dst = &cm->rst_frame;
 
     const int32_t frame_width  = frame->crop_widths[0];
     const int32_t frame_height = frame->crop_heights[0];
-    if (eb_aom_realloc_frame_buffer(dst,
-                                    frame_width,
-                                    frame_height,
-                                    cm->subsampling_x,
-                                    cm->subsampling_y,
-                                    cm->use_highbitdepth,
-                                    AOM_BORDER_IN_PIXELS,
-                                    cm->byte_alignment,
-                                    NULL,
-                                    NULL,
-                                    NULL) < 0)
+    if (svt_aom_realloc_frame_buffer(dst,
+                                     frame_width,
+                                     frame_height,
+                                     cm->subsampling_x,
+                                     cm->subsampling_y,
+                                     cm->use_highbitdepth,
+                                     AOM_BORDER_IN_PIXELS,
+                                     cm->byte_alignment,
+                                     NULL,
+                                     NULL,
+                                     NULL) < 0)
         SVT_LOG("Failed to allocate restoration dst buffer\n");
 
     RestorationLineBuffers rlbs;
@@ -1627,8 +1627,8 @@ void extend_lines(uint8_t *buf, int32_t width, int32_t height, int32_t stride, i
     for (int32_t i = 0; i < height; ++i) {
         if (use_highbitdepth) {
             uint16_t *buf16 = (uint16_t *)buf;
-            eb_aom_memset16(buf16 - extend, buf16[0], extend);
-            eb_aom_memset16(buf16 + width, buf16[width - 1], extend);
+            svt_aom_memset16(buf16 - extend, buf16[0], extend);
+            svt_aom_memset16(buf16 + width, buf16[width - 1], extend);
         } else {
             memset(buf - extend, buf[0], extend);
             memset(buf + width, buf[width - 1], extend);
