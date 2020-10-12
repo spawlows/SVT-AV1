@@ -48,12 +48,12 @@ typedef int64_t (*SsePartExtractorType)(const Yv12BufferConfig *a, const Yv12Buf
 #define NUM_EXTRACTORS (3 * (1 + 1))
 
 static const SsePartExtractorType sse_part_extractors[NUM_EXTRACTORS] = {
-    eb_aom_get_y_sse_part,
-    eb_aom_get_u_sse_part,
-    eb_aom_get_v_sse_part,
-    eb_aom_highbd_get_y_sse_part,
-    eb_aom_highbd_get_u_sse_part,
-    eb_aom_highbd_get_v_sse_part,
+    svt_aom_get_y_sse_part,
+    svt_aom_get_u_sse_part,
+    svt_aom_get_v_sse_part,
+    svt_aom_highbd_get_y_sse_part,
+    svt_aom_highbd_get_u_sse_part,
+    svt_aom_highbd_get_v_sse_part,
 };
 static int64_t sse_restoration_unit(const RestorationTileLimits *limits,
                                     const Yv12BufferConfig *src, const Yv12BufferConfig *dst,
@@ -665,20 +665,20 @@ static SgrprojInfo search_selfguided_restoration(
     ret.xqd[1] = bestxqd[1];
     return ret;
 }
-extern int32_t eb_aom_count_primitive_refsubexpfin(uint16_t n, uint16_t k, uint16_t ref,
-                                                   uint16_t v);
+extern int32_t svt_aom_count_primitive_refsubexpfin(uint16_t n, uint16_t k, uint16_t ref,
+                                                    uint16_t v);
 
 static int32_t count_sgrproj_bits(SgrprojInfo *sgrproj_info, SgrprojInfo *ref_sgrproj_info) {
     int32_t              bits   = SGRPROJ_PARAMS_BITS;
     const SgrParamsType *params = &eb_sgr_params[sgrproj_info->ep];
     if (params->r[0] > 0)
-        bits += eb_aom_count_primitive_refsubexpfin(
+        bits += svt_aom_count_primitive_refsubexpfin(
             SGRPROJ_PRJ_MAX0 - SGRPROJ_PRJ_MIN0 + 1,
             SGRPROJ_PRJ_SUBEXP_K,
             (uint16_t)(ref_sgrproj_info->xqd[0] - SGRPROJ_PRJ_MIN0),
             (uint16_t)(sgrproj_info->xqd[0] - SGRPROJ_PRJ_MIN0));
     if (params->r[1] > 0)
-        bits += eb_aom_count_primitive_refsubexpfin(
+        bits += svt_aom_count_primitive_refsubexpfin(
             SGRPROJ_PRJ_MAX1 - SGRPROJ_PRJ_MIN1 + 1,
             SGRPROJ_PRJ_SUBEXP_K,
             (uint16_t)(ref_sgrproj_info->xqd[1] - SGRPROJ_PRJ_MIN1),
@@ -1051,32 +1051,32 @@ static int32_t count_wiener_bits(int32_t wiener_win, WienerInfo *wiener_info,
     int32_t bits = 0;
     if (wiener_win == WIENER_WIN)
         bits +=
-            eb_aom_count_primitive_refsubexpfin(WIENER_FILT_TAP0_MAXV - WIENER_FILT_TAP0_MINV + 1,
-                                                WIENER_FILT_TAP0_SUBEXP_K,
-                                                ref_wiener_info->vfilter[0] - WIENER_FILT_TAP0_MINV,
-                                                wiener_info->vfilter[0] - WIENER_FILT_TAP0_MINV);
-    bits += eb_aom_count_primitive_refsubexpfin(WIENER_FILT_TAP1_MAXV - WIENER_FILT_TAP1_MINV + 1,
-                                                WIENER_FILT_TAP1_SUBEXP_K,
-                                                ref_wiener_info->vfilter[1] - WIENER_FILT_TAP1_MINV,
-                                                wiener_info->vfilter[1] - WIENER_FILT_TAP1_MINV);
-    bits += eb_aom_count_primitive_refsubexpfin(WIENER_FILT_TAP2_MAXV - WIENER_FILT_TAP2_MINV + 1,
-                                                WIENER_FILT_TAP2_SUBEXP_K,
-                                                ref_wiener_info->vfilter[2] - WIENER_FILT_TAP2_MINV,
-                                                wiener_info->vfilter[2] - WIENER_FILT_TAP2_MINV);
+            svt_aom_count_primitive_refsubexpfin(WIENER_FILT_TAP0_MAXV - WIENER_FILT_TAP0_MINV + 1,
+                                                 WIENER_FILT_TAP0_SUBEXP_K,
+                                                 ref_wiener_info->vfilter[0] - WIENER_FILT_TAP0_MINV,
+                                                 wiener_info->vfilter[0] - WIENER_FILT_TAP0_MINV);
+    bits += svt_aom_count_primitive_refsubexpfin(WIENER_FILT_TAP1_MAXV - WIENER_FILT_TAP1_MINV + 1,
+                                                 WIENER_FILT_TAP1_SUBEXP_K,
+                                                 ref_wiener_info->vfilter[1] - WIENER_FILT_TAP1_MINV,
+                                                 wiener_info->vfilter[1] - WIENER_FILT_TAP1_MINV);
+    bits += svt_aom_count_primitive_refsubexpfin(WIENER_FILT_TAP2_MAXV - WIENER_FILT_TAP2_MINV + 1,
+                                                 WIENER_FILT_TAP2_SUBEXP_K,
+                                                 ref_wiener_info->vfilter[2] - WIENER_FILT_TAP2_MINV,
+                                                 wiener_info->vfilter[2] - WIENER_FILT_TAP2_MINV);
     if (wiener_win == WIENER_WIN)
         bits +=
-            eb_aom_count_primitive_refsubexpfin(WIENER_FILT_TAP0_MAXV - WIENER_FILT_TAP0_MINV + 1,
-                                                WIENER_FILT_TAP0_SUBEXP_K,
-                                                ref_wiener_info->hfilter[0] - WIENER_FILT_TAP0_MINV,
-                                                wiener_info->hfilter[0] - WIENER_FILT_TAP0_MINV);
-    bits += eb_aom_count_primitive_refsubexpfin(WIENER_FILT_TAP1_MAXV - WIENER_FILT_TAP1_MINV + 1,
-                                                WIENER_FILT_TAP1_SUBEXP_K,
-                                                ref_wiener_info->hfilter[1] - WIENER_FILT_TAP1_MINV,
-                                                wiener_info->hfilter[1] - WIENER_FILT_TAP1_MINV);
-    bits += eb_aom_count_primitive_refsubexpfin(WIENER_FILT_TAP2_MAXV - WIENER_FILT_TAP2_MINV + 1,
-                                                WIENER_FILT_TAP2_SUBEXP_K,
-                                                ref_wiener_info->hfilter[2] - WIENER_FILT_TAP2_MINV,
-                                                wiener_info->hfilter[2] - WIENER_FILT_TAP2_MINV);
+            svt_aom_count_primitive_refsubexpfin(WIENER_FILT_TAP0_MAXV - WIENER_FILT_TAP0_MINV + 1,
+                                                 WIENER_FILT_TAP0_SUBEXP_K,
+                                                 ref_wiener_info->hfilter[0] - WIENER_FILT_TAP0_MINV,
+                                                 wiener_info->hfilter[0] - WIENER_FILT_TAP0_MINV);
+    bits += svt_aom_count_primitive_refsubexpfin(WIENER_FILT_TAP1_MAXV - WIENER_FILT_TAP1_MINV + 1,
+                                                 WIENER_FILT_TAP1_SUBEXP_K,
+                                                 ref_wiener_info->hfilter[1] - WIENER_FILT_TAP1_MINV,
+                                                 wiener_info->hfilter[1] - WIENER_FILT_TAP1_MINV);
+    bits += svt_aom_count_primitive_refsubexpfin(WIENER_FILT_TAP2_MAXV - WIENER_FILT_TAP2_MINV + 1,
+                                                 WIENER_FILT_TAP2_SUBEXP_K,
+                                                 ref_wiener_info->hfilter[2] - WIENER_FILT_TAP2_MINV,
+                                                 wiener_info->hfilter[2] - WIENER_FILT_TAP2_MINV);
     return bits;
 }
 
@@ -1253,8 +1253,8 @@ static int32_t rest_tiles_in_plane(const Av1Common *cm, int32_t plane) {
     return rsi->units_per_tile;
 }
 
-void *eb_aom_memalign(size_t align, size_t size);
-void  eb_aom_free(void *memblk);
+void *svt_aom_memalign(size_t align, size_t size);
+void  svt_aom_free(void *memblk);
 
 static void search_sgrproj_seg(const RestorationTileLimits *limits, const Av1PixelRect *tile,
                                int32_t rest_unit_idx, void *priv) {
@@ -1556,7 +1556,7 @@ void rest_finish_search(PictureParentControlSet *p_pcs_ptr, Macroblock *x, Av1Co
     for (int32_t is_uv = 0; is_uv < 2; ++is_uv) ntiles[is_uv] = rest_tiles_in_plane(cm, is_uv);
 
     assert(ntiles[1] <= ntiles[0]);
-    RestUnitSearchInfo *rusi = (RestUnitSearchInfo *)eb_aom_memalign(16, sizeof(*rusi) * ntiles[0]);
+    RestUnitSearchInfo *rusi = (RestUnitSearchInfo *)svt_aom_memalign(16, sizeof(*rusi) * ntiles[0]);
 
     // If the restoration unit dimensions are not multiples of
     // rsi->restoration_unit_size then some elements of the rusi array may be
@@ -1609,5 +1609,5 @@ void rest_finish_search(PictureParentControlSet *p_pcs_ptr, Macroblock *x, Av1Co
         }
     }
 
-    eb_aom_free(rusi);
+    svt_aom_free(rusi);
 }

@@ -16,7 +16,7 @@
  * - eb_av1_wedge_sign_from_residuals_avx2
  * - eb_av1_wedge_compute_delta_squares_avx2
  * - eb_av1_wedge_sse_from_residuals_avx2
- * - eb_aom_sum_squares_i16_sse2
+ * - svt_aom_sum_squares_i16_sse2
  *
  * @author Cidana-Wenyao
  *
@@ -35,15 +35,15 @@ namespace {
 class WedgeUtilTest : public ::testing::Test {
   public:
     void SetUp() override {
-        r0 = (int16_t *)eb_aom_memalign(32, MAX_SB_SQUARE * sizeof(int16_t));
-        r1 = (int16_t *)eb_aom_memalign(32, MAX_SB_SQUARE * sizeof(int16_t));
-        m = (uint8_t *)eb_aom_memalign(32, MAX_SB_SQUARE);
+        r0 = (int16_t *)svt_aom_memalign(32, MAX_SB_SQUARE * sizeof(int16_t));
+        r1 = (int16_t *)svt_aom_memalign(32, MAX_SB_SQUARE * sizeof(int16_t));
+        m = (uint8_t *)svt_aom_memalign(32, MAX_SB_SQUARE);
     }
 
     void TearDown() override {
-        eb_aom_free(r0);
-        eb_aom_free(r1);
-        eb_aom_free(m);
+        svt_aom_free(r0);
+        svt_aom_free(r1);
+        svt_aom_free(m);
         aom_clear_system_state();
     }
 
@@ -52,8 +52,8 @@ class WedgeUtilTest : public ::testing::Test {
         // pre-compute limit
         // MAX_MASK_VALUE/2 * (sum(r0**2) - sum(r1**2))
         int64_t limit;
-        limit = (int64_t)eb_aom_sum_squares_i16_c(r0, N);
-        limit -= (int64_t)eb_aom_sum_squares_i16_c(r1, N);
+        limit = (int64_t)svt_aom_sum_squares_i16_c(r0, N);
+        limit -= (int64_t)svt_aom_sum_squares_i16_c(r1, N);
         limit *= (1 << WEDGE_WEIGHT_BITS) / 2;
 
         // calculate ds: r0**2 - r1**2
@@ -74,7 +74,7 @@ class WedgeUtilTest : public ::testing::Test {
     int16_t *r0, *r1; /* two predicted residual */
 };
 
-extern "C" uint64_t eb_aom_sum_squares_i16_c(const int16_t *src, uint32_t n);
+extern "C" uint64_t svt_aom_sum_squares_i16_c(const int16_t *src, uint32_t n);
 #define MAX_MASK_VALUE (1 << WEDGE_WEIGHT_BITS)
 TEST_F(WedgeUtilTest, MaskSignRandomTest) {
     const int iterations = 10000;
@@ -289,7 +289,7 @@ class AomSumSquaresTest : public ::testing::TestWithParam<AomHSumSquaresParam> {
             }
 
             uint64_t res_ref_ =
-                eb_aom_sum_squares_i16_c((const int16_t *)src_, width * height);
+                svt_aom_sum_squares_i16_c((const int16_t *)src_, width * height);
 
             uint64_t res_tst_ =
                 test_impl((const int16_t *)src_, width * height);
@@ -309,6 +309,6 @@ TEST_P(AomSumSquaresTest, MatchTest) {
 INSTANTIATE_TEST_CASE_P(
     SUM_SQUARES_TEST, AomSumSquaresTest,
     ::testing::Combine(::testing::Range(BLOCK_4X4, BlockSizeS_ALL),
-                       ::testing::Values(eb_aom_sum_squares_i16_sse2)));
+                       ::testing::Values(svt_aom_sum_squares_i16_sse2)));
 
 }  // namespace

@@ -768,7 +768,7 @@ void tpl_mc_flow_dispenser(
                                                   mb_origin_x,
                                                   mb_origin_y,
                                                   &inter_pred_params);
-                        eb_aom_subtract_block(16, 16, src_diff, 16, src_mb, input_picture_ptr->stride_y, predictor, 16);
+                        svt_aom_subtract_block(16, 16, src_diff, 16, src_mb, input_picture_ptr->stride_y, predictor, 16);
 
                         svt_av1_wht_fwd_txfm(src_diff, 16, coeff, tx_size, 8, 0);
 
@@ -867,7 +867,7 @@ void tpl_mc_flow_dispenser(
                                                       dst_buffer_stride);
                     }
 
-                    eb_aom_subtract_block(16, 16, src_diff, 16, src_mb, input_picture_ptr->stride_y, dst_buffer, dst_buffer_stride);
+                    svt_aom_subtract_block(16, 16, src_diff, 16, src_mb, input_picture_ptr->stride_y, dst_buffer, dst_buffer_stride);
                     svt_av1_wht_fwd_txfm(src_diff, 16, coeff, tx_size, 8, 0);
 
                     uint16_t eob = 0;

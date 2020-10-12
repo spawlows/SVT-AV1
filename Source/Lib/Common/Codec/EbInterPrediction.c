@@ -46,9 +46,9 @@ int is_masked_compound_type(COMPOUND_TYPE type) {
 }
 
 
-void eb_aom_highbd_subtract_block_c(int rows, int cols, int16_t *diff, ptrdiff_t diff_stride,
-                                 const uint8_t *src8, ptrdiff_t src_stride, const uint8_t *pred8,
-                                 ptrdiff_t pred_stride, int bd) {
+void svt_aom_highbd_subtract_block_c(int rows, int cols, int16_t *diff, ptrdiff_t diff_stride,
+                                     const uint8_t *src8, ptrdiff_t src_stride, const uint8_t *pred8,
+                                     ptrdiff_t pred_stride, int bd) {
     uint16_t *src  = (uint16_t *)(src8);
     uint16_t *pred = (uint16_t *)(pred8);
     (void)bd;
@@ -62,9 +62,9 @@ void eb_aom_highbd_subtract_block_c(int rows, int cols, int16_t *diff, ptrdiff_t
     }
 }
 
-void eb_aom_subtract_block_c(int rows, int cols, int16_t *diff, ptrdiff_t diff_stride,
-                          const uint8_t *src, ptrdiff_t src_stride, const uint8_t *pred,
-                          ptrdiff_t pred_stride) {
+void svt_aom_subtract_block_c(int rows, int cols, int16_t *diff, ptrdiff_t diff_stride,
+                              const uint8_t *src, ptrdiff_t src_stride, const uint8_t *pred,
+                              ptrdiff_t pred_stride) {
 
     for (int r = 0; r < rows; r++) {
         for (int c = 0; c < cols; c++) diff[c] = src[c] - pred[c];
@@ -1889,38 +1889,38 @@ void combine_interintra_highbd(InterIntraMode mode, uint8_t use_wedge_interintra
             const uint8_t *mask = av1_get_contiguous_soft_mask(wedge_index, wedge_sign, bsize);
             const int      subh = 2 * mi_size_high[bsize] == bh;
             const int      subw = 2 * mi_size_wide[bsize] == bw;
-            eb_aom_highbd_blend_a64_mask(comppred8,
-                                         compstride,
-                                         intrapred8,
-                                         intrastride,
-                                         interpred8,
-                                         interstride,
-                                         mask,
-                                         block_size_wide[bsize],
-                                         bw,
-                                         bh,
-                                         subw,
-                                         subh,
-                                         bd);
+            svt_aom_highbd_blend_a64_mask(comppred8,
+                                          compstride,
+                                          intrapred8,
+                                          intrastride,
+                                          interpred8,
+                                          interstride,
+                                          mask,
+                                          block_size_wide[bsize],
+                                          bw,
+                                          bh,
+                                          subw,
+                                          subh,
+                                          bd);
         }
         return;
     }
 
     uint8_t mask[MAX_SB_SQUARE];
     build_smooth_interintra_mask(mask, bw, plane_bsize, mode);
-    eb_aom_highbd_blend_a64_mask(comppred8,
-                                 compstride,
-                                 intrapred8,
-                                 intrastride,
-                                 interpred8,
-                                 interstride,
-                                 mask,
-                                 bw,
-                                 bw,
-                                 bh,
-                                 0,
-                                 0,
-                                 bd);
+    svt_aom_highbd_blend_a64_mask(comppred8,
+                                  compstride,
+                                  intrapred8,
+                                  intrastride,
+                                  interpred8,
+                                  interstride,
+                                  mask,
+                                  bw,
+                                  bw,
+                                  bh,
+                                  0,
+                                  0,
+                                  bd);
 }
 
 static const uint8_t *av1_get_compound_type_mask(const InterInterCompoundData *const comp_data,
@@ -1947,7 +1947,22 @@ void build_masked_compound_no_round(uint8_t *dst, int dst_stride, const CONV_BUF
     const uint8_t *mask = av1_get_compound_type_mask(comp_data, seg_mask, sb_type);
 
     if (is_16bit) {
-        eb_aom_highbd_blend_a64_d16_mask(dst,
+        svt_aom_highbd_blend_a64_d16_mask(dst,
+                                          dst_stride,
+                                          src0,
+                                          src0_stride,
+                                          src1,
+                                          src1_stride,
+                                          mask,
+                                          block_size_wide[sb_type],
+                                          w,
+                                          h,
+                                          subw,
+                                          subh,
+                                          conv_params,
+                                          bit_depth);
+    } else {
+        svt_aom_lowbd_blend_a64_d16_mask(dst,
                                          dst_stride,
                                          src0,
                                          src0_stride,
@@ -1959,22 +1974,7 @@ void build_masked_compound_no_round(uint8_t *dst, int dst_stride, const CONV_BUF
                                          h,
                                          subw,
                                          subh,
-                                         conv_params,
-                                         bit_depth);
-    } else {
-        eb_aom_lowbd_blend_a64_d16_mask(dst,
-                                        dst_stride,
-                                        src0,
-                                        src0_stride,
-                                        src1,
-                                        src1_stride,
-                                        mask,
-                                        block_size_wide[sb_type],
-                                        w,
-                                        h,
-                                        subw,
-                                        subh,
-                                        conv_params);
+                                         conv_params);
     }
 }
 
@@ -2165,42 +2165,42 @@ void combine_interintra(InterIntraMode mode, int8_t use_wedge_interintra, int we
             const uint8_t *mask = av1_get_contiguous_soft_mask(wedge_index, wedge_sign, bsize);
             const int      subw = 2 * mi_size_wide[bsize] == bw;
             const int      subh = 2 * mi_size_high[bsize] == bh;
-            eb_aom_blend_a64_mask(comppred,
-                                  compstride,
-                                  intrapred,
-                                  intrastride,
-                                  interpred,
-                                  interstride,
-                                  mask,
-                                  block_size_wide[bsize],
-                                  bw,
-                                  bh,
-                                  subw,
-                                  subh);
+            svt_aom_blend_a64_mask(comppred,
+                                   compstride,
+                                   intrapred,
+                                   intrastride,
+                                   interpred,
+                                   interstride,
+                                   mask,
+                                   block_size_wide[bsize],
+                                   bw,
+                                   bh,
+                                   subw,
+                                   subh);
         }
         return;
     } else {
         uint8_t mask[MAX_SB_SQUARE];
         build_smooth_interintra_mask(mask, bw, plane_bsize, mode);
-        eb_aom_blend_a64_mask(comppred,
-                              compstride,
-                              intrapred,
-                              intrastride,
-                              interpred,
-                              interstride,
-                              mask,
-                              bw,
-                              bw,
-                              bh,
-                              0,
-                              0);
+        svt_aom_blend_a64_mask(comppred,
+                               compstride,
+                               intrapred,
+                               intrastride,
+                               interpred,
+                               interstride,
+                               mask,
+                               bw,
+                               bw,
+                               bh,
+                               0,
+                               0);
     }
 }
 
-void eb_aom_highbd_blend_a64_hmask_16bit_c(uint16_t *dst, uint32_t dst_stride, const uint16_t *src0,
-                                     uint32_t src0_stride, const uint16_t *src1,
-                                     uint32_t src1_stride, const uint8_t *mask, int w, int h,
-                                     int bd) {
+void svt_aom_highbd_blend_a64_hmask_16bit_c(uint16_t *dst, uint32_t dst_stride, const uint16_t *src0,
+                                            uint32_t src0_stride, const uint16_t *src1,
+                                            uint32_t src1_stride, const uint8_t *mask, int w, int h,
+                                            int bd) {
     (void)bd;
 
     assert(IMPLIES(src0 == dst, src0_stride == dst_stride));
@@ -2221,7 +2221,7 @@ void eb_aom_highbd_blend_a64_hmask_16bit_c(uint16_t *dst, uint32_t dst_stride, c
     }
 }
 
-uint64_t eb_aom_sum_squares_i16_c(const int16_t *src, uint32_t n) {
+uint64_t svt_aom_sum_squares_i16_c(const int16_t *src, uint32_t n) {
     uint64_t ss = 0;
     do {
         const int16_t v = *src++;

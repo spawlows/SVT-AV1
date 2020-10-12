@@ -585,11 +585,11 @@ static void pick_wedge(PictureControlSet *picture_control_set_ptr, ModeDecisionC
         uint16_t *src_buf_hbd = (uint16_t *)src_pic->buffer_y +
                                 (context_ptr->blk_origin_x + src_pic->origin_x) +
                                 (context_ptr->blk_origin_y + src_pic->origin_y) * src_pic->stride_y;
-        eb_aom_highbd_subtract_block(bh,
-                                  bw,
-                                  residual0,
-                                  bw,
-                                  (uint8_t *)src_buf_hbd /*src->buf*/,
+        svt_aom_highbd_subtract_block(bh,
+                                      bw,
+                                      residual0,
+                                      bw,
+                                      (uint8_t *)src_buf_hbd /*src->buf*/,
                                   src_pic->stride_y /*src->stride*/,
                                   (uint8_t *)p0,
                                   bw,
@@ -597,7 +597,7 @@ static void pick_wedge(PictureControlSet *picture_control_set_ptr, ModeDecisionC
     } else {
         uint8_t *src_buf = src_pic->buffer_y + (context_ptr->blk_origin_x + src_pic->origin_x) +
                            (context_ptr->blk_origin_y + src_pic->origin_y) * src_pic->stride_y;
-        eb_aom_subtract_block(
+        svt_aom_subtract_block(
                 bh, bw, residual0, bw, src_buf /*src->buf*/, src_pic->stride_y /*src->stride*/, p0, bw);
     }
     int64_t sign_limit =
@@ -882,8 +882,8 @@ void pick_interinter_mask(ModeDecisionCandidate *candidate_ptr,
 
 
 //
-int64_t eb_aom_highbd_sse_c(const uint8_t *a8, int a_stride, const uint8_t *b8, int b_stride,
-                            int width, int height) {
+int64_t svt_aom_highbd_sse_c(const uint8_t *a8, int a_stride, const uint8_t *b8, int b_stride,
+                             int width, int height) {
     int       y, x;
     int64_t   sse = 0;
     uint16_t *a   = (uint16_t *)a8; //CONVERT_TO_SHORTPTR(a8);
@@ -900,8 +900,8 @@ int64_t eb_aom_highbd_sse_c(const uint8_t *a8, int a_stride, const uint8_t *b8, 
     return sse;
 }
 
-int64_t eb_aom_sse_c(const uint8_t *a, int a_stride, const uint8_t *b, int b_stride, int width,
-                     int height) {
+int64_t svt_aom_sse_c(const uint8_t *a, int a_stride, const uint8_t *b, int b_stride, int width,
+                      int height) {
     int     y, x;
     int64_t sse = 0;
 
@@ -942,9 +942,9 @@ void model_rd_for_sb_with_curvfit(PictureControlSet *  picture_control_set_ptr,
         int64_t         dist, sse;
         int             rate;
         if (context_ptr->hbd_mode_decision) // CCODE
-            sse = eb_aom_highbd_sse(src_buf, src_stride, pred_buf, pred_stride, bw, bh);
+            sse = svt_aom_highbd_sse(src_buf, src_stride, pred_buf, pred_stride, bw, bh);
         else
-            sse = eb_aom_sse(src_buf, src_stride, pred_buf, pred_stride, bw, bh);
+            sse = svt_aom_sse(src_buf, src_stride, pred_buf, pred_stride, bw, bh);
 
         sse = ROUND_POWER_OF_TWO(sse, bd_round);
         model_rd_with_curvfit(picture_control_set_ptr,
@@ -2023,7 +2023,7 @@ static INLINE void build_obmc_inter_pred_above(uint8_t is16bit, MacroBlockD *xd,
         const uint8_t *const mask       = eb_av1_get_obmc_mask(bh);
 
         if (is16bit)
-            eb_aom_highbd_blend_a64_vmask_16bit((uint16_t *)dst,
+            svt_aom_highbd_blend_a64_vmask_16bit((uint16_t *)dst,
                                                 dst_stride,
                                                 (uint16_t *)dst,
                                                 dst_stride,
@@ -2034,7 +2034,7 @@ static INLINE void build_obmc_inter_pred_above(uint8_t is16bit, MacroBlockD *xd,
                                                 bh,
                                                 10);
         else
-            eb_aom_blend_a64_vmask(dst, dst_stride, dst, dst_stride, tmp, tmp_stride, mask, bw, bh);
+            svt_aom_blend_a64_vmask(dst, dst_stride, dst, dst_stride, tmp, tmp_stride, mask, bw, bh);
     }
 }
 static INLINE void build_obmc_inter_pred_above_hbd(uint8_t bit_depth, MacroBlockD *xd,
@@ -2071,16 +2071,16 @@ static INLINE void build_obmc_inter_pred_above_hbd(uint8_t bit_depth, MacroBlock
         const uint8_t *const tmp = &ctxt->adjacent[plane][plane_col_pos];
         const uint8_t *const mask = eb_av1_get_obmc_mask(bh);
 
-        eb_aom_highbd_blend_a64_vmask_16bit((uint16_t *)dst,
-            dst_stride,
-            (uint16_t *)dst,
-            dst_stride,
-            (uint16_t *)tmp,
-            tmp_stride,
-            mask,
-            bw,
-            bh,
-            bit_depth);
+        svt_aom_highbd_blend_a64_vmask_16bit((uint16_t *)dst,
+                                             dst_stride,
+                                             (uint16_t *)dst,
+                                             dst_stride,
+                                             (uint16_t *)tmp,
+                                             tmp_stride,
+                                             mask,
+                                             bw,
+                                             bh,
+                                             bit_depth);
     }
 }
 static INLINE void build_obmc_inter_pred_left(uint8_t is16bit, MacroBlockD *xd, int rel_mi_row,
@@ -2118,7 +2118,7 @@ static INLINE void build_obmc_inter_pred_left(uint8_t is16bit, MacroBlockD *xd, 
         const uint8_t *const mask       = eb_av1_get_obmc_mask(bw);
 
         if (is16bit)
-            eb_aom_highbd_blend_a64_hmask_16bit((uint16_t *)dst,
+            svt_aom_highbd_blend_a64_hmask_16bit((uint16_t *)dst,
                                                 dst_stride,
                                                 (uint16_t *)dst,
                                                 dst_stride,
@@ -2129,7 +2129,7 @@ static INLINE void build_obmc_inter_pred_left(uint8_t is16bit, MacroBlockD *xd, 
                                                 bh,
                                                 10);
         else
-            eb_aom_blend_a64_hmask(dst, dst_stride, dst, dst_stride, tmp, tmp_stride, mask, bw, bh);
+            svt_aom_blend_a64_hmask(dst, dst_stride, dst, dst_stride, tmp, tmp_stride, mask, bw, bh);
     }
 }
 static INLINE void build_obmc_inter_pred_left_hbd(uint8_t bit_depth, MacroBlockD *xd,
@@ -2166,7 +2166,7 @@ static INLINE void build_obmc_inter_pred_left_hbd(uint8_t bit_depth, MacroBlockD
         const uint8_t *const tmp = &ctxt->adjacent[plane][plane_row_pos * tmp_stride];
         const uint8_t *const mask = eb_av1_get_obmc_mask(bw);
 
-        eb_aom_highbd_blend_a64_hmask_16bit((uint16_t *)dst,
+        svt_aom_highbd_blend_a64_hmask_16bit((uint16_t *)dst,
             dst_stride,
             (uint16_t *)dst,
             dst_stride,
@@ -6243,7 +6243,7 @@ void calc_pred_masked_compound(PictureControlSet *    pcs_ptr,
             uint16_t *src_buf_hbd =
                 (uint16_t *)src_pic->buffer_y + (context_ptr->blk_origin_x + src_pic->origin_x) +
                 (context_ptr->blk_origin_y + src_pic->origin_y) * src_pic->stride_y;
-            eb_aom_highbd_subtract_block(bheight,
+            svt_aom_highbd_subtract_block(bheight,
                 bwidth,
                 context_ptr->residual1,
                 bwidth,
@@ -6252,7 +6252,7 @@ void calc_pred_masked_compound(PictureControlSet *    pcs_ptr,
                 (uint8_t *)context_ptr->pred1,
                 bwidth,
                 EB_10BIT);
-            eb_aom_highbd_subtract_block(bheight,
+            svt_aom_highbd_subtract_block(bheight,
                 bwidth,
                 context_ptr->diff10,
                 bwidth,
@@ -6265,7 +6265,7 @@ void calc_pred_masked_compound(PictureControlSet *    pcs_ptr,
         else {
             uint8_t *src_buf = src_pic->buffer_y + (context_ptr->blk_origin_x + src_pic->origin_x) +
                 (context_ptr->blk_origin_y + src_pic->origin_y) * src_pic->stride_y;
-            eb_aom_subtract_block(bheight,
+            svt_aom_subtract_block(bheight,
                 bwidth,
                 context_ptr->residual1,
                 bwidth,
@@ -6273,7 +6273,7 @@ void calc_pred_masked_compound(PictureControlSet *    pcs_ptr,
                 src_pic->stride_y,
                 context_ptr->pred1,
                 bwidth);
-            eb_aom_subtract_block(bheight,
+            svt_aom_subtract_block(bheight,
                 bwidth,
                 context_ptr->diff10,
                 bwidth,

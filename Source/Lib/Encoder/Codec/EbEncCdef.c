@@ -343,7 +343,7 @@ void eb_av1_cdef_frame(EncDecContext *context_ptr, SequenceControlSet *scs_ptr,
     const int32_t nvfb  = (cm->mi_rows + MI_SIZE_64X64 - 1) / MI_SIZE_64X64;
     const int32_t nhfb  = (cm->mi_cols + MI_SIZE_64X64 - 1) / MI_SIZE_64X64;
     //eb_av1_setup_dst_planes(xd->plane, cm->seq_params.sb_size, frame, 0, 0, 0, num_planes);
-    row_cdef = (uint8_t *)eb_aom_malloc(sizeof(*row_cdef) * (nhfb + 2) * 2);
+    row_cdef = (uint8_t *)svt_aom_malloc(sizeof(*row_cdef) * (nhfb + 2) * 2);
     assert(row_cdef != NULL);
     memset(row_cdef, 1, sizeof(*row_cdef) * (nhfb + 2) * 2);
     prev_row_cdef = row_cdef + 1;
@@ -360,8 +360,8 @@ void eb_av1_cdef_frame(EncDecContext *context_ptr, SequenceControlSet *scs_ptr,
 
     const int32_t stride = (cm->mi_cols << MI_SIZE_LOG2) + 2 * CDEF_HBORDER;
     for (int32_t pli = 0; pli < num_planes; pli++) {
-        linebuf[pli] = (uint16_t *)eb_aom_malloc(sizeof(*linebuf) * CDEF_VBORDER * stride);
-        colbuf[pli]  = (uint16_t *)eb_aom_malloc(
+        linebuf[pli] = (uint16_t *)svt_aom_malloc(sizeof(*linebuf) * CDEF_VBORDER * stride);
+        colbuf[pli]  = (uint16_t *)svt_aom_malloc(
             sizeof(*colbuf) * ((CDEF_BLOCKSIZE << mi_high_l2[pli]) + 2 * CDEF_VBORDER) *
             CDEF_HBORDER);
     }
@@ -663,10 +663,10 @@ void eb_av1_cdef_frame(EncDecContext *context_ptr, SequenceControlSet *scs_ptr,
             curr_row_cdef = tmp;
         }
     }
-    eb_aom_free(row_cdef);
+    svt_aom_free(row_cdef);
     for (int32_t pli = 0; pli < num_planes; pli++) {
-        eb_aom_free(linebuf[pli]);
-        eb_aom_free(colbuf[pli]);
+        svt_aom_free(linebuf[pli]);
+        svt_aom_free(colbuf[pli]);
     }
 }
 
@@ -713,7 +713,7 @@ void av1_cdef_frame16bit(EncDecContext *context_ptr, SequenceControlSet *scs_ptr
     int32_t coeff_shift = AOMMAX(scs_ptr->static_config.encoder_bit_depth /*cm->bit_depth*/ - 8, 0);
     const int32_t nvfb  = (cm->mi_rows + MI_SIZE_64X64 - 1) / MI_SIZE_64X64;
     const int32_t nhfb  = (cm->mi_cols + MI_SIZE_64X64 - 1) / MI_SIZE_64X64;
-    row_cdef            = (uint8_t *)eb_aom_malloc(sizeof(*row_cdef) * (nhfb + 2) * 2);
+    row_cdef            = (uint8_t *)svt_aom_malloc(sizeof(*row_cdef) * (nhfb + 2) * 2);
     assert(row_cdef);
     memset(row_cdef, 1, sizeof(*row_cdef) * (nhfb + 2) * 2);
     prev_row_cdef = row_cdef + 1;
@@ -730,8 +730,8 @@ void av1_cdef_frame16bit(EncDecContext *context_ptr, SequenceControlSet *scs_ptr
 
     const int32_t stride = (cm->mi_cols << MI_SIZE_LOG2) + 2 * CDEF_HBORDER;
     for (int32_t pli = 0; pli < num_planes; pli++) {
-        linebuf[pli] = (uint16_t *)eb_aom_malloc(sizeof(*linebuf) * CDEF_VBORDER * stride);
-        colbuf[pli]  = (uint16_t *)eb_aom_malloc(
+        linebuf[pli] = (uint16_t *)svt_aom_malloc(sizeof(*linebuf) * CDEF_VBORDER * stride);
+        colbuf[pli]  = (uint16_t *)svt_aom_malloc(
             sizeof(*colbuf) * ((CDEF_BLOCKSIZE << mi_high_l2[pli]) + 2 * CDEF_VBORDER) *
             CDEF_HBORDER);
     }
@@ -1030,10 +1030,10 @@ void av1_cdef_frame16bit(EncDecContext *context_ptr, SequenceControlSet *scs_ptr
             curr_row_cdef = tmp;
         }
     }
-    eb_aom_free(row_cdef);
+    svt_aom_free(row_cdef);
     for (int32_t pli = 0; pli < num_planes; pli++) {
-        eb_aom_free(linebuf[pli]);
-        eb_aom_free(colbuf[pli]);
+        svt_aom_free(linebuf[pli]);
+        svt_aom_free(colbuf[pli]);
     }
 }
 

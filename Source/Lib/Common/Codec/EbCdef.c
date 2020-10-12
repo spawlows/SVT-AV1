@@ -46,7 +46,7 @@ static void *get_actual_malloc_address(void *const mem) {
     return (void *)(*malloc_addr_location);
 }
 
-void *eb_aom_memalign(size_t align, size_t size) {
+void *svt_aom_memalign(size_t align, size_t size) {
     void *       x            = NULL;
     const size_t aligned_size = get_aligned_malloc_size(size, align);
 #if defined(AOM_MAX_ALLOCABLE_MEMORY)
@@ -60,16 +60,16 @@ void *eb_aom_memalign(size_t align, size_t size) {
     return x;
 }
 
-void *eb_aom_malloc(size_t size) { return eb_aom_memalign(DEFAULT_ALIGNMENT, size); }
+void *svt_aom_malloc(size_t size) { return svt_aom_memalign(DEFAULT_ALIGNMENT, size); }
 
-void eb_aom_free(void *memblk) {
+void svt_aom_free(void *memblk) {
     if (memblk) {
         void *addr = get_actual_malloc_address(memblk);
         free(addr);
     }
 }
 
-void *eb_aom_memset16(void *dest, int32_t val, size_t length) {
+void *svt_aom_memset16(void *dest, int32_t val, size_t length) {
     size_t    i;
     uint16_t *dest16 = (uint16_t *)dest;
     for (i = 0; i < length; i++) *dest16++ = (uint16_t)val;

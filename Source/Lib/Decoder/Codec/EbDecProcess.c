@@ -987,11 +987,11 @@ void svt_cdef_frame_mt(EbDecHandle *dec_handle_ptr, DecThreadCtxt *thread_ctxt) 
             each 64x64 in SB block in raster scan order,
             i.e for transversing across 0 - 3 64x64s in SB block*/
             for (int32_t i = 0; i < 4; i += 3)
-                colbuf[pli + i] = (uint16_t *)eb_aom_malloc(
+                colbuf[pli + i] = (uint16_t *)svt_aom_malloc(
                     sizeof(*colbuf) * ((CDEF_BLOCKSIZE << mi_high_l2[pli]) + 2 * CDEF_VBORDER) *
                     CDEF_HBORDER);
         } else {
-            colbuf[pli] = (uint16_t *)eb_aom_malloc(
+            colbuf[pli] = (uint16_t *)svt_aom_malloc(
                 sizeof(*colbuf) * ((CDEF_BLOCKSIZE << mi_high_l2[pli]) + 2 * CDEF_VBORDER) *
                 CDEF_HBORDER);
         }
@@ -1064,10 +1064,10 @@ void svt_cdef_frame_mt(EbDecHandle *dec_handle_ptr, DecThreadCtxt *thread_ctxt) 
     }
     if (dec_handle_ptr->seq_header.sb_size == BLOCK_128X128) {
         for (int32_t i = 0; i < 4; i += 3) {
-            for (int32_t pli = 0; pli < num_planes; pli++) { eb_aom_free(colbuf[pli + i]); }
+            for (int32_t pli = 0; pli < num_planes; pli++) { svt_aom_free(colbuf[pli + i]); }
         }
     } else
-        for (int32_t pli = 0; pli < num_planes; pli++) { eb_aom_free(colbuf[pli]); }
+        for (int32_t pli = 0; pli < num_planes; pli++) { svt_aom_free(colbuf[pli]); }
 
     eb_block_on_mutex(dec_mt_frame_data->temp_mutex);
     dec_mt_frame_data->num_threads_cdefed++;

@@ -156,26 +156,26 @@ class AV1Convolve2DTest : public ::testing::TestWithParam<Convolve2DParam> {
     // make the address algined to 32.
     void SetUp() override {
         conv_buf_init_ = reinterpret_cast<ConvBufType *>(
-            eb_aom_memalign(32, MAX_SB_SQUARE * sizeof(ConvBufType)));
+            svt_aom_memalign(32, MAX_SB_SQUARE * sizeof(ConvBufType)));
         conv_buf_ref_ = reinterpret_cast<ConvBufType *>(
-            eb_aom_memalign(32, MAX_SB_SQUARE * sizeof(ConvBufType)));
+            svt_aom_memalign(32, MAX_SB_SQUARE * sizeof(ConvBufType)));
         conv_buf_tst_ = reinterpret_cast<ConvBufType *>(
-            eb_aom_memalign(32, MAX_SB_SQUARE * sizeof(ConvBufType)));
+            svt_aom_memalign(32, MAX_SB_SQUARE * sizeof(ConvBufType)));
         output_init_ = reinterpret_cast<Sample *>(
-            eb_aom_memalign(32, MAX_SB_SQUARE * sizeof(Sample)));
+            svt_aom_memalign(32, MAX_SB_SQUARE * sizeof(Sample)));
         output_ref_ = reinterpret_cast<Sample *>(
-            eb_aom_memalign(32, MAX_SB_SQUARE * sizeof(Sample)));
+            svt_aom_memalign(32, MAX_SB_SQUARE * sizeof(Sample)));
         output_tst_ = reinterpret_cast<Sample *>(
-            eb_aom_memalign(32, MAX_SB_SQUARE * sizeof(Sample)));
+            svt_aom_memalign(32, MAX_SB_SQUARE * sizeof(Sample)));
     }
 
     void TearDown() override {
-        eb_aom_free(conv_buf_init_);
-        eb_aom_free(conv_buf_ref_);
-        eb_aom_free(conv_buf_tst_);
-        eb_aom_free(output_init_);
-        eb_aom_free(output_ref_);
-        eb_aom_free(output_tst_);
+        svt_aom_free(conv_buf_init_);
+        svt_aom_free(conv_buf_ref_);
+        svt_aom_free(conv_buf_tst_);
+        svt_aom_free(output_init_);
+        svt_aom_free(output_ref_);
+        svt_aom_free(output_tst_);
         aom_clear_system_state();
     }
 

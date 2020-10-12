@@ -70,7 +70,7 @@ class ColorCountTest : public ::testing::Test {
   protected:
     ColorCountTest() : rnd_(16, false) {
         input_ =
-            (Sample *)eb_aom_memalign(32, MAX_PALETTE_SQUARE * sizeof(Sample));
+            (Sample *)svt_aom_memalign(32, MAX_PALETTE_SQUARE * sizeof(Sample));
         bd_ = 8;
         ref_.clear();
         val_count_ = nullptr;
@@ -78,7 +78,7 @@ class ColorCountTest : public ::testing::Test {
 
     ~ColorCountTest() {
         if (input_) {
-            eb_aom_free(input_);
+            svt_aom_free(input_);
             input_ = nullptr;
         }
         aom_clear_system_state();
@@ -101,14 +101,14 @@ class ColorCountTest : public ::testing::Test {
 
     void run_test(size_t times) {
         const int max_colors = (1 << bd_);
-        val_count_ = (int *)eb_aom_memalign(32, max_colors * sizeof(int));
+        val_count_ = (int *)svt_aom_memalign(32, max_colors * sizeof(int));
         for (size_t i = 0; i < times; i++) {
             prepare_data();
             ASSERT_EQ(count_color(), ref_.size())
                 << "color count failed at: " << i;
         }
         if (val_count_) {
-            eb_aom_free(val_count_);
+            svt_aom_free(val_count_);
             val_count_ = nullptr;
         }
     }

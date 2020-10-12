@@ -22,7 +22,7 @@
 #define VARIANCE_PRECISION 16
 #define MEAN_PRECISION (VARIANCE_PRECISION >> 1)
 
-void *eb_aom_memset16(void *dest, int32_t val, size_t length);
+void *svt_aom_memset16(void *dest, int32_t val, size_t length);
 
 /*********************************
  * Picture Copy
@@ -393,7 +393,7 @@ void compressed_pack_sb(uint8_t *in8_bit_buffer, uint32_t in8_stride, uint8_t *i
 // Copies the source image into the destination image and updates the
 // destination's UMV borders.
 // Note: The frames are assumed to be identical in size.
-void eb_aom_yv12_copy_y_c(const Yv12BufferConfig *src_ybc, Yv12BufferConfig *dst_ybc) {
+void svt_aom_yv12_copy_y_c(const Yv12BufferConfig *src_ybc, Yv12BufferConfig *dst_ybc) {
     int32_t        row;
     const uint8_t *src = src_ybc->y_buffer;
     uint8_t *      dst = dst_ybc->y_buffer;
@@ -416,7 +416,7 @@ void eb_aom_yv12_copy_y_c(const Yv12BufferConfig *src_ybc, Yv12BufferConfig *dst
     }
 }
 
-void eb_aom_yv12_copy_u_c(const Yv12BufferConfig *src_bc, Yv12BufferConfig *dst_bc) {
+void svt_aom_yv12_copy_u_c(const Yv12BufferConfig *src_bc, Yv12BufferConfig *dst_bc) {
     int32_t        row;
     const uint8_t *src = src_bc->u_buffer;
     uint8_t *      dst = dst_bc->u_buffer;
@@ -439,7 +439,7 @@ void eb_aom_yv12_copy_u_c(const Yv12BufferConfig *src_bc, Yv12BufferConfig *dst_
     }
 }
 
-void eb_aom_yv12_copy_v_c(const Yv12BufferConfig *src_bc, Yv12BufferConfig *dst_bc) {
+void svt_aom_yv12_copy_v_c(const Yv12BufferConfig *src_bc, Yv12BufferConfig *dst_bc) {
     int32_t        row;
     const uint8_t *src = src_bc->v_buffer;
     uint8_t *      dst = dst_bc->v_buffer;

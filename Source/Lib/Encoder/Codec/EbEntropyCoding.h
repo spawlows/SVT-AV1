@@ -107,13 +107,13 @@ struct AomWriteBitBuffer {
     uint32_t bit_offset;
 };
 
-int32_t  eb_aom_wb_is_byte_aligned(const struct AomWriteBitBuffer *wb);
-uint32_t eb_aom_wb_bytes_written(const struct AomWriteBitBuffer *wb);
+int32_t  svt_aom_wb_is_byte_aligned(const struct AomWriteBitBuffer *wb);
+uint32_t svt_aom_wb_bytes_written(const struct AomWriteBitBuffer *wb);
 
-void eb_aom_wb_write_bit(struct AomWriteBitBuffer *wb, int32_t bit);
-void eb_aom_wb_write_literal(struct AomWriteBitBuffer *wb, int32_t data, int32_t bits);
+void svt_aom_wb_write_bit(struct AomWriteBitBuffer *wb, int32_t bit);
+void svt_aom_wb_write_literal(struct AomWriteBitBuffer *wb, int32_t data, int32_t bits);
 
-void eb_aom_wb_write_inv_signed_literal(struct AomWriteBitBuffer *wb, int32_t data, int32_t bits);
+void svt_aom_wb_write_inv_signed_literal(struct AomWriteBitBuffer *wb, int32_t data, int32_t bits);
 //*******************************************************************************************//
 // Bitstream.h
 struct AomWriteBitBuffer;
@@ -212,8 +212,8 @@ MotionMode motion_mode_allowed(const PictureControlSet *pcs_ptr, const BlkStruct
 int is_masked_compound_type(COMPOUND_TYPE type);
 
 
-int32_t eb_aom_count_primitive_subexpfin(uint16_t n, uint16_t k, uint16_t v);
-int32_t eb_aom_count_primitive_refsubexpfin(uint16_t n, uint16_t k, uint16_t ref, uint16_t v);
+int32_t svt_aom_count_primitive_subexpfin(uint16_t n, uint16_t k, uint16_t v);
+int32_t svt_aom_count_primitive_refsubexpfin(uint16_t n, uint16_t k, uint16_t ref, uint16_t v);
 
 #ifdef __cplusplus
 }

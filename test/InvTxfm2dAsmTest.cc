@@ -224,23 +224,23 @@ class InvTxfm2dAsmTest : public ::testing::TestWithParam<InvTxfm2dParam> {
 
     void SetUp() override {
         pixel_input_ = reinterpret_cast<int16_t *>(
-            eb_aom_memalign(32, MAX_TX_SQUARE * sizeof(int16_t)));
+            svt_aom_memalign(32, MAX_TX_SQUARE * sizeof(int16_t)));
         input_ = reinterpret_cast<int32_t *>(
-            eb_aom_memalign(32, MAX_TX_SQUARE * sizeof(int32_t)));
+            svt_aom_memalign(32, MAX_TX_SQUARE * sizeof(int32_t)));
         output_test_ = reinterpret_cast<uint16_t *>(
-            eb_aom_memalign(32, MAX_TX_SQUARE * sizeof(uint16_t)));
+            svt_aom_memalign(32, MAX_TX_SQUARE * sizeof(uint16_t)));
         output_ref_ = reinterpret_cast<uint16_t *>(
-            eb_aom_memalign(32, MAX_TX_SQUARE * sizeof(uint16_t)));
+            svt_aom_memalign(32, MAX_TX_SQUARE * sizeof(uint16_t)));
         lowbd_output_test_ = reinterpret_cast<uint8_t *>(
-            eb_aom_memalign(32, MAX_TX_SQUARE * sizeof(uint8_t)));
+            svt_aom_memalign(32, MAX_TX_SQUARE * sizeof(uint8_t)));
     }
 
     void TearDown() override {
-        eb_aom_free(pixel_input_);
-        eb_aom_free(input_);
-        eb_aom_free(output_test_);
-        eb_aom_free(output_ref_);
-        eb_aom_free(lowbd_output_test_);
+        svt_aom_free(pixel_input_);
+        svt_aom_free(input_);
+        svt_aom_free(output_test_);
+        svt_aom_free(output_ref_);
+        svt_aom_free(lowbd_output_test_);
         aom_clear_system_state();
     }
 
