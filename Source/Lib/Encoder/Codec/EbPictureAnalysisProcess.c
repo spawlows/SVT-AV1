@@ -77,9 +77,9 @@ EbErrorType picture_analysis_context_ctor(EbThreadContext *  thread_context_ptr,
     thread_context_ptr->dctor = picture_analysis_context_dctor;
 
     context_ptr->resource_coordination_results_input_fifo_ptr =
-        eb_system_resource_get_consumer_fifo(
+        svt_system_resource_get_consumer_fifo(
             enc_handle_ptr->resource_coordination_results_resource_ptr, index);
-    context_ptr->picture_analysis_results_output_fifo_ptr = eb_system_resource_get_producer_fifo(
+    context_ptr->picture_analysis_results_output_fifo_ptr = svt_system_resource_get_producer_fifo(
         enc_handle_ptr->picture_analysis_results_resource_ptr, index);
 
     if (denoise_flag == EB_TRUE) {
@@ -99,7 +99,7 @@ EbErrorType picture_analysis_context_ctor(EbThreadContext *  thread_context_ptr,
             desc.buffer_enable_mask = PICTURE_BUFFER_DESC_Y_FLAG;
         } else
             desc.buffer_enable_mask = PICTURE_BUFFER_DESC_Y_FLAG | PICTURE_BUFFER_DESC_Cb_FLAG;
-        EB_NEW(context_ptr->denoised_picture_ptr, eb_picture_buffer_desc_ctor, (EbPtr)&desc);
+        EB_NEW(context_ptr->denoised_picture_ptr, svt_picture_buffer_desc_ctor, (EbPtr)&desc);
 
         if (desc.color_format != EB_YUV444) {
             context_ptr->denoised_picture_ptr->buffer_cb =
@@ -114,7 +114,7 @@ EbErrorType picture_analysis_context_ctor(EbThreadContext *  thread_context_ptr,
         desc.max_height         = BLOCK_SIZE_64;
         desc.buffer_enable_mask = PICTURE_BUFFER_DESC_Y_FLAG;
 
-        EB_NEW(context_ptr->noise_picture_ptr, eb_picture_buffer_desc_ctor, (EbPtr)&desc);
+        EB_NEW(context_ptr->noise_picture_ptr, svt_picture_buffer_desc_ctor, (EbPtr)&desc);
     }
     return EB_ErrorNone;
 }
@@ -3631,9 +3631,9 @@ void *picture_analysis_kernel(void *input_ptr) {
                 uint8_t *in = input_picture_ptr->buffer_y + input_picture_ptr->origin_x +
                               input_picture_ptr->origin_y * input_picture_ptr->stride_y;
                 for (uint32_t row = 0; row < input_picture_ptr->height; row++)
-                    eb_memcpy(pa + row * input_padded_picture_ptr->stride_y,
-                              in + row * input_picture_ptr->stride_y,
-                              sizeof(uint8_t) * input_picture_ptr->width);
+                    svt_memcpy(pa + row * input_padded_picture_ptr->stride_y,
+                               in + row * input_picture_ptr->stride_y,
+                               sizeof(uint8_t) * input_picture_ptr->width);
             }
 
             // Set picture parameters to account for subpicture, picture scantype, and set regions by resolutions
@@ -3692,18 +3692,18 @@ void *picture_analysis_kernel(void *input_ptr) {
             }
         }
         // Get Empty Results Object
-        eb_get_empty_object(context_ptr->picture_analysis_results_output_fifo_ptr,
-                            &out_results_wrapper_ptr);
+        svt_get_empty_object(context_ptr->picture_analysis_results_output_fifo_ptr,
+                             &out_results_wrapper_ptr);
 
         PictureAnalysisResults *out_results_ptr = (PictureAnalysisResults *)
                                                       out_results_wrapper_ptr->object_ptr;
         out_results_ptr->pcs_wrapper_ptr = in_results_ptr->pcs_wrapper_ptr;
 
         // Release the Input Results
-        eb_release_object(in_results_wrapper_ptr);
+        svt_release_object(in_results_wrapper_ptr);
 
         // Post the Full Results Object
-        eb_post_full_object(out_results_wrapper_ptr);
+        svt_post_full_object(out_results_wrapper_ptr);
     }
     return NULL;
 }

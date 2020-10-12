@@ -51,7 +51,7 @@ static void segmentation_map_dctor(EbPtr p) {
     EB_FREE_ARRAY(obj->data);
 }
 
-static void eb_pcs_sb_structs_dctor(EbPtr p) {
+static void svt_pcs_sb_structs_dctor(EbPtr p) {
     PictureParentControlSet *obj = (PictureParentControlSet *)p;
     EB_FREE_ARRAY(obj->sb_params_array);
     EB_FREE_ARRAY(obj->sb_geom);
@@ -312,34 +312,34 @@ EbErrorType picture_control_set_ctor(PictureControlSet *object_ptr, EbPtr object
     // Reconstructed Picture Buffer
     if (is_16bit) {
         EB_NEW(object_ptr->recon_picture16bit_ptr,
-               eb_recon_picture_buffer_desc_ctor,
+               svt_recon_picture_buffer_desc_ctor,
                (EbPtr)&coeff_buffer_desc_init_data);
     } else {
         EB_NEW(object_ptr->recon_picture_ptr,
-               eb_recon_picture_buffer_desc_ctor,
+               svt_recon_picture_buffer_desc_ctor,
                (EbPtr)&input_pic_buf_desc_init_data);
     }
     if (init_data_ptr->is_16bit_pipeline && !is_16bit) {
         EB_NEW(object_ptr->recon_picture16bit_ptr,
-            eb_recon_picture_buffer_desc_ctor,
+            svt_recon_picture_buffer_desc_ctor,
             (EbPtr)&coeff_buffer_desc_init_data);
     }
     // Film Grain Picture Buffer
     if (init_data_ptr->film_grain_noise_level) {
         if (is_16bit) {
             EB_NEW(object_ptr->film_grain_picture16bit_ptr,
-                   eb_recon_picture_buffer_desc_ctor,
+                   svt_recon_picture_buffer_desc_ctor,
                    (EbPtr)&coeff_buffer_desc_init_data);
         } else {
             EB_NEW(object_ptr->film_grain_picture_ptr,
-                   eb_recon_picture_buffer_desc_ctor,
+                   svt_recon_picture_buffer_desc_ctor,
                    (EbPtr)&input_pic_buf_desc_init_data);
         }
     }
 
     if ((is_16bit) || (init_data_ptr->is_16bit_pipeline)) {
         EB_NEW(object_ptr->input_frame16bit,
-               eb_picture_buffer_desc_ctor,
+               svt_picture_buffer_desc_ctor,
                (EbPtr)&coeff_buffer_desc_init_data);
     }
     // Entropy Coder
@@ -1174,7 +1174,7 @@ static void picture_parent_control_set_dctor(EbPtr ptr) {
     EB_DESTROY_MUTEX(obj->debug_mutex);
     EB_FREE_ARRAY(obj->tile_group_info);
     if(obj->frame_superres_enabled){
-        eb_pcs_sb_structs_dctor(obj);
+        svt_pcs_sb_structs_dctor(obj);
         EB_DELETE(obj->enhanced_picture_ptr);
     }
 }
@@ -1213,7 +1213,7 @@ EbErrorType picture_parent_control_set_ctor(PictureParentControlSet *object_ptr,
         input_pic_buf_desc_init_data.color_format       = EB_YUV420; //set to 420 for MD
         input_pic_buf_desc_init_data.split_mode         = EB_FALSE;
         EB_NEW(object_ptr->chroma_downsampled_picture_ptr,
-               eb_picture_buffer_desc_ctor,
+               svt_picture_buffer_desc_ctor,
                (EbPtr)&input_pic_buf_desc_init_data);
         object_ptr->is_chroma_downsampled_picture_ptr_owner = EB_TRUE;
     } else if (init_data_ptr->color_format == EB_YUV420) {

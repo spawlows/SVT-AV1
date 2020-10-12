@@ -391,9 +391,9 @@ EbErrorType rate_control_context_ctor(EbThreadContext *  thread_context_ptr,
     thread_context_ptr->dctor = rate_control_context_dctor;
 
     context_ptr->rate_control_input_tasks_fifo_ptr =
-        eb_system_resource_get_consumer_fifo(enc_handle_ptr->rate_control_tasks_resource_ptr, 0);
+        svt_system_resource_get_consumer_fifo(enc_handle_ptr->rate_control_tasks_resource_ptr, 0);
     context_ptr->rate_control_output_results_fifo_ptr =
-        eb_system_resource_get_producer_fifo(enc_handle_ptr->rate_control_results_resource_ptr, 0);
+        svt_system_resource_get_producer_fifo(enc_handle_ptr->rate_control_results_resource_ptr, 0);
 
     // High level RC
     EB_NEW(context_ptr->high_level_rate_control_ptr, high_level_rate_control_context_ctor);
@@ -496,7 +496,7 @@ void high_level_rc_input_picture_vbr(PictureParentControlSet *pcs_ptr, SequenceC
 
     area_in_pixel = pcs_ptr->aligned_width * pcs_ptr->aligned_height;
 
-    eb_block_on_mutex(scs_ptr->encode_context_ptr->rate_table_update_mutex);
+    svt_block_on_mutex(scs_ptr->encode_context_ptr->rate_table_update_mutex);
 
     tables_updated              = scs_ptr->encode_context_ptr->rate_control_tables_array_updated;
     pcs_ptr->percentage_updated = EB_FALSE;
@@ -507,7 +507,7 @@ void high_level_rc_input_picture_vbr(PictureParentControlSet *pcs_ptr, SequenceC
                  [encode_context_ptr->hl_rate_control_historgram_queue_head_index]);
         while ((hl_rate_control_histogram_ptr_temp->life_count == 0) &&
                hl_rate_control_histogram_ptr_temp->passed_to_hlrc) {
-            eb_block_on_mutex(scs_ptr->encode_context_ptr->hl_rate_control_historgram_queue_mutex);
+            svt_block_on_mutex(scs_ptr->encode_context_ptr->hl_rate_control_historgram_queue_mutex);
             // Reset the Reorder Queue Entry
             hl_rate_control_histogram_ptr_temp->picture_number +=
                 INITIAL_RATE_CONTROL_REORDER_QUEUE_MAX_DEPTH;
@@ -522,7 +522,7 @@ void high_level_rc_input_picture_vbr(PictureParentControlSet *pcs_ptr, SequenceC
                  HIGH_LEVEL_RATE_CONTROL_HISTOGRAM_QUEUE_MAX_DEPTH - 1)
                 ? 0
                 : encode_context_ptr->hl_rate_control_historgram_queue_head_index + 1;
-            eb_release_mutex(scs_ptr->encode_context_ptr->hl_rate_control_historgram_queue_mutex);
+            svt_release_mutex(scs_ptr->encode_context_ptr->hl_rate_control_historgram_queue_mutex);
             hl_rate_control_histogram_ptr_temp =
                 encode_context_ptr->hl_rate_control_historgram_queue
                     [encode_context_ptr->hl_rate_control_historgram_queue_head_index];
@@ -717,10 +717,10 @@ void high_level_rc_input_picture_vbr(PictureParentControlSet *pcs_ptr, SequenceC
                     hl_rate_control_histogram_ptr_temp->pred_bits_ref_qp[ref_qp_index_temp] = 0;
 
                     if (ref_qp_table_index == previous_selected_ref_qp) {
-                        eb_block_on_mutex(
+                        svt_block_on_mutex(
                             scs_ptr->encode_context_ptr->hl_rate_control_historgram_queue_mutex);
                         hl_rate_control_histogram_ptr_temp->life_count--;
-                        eb_release_mutex(
+                        svt_release_mutex(
                             scs_ptr->encode_context_ptr->hl_rate_control_historgram_queue_mutex);
                     }
                     hl_rate_control_histogram_ptr_temp->pred_bits_ref_qp[ref_qp_index_temp] =
@@ -966,7 +966,7 @@ void high_level_rc_input_picture_vbr(PictureParentControlSet *pcs_ptr, SequenceC
         }
 #endif
     }
-    eb_release_mutex(scs_ptr->encode_context_ptr->rate_table_update_mutex);
+    svt_release_mutex(scs_ptr->encode_context_ptr->rate_table_update_mutex);
 }
 void frame_level_rc_input_picture_vbr(PictureControlSet *pcs_ptr, SequenceControlSet *scs_ptr,
                                       RateControlContext *             context_ptr,
@@ -2021,7 +2021,7 @@ void high_level_rc_input_picture_cvbr(PictureParentControlSet *pcs_ptr, Sequence
 
     uint32_t area_in_pixel = pcs_ptr->aligned_width * pcs_ptr->aligned_height;
 
-    eb_block_on_mutex(scs_ptr->encode_context_ptr->rate_table_update_mutex);
+    svt_block_on_mutex(scs_ptr->encode_context_ptr->rate_table_update_mutex);
 
     EbBool tables_updated       = scs_ptr->encode_context_ptr->rate_control_tables_array_updated;
     pcs_ptr->percentage_updated = EB_FALSE;
@@ -2034,7 +2034,7 @@ void high_level_rc_input_picture_cvbr(PictureParentControlSet *pcs_ptr, Sequence
 
         while ((hl_rate_control_histogram_ptr_temp->life_count == 0) &&
                hl_rate_control_histogram_ptr_temp->passed_to_hlrc) {
-            eb_block_on_mutex(scs_ptr->encode_context_ptr->hl_rate_control_historgram_queue_mutex);
+            svt_block_on_mutex(scs_ptr->encode_context_ptr->hl_rate_control_historgram_queue_mutex);
             // Reset the Reorder Queue Entry
             hl_rate_control_histogram_ptr_temp->picture_number +=
                 INITIAL_RATE_CONTROL_REORDER_QUEUE_MAX_DEPTH;
@@ -2049,7 +2049,7 @@ void high_level_rc_input_picture_cvbr(PictureParentControlSet *pcs_ptr, Sequence
                  HIGH_LEVEL_RATE_CONTROL_HISTOGRAM_QUEUE_MAX_DEPTH - 1)
                 ? 0
                 : encode_context_ptr->hl_rate_control_historgram_queue_head_index + 1;
-            eb_release_mutex(scs_ptr->encode_context_ptr->hl_rate_control_historgram_queue_mutex);
+            svt_release_mutex(scs_ptr->encode_context_ptr->hl_rate_control_historgram_queue_mutex);
             hl_rate_control_histogram_ptr_temp =
                 encode_context_ptr->hl_rate_control_historgram_queue
                     [encode_context_ptr->hl_rate_control_historgram_queue_head_index];
@@ -2250,10 +2250,10 @@ void high_level_rc_input_picture_cvbr(PictureParentControlSet *pcs_ptr, Sequence
                         hl_rate_control_histogram_ptr_temp->pred_bits_ref_qp[ref_qp_index_temp] = 0;
 
                         if (ref_qp_table_index == previous_selected_ref_qp) {
-                            eb_block_on_mutex(scs_ptr->encode_context_ptr
+                            svt_block_on_mutex(scs_ptr->encode_context_ptr
                                                   ->hl_rate_control_historgram_queue_mutex);
                             hl_rate_control_histogram_ptr_temp->life_count--;
-                            eb_release_mutex(scs_ptr->encode_context_ptr
+                            svt_release_mutex(scs_ptr->encode_context_ptr
                                                  ->hl_rate_control_historgram_queue_mutex);
                         }
                         hl_rate_control_histogram_ptr_temp->pred_bits_ref_qp[ref_qp_index_temp] =
@@ -2495,7 +2495,7 @@ void high_level_rc_input_picture_cvbr(PictureParentControlSet *pcs_ptr, Sequence
             (int)high_level_rate_control_ptr->virtual_buffer_level*/);
 #endif
     }
-    eb_release_mutex(scs_ptr->encode_context_ptr->rate_table_update_mutex);
+    svt_release_mutex(scs_ptr->encode_context_ptr->rate_table_update_mutex);
 }
 void frame_level_rc_input_picture_cvbr(PictureControlSet *pcs_ptr, SequenceControlSet *scs_ptr,
                                        RateControlContext *             context_ptr,
@@ -2733,10 +2733,10 @@ void frame_level_rc_input_picture_cvbr(PictureControlSet *pcs_ptr, SequenceContr
                 hl_rate_control_histogram_ptr_temp->pred_bits_ref_qp[ref_qp_index_temp] = 0;
 
                 if (ref_qp_table_index == previous_selected_ref_qp) {
-                    eb_block_on_mutex(
+                    svt_block_on_mutex(
                         scs_ptr->encode_context_ptr->hl_rate_control_historgram_queue_mutex);
                     hl_rate_control_histogram_ptr_temp->life_count--;
-                    eb_release_mutex(
+                    svt_release_mutex(
                         scs_ptr->encode_context_ptr->hl_rate_control_historgram_queue_mutex);
                 }
 
@@ -3403,11 +3403,11 @@ void high_level_rc_feed_back_picture(PictureParentControlSet *pcs_ptr,
                     ->hl_rate_control_historgram_queue[queue_entry_index_head_temp];
             if (hl_rate_control_histogram_ptr_temp->picture_number == pcs_ptr->picture_number &&
                 hl_rate_control_histogram_ptr_temp->passed_to_hlrc) {
-                eb_block_on_mutex(
+                svt_block_on_mutex(
                     scs_ptr->encode_context_ptr->hl_rate_control_historgram_queue_mutex);
                 hl_rate_control_histogram_ptr_temp->total_num_bits_coded = pcs_ptr->total_num_bits;
                 hl_rate_control_histogram_ptr_temp->is_coded             = EB_TRUE;
-                eb_release_mutex(
+                svt_release_mutex(
                     scs_ptr->encode_context_ptr->hl_rate_control_historgram_queue_mutex);
             }
         }
@@ -6232,17 +6232,17 @@ void *rate_control_kernel(void *input_ptr) {
             if (use_input_stat(scs_ptr))
                 update_rc_counts(pcs_ptr->parent_pcs_ptr);
             // Get Empty Rate Control Results Buffer
-            eb_get_empty_object(context_ptr->rate_control_output_results_fifo_ptr,
+            svt_get_empty_object(context_ptr->rate_control_output_results_fifo_ptr,
                                 &rate_control_results_wrapper_ptr);
             rate_control_results_ptr =
                 (RateControlResults *)rate_control_results_wrapper_ptr->object_ptr;
             rate_control_results_ptr->pcs_wrapper_ptr = rate_control_tasks_ptr->pcs_wrapper_ptr;
 
             // Post Full Rate Control Results
-            eb_post_full_object(rate_control_results_wrapper_ptr);
+            svt_post_full_object(rate_control_results_wrapper_ptr);
 
             // Release Rate Control Tasks
-            eb_release_object(rate_control_tasks_wrapper_ptr);
+            svt_release_object(rate_control_tasks_wrapper_ptr);
 
             break;
 
@@ -6514,13 +6514,13 @@ void *rate_control_kernel(void *input_ptr) {
             total_number_of_fb_frames++;
 
             // Release the SequenceControlSet
-            eb_release_object(parentpicture_control_set_ptr->scs_wrapper_ptr);
+            svt_release_object(parentpicture_control_set_ptr->scs_wrapper_ptr);
             // Release the ParentPictureControlSet
-            eb_release_object(parentpicture_control_set_ptr->input_picture_wrapper_ptr);
-            eb_release_object(rate_control_tasks_ptr->pcs_wrapper_ptr);
+            svt_release_object(parentpicture_control_set_ptr->input_picture_wrapper_ptr);
+            svt_release_object(rate_control_tasks_ptr->pcs_wrapper_ptr);
 
             // Release Rate Control Tasks
-            eb_release_object(rate_control_tasks_wrapper_ptr);
+            svt_release_object(rate_control_tasks_wrapper_ptr);
             break;
 
         case RC_ENTROPY_CODING_ROW_FEEDBACK_RESULT:
@@ -6528,7 +6528,7 @@ void *rate_control_kernel(void *input_ptr) {
             // Extract bits-per-sb-row
 
             // Release Rate Control Tasks
-            eb_release_object(rate_control_tasks_wrapper_ptr);
+            svt_release_object(rate_control_tasks_wrapper_ptr);
 
             break;
 

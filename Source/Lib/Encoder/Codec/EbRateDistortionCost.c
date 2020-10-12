@@ -32,7 +32,7 @@ int av1_get_comp_reference_type_context_new(const MacroBlockD *xd);
 int  av1_get_palette_bsize_ctx(BlockSize bsize);
 int  av1_get_palette_mode_ctx(const MacroBlockD *xd);
 int  write_uniform_cost(int n, int v);
-int  eb_get_palette_cache(const MacroBlockD *const xd, int plane, uint16_t *cache);
+int  svt_get_palette_cache(const MacroBlockD *const xd, int plane, uint16_t *cache);
 int  svt_av1_palette_color_cost_y(const PaletteModeInfo *const pmi, uint16_t *color_cache, int n_cache,
                                   int bit_depth);
 int  svt_av1_cost_color_map(PaletteInfo *palette_info, MdRateEstimationContext *rate_table,
@@ -681,7 +681,7 @@ uint64_t av1_intra_fast_cost(BlkStruct *blk_ptr, ModeDecisionCandidate *candidat
                         ->palette_ysize_fac_bits[bsize_ctx][plt_size - PALETTE_MIN_SIZE] +
                     write_uniform_cost(plt_size, color_map[0]);
                 uint16_t  color_cache[2 * PALETTE_MAX_SIZE];
-                const int n_cache = eb_get_palette_cache(blk_ptr->av1xd, 0, color_cache);
+                const int n_cache = svt_get_palette_cache(blk_ptr->av1xd, 0, color_cache);
                 palette_mode_cost += svt_av1_palette_color_cost_y(
                     &candidate_ptr->palette_info->pmi, color_cache, n_cache,
                     pcs_ptr->parent_pcs_ptr->scs_ptr->encoder_bit_depth);

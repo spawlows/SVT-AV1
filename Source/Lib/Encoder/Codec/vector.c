@@ -113,7 +113,7 @@ void *_vector_offset(Vector *vector, size_t index) {
 void _vector_assign(Vector *vector, size_t index, void *element) {
     /* Insert the element */
     void *offset = _vector_offset(vector, index);
-    eb_memcpy(offset, element, vector->element_size);
+    svt_memcpy(offset, element, vector->element_size);
 }
 
 int _vector_adjust_capacity(Vector *vector) {
@@ -148,7 +148,7 @@ int _vector_reallocate(Vector *vector, size_t new_capacity) {
     }
 /* clang-format on */
 #else
-    eb_memcpy(vector->data, old, svt_aom_vector_byte_size(vector));
+    svt_memcpy(vector->data, old, svt_aom_vector_byte_size(vector));
 #endif
 
     vector->capacity = new_capacity;

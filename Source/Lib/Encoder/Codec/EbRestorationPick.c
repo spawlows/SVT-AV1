@@ -320,7 +320,7 @@ static int64_t get_pixel_proj_error(const uint8_t *src8, int32_t width, int32_t 
                                     int32_t *flt1, int32_t flt1_stride, int32_t *xqd,
                                     const SgrParamsType *params) {
     int32_t xq[2];
-    eb_decode_xq(xqd, xq, params);
+    svt_decode_xq(xqd, xq, params);
     if (!use_highbitdepth) {
         return svt_av1_lowbd_pixel_proj_error(src8,
                                               width,
@@ -882,7 +882,7 @@ static void update_a_sep_sym(int32_t wiener_win, int64_t **mc, int64_t **hc, int
             S[i] = S[wiener_win - 1 - i];
             S[wiener_halfwin1 - 1] -= 2 * S[i];
         }
-        eb_memcpy(a, S, wiener_win * sizeof(*a));
+        svt_memcpy(a, S, wiener_win * sizeof(*a));
     }
 }
 
@@ -935,7 +935,7 @@ static void update_b_sep_sym(int32_t wiener_win, int64_t **Mc, int64_t **hc, int
             S[i] = S[wiener_win - 1 - i];
             S[wiener_halfwin1 - 1] -= 2 * S[i];
         }
-        eb_memcpy(b, S, wiener_win * sizeof(*b));
+        svt_memcpy(b, S, wiener_win * sizeof(*b));
     }
 }
 
@@ -1515,13 +1515,13 @@ void restoration_seg_search(int32_t *rst_tmpbuf, Yv12BufferConfig *org_fts,
         rsc_p->tmpbuf = rst_tmpbuf;
 
         const int32_t highbd = rsc.cm->use_highbitdepth;
-        eb_extend_frame(rsc.dgd_buffer,
-                        rsc.plane_width,
-                        rsc.plane_height,
-                        rsc.dgd_stride,
-                        RESTORATION_BORDER,
-                        RESTORATION_BORDER,
-                        highbd);
+        svt_extend_frame(rsc.dgd_buffer,
+                         rsc.plane_width,
+                         rsc.plane_height,
+                         rsc.dgd_stride,
+                         RESTORATION_BORDER,
+                         RESTORATION_BORDER,
+                         highbd);
 
         av1_foreach_rest_unit_in_frame_seg(rsc_p->cm,
                                            rsc_p->plane,

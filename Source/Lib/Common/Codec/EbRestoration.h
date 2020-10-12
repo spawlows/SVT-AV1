@@ -22,10 +22,10 @@
 extern "C" {
 #endif
 
-void eb_apply_selfguided_restoration_c(const uint8_t *dat8, int32_t width, int32_t height,
-                                       int32_t stride, int32_t eps, const int32_t *xqd,
-                                       uint8_t *dst8, int32_t dst_stride, int32_t *tmpbuf,
-                                       int32_t bit_depth, int32_t highbd);
+void svt_apply_selfguided_restoration_c(const uint8_t *dat8, int32_t width, int32_t height,
+                                        int32_t stride, int32_t eps, const int32_t *xqd,
+                                        uint8_t *dst8, int32_t dst_stride, int32_t *tmpbuf,
+                                        int32_t bit_depth, int32_t highbd);
 
 #define CLIP(x, lo, hi) ((x) < (lo) ? (lo) : (x) > (hi) ? (hi) : (x))
 #define RINT(x) ((x) < 0 ? (int32_t)((x)-0.5) : (int32_t)((x) + 0.5))
@@ -266,9 +266,9 @@ extern const int32_t       eb_one_by_x[MAX_NELEM];
 
 //void svt_av1_alloc_restoration_struct(struct Av1Common *cm, RestorationInfo *rsi,
 //                                      int32_t is_uv);
-void eb_extend_frame(uint8_t *data, int32_t width, int32_t height, int32_t stride,
-                     int32_t border_horz, int32_t border_vert, int32_t highbd);
-void eb_decode_xq(const int32_t *xqd, int32_t *xq, const SgrParamsType *params);
+void svt_extend_frame(uint8_t *data, int32_t width, int32_t height, int32_t stride,
+                      int32_t border_horz, int32_t border_vert, int32_t highbd);
+void svt_decode_xq(const int32_t *xqd, int32_t *xq, const SgrParamsType *params);
 
 // Filter a single loop restoration unit.
 //

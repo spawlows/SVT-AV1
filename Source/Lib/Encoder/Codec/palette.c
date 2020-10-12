@@ -155,7 +155,7 @@ static void palette_add_to_cache(uint16_t *cache, int *n, uint16_t val) {
     cache[(*n)++] = val;
 }
 
-int eb_get_palette_cache(const MacroBlockD *const xd, int plane, uint16_t *cache) {
+int svt_get_palette_cache(const MacroBlockD *const xd, int plane, uint16_t *cache) {
     const int row = -xd->mb_to_top_edge >> 3;
     // Do not refer to above SB row when on SB boundary.
     const MbModeInfo *const above_mi = (row % (1 << MIN_SB_SIZE_LOG2)) ? xd->above_mbmi : NULL;
@@ -265,7 +265,7 @@ static AOM_INLINE void extend_palette_color_map(uint8_t *const color_map, int or
     }
     // Copy last row to extra rows.
     for (j = orig_height; j < new_height; ++j) {
-        eb_memcpy(color_map + j * new_width, color_map + (orig_height - 1) * new_width, new_width);
+        svt_memcpy(color_map + j * new_width, color_map + (orig_height - 1) * new_width, new_width);
     }
 }
 void palette_rd_y(PaletteInfo *palette_info, ModeDecisionContext *context_ptr, BlockSize bsize,
@@ -409,7 +409,7 @@ void search_palette_luma(PictureControlSet *pcs_ptr, ModeDecisionContext *contex
             GENERATE_KMEANS_DATA(uint8_t *);
 
         uint16_t  color_cache[2 * PALETTE_MAX_SIZE];
-        const int n_cache = eb_get_palette_cache(xd, 0, color_cache);
+        const int n_cache = svt_get_palette_cache(xd, 0, color_cache);
 
         // Find the dominant colors, stored in top_colors[].
         int top_colors[PALETTE_MAX_SIZE] = {0};

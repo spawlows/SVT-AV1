@@ -68,8 +68,8 @@ void setup_rtcd_internal(CPU_FLAGS flags) {
     svt_av1_wedge_compute_delta_squares = svt_av1_wedge_compute_delta_squares_c;
     svt_av1_wedge_sign_from_residuals = svt_av1_wedge_sign_from_residuals_c;
 
-    eb_compute_cdef_dist_16bit = compute_cdef_dist_c;
-    eb_compute_cdef_dist_8bit = compute_cdef_dist_8bit_c;
+    svt_compute_cdef_dist_16bit = compute_cdef_dist_c;
+    svt_compute_cdef_dist_8bit = compute_cdef_dist_8bit_c;
 
     svt_av1_compute_stats = svt_av1_compute_stats_c;
     svt_av1_compute_stats_highbd = svt_av1_compute_stats_highbd_c;
@@ -78,7 +78,7 @@ void setup_rtcd_internal(CPU_FLAGS flags) {
     svt_av1_highbd_pixel_proj_error = svt_av1_highbd_pixel_proj_error_c;
     svt_av1_calc_frame_error = svt_av1_calc_frame_error_c;
 
-    eb_subtract_average = eb_subtract_average_c;
+    svt_subtract_average = svt_subtract_average_c;
 
     svt_get_proj_subspace = svt_get_proj_subspace_c;
 
@@ -344,8 +344,8 @@ void setup_rtcd_internal(CPU_FLAGS flags) {
     if (flags & HAS_AVX2) svt_aom_highbd_sse = svt_aom_highbd_sse_avx2;
     if (flags & HAS_AVX2) svt_av1_wedge_compute_delta_squares = svt_av1_wedge_compute_delta_squares_avx2;
     if (flags & HAS_AVX2) svt_av1_wedge_sign_from_residuals = svt_av1_wedge_sign_from_residuals_avx2;
-    if (flags & HAS_AVX2) eb_compute_cdef_dist_16bit = compute_cdef_dist_16bit_avx2;
-    if (flags & HAS_AVX2) eb_compute_cdef_dist_8bit = compute_cdef_dist_8bit_avx2;
+    if (flags & HAS_AVX2) svt_compute_cdef_dist_16bit = compute_cdef_dist_16bit_avx2;
+    if (flags & HAS_AVX2) svt_compute_cdef_dist_8bit = compute_cdef_dist_8bit_avx2;
     if (flags & HAS_AVX2) svt_av1_compute_stats = svt_av1_compute_stats_avx2;
     if (flags & HAS_AVX2) svt_av1_compute_stats_highbd = svt_av1_compute_stats_highbd_avx2;
 #ifndef NON_AVX512_SUPPORT
@@ -356,7 +356,7 @@ void setup_rtcd_internal(CPU_FLAGS flags) {
 #endif
         if (flags & HAS_AVX2) svt_av1_highbd_pixel_proj_error = svt_av1_highbd_pixel_proj_error_avx2;
         if (flags & HAS_AVX2) svt_av1_calc_frame_error = svt_av1_calc_frame_error_avx2;
-        if (flags & HAS_AVX2) eb_subtract_average = eb_subtract_average_avx2;
+        if (flags & HAS_AVX2) svt_subtract_average = svt_subtract_average_avx2;
         if (flags & HAS_AVX2) svt_get_proj_subspace = svt_get_proj_subspace_avx2;
         if (flags & HAS_AVX2) svt_search_one_dual = svt_search_one_dual_avx2;
         if (flags & HAS_AVX2) svt_aom_mse16x16 = svt_aom_mse16x16_avx2;

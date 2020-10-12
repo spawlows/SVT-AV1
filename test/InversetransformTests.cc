@@ -30,22 +30,22 @@ int txsize_64[] = { 0};
 int bd[] = { 10, 12};
 
 static void init_data(int32_t **input, int32_t **input_opt, int32_t *input_stride) {
-    *input_stride = eb_create_random_aligned_stride(MAX_SB_SIZE, 64);
+    *input_stride = svt_create_random_aligned_stride(MAX_SB_SIZE, 64);
     TEST_ALLIGN_MALLOC(int32_t*, *input, sizeof(int32_t) * MAX_SB_SIZE * *input_stride);
     TEST_ALLIGN_MALLOC(int32_t*, *input_opt, sizeof(int32_t) * MAX_SB_SIZE * *input_stride);
     memset(*input, 0, MAX_SB_SIZE * *input_stride);
     memset(*input_opt, 0, MAX_SB_SIZE * *input_stride);
-    eb_buf_random_s32(*input, MAX_SB_SIZE * *input_stride);
+    svt_buf_random_s32(*input, MAX_SB_SIZE * *input_stride);
     memcpy(*input_opt, *input, sizeof(**input) * MAX_SB_SIZE * *input_stride);
 }
 
 static void init_data_with_max(int32_t **input, int32_t **input_opt, int32_t *input_stride) {
-    *input_stride = eb_create_random_aligned_stride(MAX_SB_SIZE, 64);
+    *input_stride = svt_create_random_aligned_stride(MAX_SB_SIZE, 64);
     TEST_ALLIGN_MALLOC(int32_t*, *input, sizeof(int32_t) * MAX_SB_SIZE * *input_stride);
     TEST_ALLIGN_MALLOC(int32_t*, *input_opt, sizeof(int32_t) * MAX_SB_SIZE * *input_stride);
     memset(*input, 0, MAX_SB_SIZE * *input_stride);
     memset(*input_opt, 0, MAX_SB_SIZE * *input_stride);
-    eb_buf_random_s32_with_max(*input, MAX_SB_SIZE * *input_stride, 1023);
+    svt_buf_random_s32_with_max(*input, MAX_SB_SIZE * *input_stride, 1023);
     memcpy(*input_opt, *input, sizeof(**input) * MAX_SB_SIZE * *input_stride);
 }
 
@@ -63,7 +63,7 @@ static void uninit_output(uint16_t *output, uint16_t *output_opt) {
 static void init_output_r(uint16_t **output_r, uint16_t **output_opt_r, int32_t num) {
     TEST_ALLIGN_MALLOC(uint16_t*, *output_r, sizeof(uint16_t) * MAX_SB_SIZE * num);
     TEST_ALLIGN_MALLOC(uint16_t*, *output_opt_r, sizeof(uint16_t) * MAX_SB_SIZE * num);
-    eb_buf_random_u16(*output_r, MAX_SB_SIZE * num);
+    svt_buf_random_u16(*output_r, MAX_SB_SIZE * num);
     memcpy(*output_opt_r, *output_r, sizeof(uint16_t) * MAX_SB_SIZE * num);
 }
 
@@ -86,12 +86,12 @@ TEST(InverseTransformTest, av1_inv_txfm_2d_square_kernels)
                 case 0://16x16
                     for (int j = 0; j < 16; j++) {
                         init_data(&coeff, &coeff_opt, &stride);
-                        ASSERT(eb_buf_compare_s32(coeff, coeff_opt, MAX_SB_SIZE * stride) == 1);
+                        ASSERT(svt_buf_compare_s32(coeff, coeff_opt, MAX_SB_SIZE * stride) == 1);
                         init_output_r(&output_r, &output_opt_r, stride);
                         init_output_w(&output_w, &output_opt_w, stride);
                         av1_inv_txfm_highbd_func_ptr_array_base[loop](coeff, output_r, stride, output_w, stride, (TxType)txsize_16[j], bd[x]);
                         av1_inv_txfm_highbd_func_ptr_array_opt[loop](coeff, output_opt_r, stride, output_opt_w, stride, (TxType)txsize_16[j], bd[x]);
-                        EXPECT_EQ(eb_buf_compare_u16(output_w, output_opt_w, MAX_SB_SIZE * stride), 1);
+                        EXPECT_EQ(svt_buf_compare_u16(output_w, output_opt_w, MAX_SB_SIZE * stride), 1);
                         uninit_output(output_r, output_opt_r);
                         uninit_output(output_w, output_opt_w);
                         uninit_data(coeff, coeff_opt, &stride);
@@ -100,12 +100,12 @@ TEST(InverseTransformTest, av1_inv_txfm_2d_square_kernels)
                 case 1://32x32
                     for (int j = 0; j < 2; j++) {
                         init_data(&coeff, &coeff_opt, &stride);
-                        ASSERT(eb_buf_compare_s32(coeff, coeff_opt, MAX_SB_SIZE * stride) == 1);
+                        ASSERT(svt_buf_compare_s32(coeff, coeff_opt, MAX_SB_SIZE * stride) == 1);
                         init_output_r(&output_r, &output_opt_r, stride);
                         init_output_w(&output_w, &output_opt_w, stride);
                         av1_inv_txfm_highbd_func_ptr_array_base[loop](coeff, output_r, stride, output_w, stride, (TxType)txsize_32[j], bd[x]);
                         av1_inv_txfm_highbd_func_ptr_array_opt[loop](coeff, output_opt_r, stride, output_opt_w, stride, (TxType)txsize_32[j], bd[x]);
-                        EXPECT_EQ(eb_buf_compare_u16(output_w, output_opt_w, MAX_SB_SIZE * stride), 1);
+                        EXPECT_EQ(svt_buf_compare_u16(output_w, output_opt_w, MAX_SB_SIZE * stride), 1);
                         uninit_output(output_r, output_opt_r);
                         uninit_output(output_w, output_opt_w);
                         uninit_data(coeff, coeff_opt, &stride);
@@ -114,12 +114,12 @@ TEST(InverseTransformTest, av1_inv_txfm_2d_square_kernels)
                 case 2://64x64
                     for (int j = 0; j < 1; j++) {
                         init_data(&coeff, &coeff_opt, &stride);
-                        ASSERT(eb_buf_compare_s32(coeff, coeff_opt, MAX_SB_SIZE * stride) == 1);
+                        ASSERT(svt_buf_compare_s32(coeff, coeff_opt, MAX_SB_SIZE * stride) == 1);
                         init_output_r(&output_r, &output_opt_r, stride);
                         init_output_w(&output_w, &output_opt_w, stride);
                         av1_inv_txfm_highbd_func_ptr_array_base[loop](coeff, output_r, stride, output_w, stride, (TxType)txsize_64[j], bd[x]);
                         av1_inv_txfm_highbd_func_ptr_array_opt[loop](coeff, output_opt_r, stride, output_opt_w, stride, (TxType)txsize_64[j], bd[x]);
-                        EXPECT_EQ(eb_buf_compare_u16(output_w, output_opt_w, MAX_SB_SIZE * stride), 1);
+                        EXPECT_EQ(svt_buf_compare_u16(output_w, output_opt_w, MAX_SB_SIZE * stride), 1);
                         uninit_output(output_r, output_opt_r);
                         uninit_output(output_w, output_opt_w);
                         uninit_data(coeff, coeff_opt, &stride);
@@ -146,12 +146,12 @@ TEST(InverseTransformTest, av1_inv_txfm_2d_rect_kernels)
                 case 0://32x16
                     for (int j = 0; j < 2; j++) {
                         init_data_with_max(&coeff, &coeff_opt, &stride);
-                        ASSERT(eb_buf_compare_s32(coeff, coeff_opt, MAX_SB_SIZE * stride) == 1);
+                        ASSERT(svt_buf_compare_s32(coeff, coeff_opt, MAX_SB_SIZE * stride) == 1);
                         init_output_r(&output_r, &output_opt_r, stride);
                         init_output_w(&output_w, &output_opt_w, stride);
                         av1_inv_txfm_highbd_rect_func_ptr_array_base[loop](coeff, output_r, stride, output_w, stride, (TxType)txsize_32[j], (TxSize)rect_types[loop], 0, bd[x]);
                         av1_inv_txfm_highbd_rect_func_ptr_array_opt[loop](coeff, output_opt_r, stride, output_opt_w, stride, (TxType)txsize_32[j], (TxSize)rect_types[loop], 0, bd[x]);
-                        EXPECT_EQ(eb_buf_compare_u16(output_w, output_opt_w, MAX_SB_SIZE * stride), 1);
+                        EXPECT_EQ(svt_buf_compare_u16(output_w, output_opt_w, MAX_SB_SIZE * stride), 1);
                         uninit_output(output_r, output_opt_r);
                         uninit_output(output_w, output_opt_w);
                         uninit_data(coeff, coeff_opt, &stride);
@@ -160,12 +160,12 @@ TEST(InverseTransformTest, av1_inv_txfm_2d_rect_kernels)
                 case 1://16x32
                     for (int j = 0; j < 2; j++) {
                         init_data_with_max(&coeff, &coeff_opt, &stride);
-                        ASSERT(eb_buf_compare_s32(coeff, coeff_opt, MAX_SB_SIZE * stride) == 1);
+                        ASSERT(svt_buf_compare_s32(coeff, coeff_opt, MAX_SB_SIZE * stride) == 1);
                         init_output_r(&output_r, &output_opt_r, stride);
                         init_output_w(&output_w, &output_opt_w, stride);
                         av1_inv_txfm_highbd_rect_func_ptr_array_base[loop](coeff, output_r, stride, output_w, stride, (TxType)txsize_32[j], (TxSize)rect_types[loop], 0, bd[x]);
                         av1_inv_txfm_highbd_rect_func_ptr_array_opt[loop](coeff, output_opt_r, stride, output_opt_w, stride, (TxType)txsize_32[j], (TxSize)rect_types[loop], 0, bd[x]);
-                        EXPECT_EQ(eb_buf_compare_u16(output_w, output_opt_w, MAX_SB_SIZE * stride), 1);
+                        EXPECT_EQ(svt_buf_compare_u16(output_w, output_opt_w, MAX_SB_SIZE * stride), 1);
                         uninit_output(output_r, output_opt_r);
                         uninit_output(output_w, output_opt_w);
                         uninit_data(coeff, coeff_opt, &stride);
@@ -174,12 +174,12 @@ TEST(InverseTransformTest, av1_inv_txfm_2d_rect_kernels)
                 case 2://16x64
                     for (int j = 0; j < 1; j++) {
                         init_data_with_max(&coeff, &coeff_opt, &stride);
-                        ASSERT(eb_buf_compare_s32(coeff, coeff_opt, MAX_SB_SIZE * stride) == 1);
+                        ASSERT(svt_buf_compare_s32(coeff, coeff_opt, MAX_SB_SIZE * stride) == 1);
                         init_output_r(&output_r, &output_opt_r, stride);
                         init_output_w(&output_w, &output_opt_w, stride);
                         av1_inv_txfm_highbd_rect_func_ptr_array_base[loop](coeff, output_r, stride, output_w, stride, (TxType)txsize_64[j], (TxSize)rect_types[loop], 0, bd[x]);
                         av1_inv_txfm_highbd_rect_func_ptr_array_opt[loop](coeff, output_opt_r, stride, output_opt_w, stride, (TxType)txsize_64[j], (TxSize)rect_types[loop], 0, bd[x]);
-                        EXPECT_EQ(eb_buf_compare_u16(output_w, output_opt_w, MAX_SB_SIZE * stride), 1);
+                        EXPECT_EQ(svt_buf_compare_u16(output_w, output_opt_w, MAX_SB_SIZE * stride), 1);
                         uninit_output(output_r, output_opt_r);
                         uninit_output(output_w, output_opt_w);
                         uninit_data(coeff, coeff_opt, &stride);
@@ -188,12 +188,12 @@ TEST(InverseTransformTest, av1_inv_txfm_2d_rect_kernels)
                 case 3://32x64
                     for (int j = 0; j < 1; j++) {
                         init_data_with_max(&coeff, &coeff_opt, &stride);
-                        ASSERT(eb_buf_compare_s32(coeff, coeff_opt, MAX_SB_SIZE * stride) == 1);
+                        ASSERT(svt_buf_compare_s32(coeff, coeff_opt, MAX_SB_SIZE * stride) == 1);
                         init_output_r(&output_r, &output_opt_r, stride);
                         init_output_w(&output_w, &output_opt_w, stride);
                         av1_inv_txfm_highbd_rect_func_ptr_array_base[loop](coeff, output_r, stride, output_w, stride, (TxType)txsize_64[j], (TxSize)rect_types[loop], 0, bd[x]);
                         av1_inv_txfm_highbd_rect_func_ptr_array_opt[loop](coeff, output_opt_r, stride, output_opt_w, stride, (TxType)txsize_64[j], (TxSize)rect_types[loop], 0, bd[x]);
-                        EXPECT_EQ(eb_buf_compare_u16(output_w, output_opt_w, MAX_SB_SIZE * stride), 1);
+                        EXPECT_EQ(svt_buf_compare_u16(output_w, output_opt_w, MAX_SB_SIZE * stride), 1);
                         uninit_output(output_r, output_opt_r);
                         uninit_output(output_w, output_opt_w);
                         uninit_data(coeff, coeff_opt, &stride);
@@ -202,12 +202,12 @@ TEST(InverseTransformTest, av1_inv_txfm_2d_rect_kernels)
                 case 4://64x32
                     for (int j = 0; j < 1; j++) {
                         init_data_with_max(&coeff, &coeff_opt, &stride);
-                        ASSERT(eb_buf_compare_s32(coeff, coeff_opt, MAX_SB_SIZE * stride) == 1);
+                        ASSERT(svt_buf_compare_s32(coeff, coeff_opt, MAX_SB_SIZE * stride) == 1);
                         init_output_r(&output_r, &output_opt_r, stride);
                         init_output_w(&output_w, &output_opt_w, stride);
                         av1_inv_txfm_highbd_rect_func_ptr_array_base[loop](coeff, output_r, stride, output_w, stride, (TxType)txsize_64[j], (TxSize)rect_types[loop], 0, bd[x]);
                         av1_inv_txfm_highbd_rect_func_ptr_array_opt[loop](coeff, output_opt_r, stride, output_opt_w, stride, (TxType)txsize_64[j], (TxSize)rect_types[loop], 0, bd[x]);
-                        EXPECT_EQ(eb_buf_compare_u16(output_w, output_opt_w, MAX_SB_SIZE * stride), 1);
+                        EXPECT_EQ(svt_buf_compare_u16(output_w, output_opt_w, MAX_SB_SIZE * stride), 1);
                         uninit_output(output_r, output_opt_r);
                         uninit_output(output_w, output_opt_w);
                         uninit_data(coeff, coeff_opt, &stride);
@@ -216,12 +216,12 @@ TEST(InverseTransformTest, av1_inv_txfm_2d_rect_kernels)
                 case 5://64x16
                     for (int j = 0; j < 1; j++) {
                         init_data_with_max(&coeff, &coeff_opt, &stride);
-                        ASSERT(eb_buf_compare_s32(coeff, coeff_opt, MAX_SB_SIZE * stride) == 1);
+                        ASSERT(svt_buf_compare_s32(coeff, coeff_opt, MAX_SB_SIZE * stride) == 1);
                         init_output_r(&output_r, &output_opt_r, stride);
                         init_output_w(&output_w, &output_opt_w, stride);
                         av1_inv_txfm_highbd_rect_func_ptr_array_base[loop](coeff, output_r, stride, output_w, stride, (TxType)txsize_64[j], (TxSize)rect_types[loop], 0, bd[x]);
                         av1_inv_txfm_highbd_rect_func_ptr_array_opt[loop](coeff, output_opt_r, stride, output_opt_w, stride, (TxType)txsize_64[j], (TxSize)rect_types[loop], 0, bd[x]);
-                        EXPECT_EQ(eb_buf_compare_u16(output_w, output_opt_w, MAX_SB_SIZE * stride), 1);
+                        EXPECT_EQ(svt_buf_compare_u16(output_w, output_opt_w, MAX_SB_SIZE * stride), 1);
                         uninit_output(output_r, output_opt_r);
                         uninit_output(output_w, output_opt_w);
                         uninit_data(coeff, coeff_opt, &stride);

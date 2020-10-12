@@ -53,9 +53,9 @@ EbErrorType initial_rate_control_context_ctor(EbThreadContext *  thread_context_
     thread_context_ptr->priv  = context_ptr;
     thread_context_ptr->dctor = initial_rate_control_context_dctor;
 
-    context_ptr->motion_estimation_results_input_fifo_ptr = eb_system_resource_get_consumer_fifo(
+    context_ptr->motion_estimation_results_input_fifo_ptr = svt_system_resource_get_consumer_fifo(
         enc_handle_ptr->motion_estimation_results_resource_ptr, 0);
-    context_ptr->initialrate_control_results_output_fifo_ptr = eb_system_resource_get_producer_fifo(
+    context_ptr->initialrate_control_results_output_fifo_ptr = svt_system_resource_get_producer_fifo(
         enc_handle_ptr->initial_rate_control_results_resource_ptr, 0);
 
     return EB_ErrorNone;
@@ -84,14 +84,14 @@ void release_pa_reference_objects(SequenceControlSet *scs_ptr, PictureParentCont
             for (uint32_t ref_pic_index = 0; ref_pic_index < num_of_ref_pic_to_search;
                  ++ref_pic_index) {
                 if (pcs_ptr->ref_pa_pic_ptr_array[list_index][ref_pic_index] != NULL) {
-                    eb_release_object(pcs_ptr->ref_pa_pic_ptr_array[list_index][ref_pic_index]);
+                    svt_release_object(pcs_ptr->ref_pa_pic_ptr_array[list_index][ref_pic_index]);
                 }
             }
         }
     }
 
     if (pcs_ptr->pa_reference_picture_wrapper_ptr != NULL) {
-        eb_release_object(pcs_ptr->pa_reference_picture_wrapper_ptr);
+        svt_release_object(pcs_ptr->pa_reference_picture_wrapper_ptr);
     }
 
     return;
@@ -254,7 +254,7 @@ void get_histogram_queue_data(SequenceControlSet *scs_ptr, EncodeContext *encode
     int32_t                      histogram_queue_entry_index;
 
     // Determine offset from the Head Ptr for HLRC histogram queue
-    eb_block_on_mutex(scs_ptr->encode_context_ptr->hl_rate_control_historgram_queue_mutex);
+    svt_block_on_mutex(scs_ptr->encode_context_ptr->hl_rate_control_historgram_queue_mutex);
     histogram_queue_entry_index = (int32_t)(
         pcs_ptr->picture_number -
         encode_context_ptr
@@ -282,15 +282,15 @@ void get_histogram_queue_data(SequenceControlSet *scs_ptr, EncodeContext *encode
     histogram_queue_entry_ptr->is_coded             = EB_FALSE;
     histogram_queue_entry_ptr->total_num_bits_coded = 0;
     histogram_queue_entry_ptr->frames_in_sw         = 0;
-    eb_memcpy(histogram_queue_entry_ptr->me_distortion_histogram,
+    svt_memcpy(histogram_queue_entry_ptr->me_distortion_histogram,
               pcs_ptr->me_distortion_histogram,
               sizeof(uint16_t) * NUMBER_OF_SAD_INTERVALS);
 
-    eb_memcpy(histogram_queue_entry_ptr->ois_distortion_histogram,
+    svt_memcpy(histogram_queue_entry_ptr->ois_distortion_histogram,
               pcs_ptr->ois_distortion_histogram,
               sizeof(uint16_t) * NUMBER_OF_INTRA_SAD_INTERVALS);
 
-    eb_release_mutex(scs_ptr->encode_context_ptr->hl_rate_control_historgram_queue_mutex);
+    svt_release_mutex(scs_ptr->encode_context_ptr->hl_rate_control_historgram_queue_mutex);
     //SVT_LOG("Test1 POC: %d\t POC: %d\t LifeCount: %d\n", histogram_queue_entry_ptr->picture_number, pcs_ptr->picture_number,  histogram_queue_entry_ptr->life_count);
 
     return;
@@ -301,7 +301,7 @@ void update_histogram_queue_entry(SequenceControlSet *scs_ptr, EncodeContext *en
     HlRateControlHistogramEntry *histogram_queue_entry_ptr;
     int32_t                      histogram_queue_entry_index;
 
-    eb_block_on_mutex(scs_ptr->encode_context_ptr->hl_rate_control_historgram_queue_mutex);
+    svt_block_on_mutex(scs_ptr->encode_context_ptr->hl_rate_control_historgram_queue_mutex);
 
     histogram_queue_entry_index = (int32_t)(
         pcs_ptr->picture_number -
@@ -328,7 +328,7 @@ void update_histogram_queue_entry(SequenceControlSet *scs_ptr, EncodeContext *en
         histogram_queue_entry_ptr->life_count += pcs_ptr->historgram_life_count;
 
     histogram_queue_entry_ptr->frames_in_sw = frames_in_sw;
-    eb_release_mutex(scs_ptr->encode_context_ptr->hl_rate_control_historgram_queue_mutex);
+    svt_release_mutex(scs_ptr->encode_context_ptr->hl_rate_control_historgram_queue_mutex);
 
     return;
 }
@@ -1386,7 +1386,7 @@ void *initial_rate_control_kernel(void *input_ptr) {
                 init_zz_cost_info(pcs_ptr);
 
                 // Get Empty Results Object
-                eb_get_empty_object(
+                svt_get_empty_object(
                     context_ptr->initialrate_control_results_output_fifo_ptr,
                     &out_results_wrapper_ptr);
 
@@ -1394,7 +1394,7 @@ void *initial_rate_control_kernel(void *input_ptr) {
                     (InitialRateControlResults *)out_results_wrapper_ptr->object_ptr;
 
                 out_results_ptr->pcs_wrapper_ptr = pcs_ptr->p_pcs_wrapper_ptr;
-                eb_post_full_object(out_results_wrapper_ptr);
+                svt_post_full_object(out_results_wrapper_ptr);
 
             }
             else {
@@ -1556,19 +1556,19 @@ void *initial_rate_control_kernel(void *input_ptr) {
                                 encode_context_ptr, scs_ptr, pcs_ptr);
                         }
                         // Get Empty Reference Picture Object
-                        eb_get_empty_object(
+                        svt_get_empty_object(
                             scs_ptr->encode_context_ptr->reference_picture_pool_fifo_ptr,
                             &reference_picture_wrapper_ptr);
                         if (loop_index) {
                             pcs_ptr->reference_picture_wrapper_ptr = reference_picture_wrapper_ptr;
                             // Give the new Reference a nominal live_count of 1
-                            eb_object_inc_live_count(pcs_ptr->reference_picture_wrapper_ptr, 1);
+                            svt_object_inc_live_count(pcs_ptr->reference_picture_wrapper_ptr, 1);
                         } else {
                             ((PictureParentControlSet *)(queue_entry_ptr->parent_pcs_wrapper_ptr
                                                              ->object_ptr))
                                 ->reference_picture_wrapper_ptr = reference_picture_wrapper_ptr;
                             // Give the new Reference a nominal live_count of 1
-                            eb_object_inc_live_count(
+                            svt_object_inc_live_count(
                                 ((PictureParentControlSet *)(queue_entry_ptr->parent_pcs_wrapper_ptr
                                                                  ->object_ptr))
                                     ->reference_picture_wrapper_ptr,
@@ -1580,7 +1580,7 @@ void *initial_rate_control_kernel(void *input_ptr) {
                             tpl_mc_flow(encode_context_ptr, scs_ptr, pcs_ptr);
                         }
                         // Get Empty Results Object
-                        eb_get_empty_object(
+                        svt_get_empty_object(
                             context_ptr->initialrate_control_results_output_fifo_ptr,
                             &out_results_wrapper_ptr);
 
@@ -1599,7 +1599,7 @@ void *initial_rate_control_kernel(void *input_ptr) {
                                 //loop_index ? pcs_ptr : queueEntryPtr);
                         }
                         // Post the Full Results Object
-                        eb_post_full_object(out_results_wrapper_ptr);
+                        svt_post_full_object(out_results_wrapper_ptr);
                     }
                     // Reset the Reorder Queue Entry
                     queue_entry_ptr->picture_number += INITIAL_RATE_CONTROL_REORDER_QUEUE_MAX_DEPTH;
@@ -1621,7 +1621,7 @@ void *initial_rate_control_kernel(void *input_ptr) {
         }
 
         // Release the Input Results
-        eb_release_object(in_results_wrapper_ptr);
+        svt_release_object(in_results_wrapper_ptr);
     }
     return NULL;
 }

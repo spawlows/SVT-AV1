@@ -92,17 +92,17 @@ class AV1SelfguidedFilterTest
                     int32_t h = AOMMIN(pu_height, height - k);
                     uint8_t *input_p = input + k * stride + j;
                     uint8_t *output_p = output + k * out_stride + j;
-                    eb_apply_selfguided_restoration_c(input_p,
-                                                   w,
-                                                   h,
-                                                   stride,
-                                                   eps,
-                                                   xqd,
-                                                   output_p,
-                                                   out_stride,
-                                                   tmpbuf,
-                                                   8,
-                                                   0);
+                    svt_apply_selfguided_restoration_c(input_p,
+                                                       w,
+                                                       h,
+                                                       stride,
+                                                       eps,
+                                                       xqd,
+                                                       output_p,
+                                                       out_stride,
+                                                       tmpbuf,
+                                                       8,
+                                                       0);
                 }
         }
         svt_av1_get_time(&middle_time_seconds, &middle_time_useconds);
@@ -212,17 +212,17 @@ class AV1SelfguidedFilterTest
                              tmpbuf,
                              8,
                              0);
-                    eb_apply_selfguided_restoration_c(input_p,
-                                                   w,
-                                                   h,
-                                                   stride,
-                                                   eps,
-                                                   xqd,
-                                                   output2_p,
-                                                   out_stride,
-                                                   tmpbuf,
-                                                   8,
-                                                   0);
+                    svt_apply_selfguided_restoration_c(input_p,
+                                                       w,
+                                                       h,
+                                                       stride,
+                                                       eps,
+                                                       xqd,
+                                                       output2_p,
+                                                       out_stride,
+                                                       tmpbuf,
+                                                       8,
+                                                       0);
                 }
 
             for (j = 0; j < test_h; ++j)
@@ -251,7 +251,7 @@ TEST_P(AV1SelfguidedFilterTest, CorrectnessTest) {
 
 INSTANTIATE_TEST_CASE_P(
     AVX2, AV1SelfguidedFilterTest,
-    ::testing::Values(make_tuple(eb_apply_selfguided_restoration_avx2)));
+    ::testing::Values(make_tuple(svt_apply_selfguided_restoration_avx2)));
 
 // Test parameter list:
 //  <tst_fun_, bit_depth>
@@ -315,17 +315,17 @@ class AV1HighbdSelfguidedFilterTest
                     int32_t h = AOMMIN(pu_height, height - k);
                     uint16_t *input_p = input + k * stride + j;
                     uint16_t *output_p = output + k * out_stride + j;
-                    eb_apply_selfguided_restoration_c(CONVERT_TO_BYTEPTR(input_p),
-                                                   w,
-                                                   h,
-                                                   stride,
-                                                   eps,
-                                                   xqd,
-                                                   CONVERT_TO_BYTEPTR(output_p),
-                                                   out_stride,
-                                                   tmpbuf,
-                                                   bit_depth,
-                                                   1);
+                    svt_apply_selfguided_restoration_c(CONVERT_TO_BYTEPTR(input_p),
+                                                       w,
+                                                       h,
+                                                       stride,
+                                                       eps,
+                                                       xqd,
+                                                       CONVERT_TO_BYTEPTR(output_p),
+                                                       out_stride,
+                                                       tmpbuf,
+                                                       bit_depth,
+                                                       1);
                 }
         }
         svt_av1_get_time(&middle_time_seconds, &middle_time_useconds);
@@ -439,7 +439,7 @@ class AV1HighbdSelfguidedFilterTest
                              tmpbuf,
                              bit_depth,
                              1);
-                    eb_apply_selfguided_restoration_c(
+                    svt_apply_selfguided_restoration_c(
                         CONVERT_TO_BYTEPTR(input_p),
                         w,
                         h,
@@ -479,7 +479,7 @@ TEST_P(AV1HighbdSelfguidedFilterTest, CorrectnessTest) {
 const int32_t highbd_params_avx2[] = {8, 10, 12};
 INSTANTIATE_TEST_CASE_P(
     AVX2, AV1HighbdSelfguidedFilterTest,
-    ::testing::Combine(::testing::Values(eb_apply_selfguided_restoration_avx2),
+    ::testing::Combine(::testing::Values(svt_apply_selfguided_restoration_avx2),
                        ::testing::ValuesIn(highbd_params_avx2)));
 
 #if 0
@@ -488,13 +488,13 @@ INSTANTIATE_TEST_CASE_P(
 static void init_data_integral_images(uint8_t **src8, uint16_t **src16,
                                       int32_t *src_stride) {
     *src_stride =
-        eb_create_random_aligned_stride(2 * RESTORATION_UNITSIZE_MAX, 64);
+        svt_create_random_aligned_stride(2 * RESTORATION_UNITSIZE_MAX, 64);
     *src8 = (uint8_t *)malloc(sizeof(**src8) * 2 * RESTORATION_UNITSIZE_MAX *
                               *src_stride);
     *src16 = (uint16_t *)malloc(sizeof(**src16) * 2 * RESTORATION_UNITSIZE_MAX *
                                 *src_stride);
-    eb_buf_random_u8(*src8, 2 * RESTORATION_UNITSIZE_MAX * *src_stride);
-    eb_buf_random_u16_with_bd(
+    svt_buf_random_u8(*src8, 2 * RESTORATION_UNITSIZE_MAX * *src_stride);
+    svt_buf_random_u16_with_bd(
         *src16, 2 * RESTORATION_UNITSIZE_MAX * *src_stride, 12);
 }
 

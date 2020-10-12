@@ -84,23 +84,23 @@ AomSadMultiDFn aom_sad_4d_avx2_func_ptr_array[num_sad] = {
 
 static void init_data_sadMxN(uint8_t **src_ptr, uint32_t *src_stride,
                              uint8_t **ref_ptr, uint32_t *ref_stride) {
-    *src_stride = eb_create_random_aligned_stride(MAX_SB_SIZE, 64);
-    *ref_stride = eb_create_random_aligned_stride(MAX_SB_SIZE, 64);
+    *src_stride = svt_create_random_aligned_stride(MAX_SB_SIZE, 64);
+    *ref_stride = svt_create_random_aligned_stride(MAX_SB_SIZE, 64);
     *src_ptr = (uint8_t *)malloc(sizeof(**src_ptr) * MAX_SB_SIZE * *src_stride);
     *ref_ptr = (uint8_t *)malloc(sizeof(**ref_ptr) * MAX_SB_SIZE * *ref_stride);
-    eb_buf_random_u8(*src_ptr, MAX_SB_SIZE * *src_stride);
-    eb_buf_random_u8(*ref_ptr, MAX_SB_SIZE * *ref_stride);
+    svt_buf_random_u8(*src_ptr, MAX_SB_SIZE * *src_stride);
+    svt_buf_random_u8(*ref_ptr, MAX_SB_SIZE * *ref_stride);
 }
 
 static void init_data_sadMxNx4d(uint8_t **src_ptr, uint32_t *src_stride,
                                 uint8_t *ref_ptr[4], uint32_t *ref_stride) {
-    *src_stride = eb_create_random_aligned_stride(MAX_SB_SIZE, 64);
-    *ref_stride = eb_create_random_aligned_stride(MAX_SB_SIZE, 64);
+    *src_stride = svt_create_random_aligned_stride(MAX_SB_SIZE, 64);
+    *ref_stride = svt_create_random_aligned_stride(MAX_SB_SIZE, 64);
     *src_ptr = (uint8_t *)malloc(sizeof(**src_ptr) * MAX_SB_SIZE * *src_stride);
     ref_ptr[0] =
         (uint8_t *)malloc(sizeof(**ref_ptr) * (MAX_SB_SIZE + 3) * *ref_stride);
-    eb_buf_random_u8(*src_ptr, MAX_SB_SIZE * *src_stride);
-    eb_buf_random_u8(ref_ptr[0], (MAX_SB_SIZE + 3) * *ref_stride);
+    svt_buf_random_u8(*src_ptr, MAX_SB_SIZE * *src_stride);
+    svt_buf_random_u8(ref_ptr[0], (MAX_SB_SIZE + 3) * *ref_stride);
     ref_ptr[1] = ref_ptr[0] + *ref_stride;
     ref_ptr[2] = ref_ptr[1] + *ref_stride;
     ref_ptr[3] = ref_ptr[2] + *ref_stride;
@@ -144,7 +144,7 @@ void sadMxNx4d_match_test(const AomSadMultiDFn *const func_table) {
         for (int j = 0; j < num_sad; j++) {
             if(func_table[j] == NULL)
                 continue;
-            eb_buf_random_u32(sad_array_opt, 4);
+            svt_buf_random_u32(sad_array_opt, 4);
             aom_sad_4d_c_func_ptr_array[j](
                 src_ptr, src_stride, ref_ptr, ref_stride, sad_array_org);
             func_table[j](
@@ -226,7 +226,7 @@ void sadMxNx4d_speed_test(const AomSadMultiDFn *const func_table) {
     uint64_t finish_time_seconds, finish_time_useconds;
 
     init_data_sadMxNx4d(&src_ptr, &src_stride, ref_ptr, &ref_stride);
-    eb_buf_random_u32(sad_array_opt, 4);
+    svt_buf_random_u32(sad_array_opt, 4);
 
     for (int j = 0; j < num_sad; j++) {
         if(func_table[j] == NULL)

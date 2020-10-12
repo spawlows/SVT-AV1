@@ -416,45 +416,45 @@ void svt_cdef_block(EbDecHandle *dec_handle, int32_t *mi_wide_l2, int32_t *mi_hi
         /*Cdef filter calling function for high bit depth */
         if (use_highbd) {
             uint16_t *tmp_buff = (uint16_t *)rec_buff;
-            eb_cdef_filter_fb(NULL,
-                              &tmp_buff[rec_stride * (MI_SIZE_64X64 * fbr << mi_high_l2[pli]) +
-                                        (fbc * MI_SIZE_64X64 << mi_wide_l2[pli])],
-                              rec_stride,
-                              &src[CDEF_VBORDER * CDEF_BSTRIDE + CDEF_HBORDER],
-                              sub_x,
-                              sub_y,
-                              dir,
-                              NULL,
-                              var,
-                              pli,
-                              dlist,
-                              cdef_count,
-                              level,
-                              sec_strength,
-                              pri_damping,
-                              sec_damping,
-                              coeff_shift);
+            svt_cdef_filter_fb(NULL,
+                               &tmp_buff[rec_stride * (MI_SIZE_64X64 * fbr << mi_high_l2[pli]) +
+                               (fbc * MI_SIZE_64X64 << mi_wide_l2[pli])],
+                               rec_stride,
+                               &src[CDEF_VBORDER * CDEF_BSTRIDE + CDEF_HBORDER],
+                               sub_x,
+                               sub_y,
+                               dir,
+                               NULL,
+                               var,
+                               pli,
+                               dlist,
+                               cdef_count,
+                               level,
+                               sec_strength,
+                               pri_damping,
+                               sec_damping,
+                               coeff_shift);
         }
         /*Cdef filter calling function for 8 bit depth */
         else
-            eb_cdef_filter_fb(&rec_buff[rec_stride * (MI_SIZE_64X64 * fbr << mi_high_l2[pli]) +
-                                        (fbc * MI_SIZE_64X64 << mi_wide_l2[pli])],
-                              NULL,
-                              rec_stride,
-                              &src[CDEF_VBORDER * CDEF_BSTRIDE + CDEF_HBORDER],
-                              sub_x,
-                              sub_y,
-                              dir,
-                              NULL,
-                              var,
-                              pli,
-                              dlist,
-                              cdef_count,
-                              level,
-                              sec_strength,
-                              pri_damping,
-                              sec_damping,
-                              coeff_shift);
+            svt_cdef_filter_fb(&rec_buff[rec_stride * (MI_SIZE_64X64 * fbr << mi_high_l2[pli]) +
+                               (fbc * MI_SIZE_64X64 << mi_wide_l2[pli])],
+                               NULL,
+                               rec_stride,
+                               &src[CDEF_VBORDER * CDEF_BSTRIDE + CDEF_HBORDER],
+                               sub_x,
+                               sub_y,
+                               dir,
+                               NULL,
+                               var,
+                               pli,
+                               dlist,
+                               cdef_count,
+                               level,
+                               sec_strength,
+                               pri_damping,
+                               sec_damping,
+                               coeff_shift);
     } /*cdef plane loop ending*/
     //CHKN filtered data is written back directy to recFrame.
     *cdef_left = 1;
@@ -647,21 +647,21 @@ void svt_cdef_frame(EbDecHandle *dec_handle, int enable_flag) {
         /*Loop for 64x64 block wise, along row wise for frame size*/
         for (int32_t fbc = 0; fbc < nhfb; fbc++) {
             svt_cdef_block(dec_handle,
-                            mi_wide_l2,
-                            mi_high_l2,
-                            colbuf,
-                            prev_row_cdef,
-                            curr_row_cdef,
-                            fbr,
-                            fbc,
-                            &cdef_left,
-                            num_planes,
-                            src,
-                            curr_recon_stride,
-                            curr_blk_recon_buf,
-                            linebuf,
-                            linebuf,
-                            stride);
+                           mi_wide_l2,
+                           mi_high_l2,
+                           colbuf,
+                           prev_row_cdef,
+                           curr_row_cdef,
+                           fbr,
+                           fbc,
+                           &cdef_left,
+                           num_planes,
+                           src,
+                           curr_recon_stride,
+                           curr_blk_recon_buf,
+                           linebuf,
+                           linebuf,
+                           stride);
         }
         uint8_t *tmp  = prev_row_cdef;
         prev_row_cdef = curr_row_cdef;

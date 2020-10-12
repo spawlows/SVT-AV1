@@ -103,10 +103,10 @@ EbErrorType rest_context_ctor(EbThreadContext *  thread_context_ptr,
 
     // Input/Output System Resource Manager FIFOs
     context_ptr->rest_input_fifo_ptr =
-        eb_system_resource_get_consumer_fifo(enc_handle_ptr->cdef_results_resource_ptr, index);
+        svt_system_resource_get_consumer_fifo(enc_handle_ptr->cdef_results_resource_ptr, index);
     context_ptr->rest_output_fifo_ptr =
-        eb_system_resource_get_producer_fifo(enc_handle_ptr->rest_results_resource_ptr, index);
-    context_ptr->picture_demux_fifo_ptr = eb_system_resource_get_producer_fifo(
+        svt_system_resource_get_producer_fifo(enc_handle_ptr->rest_results_resource_ptr, index);
+    context_ptr->picture_demux_fifo_ptr = svt_system_resource_get_producer_fifo(
         enc_handle_ptr->picture_demux_results_resource_ptr, demux_index);
 
     {
@@ -125,9 +125,9 @@ EbErrorType rest_context_ctor(EbThreadContext *  thread_context_ptr,
         init_data.split_mode         = EB_FALSE;
         init_data.is_16bit_pipeline = config->is_16bit_pipeline;
 
-        EB_NEW(context_ptr->trial_frame_rst, eb_picture_buffer_desc_ctor, (EbPtr)&init_data);
+        EB_NEW(context_ptr->trial_frame_rst, svt_picture_buffer_desc_ctor, (EbPtr)&init_data);
 
-        EB_NEW(context_ptr->org_rec_frame, eb_picture_buffer_desc_ctor, (EbPtr)&init_data);
+        EB_NEW(context_ptr->org_rec_frame, svt_picture_buffer_desc_ctor, (EbPtr)&init_data);
         if (!is_16bit)
         {
             context_ptr->trial_frame_rst->bit_depth = EB_8BIT;
@@ -152,12 +152,12 @@ EbErrorType rest_context_ctor(EbThreadContext *  thread_context_ptr,
     if (config->is_16bit_pipeline || is_16bit) {
         temp_lf_recon_desc_init_data.bit_depth = EB_16BIT;
         EB_NEW(context_ptr->temp_lf_recon_picture16bit_ptr,
-               eb_recon_picture_buffer_desc_ctor,
+               svt_recon_picture_buffer_desc_ctor,
                (EbPtr)&temp_lf_recon_desc_init_data);
     } else {
         temp_lf_recon_desc_init_data.bit_depth = EB_8BIT;
         EB_NEW(context_ptr->temp_lf_recon_picture_ptr,
-               eb_recon_picture_buffer_desc_ctor,
+               svt_recon_picture_buffer_desc_ctor,
                (EbPtr)&temp_lf_recon_desc_init_data);
     }
 
@@ -197,15 +197,15 @@ void get_own_recon(SequenceControlSet *scs_ptr, PictureControlSet *pcs_ptr,
                                org_rec->origin_y / 2 * org_rec->stride_cr;
 
         for (int r = 0; r < recon_picture_ptr->height; ++r)
-            eb_memcpy(org_ptr + r * org_rec->stride_y,
+            svt_memcpy(org_ptr + r * org_rec->stride_y,
                    rec_ptr + r * recon_picture_ptr->stride_y,
                    recon_picture_ptr->width << 1);
 
         for (int r = 0; r < (recon_picture_ptr->height >> ss_y); ++r) {
-            eb_memcpy(org_ptr_cb + r * org_rec->stride_cb,
+            svt_memcpy(org_ptr_cb + r * org_rec->stride_cb,
                    rec_ptr_cb + r * recon_picture_ptr->stride_cb,
                    (recon_picture_ptr->width >> ss_x) << 1);
-            eb_memcpy(org_ptr_cr + r * org_rec->stride_cr,
+            svt_memcpy(org_ptr_cr + r * org_rec->stride_cr,
                    rec_ptr_cr + r * recon_picture_ptr->stride_cr,
                    (recon_picture_ptr->width >> ss_x) << 1);
         }
@@ -240,15 +240,15 @@ void get_own_recon(SequenceControlSet *scs_ptr, PictureControlSet *pcs_ptr,
                                                      org_rec->origin_y / 2 * org_rec->stride_cr]);
 
         for (int r = 0; r < recon_picture_ptr->height; ++r)
-            eb_memcpy(org_ptr + r * org_rec->stride_y,
+            svt_memcpy(org_ptr + r * org_rec->stride_y,
                    rec_ptr + r * recon_picture_ptr->stride_y,
                    recon_picture_ptr->width);
 
         for (int r = 0; r < (recon_picture_ptr->height >> ss_y); ++r) {
-            eb_memcpy(org_ptr_cb + r * org_rec->stride_cb,
+            svt_memcpy(org_ptr_cb + r * org_rec->stride_cb,
                    rec_ptr_cb + r * recon_picture_ptr->stride_cb,
                    (recon_picture_ptr->width >> ss_x));
-            eb_memcpy(org_ptr_cr + r * org_rec->stride_cr,
+            svt_memcpy(org_ptr_cr + r * org_rec->stride_cr,
                    rec_ptr_cr + r * recon_picture_ptr->stride_cr,
                    (recon_picture_ptr->width >> ss_x));
         }
@@ -387,7 +387,7 @@ EbErrorType copy_recon_enc(SequenceControlSet *scs_ptr,
 
             int height = (recon_picture_src->height >> sub_y);
             for (int row = 0; row < height; ++row) {
-                eb_memcpy(dst_buf, src_buf, (recon_picture_src->width >> sub_x) *
+                svt_memcpy(dst_buf, src_buf, (recon_picture_src->width >> sub_x) *
                                          sizeof(*src_buf) << use_highbd);
                 src_buf += src_stride << use_highbd;
                 dst_buf += dst_stride << use_highbd;
@@ -551,7 +551,7 @@ void *rest_kernel(void *input_ptr) {
         }
 
         //all seg based search is done. update total processed segments. if all done, finish the search and perfrom application.
-        eb_block_on_mutex(pcs_ptr->rest_search_mutex);
+        svt_block_on_mutex(pcs_ptr->rest_search_mutex);
 
         pcs_ptr->tot_seg_searched_rest++;
         if (pcs_ptr->tot_seg_searched_rest == pcs_ptr->rest_segments_total_count) {
@@ -598,8 +598,8 @@ void *rest_kernel(void *input_ptr) {
 
             if (pcs_ptr->parent_pcs_ptr->is_used_as_reference_flag) {
                 // Get Empty PicMgr Results
-                eb_get_empty_object(context_ptr->picture_demux_fifo_ptr,
-                                    &picture_demux_results_wrapper_ptr);
+                svt_get_empty_object(context_ptr->picture_demux_fifo_ptr,
+                                     &picture_demux_results_wrapper_ptr);
 
                 picture_demux_results_rtr =
                     (PictureDemuxResults *)picture_demux_results_wrapper_ptr->object_ptr;
@@ -610,7 +610,7 @@ void *rest_kernel(void *input_ptr) {
                 picture_demux_results_rtr->picture_type    = EB_PIC_REFERENCE;
 
                 // Post Reference Picture
-                eb_post_full_object(picture_demux_results_wrapper_ptr);
+                svt_post_full_object(picture_demux_results_wrapper_ptr);
             }
             //Jing: TODO
             //Consider to add parallelism here, sending line by line, not waiting for a full frame
@@ -628,8 +628,8 @@ void *rest_kernel(void *input_ptr) {
                     const int tile_idx =
                         tile_row_idx * pcs_ptr->parent_pcs_ptr->av1_cm->tiles_info.tile_cols +
                         tile_col_idx;
-                    eb_get_empty_object(context_ptr->rest_output_fifo_ptr,
-                                        &rest_results_wrapper_ptr);
+                    svt_get_empty_object(context_ptr->rest_output_fifo_ptr,
+                                         &rest_results_wrapper_ptr);
                     rest_results_ptr = (struct RestResults *)rest_results_wrapper_ptr->object_ptr;
                     rest_results_ptr->pcs_wrapper_ptr = cdef_results_ptr->pcs_wrapper_ptr;
                     rest_results_ptr->completed_sb_row_index_start = 0;
@@ -637,14 +637,14 @@ void *rest_kernel(void *input_ptr) {
                     rest_results_ptr->completed_sb_row_count = tile_height_in_sb;
                     rest_results_ptr->tile_index             = tile_idx;
                     // Post Rest Results
-                    eb_post_full_object(rest_results_wrapper_ptr);
+                    svt_post_full_object(rest_results_wrapper_ptr);
                 }
             }
         }
-        eb_release_mutex(pcs_ptr->rest_search_mutex);
+        svt_release_mutex(pcs_ptr->rest_search_mutex);
 
         // Release input Results
-        eb_release_object(cdef_results_wrapper_ptr);
+        svt_release_object(cdef_results_wrapper_ptr);
     }
 
     return NULL;

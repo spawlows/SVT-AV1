@@ -766,10 +766,10 @@ void svt_av1_selfguided_restoration_avx2(const uint8_t *dgd8, int32_t width, int
     }
 }
 
-void eb_apply_selfguided_restoration_avx2(const uint8_t *dat8, int32_t width, int32_t height,
-                                          int32_t stride, int32_t eps, const int32_t *xqd,
-                                          uint8_t *dst8, int32_t dst_stride, int32_t *tmpbuf,
-                                          int32_t bit_depth, int32_t highbd) {
+void svt_apply_selfguided_restoration_avx2(const uint8_t *dat8, int32_t width, int32_t height,
+                                           int32_t stride, int32_t eps, const int32_t *xqd,
+                                           uint8_t *dst8, int32_t dst_stride, int32_t *tmpbuf,
+                                           int32_t bit_depth, int32_t highbd) {
     int32_t *flt0 = tmpbuf;
     int32_t *flt1 = flt0 + RESTORATION_UNITPELS_MAX;
     assert(width * height <= RESTORATION_UNITPELS_MAX);
@@ -777,7 +777,7 @@ void eb_apply_selfguided_restoration_avx2(const uint8_t *dat8, int32_t width, in
         dat8, width, height, stride, flt0, flt1, width, eps, bit_depth, highbd);
     const SgrParamsType *const params = &eb_sgr_params[eps];
     int32_t                    xq[2];
-    eb_decode_xq(xqd, xq, params);
+    svt_decode_xq(xqd, xq, params);
 
     const __m256i xq0      = _mm256_set1_epi32(xq[0]);
     const __m256i xq1      = _mm256_set1_epi32(xq[1]);
