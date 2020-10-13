@@ -2186,7 +2186,7 @@ void me_prune_ref(
             }
         }
     }
-    eb_memcpy(sorted, context_ptr->hme_results, sizeof(HmeResults)*MAX_NUM_OF_REF_PIC_LIST*REF_LIST_MAX_DEPTH);
+    svt_memcpy(sorted, context_ptr->hme_results, sizeof(HmeResults)*MAX_NUM_OF_REF_PIC_LIST*REF_LIST_MAX_DEPTH);
     HmeResults     * res_p = sorted[0];
     uint32_t i, j;
     for (i = 0; i < num_of_cand_to_sort - 1; ++i) {
@@ -2941,7 +2941,7 @@ void hme_sb(
 void hme_prune_ref_and_adjust_sr(MeContext* context_ptr) {
     HmeResults    sorted[MAX_NUM_OF_REF_PIC_LIST][REF_LIST_MAX_DEPTH];
     uint32_t      num_of_cand_to_sort = MAX_NUM_OF_REF_PIC_LIST * REF_LIST_MAX_DEPTH;
-    eb_memcpy(sorted, context_ptr->hme_results, sizeof(HmeResults)*MAX_NUM_OF_REF_PIC_LIST*REF_LIST_MAX_DEPTH);
+    svt_memcpy(sorted, context_ptr->hme_results, sizeof(HmeResults)*MAX_NUM_OF_REF_PIC_LIST*REF_LIST_MAX_DEPTH);
     HmeResults     * res_p = sorted[0];
     uint32_t i, j;
     for (i = 0; i < num_of_cand_to_sort - 1; ++i) {

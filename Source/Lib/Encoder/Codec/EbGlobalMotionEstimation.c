@@ -199,7 +199,7 @@ void compute_global_motion(EbPictureBufferDesc *input_pic, EbPictureBufferDesc *
             int64_t best_warp_error = INT64_MAX;
             // Initially set all params to identity.
             for (unsigned i = 0; i < RANSAC_NUM_MOTIONS; ++i) {
-                eb_memcpy(params_by_motion[i].params,
+                svt_memcpy(params_by_motion[i].params,
                        k_indentity_params,
                        (MAX_PARAMDIM - 1) * sizeof(*(params_by_motion[i].params)));
                 params_by_motion[i].num_inliers = 0;
@@ -244,12 +244,12 @@ void compute_global_motion(EbPictureBufferDesc *input_pic, EbPictureBufferDesc *
                         // Save the wm_params modified by
                         // svt_av1_refine_integerized_param() rather than motion index to
                         // avoid rerunning refine() below.
-                        eb_memcpy(&global_motion, &tmp_wm_params, sizeof(EbWarpedMotionParams));
+                        svt_memcpy(&global_motion, &tmp_wm_params, sizeof(EbWarpedMotionParams));
                     }
                 }
             }
             if (global_motion.wmtype <= AFFINE)
-                if (!eb_get_shear_params(&global_motion)) global_motion = default_warp_params;
+                if (!svt_get_shear_params(&global_motion)) global_motion = default_warp_params;
 
             if (global_motion.wmtype == TRANSLATION) {
                 global_motion.wmmat[0] =

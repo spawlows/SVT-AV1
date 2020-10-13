@@ -123,9 +123,9 @@ EbErrorType copy_recon(SeqHeader *seq_hdr, EbPictureBufferDesc *recon_picture_sr
 
         int height = (recon_picture_src->height >> sub_y);
         for (int row = 0; row < height; ++row) {
-            eb_memcpy(dst_buf,
-                    src_buf,
-                   (recon_picture_src->width >> sub_x) * sizeof(*src_buf) << use_highbd);
+            svt_memcpy(dst_buf,
+                       src_buf,
+                       (recon_picture_src->width >> sub_x) * sizeof(*src_buf) << use_highbd);
             src_buf += src_stride << use_highbd;
             dst_buf += dst_stride << use_highbd;
         }

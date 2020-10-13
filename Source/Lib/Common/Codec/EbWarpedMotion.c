@@ -478,12 +478,12 @@ static int find_affine_int(int np, const int *pts1, const int *pts2, BlockSize b
     return 0;
 }
 
-EbBool eb_find_projection(int np, int *pts1, int *pts2, BlockSize bsize, int mvy, int mvx,
-                          EbWarpedMotionParams *wm_params, int mi_row, int mi_col) {
+EbBool svt_find_projection(int np, int *pts1, int *pts2, BlockSize bsize, int mvy, int mvx,
+                           EbWarpedMotionParams *wm_params, int mi_row, int mi_col) {
     if (find_affine_int(np, pts1, pts2, bsize, mvy, mvx, wm_params, mi_row, mi_col)) { return 1; }
 
     // check compatibility with the fast warp filter
-    if (!eb_get_shear_params(wm_params)) return 1;
+    if (!svt_get_shear_params(wm_params)) return 1;
 
     return 0;
 }
@@ -692,10 +692,10 @@ void svt_av1_warp_affine_c(const int32_t *mat, const uint8_t *ref, int width, in
     }
 }
 
-void eb_warp_plane(EbWarpedMotionParams *wm, const uint8_t *const ref, int width, int height,
-                   int stride, uint8_t *pred, int p_col, int p_row, int p_width, int p_height,
-                   int p_stride, int subsampling_x, int subsampling_y,
-                   ConvolveParams *conv_params) {
+void svt_warp_plane(EbWarpedMotionParams *wm, const uint8_t *const ref, int width, int height,
+                    int stride, uint8_t *pred, int p_col, int p_row, int p_width, int p_height,
+                    int p_stride, int subsampling_x, int subsampling_y,
+                    ConvolveParams *conv_params) {
     assert(wm->wmtype <= AFFINE);
     if (wm->wmtype == ROTZOOM) {
         wm->wmmat[5] = wm->wmmat[2];
@@ -843,10 +843,10 @@ void svt_av1_highbd_warp_affine_c(const int32_t *mat, const uint16_t *ref, int w
     }
 }
 
-void eb_highbd_warp_plane(EbWarpedMotionParams *wm, const uint8_t *const ref8, int width,
-                          int height, int stride, const uint8_t *const pred8, int p_col,
-                          int p_row, int p_width, int p_height, int p_stride, int subsampling_x,
-                          int subsampling_y, int bd, ConvolveParams *conv_params) {
+void svt_highbd_warp_plane(EbWarpedMotionParams *wm, const uint8_t *const ref8, int width,
+                           int height, int stride, const uint8_t *const pred8, int p_col,
+                           int p_row, int p_width, int p_height, int p_stride, int subsampling_x,
+                           int subsampling_y, int bd, ConvolveParams *conv_params) {
     assert(wm->wmtype <= AFFINE);
     if (wm->wmtype == ROTZOOM) {
         wm->wmmat[5] = wm->wmmat[2];
@@ -887,41 +887,41 @@ void svt_av1_warp_plane(EbWarpedMotionParams *wm, int use_hbd, int bd, const uin
                         int p_height, int p_stride, int subsampling_x, int subsampling_y,
                         ConvolveParams *conv_params) {
     if (use_hbd)
-        eb_highbd_warp_plane(wm,
-                             ref,
-                             width,
-                             height,
-                             stride,
-                             pred,
-                             p_col,
-                             p_row,
-                             p_width,
-                             p_height,
-                             p_stride,
-                             subsampling_x,
-                             subsampling_y,
-                             bd,
-                             conv_params);
+        svt_highbd_warp_plane(wm,
+                              ref,
+                              width,
+                              height,
+                              stride,
+                              pred,
+                              p_col,
+                              p_row,
+                              p_width,
+                              p_height,
+                              p_stride,
+                              subsampling_x,
+                              subsampling_y,
+                              bd,
+                              conv_params);
     else
-        eb_warp_plane(wm,
-                      ref,
-                      width,
-                      height,
-                      stride,
-                      pred,
-                      p_col,
-                      p_row,
-                      p_width,
-                      p_height,
-                      p_stride,
-                      subsampling_x,
-                      subsampling_y,
-                      conv_params);
+        svt_warp_plane(wm,
+                       ref,
+                       width,
+                       height,
+                       stride,
+                       pred,
+                       p_col,
+                       p_row,
+                       p_width,
+                       p_height,
+                       p_stride,
+                       subsampling_x,
+                       subsampling_y,
+                       conv_params);
 }
 
 
 // Returns 1 on success or 0 on an invalid affine set
-int eb_get_shear_params(EbWarpedMotionParams *wm) {
+int svt_get_shear_params(EbWarpedMotionParams *wm) {
     const int32_t *mat = wm->wmmat;
     if (!is_affine_valid(wm)) return 0;
     wm->alpha = clamp(mat[2] - (1 << WARPEDMODEL_PREC_BITS), INT16_MIN, INT16_MAX);

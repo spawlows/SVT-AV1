@@ -92,8 +92,8 @@ class ResidualTestBase : public ::testing::Test {
             break;
         }
         case VAL_RANDOM: {
-            eb_buf_random_u8(input_, test_size_);
-            eb_buf_random_u8(pred_, test_size_);
+            svt_buf_random_u8(input_, test_size_);
+            svt_buf_random_u8(pred_, test_size_);
             break;
         }
         default: break;
@@ -180,8 +180,8 @@ class ResidualKernelTest
             break;
         }
         case VAL_RANDOM: {
-            eb_buf_random_u16(input16bit_, test_size_);
-            eb_buf_random_u16(pred16bit_, test_size_);
+            svt_buf_random_u16(input16bit_, test_size_);
+            svt_buf_random_u16(pred16bit_, test_size_);
             break;
         }
         default: break;
@@ -203,7 +203,7 @@ class ResidualKernelTest
         for (int i = 0; i < (int) (sizeof(residual_kernel8bit_func_table) /
                                 sizeof(*residual_kernel8bit_func_table));
              i++) {
-            eb_buf_random_s16(residual2_, test_size_);
+            svt_buf_random_s16(residual2_, test_size_);
             residual_kernel8bit_func_table[i](input_,
                                               input_stride_,
                                               pred_,
@@ -248,7 +248,7 @@ class ResidualKernelTest
         for (int i = 0; i < (int) (sizeof(residual_kernel8bit_func_table) /
                                 sizeof(*residual_kernel8bit_func_table));
              i++) {
-            eb_buf_random_s16(residual2_, test_size_);
+            svt_buf_random_s16(residual2_, test_size_);
 
             svt_av1_get_time(&middle_time_seconds, &middle_time_useconds);
 

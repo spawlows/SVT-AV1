@@ -253,8 +253,8 @@ void setup_common_rtcd_internal(CPU_FLAGS flags) {
     svt_aom_highbd_blend_a64_vmask_16bit = svt_aom_highbd_blend_a64_vmask_16bit_c;
     svt_aom_highbd_blend_a64_hmask_16bit = svt_aom_highbd_blend_a64_hmask_16bit_c;
 
-    eb_cfl_predict_lbd = eb_cfl_predict_lbd_c;
-    eb_cfl_predict_hbd = eb_cfl_predict_hbd_c;
+    svt_cfl_predict_lbd = svt_cfl_predict_lbd_c;
+    svt_cfl_predict_hbd = svt_cfl_predict_hbd_c;
 
     svt_av1_filter_intra_predictor = svt_av1_filter_intra_predictor_c;
 
@@ -268,7 +268,7 @@ void setup_common_rtcd_internal(CPU_FLAGS flags) {
 
     svt_av1_highbd_wiener_convolve_add_src = svt_av1_highbd_wiener_convolve_add_src_c;
 
-    eb_apply_selfguided_restoration = eb_apply_selfguided_restoration_c;
+    svt_apply_selfguided_restoration = svt_apply_selfguided_restoration_c;
 
     svt_av1_selfguided_restoration = svt_av1_selfguided_restoration_c;
 
@@ -609,11 +609,11 @@ void setup_common_rtcd_internal(CPU_FLAGS flags) {
     svt_aom_h_predictor_8x16 = svt_aom_h_predictor_8x16_c;
     svt_aom_h_predictor_8x32 = svt_aom_h_predictor_8x32_c;
     svt_aom_h_predictor_8x4 = svt_aom_h_predictor_8x4_c;
-    eb_cdef_find_dir = eb_cdef_find_dir_c;
+    svt_cdef_find_dir = svt_cdef_find_dir_c;
 
-    eb_cdef_filter_block = eb_cdef_filter_block_c;
+    svt_cdef_filter_block = svt_cdef_filter_block_c;
 
-    eb_copy_rect8_8bit_to_16bit = eb_copy_rect8_8bit_to_16bit_c;
+    svt_copy_rect8_8bit_to_16bit = svt_copy_rect8_8bit_to_16bit_c;
 
 
     svt_av1_highbd_warp_affine = svt_av1_highbd_warp_affine_c;
@@ -807,8 +807,8 @@ void setup_common_rtcd_internal(CPU_FLAGS flags) {
     svt_aom_highbd_h_predictor_8x8 = svt_aom_highbd_h_predictor_8x8_c;
     svt_aom_highbd_h_predictor_16x16 = svt_aom_highbd_h_predictor_16x16_c;
     svt_aom_highbd_h_predictor_16x32 = svt_aom_highbd_h_predictor_16x32_c;
-    eb_log2f = log2f_32;
-    eb_memcpy = eb_memcpy_c;
+    svt_log2f = log2f_32;
+    svt_memcpy = svt_memcpy_c;
 #ifdef ARCH_X86_64
     flags &= get_cpu_flags_to_use();
     if (flags & HAS_SSE4_1) svt_aom_blend_a64_mask = svt_aom_blend_a64_mask_sse4_1;
@@ -820,15 +820,15 @@ void setup_common_rtcd_internal(CPU_FLAGS flags) {
     if (flags & HAS_SSE4_1) svt_aom_highbd_blend_a64_vmask_8bit = svt_aom_highbd_blend_a64_vmask_8bit_sse4_1;
     if (flags & HAS_SSE4_1) svt_aom_highbd_blend_a64_vmask_16bit = svt_aom_highbd_blend_a64_vmask_16bit_sse4_1;
     if (flags & HAS_SSE4_1) svt_aom_highbd_blend_a64_hmask_16bit = svt_aom_highbd_blend_a64_hmask_16bit_sse4_1;
-    if (flags & HAS_AVX2) eb_cfl_predict_lbd = eb_cfl_predict_lbd_avx2;
-    if (flags & HAS_AVX2) eb_cfl_predict_hbd = eb_cfl_predict_hbd_avx2;
+    if (flags & HAS_AVX2) svt_cfl_predict_lbd = svt_cfl_predict_lbd_avx2;
+    if (flags & HAS_AVX2) svt_cfl_predict_hbd = svt_cfl_predict_hbd_avx2;
     if (flags & HAS_SSE4_1) svt_av1_filter_intra_predictor = svt_av1_filter_intra_predictor_sse4_1;
     if (flags & HAS_SSE4_1) svt_av1_filter_intra_edge_high = svt_av1_filter_intra_edge_high_sse4_1;
     if (flags & HAS_SSE4_1) svt_av1_filter_intra_edge = svt_av1_filter_intra_edge_sse4_1;
     if (flags & HAS_SSE4_1) svt_av1_upsample_intra_edge = svt_av1_upsample_intra_edge_sse4_1;
     if (flags & HAS_AVX2) svt_av1_build_compound_diffwtd_mask_d16 = svt_av1_build_compound_diffwtd_mask_d16_avx2;
     if (flags & HAS_AVX2) svt_av1_highbd_wiener_convolve_add_src = svt_av1_highbd_wiener_convolve_add_src_avx2;
-    if (flags & HAS_AVX2) eb_apply_selfguided_restoration = eb_apply_selfguided_restoration_avx2;
+    if (flags & HAS_AVX2) svt_apply_selfguided_restoration = svt_apply_selfguided_restoration_avx2;
     if (flags & HAS_AVX2) svt_av1_selfguided_restoration = svt_av1_selfguided_restoration_avx2;
     if (flags & HAS_AVX2) svt_av1_inv_txfm2d_add_4x4 = svt_av1_inv_txfm2d_add_4x4_avx2;
     if (flags & HAS_AVX2) svt_av1_inv_txfm2d_add_8x8 = svt_av1_inv_txfm2d_add_8x8_avx2;
@@ -1224,13 +1224,13 @@ void setup_common_rtcd_internal(CPU_FLAGS flags) {
         if (flags & HAS_SSE2) svt_aom_h_predictor_8x16 = svt_aom_h_predictor_8x16_sse2;
         if (flags & HAS_SSE2) svt_aom_h_predictor_8x32 = svt_aom_h_predictor_8x32_sse2;
         if (flags & HAS_SSE2) svt_aom_h_predictor_8x4 = svt_aom_h_predictor_8x4_sse2;
-        if (flags & HAS_AVX2) eb_cdef_find_dir = eb_cdef_find_dir_avx2;
-        if (flags & HAS_AVX2) eb_cdef_filter_block = eb_cdef_filter_block_avx2;
-        if (flags & HAS_AVX2) eb_copy_rect8_8bit_to_16bit = eb_copy_rect8_8bit_to_16bit_avx2;
-        if (flags & HAS_AVX2) eb_cdef_filter_block_8x8_16 = eb_cdef_filter_block_8x8_16_avx2;
+        if (flags & HAS_AVX2) svt_cdef_find_dir = svt_cdef_find_dir_avx2;
+        if (flags & HAS_AVX2) svt_cdef_filter_block = svt_cdef_filter_block_avx2;
+        if (flags & HAS_AVX2) svt_copy_rect8_8bit_to_16bit = svt_copy_rect8_8bit_to_16bit_avx2;
+        if (flags & HAS_AVX2) svt_cdef_filter_block_8x8_16 = svt_cdef_filter_block_8x8_16_avx2;
 #ifndef NON_AVX512_SUPPORT
         if (flags & HAS_AVX512F) {
-            eb_cdef_filter_block_8x8_16 = eb_cdef_filter_block_8x8_16_avx512;
+            svt_cdef_filter_block_8x8_16 = svt_cdef_filter_block_8x8_16_avx512;
         }
 #endif
         SET_AVX2(
@@ -1480,8 +1480,8 @@ void setup_common_rtcd_internal(CPU_FLAGS flags) {
         if (flags & HAS_AVX2) svt_aom_highbd_h_predictor_64x16 = svt_aom_highbd_h_predictor_64x16_avx2;
         if (flags & HAS_AVX2) svt_aom_highbd_h_predictor_64x32 = svt_aom_highbd_h_predictor_64x32_avx2;
         if (flags & HAS_AVX2) svt_aom_highbd_h_predictor_64x64 = svt_aom_highbd_h_predictor_64x64_avx2;
-        if (flags & HAS_SSE2) eb_log2f = Log2f_ASM;
-        if (flags & HAS_SSE2) eb_memcpy = eb_memcpy_intrin_sse;
+        if (flags & HAS_SSE2) svt_log2f = Log2f_ASM;
+        if (flags & HAS_SSE2) svt_memcpy = svt_memcpy_intrin_sse;
 #ifndef NON_AVX512_SUPPORT
         if (flags & HAS_AVX512F) {
             svt_aom_highbd_h_predictor_32x16 = aom_highbd_h_predictor_32x16_avx512;

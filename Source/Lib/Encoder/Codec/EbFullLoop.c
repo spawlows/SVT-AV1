@@ -398,7 +398,7 @@ void svt_av1_quantize_fp_c(const TranLow *coeff_ptr, intptr_t n_coeffs, const in
                          0);
 }
 
-static void eb_highbd_quantize_fp_helper_c(
+static void svt_highbd_quantize_fp_helper_c(
     const TranLow *coeff_ptr, intptr_t count, const int16_t *zbin_ptr, const int16_t *round_ptr,
     const int16_t *quant_ptr, const int16_t *quant_shift_ptr, TranLow *qcoeff_ptr,
     TranLow *dqcoeff_ptr, const int16_t *dequant_ptr, uint16_t *eob_ptr, const int16_t *scan,
@@ -678,21 +678,21 @@ void svt_av1_highbd_quantize_fp_facade(const TranLow *coeff_ptr, intptr_t n_coef
     const QmVal *qm_ptr  = qparam->qmatrix;
     const QmVal *iqm_ptr = qparam->iqmatrix;
     if (qm_ptr != NULL && iqm_ptr != NULL) {
-        eb_highbd_quantize_fp_helper_c(coeff_ptr,
-                                       n_coeffs,
-                                       p->zbin_qtx,
-                                       p->round_fp_qtx,
-                                       p->quant_fp_qtx,
-                                       p->quant_shift_qtx,
-                                       qcoeff_ptr,
-                                       dqcoeff_ptr,
-                                       p->dequant_qtx,
-                                       eob_ptr,
-                                       sc->scan,
-                                       sc->iscan,
-                                       qm_ptr,
-                                       iqm_ptr,
-                                       qparam->log_scale);
+        svt_highbd_quantize_fp_helper_c(coeff_ptr,
+                                        n_coeffs,
+                                        p->zbin_qtx,
+                                        p->round_fp_qtx,
+                                        p->quant_fp_qtx,
+                                        p->quant_shift_qtx,
+                                        qcoeff_ptr,
+                                        dqcoeff_ptr,
+                                        p->dequant_qtx,
+                                        eob_ptr,
+                                        sc->scan,
+                                        sc->iscan,
+                                        qm_ptr,
+                                        iqm_ptr,
+                                        qparam->log_scale);
     } else {
         svt_av1_highbd_quantize_fp(coeff_ptr,
                                    n_coeffs,

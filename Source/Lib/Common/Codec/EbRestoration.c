@@ -225,9 +225,9 @@ static void extend_frame_lowbd(uint8_t *data, int32_t width, int32_t height, int
         memset(data_p + width, data_p[width - 1], border_horz);
     }
     data_p = data - border_horz;
-    for (i = -border_vert; i < 0; ++i) eb_memcpy(data_p + i * stride,data_p, width + 2 * border_horz);
+    for (i = -border_vert; i < 0; ++i) svt_memcpy(data_p + i * stride,data_p, width + 2 * border_horz);
     for (i = height; i < height + border_vert; ++i) {
-        eb_memcpy(data_p + i * stride,data_p + (height - 1) * stride, width + 2 * border_horz);
+        svt_memcpy(data_p + i * stride,data_p + (height - 1) * stride, width + 2 * border_horz);
     }
 }
 
@@ -242,17 +242,17 @@ static void extend_frame_highbd(uint16_t *data, int32_t width, int32_t height, i
     }
     data_p = data - border_horz;
     for (i = -border_vert; i < 0; ++i) {
-        eb_memcpy(data_p + i * stride, data_p, (width + 2 * border_horz) * sizeof(uint16_t));
+        svt_memcpy(data_p + i * stride, data_p, (width + 2 * border_horz) * sizeof(uint16_t));
     }
     for (i = height; i < height + border_vert; ++i) {
-        eb_memcpy(data_p + i * stride,
-               data_p + (height - 1) * stride,
-               (width + 2 * border_horz) * sizeof(uint16_t));
+        svt_memcpy(data_p + i * stride,
+                   data_p + (height - 1) * stride,
+                   (width + 2 * border_horz) * sizeof(uint16_t));
     }
 }
 
-void eb_extend_frame(uint8_t *data, int32_t width, int32_t height, int32_t stride,
-                     int32_t border_horz, int32_t border_vert, int32_t highbd) {
+void svt_extend_frame(uint8_t *data, int32_t width, int32_t height, int32_t stride,
+                      int32_t border_horz, int32_t border_vert, int32_t highbd) {
     if (highbd)
         extend_frame_highbd(
             CONVERT_TO_SHORTPTR(data), width, height, stride, border_horz, border_vert);
@@ -262,13 +262,13 @@ void eb_extend_frame(uint8_t *data, int32_t width, int32_t height, int32_t strid
 
 static void copy_tile_lowbd(int32_t width, int32_t height, const uint8_t *src, int32_t src_stride,
                             uint8_t *dst, int32_t dst_stride) {
-    for (int32_t i = 0; i < height; ++i) eb_memcpy(dst + i * dst_stride, src + i * src_stride, width);
+    for (int32_t i = 0; i < height; ++i) svt_memcpy(dst + i * dst_stride, src + i * src_stride, width);
 }
 
 static void copy_tile_highbd(int32_t width, int32_t height, const uint16_t *src, int32_t src_stride,
                              uint16_t *dst, int32_t dst_stride) {
     for (int32_t i = 0; i < height; ++i)
-        eb_memcpy(dst + i * dst_stride, src + i * src_stride, width * sizeof(*dst));
+        svt_memcpy(dst + i * dst_stride, src + i * src_stride, width * sizeof(*dst));
 }
 
 void copy_tile(int32_t width, int32_t height, const uint8_t *src, int32_t src_stride,
@@ -291,7 +291,7 @@ void copy_tile(int32_t width, int32_t height, const uint8_t *src, int32_t src_st
 // rules:
 //
 // * At a frame boundary, we copy the outermost row of CDEF pixels three times.
-//   This extension is done by a call to eb_extend_frame() at the start of the loop
+//   This extension is done by a call to svt_extend_frame() at the start of the loop
 //   restoration process, so the value of copy_above/copy_below doesn't strictly
 //   matter.
 //   However, by setting *copy_above = *copy_below = 1 whenever loop filtering
@@ -386,10 +386,10 @@ void setup_processing_stripe_boundary(const RestorationTileLimits *      limits,
                 const uint8_t *buf     = rsb->stripe_boundary_above + (buf_off << use_highbd);
                 uint8_t *      dst8    = data8_tl + i * data_stride;
                 // Save old pixels, then replace with data from stripe_boundary_above
-                eb_memcpy(rlbs->tmp_save_above[i + RESTORATION_BORDER],
-                       REAL_PTR(use_highbd, dst8),
-                       line_size);
-                eb_memcpy(REAL_PTR(use_highbd, dst8), buf, line_size);
+                svt_memcpy(rlbs->tmp_save_above[i + RESTORATION_BORDER],
+                           REAL_PTR(use_highbd, dst8),
+                           line_size);
+                svt_memcpy(REAL_PTR(use_highbd, dst8), buf, line_size);
             }
         }
 
@@ -407,8 +407,8 @@ void setup_processing_stripe_boundary(const RestorationTileLimits *      limits,
 
                 uint8_t *dst8 = data8_bl + i * data_stride;
                 // Save old pixels, then replace with data from stripe_boundary_below
-                eb_memcpy(rlbs->tmp_save_below[i], REAL_PTR(use_highbd, dst8), line_size);
-                eb_memcpy(REAL_PTR(use_highbd, dst8), src, line_size);
+                svt_memcpy(rlbs->tmp_save_below[i], REAL_PTR(use_highbd, dst8), line_size);
+                svt_memcpy(REAL_PTR(use_highbd, dst8), src, line_size);
             }
         }
     } else {
@@ -418,10 +418,10 @@ void setup_processing_stripe_boundary(const RestorationTileLimits *      limits,
             // Only save and overwrite i=-RESTORATION_BORDER line.
             uint8_t *dst8 = data8_tl + (-RESTORATION_BORDER) * data_stride;
             // Save old pixels, then replace with data from stripe_boundary_above
-            eb_memcpy(rlbs->tmp_save_above[0], REAL_PTR(use_highbd, dst8), line_size);
-            eb_memcpy(REAL_PTR(use_highbd, dst8),
-                   REAL_PTR(use_highbd, data8_tl + (-RESTORATION_BORDER + 1) * data_stride),
-                   line_size);
+            svt_memcpy(rlbs->tmp_save_above[0], REAL_PTR(use_highbd, dst8), line_size);
+            svt_memcpy(REAL_PTR(use_highbd, dst8),
+                       REAL_PTR(use_highbd, data8_tl + (-RESTORATION_BORDER + 1) * data_stride),
+                       line_size);
         }
 
         if (copy_below) {
@@ -431,10 +431,10 @@ void setup_processing_stripe_boundary(const RestorationTileLimits *      limits,
             // Only save and overwrite i=2 line.
             uint8_t *dst8 = data8_bl + 2 * data_stride;
             // Save old pixels, then replace with data from stripe_boundary_below
-            eb_memcpy(rlbs->tmp_save_below[2], REAL_PTR(use_highbd, dst8), line_size);
-            eb_memcpy(REAL_PTR(use_highbd, dst8),
-                   REAL_PTR(use_highbd, data8_bl + (2 - 1) * data_stride),
-                   line_size);
+            svt_memcpy(rlbs->tmp_save_below[2], REAL_PTR(use_highbd, dst8), line_size);
+            svt_memcpy(REAL_PTR(use_highbd, dst8),
+                       REAL_PTR(use_highbd, data8_bl + (2 - 1) * data_stride),
+                       line_size);
         }
     }
 }
@@ -467,9 +467,9 @@ void restore_processing_stripe_boundary(const RestorationTileLimits * limits,
             uint8_t *data8_tl = data8 + data_x0 + limits->v_start * data_stride;
             for (int32_t i = -RESTORATION_BORDER; i < 0; ++i) {
                 uint8_t *dst8 = data8_tl + i * data_stride;
-                eb_memcpy(REAL_PTR(use_highbd, dst8),
-                       rlbs->tmp_save_above[i + RESTORATION_BORDER],
-                       line_size);
+                svt_memcpy(REAL_PTR(use_highbd, dst8),
+                           rlbs->tmp_save_above[i + RESTORATION_BORDER],
+                           line_size);
             }
         }
 
@@ -481,7 +481,7 @@ void restore_processing_stripe_boundary(const RestorationTileLimits * limits,
                 if (stripe_bottom + i >= limits->v_end + RESTORATION_BORDER) break;
 
                 uint8_t *dst8 = data8_bl + i * data_stride;
-                eb_memcpy(REAL_PTR(use_highbd, dst8), rlbs->tmp_save_below[i], line_size);
+                svt_memcpy(REAL_PTR(use_highbd, dst8), rlbs->tmp_save_below[i], line_size);
             }
         }
     } else {
@@ -490,7 +490,7 @@ void restore_processing_stripe_boundary(const RestorationTileLimits * limits,
 
             // Only restore i=-RESTORATION_BORDER line.
             uint8_t *dst8 = data8_tl + (-RESTORATION_BORDER) * data_stride;
-            eb_memcpy(REAL_PTR(use_highbd, dst8), rlbs->tmp_save_above[0], line_size);
+            svt_memcpy(REAL_PTR(use_highbd, dst8), rlbs->tmp_save_above[0], line_size);
         }
 
         if (copy_below) {
@@ -500,7 +500,7 @@ void restore_processing_stripe_boundary(const RestorationTileLimits * limits,
             // Only restore i=2 line.
             if (stripe_bottom + 2 < limits->v_end + RESTORATION_BORDER) {
                 uint8_t *dst8 = data8_bl + 2 * data_stride;
-                eb_memcpy(REAL_PTR(use_highbd, dst8), rlbs->tmp_save_below[2], line_size);
+                svt_memcpy(REAL_PTR(use_highbd, dst8), rlbs->tmp_save_below[2], line_size);
             }
         }
     }
@@ -704,7 +704,7 @@ static void boxsum(int32_t *src, int32_t width, int32_t height, int32_t src_stri
         assert(0 && "Invalid value of r in self-guided filter");
 }
 
-void eb_decode_xq(const int32_t *xqd, int32_t *xq, const SgrParamsType *params) {
+void svt_decode_xq(const int32_t *xqd, int32_t *xq, const SgrParamsType *params) {
     if (params->r[0] == 0) {
         xq[0] = 0;
         xq[1] = (1 << SGRPROJ_PRJ_BITS) - xqd[1];
@@ -1044,10 +1044,10 @@ void svt_av1_selfguided_restoration_c(const uint8_t *dgd8, int32_t width, int32_
             dgd32, width, height, dgd32_stride, flt1, flt_stride, bit_depth, sgr_params_idx, 1);
 }
 
-void eb_apply_selfguided_restoration_c(const uint8_t *dat8, int32_t width, int32_t height,
-                                       int32_t stride, int32_t eps, const int32_t *xqd,
-                                       uint8_t *dst8, int32_t dst_stride, int32_t *tmpbuf,
-                                       int32_t bit_depth, int32_t highbd) {
+void svt_apply_selfguided_restoration_c(const uint8_t *dat8, int32_t width, int32_t height,
+                                        int32_t stride, int32_t eps, const int32_t *xqd,
+                                        uint8_t *dst8, int32_t dst_stride, int32_t *tmpbuf,
+                                        int32_t bit_depth, int32_t highbd) {
     int32_t *flt0 = tmpbuf;
     int32_t *flt1 = flt0 + RESTORATION_UNITPELS_MAX;
     assert(width * height <= RESTORATION_UNITPELS_MAX);
@@ -1056,7 +1056,7 @@ void eb_apply_selfguided_restoration_c(const uint8_t *dat8, int32_t width, int32
         dat8, width, height, stride, flt0, flt1, width, eps, bit_depth, highbd);
     const SgrParamsType *const params = &eb_sgr_params[eps];
     int32_t                    xq[2];
-    eb_decode_xq(xqd, xq, params);
+    svt_decode_xq(xqd, xq, params);
     for (int32_t i = 0; i < height; ++i) {
         for (int32_t j = 0; j < width; ++j) {
             const int32_t  k      = i * width + j;
@@ -1091,17 +1091,17 @@ void sgrproj_filter_stripe(const RestorationUnitInfo *rui, int32_t stripe_width,
     for (int32_t j = 0; j < stripe_width; j += procunit_width) {
         int32_t w = AOMMIN(procunit_width, stripe_width - j);
         //CHKN SSE
-        eb_apply_selfguided_restoration(src + j,
-                                        w,
-                                        stripe_height,
-                                        src_stride,
-                                        rui->sgrproj_info.ep,
-                                        rui->sgrproj_info.xqd,
-                                        dst + j,
-                                        dst_stride,
-                                        tmpbuf,
-                                        bit_depth,
-                                        0);
+        svt_apply_selfguided_restoration(src + j,
+                                         w,
+                                         stripe_height,
+                                         src_stride,
+                                         rui->sgrproj_info.ep,
+                                         rui->sgrproj_info.xqd,
+                                         dst + j,
+                                         dst_stride,
+                                         tmpbuf,
+                                         bit_depth,
+                                         0);
     }
 }
 
@@ -1137,17 +1137,17 @@ void sgrproj_filter_stripe_highbd(const RestorationUnitInfo *rui, int32_t stripe
         int32_t w = AOMMIN(procunit_width, stripe_width - j);
 
         //CHKN SSE
-        eb_apply_selfguided_restoration(src8 + j,
-                                        w,
-                                        stripe_height,
-                                        src_stride,
-                                        rui->sgrproj_info.ep,
-                                        rui->sgrproj_info.xqd,
-                                        dst8 + j,
-                                        dst_stride,
-                                        tmpbuf,
-                                        bit_depth,
-                                        1);
+        svt_apply_selfguided_restoration(src8 + j,
+                                         w,
+                                         stripe_height,
+                                         src_stride,
+                                         rui->sgrproj_info.ep,
+                                         rui->sgrproj_info.xqd,
+                                         dst8 + j,
+                                         dst_stride,
+                                         tmpbuf,
+                                         bit_depth,
+                                         1);
     }
 }
 
@@ -1327,13 +1327,13 @@ void svt_av1_loop_restoration_filter_frame(Yv12BufferConfig *frame, Av1Common *c
         const int32_t plane_width  = frame->crop_widths[is_uv];
         const int32_t plane_height = frame->crop_heights[is_uv];
 
-        eb_extend_frame(frame->buffers[plane],
-                        plane_width,
-                        plane_height,
-                        frame->strides[is_uv],
-                        RESTORATION_BORDER,
-                        RESTORATION_BORDER,
-                        highbd);
+        svt_extend_frame(frame->buffers[plane],
+                         plane_width,
+                         plane_height,
+                         frame->strides[is_uv],
+                         RESTORATION_BORDER,
+                         RESTORATION_BORDER,
+                         highbd);
 
         FilterFrameCtxt ctxt;
         ctxt.rsi         = rsi;
@@ -1682,11 +1682,11 @@ void save_deblock_boundary_lines(uint8_t *src_buf, int32_t src_stride, int32_t s
         upscaled_width = src_width;
         line_bytes     = upscaled_width << use_highbd;
         for (int32_t i = 0; i < lines_to_save; i++) {
-            eb_memcpy(bdry_rows + i * bdry_stride, src_rows + i * src_stride, line_bytes);
+            svt_memcpy(bdry_rows + i * bdry_stride, src_rows + i * src_stride, line_bytes);
         }
     }
     // If we only saved one line, then copy it into the second line buffer
-    if (lines_to_save == 1) eb_memcpy(bdry_rows + bdry_stride, bdry_rows, line_bytes);
+    if (lines_to_save == 1) svt_memcpy(bdry_rows + bdry_stride, bdry_rows, line_bytes);
 
     extend_lines(bdry_rows,
                  upscaled_width,
@@ -1723,7 +1723,7 @@ void save_cdef_boundary_lines(uint8_t *src_buf, int32_t src_stride, int32_t src_
         // we want to (effectively) extend the outermost row of CDEF data
         // from this tile to produce a border, rather than using deblocked
         // pixels from the tile above/below.
-        eb_memcpy(bdry_rows + i * bdry_stride, src_rows, line_bytes);
+        svt_memcpy(bdry_rows + i * bdry_stride, src_rows, line_bytes);
     }
     extend_lines(bdry_rows,
                  upscaled_width,

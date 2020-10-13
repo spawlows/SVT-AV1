@@ -2780,7 +2780,7 @@ uint64_t svt_handle_transform64x64_c(int32_t *output) {
 
     // Re-pack non-zero coeffs in the first 32x32 indices.
     for (int32_t row = 1; row < 32; ++row)
-        eb_memcpy_c(output + row * 32, output + row * 64, 32 * sizeof(*output));
+        svt_memcpy_c(output + row * 32, output + row * 64, 32 * sizeof(*output));
 
     return three_quad_energy;
 }
@@ -2861,7 +2861,7 @@ uint64_t svt_handle_transform64x32_c(int32_t *output) {
 
     // Re-pack non-zero coeffs in the first 32x32 indices.
     for (int32_t row = 1; row < 32; ++row)
-        eb_memcpy_c(output + row * 32, output + row * 64, 32 * sizeof(*output));
+        svt_memcpy_c(output + row * 32, output + row * 64, 32 * sizeof(*output));
 
     return three_quad_energy;
 }
@@ -2907,7 +2907,7 @@ uint64_t svt_handle_transform64x16_c(int32_t *output) {
 
     // Re-pack non-zero coeffs in the first 32x16 indices.
     for (int32_t row = 1; row < 16; ++row)
-        eb_memcpy_c(output + row * 32, output + row * 64, 32 * sizeof(*output));
+        svt_memcpy_c(output + row * 32, output + row * 64, 32 * sizeof(*output));
 
     return three_quad_energy;
 }

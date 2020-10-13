@@ -50,26 +50,26 @@ class av1_compute_stats_test
             memset(dgd, 0, sizeof(*dgd) * 2 * RESTORATION_UNITSIZE_MAX * dgd_stride);
             memset(src, 0, sizeof(*src) * 2 * RESTORATION_UNITSIZE_MAX * src_stride);
         } else if (1 == idx) {
-            eb_buf_random_u8_to_255(dgd, 2 * RESTORATION_UNITSIZE_MAX * dgd_stride);
-            eb_buf_random_u8_to_255(src, 2 * RESTORATION_UNITSIZE_MAX * src_stride);
+            svt_buf_random_u8_to_255(dgd, 2 * RESTORATION_UNITSIZE_MAX * dgd_stride);
+            svt_buf_random_u8_to_255(src, 2 * RESTORATION_UNITSIZE_MAX * src_stride);
         } else if (2 == idx) {
-            eb_buf_random_u8_to_255(dgd, 2 * RESTORATION_UNITSIZE_MAX * dgd_stride);
+            svt_buf_random_u8_to_255(dgd, 2 * RESTORATION_UNITSIZE_MAX * dgd_stride);
             memset(src, 0, sizeof(*src) * 2 * RESTORATION_UNITSIZE_MAX * src_stride);
         } else if (3 == idx) {
             memset(dgd, 0, sizeof(*dgd) * 2 * RESTORATION_UNITSIZE_MAX * dgd_stride);
-            eb_buf_random_u8_to_255(src, 2 * RESTORATION_UNITSIZE_MAX * src_stride);
+            svt_buf_random_u8_to_255(src, 2 * RESTORATION_UNITSIZE_MAX * src_stride);
         } else if (4 == idx) {
-            eb_buf_random_u8_to_0_or_255(dgd, 2 * RESTORATION_UNITSIZE_MAX * dgd_stride);
-            eb_buf_random_u8_to_0_or_255(src, 2 * RESTORATION_UNITSIZE_MAX * src_stride);
+            svt_buf_random_u8_to_0_or_255(dgd, 2 * RESTORATION_UNITSIZE_MAX * dgd_stride);
+            svt_buf_random_u8_to_0_or_255(src, 2 * RESTORATION_UNITSIZE_MAX * src_stride);
         } else {
-            eb_buf_random_u8(dgd, 2 * RESTORATION_UNITSIZE_MAX * dgd_stride);
-            eb_buf_random_u8(src, 2 * RESTORATION_UNITSIZE_MAX * src_stride);
+            svt_buf_random_u8(dgd, 2 * RESTORATION_UNITSIZE_MAX * dgd_stride);
+            svt_buf_random_u8(src, 2 * RESTORATION_UNITSIZE_MAX * src_stride);
         }
     }
 
     void init_output() {
-        eb_buf_random_s64(M_org, WIENER_WIN2);
-        eb_buf_random_s64(H_org, WIENER_WIN2 * WIENER_WIN2);
+        svt_buf_random_s64(M_org, WIENER_WIN2);
+        svt_buf_random_s64(H_org, WIENER_WIN2 * WIENER_WIN2);
         memcpy(M_opt, M_org, sizeof(*M_org) * WIENER_WIN2);
         memcpy(H_opt, H_org, sizeof(*H_org) * WIENER_WIN2 * WIENER_WIN2);
     }
@@ -85,9 +85,9 @@ class av1_compute_stats_test
         init_output();
 
         dgd_stride =
-            eb_create_random_aligned_stride(2 * RESTORATION_UNITSIZE_MAX, 64);
+            svt_create_random_aligned_stride(2 * RESTORATION_UNITSIZE_MAX, 64);
         src_stride =
-            eb_create_random_aligned_stride(2 * RESTORATION_UNITSIZE_MAX, 64);
+            svt_create_random_aligned_stride(2 * RESTORATION_UNITSIZE_MAX, 64);
         dgd = (uint8_t *)malloc(sizeof(*dgd) * 2 * RESTORATION_UNITSIZE_MAX *
                                 dgd_stride);
         src = (uint8_t *)malloc(sizeof(*src) * 2 * RESTORATION_UNITSIZE_MAX *
@@ -142,9 +142,9 @@ class av1_compute_stats_test
 
         init_output();
         dgd_stride =
-            eb_create_random_aligned_stride(2 * RESTORATION_UNITSIZE_MAX, 64);
+            svt_create_random_aligned_stride(2 * RESTORATION_UNITSIZE_MAX, 64);
         src_stride =
-            eb_create_random_aligned_stride(2 * RESTORATION_UNITSIZE_MAX, 64);
+            svt_create_random_aligned_stride(2 * RESTORATION_UNITSIZE_MAX, 64);
         dgd = (uint8_t *)malloc(sizeof(*dgd) * 2 * RESTORATION_UNITSIZE_MAX *
                                 dgd_stride);
         src = (uint8_t *)malloc(sizeof(*src) * 2 * RESTORATION_UNITSIZE_MAX *
@@ -258,26 +258,26 @@ class av1_compute_stats_test_hbd
             memset(dgd, 0, sizeof(*dgd) * 2 * RESTORATION_UNITSIZE_MAX * dgd_stride);
             memset(src, 0, sizeof(*src) * 2 * RESTORATION_UNITSIZE_MAX * src_stride);
         } else if (1 == idx) {
-            eb_buf_random_u16_to_bd(
+            svt_buf_random_u16_to_bd(
                 dgd, 2 * RESTORATION_UNITSIZE_MAX * dgd_stride, bd);
-            eb_buf_random_u16_to_bd(
+            svt_buf_random_u16_to_bd(
                 src, 2 * RESTORATION_UNITSIZE_MAX * src_stride, bd);
         } else if (2 == idx) {
-            eb_buf_random_u16_to_bd(
+            svt_buf_random_u16_to_bd(
                 dgd, 2 * RESTORATION_UNITSIZE_MAX * dgd_stride, bd);
             memset(src, 0, sizeof(*src) * 2 * RESTORATION_UNITSIZE_MAX * src_stride);
         } else if (3 == idx) {
             memset(dgd, 0, sizeof(*dgd) * 2 * RESTORATION_UNITSIZE_MAX * dgd_stride);
-            eb_buf_random_u16_to_bd(
+            svt_buf_random_u16_to_bd(
                 src, 2 * RESTORATION_UNITSIZE_MAX * src_stride, bd);
         } else if (4 == idx) {
-            eb_buf_random_u16_to_0_or_bd(
+            svt_buf_random_u16_to_0_or_bd(
                 dgd, 2 * RESTORATION_UNITSIZE_MAX * dgd_stride, bd);
-            eb_buf_random_u16_to_0_or_bd(
+            svt_buf_random_u16_to_0_or_bd(
                 src, 2 * RESTORATION_UNITSIZE_MAX * src_stride, bd);
         } else if (5 == idx) {
             // Trigger the 32-bit overflow in Step 3 and 4 for AOM_BITS_12.
-            eb_buf_random_u16_to_bd(
+            svt_buf_random_u16_to_bd(
                 dgd, 2 * RESTORATION_UNITSIZE_MAX * dgd_stride, bd);
             for (int i = 0; i < 2 * RESTORATION_UNITSIZE_MAX; i++) {
                 memset(dgd + i * dgd_stride, 0, sizeof(*dgd) * 20);
@@ -285,21 +285,21 @@ class av1_compute_stats_test_hbd
             memset(src, 0, sizeof(*src) * 2 * RESTORATION_UNITSIZE_MAX * src_stride);
         } else if (6 == idx) {
             // Trigger the 32-bit overflow in Step 5 and 6 for AOM_BITS_12.
-            eb_buf_random_u16_to_bd(
+            svt_buf_random_u16_to_bd(
                 dgd, 2 * RESTORATION_UNITSIZE_MAX * dgd_stride, bd);
             memset(dgd, 0, sizeof(*dgd) * 2 * RESTORATION_UNITSIZE_MAX * 20);
             memset(src, 0, sizeof(*src) * 2 * RESTORATION_UNITSIZE_MAX * src_stride);
         } else {
-            eb_buf_random_u16_with_bd(
+            svt_buf_random_u16_with_bd(
                 dgd, 2 * RESTORATION_UNITSIZE_MAX * dgd_stride, bd);
-            eb_buf_random_u16_with_bd(
+            svt_buf_random_u16_with_bd(
                 src, 2 * RESTORATION_UNITSIZE_MAX * src_stride, bd);
         }
     }
 
     void init_output() {
-        eb_buf_random_s64(M_org, WIENER_WIN2);
-        eb_buf_random_s64(H_org, WIENER_WIN2 * WIENER_WIN2);
+        svt_buf_random_s64(M_org, WIENER_WIN2);
+        svt_buf_random_s64(H_org, WIENER_WIN2 * WIENER_WIN2);
         memcpy(M_opt, M_org, sizeof(*M_org) * WIENER_WIN2);
         memcpy(H_opt, H_org, sizeof(*H_org) * WIENER_WIN2 * WIENER_WIN2);
     }
@@ -316,9 +316,9 @@ class av1_compute_stats_test_hbd
         init_output();
 
         dgd_stride =
-            eb_create_random_aligned_stride(2 * RESTORATION_UNITSIZE_MAX, 64);
+            svt_create_random_aligned_stride(2 * RESTORATION_UNITSIZE_MAX, 64);
         src_stride =
-            eb_create_random_aligned_stride(2 * RESTORATION_UNITSIZE_MAX, 64);
+            svt_create_random_aligned_stride(2 * RESTORATION_UNITSIZE_MAX, 64);
         dgd = (uint16_t *)malloc(sizeof(*dgd) * 2 * RESTORATION_UNITSIZE_MAX *
                                   dgd_stride);
         src = (uint16_t *)malloc(sizeof(*src) * 2 * RESTORATION_UNITSIZE_MAX *
@@ -382,9 +382,9 @@ class av1_compute_stats_test_hbd
         init_output();
 
         dgd_stride =
-            eb_create_random_aligned_stride(2 * RESTORATION_UNITSIZE_MAX, 64);
+            svt_create_random_aligned_stride(2 * RESTORATION_UNITSIZE_MAX, 64);
         src_stride =
-            eb_create_random_aligned_stride(2 * RESTORATION_UNITSIZE_MAX, 64);
+            svt_create_random_aligned_stride(2 * RESTORATION_UNITSIZE_MAX, 64);
         dgd = (uint16_t *)malloc(sizeof(*dgd) * 2 * RESTORATION_UNITSIZE_MAX *
                                  dgd_stride);
         src = (uint16_t *)malloc(sizeof(*src) * 2 * RESTORATION_UNITSIZE_MAX *

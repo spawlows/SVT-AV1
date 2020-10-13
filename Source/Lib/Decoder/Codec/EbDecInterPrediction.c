@@ -122,7 +122,7 @@ static void highbd_build_mc_border(const uint8_t *src8, int32_t src_stride,
         y0 = y0 + top;
         for (int32_t i = 0; i < blk_fill_itt; i++) {
             aom_memset16((void *)dst_temp, ref_temp[0], left);
-            if (right) eb_memcpy(dst_temp + left, ref_temp, right * sizeof(uint16_t));
+            if (right) svt_memcpy(dst_temp + left, ref_temp, right * sizeof(uint16_t));
             dst_temp += dst_stride;
             ++y0;
             if (y0 > 0 && y0 < h) ref_temp += src_stride;
@@ -141,7 +141,7 @@ static void highbd_build_mc_border(const uint8_t *src8, int32_t src_stride,
             ptr_ext = copy;
         }
         for (int32_t i = 0; i < blk_fill_itt; i++) {
-            if (copy) eb_memcpy(dst_temp, ref_temp + x0, copy * sizeof(uint16_t));
+            if (copy) svt_memcpy(dst_temp, ref_temp + x0, copy * sizeof(uint16_t));
             if (set) aom_memset16((void *)(dst_temp + ptr_ext), ref_temp[w - 1], set);
             dst_temp += dst_stride;
             ++y0;
@@ -152,7 +152,7 @@ static void highbd_build_mc_border(const uint8_t *src8, int32_t src_stride,
     if (top) {
         dst_temp = dst + (top * dst_stride);
         for (int32_t i = 0; i < top; i++) {
-            eb_memcpy(dst, dst_temp, b_w * sizeof(uint16_t));
+            svt_memcpy(dst, dst_temp, b_w * sizeof(uint16_t));
             dst += dst_stride;
         }
     }
@@ -162,7 +162,7 @@ static void highbd_build_mc_border(const uint8_t *src8, int32_t src_stride,
         dst = dst_temp;
         dst_temp -= dst_stride;
         for (int32_t i = 0; i < itt; i++) {
-            eb_memcpy(dst, dst_temp, b_w * sizeof(uint16_t));
+            svt_memcpy(dst, dst_temp, b_w * sizeof(uint16_t));
             dst += dst_stride;
         }
     }
@@ -187,7 +187,7 @@ static void highbd_build_mc_border(const uint8_t *src8, int32_t src_stride,
 
         if (left) aom_memset16((void*)dst, ref_row[0], left);
 
-        if (copy) eb_memcpy(dst + left, ref_row + x + left, copy * sizeof(uint16_t));
+        if (copy) svt_memcpy(dst + left, ref_row + x + left, copy * sizeof(uint16_t));
 
         if (right) aom_memset16((void*)(dst + left + copy), ref_row[w - 1], right);
 
@@ -251,7 +251,7 @@ static void build_mc_border(const uint8_t *ref_row, int32_t src_stride,
         y0 = y0 + top;
         for (int32_t i = 0; i < blk_fill_itt; i++) {
             memset(dst_temp, ref_temp[0], left);
-            if (right) eb_memcpy(dst_temp + left, ref_temp, right);
+            if (right) svt_memcpy(dst_temp + left, ref_temp, right);
             dst_temp += dst_stride;
             ++y0;
             if (y0 > 0 && y0 < h) ref_temp += src_stride;
@@ -270,7 +270,7 @@ static void build_mc_border(const uint8_t *ref_row, int32_t src_stride,
             ptr_ext = copy;
         }
         for (int32_t i = 0; i < blk_fill_itt; i++) {
-            if (copy) eb_memcpy(dst_temp, ref_temp + x0, copy);
+            if (copy) svt_memcpy(dst_temp, ref_temp + x0, copy);
             if (set) memset(dst_temp + ptr_ext, ref_temp[w - 1], set);
             dst_temp += dst_stride;
             ++y0;
@@ -281,7 +281,7 @@ static void build_mc_border(const uint8_t *ref_row, int32_t src_stride,
     if (top) {
         dst_temp = dst + (top * dst_stride);
         for (int32_t i = 0; i < top; i++) {
-            eb_memcpy(dst, dst_temp, b_w);
+            svt_memcpy(dst, dst_temp, b_w);
             dst += dst_stride;
         }
     }
@@ -291,7 +291,7 @@ static void build_mc_border(const uint8_t *ref_row, int32_t src_stride,
         dst = dst_temp;
         dst_temp -= dst_stride;
         for (int32_t i = 0; i < itt; i++) {
-            eb_memcpy(dst, dst_temp, b_w);
+            svt_memcpy(dst, dst_temp, b_w);
             dst += dst_stride;
         }
     }
@@ -316,7 +316,7 @@ static void build_mc_border(const uint8_t *ref_row, int32_t src_stride,
 
         if (left) memset(dst, ref_row[0], left);
 
-        if (copy) eb_memcpy(dst + left, ref_row + x + left, copy);
+        if (copy) svt_memcpy(dst + left, ref_row + x + left, copy);
 
         if (right) memset(dst + left + copy, ref_row[w - 1], right);
 

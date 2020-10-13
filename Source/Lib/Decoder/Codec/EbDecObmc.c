@@ -199,7 +199,7 @@ static INLINE void dec_build_prediction_by_above_pred(
         return;
     BlockModeInfo *backup_pi_mi = backup_pi->mi;
     backup_pi->mi               = bakup_abv_mbmi;
-    eb_memcpy(bakup_abv_mbmi, above_mbmi, sizeof(*bakup_abv_mbmi));
+    svt_memcpy(bakup_abv_mbmi, above_mbmi, sizeof(*bakup_abv_mbmi));
     av1_modify_neighbor_predictor_for_obmc(bakup_abv_mbmi);
 
     const int num_refs = 1 + has_second_ref(bakup_abv_mbmi);
@@ -363,7 +363,7 @@ static INLINE void dec_build_prediction_by_left_pred(
         return;
     BlockModeInfo *backup_pi_mi = backup_pi->mi;
     backup_pi->mi               = bakup_left_mbmi;
-    eb_memcpy(bakup_left_mbmi, left_mbmi, sizeof(*bakup_left_mbmi));
+    svt_memcpy(bakup_left_mbmi, left_mbmi, sizeof(*bakup_left_mbmi));
     av1_modify_neighbor_predictor_for_obmc(bakup_left_mbmi);
 
     const int num_refs = 1 + has_second_ref(bakup_left_mbmi);

@@ -273,7 +273,7 @@ extern "C" {
 #include "EbPictureAnalysisProcess.h"
 }
 
-static void eb_picture_buffer_desc_dctor(EbPtr p) {
+static void svt_picture_buffer_desc_dctor(EbPtr p) {
     EbPictureBufferDesc *obj = (EbPictureBufferDesc *)p;
     if (obj->buffer_enable_mask & PICTURE_BUFFER_DESC_Y_FLAG) {
         EB_FREE_ALIGNED_ARRAY(obj->buffer_y);
@@ -377,7 +377,7 @@ class DenoiseModelRunTest : public ::testing::Test {
         subsampling_x_ = (pbd_init_data.color_format == EB_YUV444 ? 1 : 2) - 1;
         subsampling_y_ = (pbd_init_data.color_format >= EB_YUV422 ? 1 : 2) - 1;
 
-        EbErrorType err = eb_picture_buffer_desc_ctor(&in_pic_, &pbd_init_data);
+        EbErrorType err = svt_picture_buffer_desc_ctor(&in_pic_, &pbd_init_data);
         EXPECT_EQ(err, 0) << "create input pic fail";
 
         // create the denoise and noise model
@@ -397,7 +397,7 @@ class DenoiseModelRunTest : public ::testing::Test {
     }
 
     ~DenoiseModelRunTest() {
-        eb_picture_buffer_desc_dctor(&in_pic_);
+        svt_picture_buffer_desc_dctor(&in_pic_);
         denoise_and_model_dctor(&noise_model);
     }
 
