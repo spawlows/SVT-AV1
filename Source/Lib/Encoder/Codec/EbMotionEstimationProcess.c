@@ -1322,6 +1322,7 @@ void *motion_estimation_kernel(void *input_ptr) {
     return NULL;
 }
 #if FEATURE_INL_ME
+// inloop ME ctor
 EbErrorType ime_context_ctor(EbThreadContext *  thread_context_ptr,
         const EbEncHandle *enc_handle_ptr, int index) {
     InLoopMeContext *context_ptr;
@@ -1338,7 +1339,7 @@ EbErrorType ime_context_ctor(EbThreadContext *  thread_context_ptr,
             me_context_ctor);
     return EB_ErrorNone;
 }
-
+// Lambda Assignement
 static void init_lambda(InLoopMeContext *context_ptr,
     SequenceControlSet *scs_ptr,
     PictureParentControlSet *ppcs_ptr) {
@@ -1362,6 +1363,8 @@ static void init_lambda(InLoopMeContext *context_ptr,
                 lambda_mode_decision_ld_sad_qp_scaling[ppcs_ptr->picture_qp];
     }
 }
+
+// Get ME buffer sb based
 static void prepare_sb_me_buffer(InLoopMeContext *context_ptr,
     PictureParentControlSet *ppcs_ptr,
     uint32_t sb_origin_x, uint32_t sb_origin_y) {
@@ -1452,6 +1455,13 @@ static void prepare_sb_me_buffer(InLoopMeContext *context_ptr,
         }
     }
 }
+
+/************************************************
+ * inloop Motion Analysis Kernel
+ * The Motion Analysis performs  Motion Estimation
+ * This process has access to the current input picture as well as
+ * the reference pictures, which can be input or reconstructed
+ ************************************************/
 void *inloop_me_kernel(void *input_ptr) {
     EbThreadContext *          thread_context_ptr = (EbThreadContext *)input_ptr;
     InLoopMeContext *context_ptr = (InLoopMeContext *)thread_context_ptr->priv;
@@ -1495,11 +1505,6 @@ void *inloop_me_kernel(void *input_ptr) {
         uint8_t task_type = in_results_ptr->task_type;
 
         // iME get ppcs input, and output pcs to RC kernel
-
-        //printf("iME-IN  POC:%ld, segment %d/%d\n",
-        //        ppcs_ptr->picture_number,
-        //        in_results_ptr->segment_index,
-        //        ppcs_ptr->inloop_me_segments_total_count);
         if (scs_ptr->in_loop_me) {
             input_picture_ptr = ppcs_ptr->enhanced_picture_ptr;
 
@@ -1575,8 +1580,6 @@ void *inloop_me_kernel(void *input_ptr) {
                 }
 #if TUNE_IME_REUSE_TPL_RESULT
                 skip_me = ppcs_ptr->tpl_me_done;
-                //if (skip_me)
-                //    printf("[%ld]: skip iME\n", ppcs_ptr->picture_number);
 #endif
             }
 
@@ -1661,9 +1664,6 @@ void *inloop_me_kernel(void *input_ptr) {
                             ppcs_ptr, context_ptr->me_context_ptr, input_picture_ptr);
 #endif
                 }
-
-                //printf("[%ld]: iME, sending to RC kernel\n",
-                //        ppcs_ptr->picture_number);
                 eb_get_empty_object(context_ptr->output_fifo_ptr,
                         &out_results_wrapper_ptr);
 
@@ -1685,10 +1685,6 @@ void *inloop_me_kernel(void *input_ptr) {
                 if (scs_ptr->in_loop_ois == 0)
 #endif
                 if (scs_ptr->static_config.enable_tpl_la) {
-                    //printf("[%ld]: Doing open loop intra search for TPL, (%d, %d) => (%d, %d)\n",
-                    //        ppcs_ptr->picture_number,
-                    //        x_sb_start_index, y_sb_start_index,
-                    //        x_sb_end_index, y_sb_end_index);
                     for (uint32_t y_sb_index = y_sb_start_index; y_sb_index < y_sb_end_index;
                             ++y_sb_index) {
                         for (uint32_t x_sb_index = x_sb_start_index; x_sb_index < x_sb_end_index;
@@ -1705,7 +1701,6 @@ void *inloop_me_kernel(void *input_ptr) {
                 if (ppcs_ptr->tpl_me_seg_acc ==
                         ppcs_ptr->tpl_me_segments_total_count) {
 
-                    //printf("[%ld]: tpl_segment %d, tpl done\n", ppcs_ptr->picture_number, ppcs_ptr->tpl_me_seg_acc);
                     eb_post_semaphore(ppcs_ptr->tpl_me_done_semaphore);
                 }
                 eb_release_mutex(ppcs_ptr->tpl_me_mutex);

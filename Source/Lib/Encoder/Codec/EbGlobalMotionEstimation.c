@@ -156,6 +156,7 @@ void global_motion_estimation(PictureParentControlSet *pcs_ptr, MeContext *conte
 }
 
 #if FEATURE_INL_ME
+// inloop global motion estimation
 #if FEATURE_GM_OPT
 void global_motion_estimation_inl(PictureParentControlSet *pcs_ptr, EbPictureBufferDesc *input_picture_ptr) {
 #else

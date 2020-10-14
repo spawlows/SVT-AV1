@@ -2740,6 +2740,8 @@ void sub_sample_luma_generate_pixel_intensity_histogram_bins(
 }
 
 #ifdef FEATURE_INL_ME
+    // Histogram bins
+    // Luma for Histogram generation
 void sub_sample_luma_generate_pixel_intensity_histogram_bins_ex(
     SequenceControlSet *scs_ptr, PictureParentControlSet *pcs_ptr,
     EbPictureBufferDesc *input_picture_ptr, uint64_t *sum_avg_intensity_ttl_regions_luma,
@@ -3010,6 +3012,7 @@ void compute_picture_spatial_statistics(SequenceControlSet *     scs_ptr,
 }
 
 #if FEATURE_INL_ME
+// compute mean & variance
 void compute_picture_spatial_statistics_ex(SequenceControlSet *     scs_ptr,
                                         PictureParentControlSet *pcs_ptr,
                                         EbPictureBufferDesc *    input_picture_ptr) {
@@ -3166,6 +3169,8 @@ void gathering_picture_statistics(SequenceControlSet *scs_ptr, PictureParentCont
 }
 
 #if FEATURE_INL_ME
+// calculate picture statistics
+// mean , variance , Luma intensity, Histogram
 static void gathering_picture_statistics_ex(SequenceControlSet *scs_ptr, PictureParentControlSet *pcs_ptr,
                                   EbPictureBufferDesc *input_picture_ptr) {
  uint64_t sum_avg_intensity_ttl_regions_luma = 0;

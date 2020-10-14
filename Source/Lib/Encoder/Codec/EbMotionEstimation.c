@@ -1844,6 +1844,7 @@ void swap_me_candidate(MePredUnit *a, MePredUnit *b) {
     *b       = temp_ptr;
 }
 #if FEATURE_INL_ME
+// get ME references based on level:
 // level: 0 => sixteenth, 1 => quarter, 2 => original
 static EbPictureBufferDesc* get_me_reference(
     PictureParentControlSet   *pcs_ptr,

@@ -2917,6 +2917,7 @@ static void adjust_filter_strength(PictureParentControlSet *picture_control_set_
 }
 
 #if FEATURE_INL_ME
+//  Inloop padding + decimation
 static void pad_and_decimate_filtered_pic_inl(
     PictureParentControlSet *picture_control_set_ptr_central) {
     // reference structures (padded pictures + downsampled versions)
