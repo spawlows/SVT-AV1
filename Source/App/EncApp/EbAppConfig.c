@@ -1388,7 +1388,7 @@ ConfigEntry config_entry[] = {
 /**********************************
  * Constructor
  **********************************/
-EbConfig * eb_config_ctor(EncodePass pass) {
+EbConfig * svt_config_ctor(EncodePass pass) {
     EbConfig *config_ptr = (EbConfig *)calloc(1, sizeof(EbConfig));
     if (!config_ptr)
         return NULL;
@@ -1409,7 +1409,7 @@ EbConfig * eb_config_ctor(EncodePass pass) {
 /**********************************
  * Destructor
  **********************************/
-void eb_config_dtor(EbConfig *config_ptr) {
+void svt_config_dtor(EbConfig *config_ptr) {
     if (!config_ptr)
         return;
     // Close any files that are open
@@ -1463,7 +1463,7 @@ void eb_config_dtor(EbConfig *config_ptr) {
 }
 
 EbErrorType enc_channel_ctor(EncChannel* c, EncodePass pass) {
-    c->config = eb_config_ctor(pass);
+    c->config = svt_config_ctor(pass);
     if (!c->config)
         return EB_ErrorInsufficientResources;
     c->app_callback = (EbAppContext *)malloc(sizeof(EbAppContext));
@@ -1486,7 +1486,7 @@ void enc_channel_dctor(EncChannel* c, uint32_t inst_cnt)
         svt_av1_enc_deinit(ctx->svt_encoder_handle);
         de_init_encoder(ctx, inst_cnt);
     }
-    eb_config_dtor(c->config);
+    svt_config_dtor(c->config);
     free(c->app_callback);
 }
 
