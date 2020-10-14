@@ -352,7 +352,10 @@ EbErrorType signal_derivation_me_kernel_oq(SequenceControlSet *       scs_ptr,
     return return_error;
 };
 #if TUNE_SIGNAL_TPL_ME_OQ
-EbErrorType signal_tpl_me_kernel_oq(SequenceControlSet *       scs_ptr,
+/******************************************************
+* Derive ME Settings for TPL
+******************************************************/
+EbErrorType signal_tpl_me_kernel(SequenceControlSet *       scs_ptr,
                                            PictureParentControlSet *  pcs_ptr,
                                            MotionEstimationContext_t *context_ptr) {
     EbErrorType return_error = EB_ErrorNone;
@@ -1513,7 +1516,7 @@ void *inloop_me_kernel(void *input_ptr) {
 
             if (task_type != 0) {
 #if TUNE_SIGNAL_TPL_ME_OQ
-                signal_tpl_me_kernel_oq(scs_ptr, ppcs_ptr, (MotionEstimationContext_t*)context_ptr);
+                signal_tpl_me_kernel(scs_ptr, ppcs_ptr, (MotionEstimationContext_t*)context_ptr);
 #else
                 signal_derivation_me_kernel_oq(scs_ptr, ppcs_ptr, (MotionEstimationContext_t*)context_ptr);
 #endif
