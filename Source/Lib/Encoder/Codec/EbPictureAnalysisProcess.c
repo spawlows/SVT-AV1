@@ -2742,7 +2742,7 @@ void sub_sample_luma_generate_pixel_intensity_histogram_bins(
 #ifdef FEATURE_INL_ME
     // Histogram bins
     // Luma for Histogram generation
-void sub_sample_luma_generate_pixel_intensity_histogram_bins_ex(
+void sub_sample_luma_generate_pixel_intensity_histogram_bins_ime(
     SequenceControlSet *scs_ptr, PictureParentControlSet *pcs_ptr,
     EbPictureBufferDesc *input_picture_ptr, uint64_t *sum_avg_intensity_ttl_regions_luma,
     uint8_t decim_step) {
@@ -3013,7 +3013,7 @@ void compute_picture_spatial_statistics(SequenceControlSet *     scs_ptr,
 
 #if FEATURE_INL_ME
 // compute mean & variance
-void compute_picture_spatial_statistics_ex(SequenceControlSet *     scs_ptr,
+void compute_picture_spatial_statistics_ime(SequenceControlSet *     scs_ptr,
                                         PictureParentControlSet *pcs_ptr,
                                         EbPictureBufferDesc *    input_picture_ptr) {
     uint64_t pic_tot_variance;
@@ -3171,7 +3171,7 @@ void gathering_picture_statistics(SequenceControlSet *scs_ptr, PictureParentCont
 #if FEATURE_INL_ME
 // calculate picture statistics
 // mean , variance , Luma intensity, Histogram
-static void gathering_picture_statistics_ex(SequenceControlSet *scs_ptr, PictureParentControlSet *pcs_ptr,
+static void gathering_picture_statistics_ime(SequenceControlSet *scs_ptr, PictureParentControlSet *pcs_ptr,
                                   EbPictureBufferDesc *input_picture_ptr) {
  uint64_t sum_avg_intensity_ttl_regions_luma = 0;
     uint64_t sum_avg_intensity_ttl_regions_cb   = 0;
@@ -3179,7 +3179,7 @@ static void gathering_picture_statistics_ex(SequenceControlSet *scs_ptr, Picture
 
     // Histogram bins
     // Use 1/16 Luma for Histogram generation
-    sub_sample_luma_generate_pixel_intensity_histogram_bins_ex(
+    sub_sample_luma_generate_pixel_intensity_histogram_bins_ime(
         scs_ptr, pcs_ptr,input_picture_ptr, &sum_avg_intensity_ttl_regions_luma, 4);
 
     // Use 1/16 Chroma for Histogram generation
@@ -3198,7 +3198,7 @@ static void gathering_picture_statistics_ex(SequenceControlSet *scs_ptr, Picture
                                       sum_avg_intensity_ttl_regions_cb,
                                       sum_avg_intensity_ttl_regions_cr);
 
-    compute_picture_spatial_statistics_ex(
+    compute_picture_spatial_statistics_ime(
         scs_ptr, pcs_ptr, input_picture_ptr);
 
 }
@@ -3729,7 +3729,7 @@ void downsample_filtering_input_picture(PictureParentControlSet *pcs_ptr,
 #if FEATURE_INL_ME
 // Current down sampled input is not used for HME, but mainly used for GM
 // So don't do the unnecessary check here
-void downsample_filtering_input_picture_ex(
+void downsample_filtering_input_picture_ime(
                                         EbPictureBufferDesc *    input_padded_picture_ptr,
                                         EbPictureBufferDesc *    quarter_picture_ptr,
                                         EbPictureBufferDesc *    sixteenth_picture_ptr) {
@@ -3792,7 +3792,7 @@ void downsample_filtering_input_picture_ex(
     }
 }
 
-void downsample_decimation_input_picture_ex(
+void downsample_decimation_input_picture_ime(
                                          EbPictureBufferDesc *    input_padded_picture_ptr,
                                          EbPictureBufferDesc *    quarter_decimated_picture_ptr,
                                          EbPictureBufferDesc *    sixteenth_decimated_picture_ptr) {
@@ -4164,12 +4164,12 @@ void *picture_analysis_kernel(void *input_ptr) {
                 // Get the 1/2, 1/4 of input picture, only used for global motion
                 // TODO: Check for global motion whether we need these
                 if (scs_ptr->down_sampling_method_me_search == ME_FILTERED_DOWNSAMPLED) {
-                    downsample_filtering_input_picture_ex(
+                    downsample_filtering_input_picture_ime(
                             input_picture_ptr,
                             (EbPictureBufferDesc *)ds_obj->quarter_picture_ptr,
                             (EbPictureBufferDesc *)ds_obj->sixteenth_picture_ptr);
                 } else {
-                    downsample_decimation_input_picture_ex(
+                    downsample_decimation_input_picture_ime(
                             input_picture_ptr,
                             (EbPictureBufferDesc *)ds_obj->quarter_picture_ptr,
                             (EbPictureBufferDesc *)ds_obj->sixteenth_picture_ptr);
@@ -4177,7 +4177,7 @@ void *picture_analysis_kernel(void *input_ptr) {
 
                 // TODO: Refine this function
                 // Gathering statistics of input picture, including Variance Calculation, Histogram Bins
-                gathering_picture_statistics_ex(
+                gathering_picture_statistics_ime(
                         scs_ptr, pcs_ptr,
                         pcs_ptr->chroma_downsampled_picture_ptr);
 
