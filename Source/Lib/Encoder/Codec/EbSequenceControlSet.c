@@ -301,9 +301,6 @@ EbErrorType copy_sequence_control_set(SequenceControlSet *dst, SequenceControlSe
 #if FEATURE_INL_ME
     dst->in_loop_me                     = src->in_loop_me;
 #endif
-#if TUNE_TPL_OIS
-    dst->in_loop_ois                     = src->in_loop_ois;
-#endif
     return EB_ErrorNone;
 }
 

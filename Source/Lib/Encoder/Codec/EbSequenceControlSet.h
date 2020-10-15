@@ -83,11 +83,6 @@ typedef struct SequenceControlSet {
          Default is 0. */
     uint8_t in_loop_me;
 #endif
-#if TUNE_TPL_OIS
-    /*!< Use in loop motion OIS
-         Default is 1. */
-    uint8_t in_loop_ois;
-#endif
     /*!< Allow the usage of motion field motion vector in the stream
         (The signal changes per preset; 0: Enabled, 1: Disabled) Default is 1. */
     uint8_t mfmv_enabled;
@@ -208,12 +203,6 @@ typedef struct SequenceControlSet {
     int32_t  lap_enabled;
     TWO_PASS twopass;
     double   double_frame_rate;
-#if FIX_OPTIMIZE_BUILD_QUANTIZER
-    Quants quants_bd; // follows input bit depth
-    Dequants deq_bd;  // follows input bit depth
-    Quants quants_8bit;  // 8bit
-    Dequants deq_8bit; // 8bit
-#endif
 } SequenceControlSet;
 
 typedef struct EbSequenceControlSetInitData {
