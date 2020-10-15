@@ -2297,10 +2297,6 @@ void set_param_based_on_input(SequenceControlSet *scs_ptr)
     else
         scs_ptr->in_loop_me = 1;
 #endif
-#if TUNE_TPL_OIS
-        // Open loop intra done with TPL, data is not stored
-        scs_ptr->in_loop_ois = 1;
-#endif
 
     // Set over_boundary_block_mode     Settings
     // 0                            0: not allowed

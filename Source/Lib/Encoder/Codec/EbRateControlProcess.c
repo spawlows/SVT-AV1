@@ -366,15 +366,6 @@ void tpl_mc_flow_dispenser(
             8);
     qIndex =
         (qIndex + delta_qindex);
-#if FIX_OPTIMIZE_BUILD_QUANTIZER
-    mb_plane.quant_qtx = scs_ptr->quants_8bit.y_quant[qIndex];
-    mb_plane.quant_fp_qtx = scs_ptr->quants_8bit.y_quant_fp[qIndex];
-    mb_plane.round_fp_qtx = scs_ptr->quants_8bit.y_round_fp[qIndex];
-    mb_plane.quant_shift_qtx = scs_ptr->quants_8bit.y_quant_shift[qIndex];
-    mb_plane.zbin_qtx = scs_ptr->quants_8bit.y_zbin[qIndex];
-    mb_plane.round_qtx = scs_ptr->quants_8bit.y_round[qIndex];
-    mb_plane.dequant_qtx = scs_ptr->deq_8bit.y_dequant_qtx[qIndex];
-#else
     Quants *const quants_bd = &pcs_ptr->quants_bd;
     Dequants *const deq_bd = &pcs_ptr->deq_bd;
     svt_av1_set_quantizer(
@@ -396,20 +387,7 @@ void tpl_mc_flow_dispenser(
     mb_plane.zbin_qtx = pcs_ptr->quants_bd.y_zbin[qIndex];
     mb_plane.round_qtx = pcs_ptr->quants_bd.y_round[qIndex];
     mb_plane.dequant_qtx = pcs_ptr->deq_bd.y_dequant_qtx[qIndex];
-#endif
     pcs_ptr->base_rdmult = svt_av1_compute_rd_mult_based_on_qindex((AomBitDepth)8/*scs_ptr->static_config.encoder_bit_depth*/, qIndex) / 6;
-#if TUNE_TPL_OIS
-    DECLARE_ALIGNED(16, uint8_t, left0_data[MAX_TX_SIZE * 2 + 32]);
-    DECLARE_ALIGNED(16, uint8_t, above0_data[MAX_TX_SIZE * 2 + 32]);
-    DECLARE_ALIGNED(16, uint8_t, left_data[MAX_TX_SIZE * 2 + 32]);
-    DECLARE_ALIGNED(16, uint8_t, above_data[MAX_TX_SIZE * 2 + 32]);
-
-    EbPictureBufferDesc *input_ptr =  pcs_ptr->enhanced_picture_ptr;
-    uint8_t *above_row;
-    uint8_t *left_col;
-    uint8_t *above0_row;
-    uint8_t *left0_col;
-#endif
     // Walk the first N entries in the sliding window
     for (uint32_t sb_index = 0; sb_index < pcs_ptr->sb_total_count; ++sb_index) {
         {
@@ -448,77 +426,8 @@ void tpl_mc_flow_dispenser(
                     int64_t best_inter_cost = INT64_MAX;
                     MV final_best_mv = { 0, 0 };
                     uint32_t max_inter_ref = MAX_PA_ME_MV;
-#if !TUNE_TPL_OIS
                     OisMbResults *ois_mb_results_ptr = pcs_ptr->ois_mb_results[(mb_origin_y >> 4) * picture_width_in_mb + (mb_origin_x >> 4)];
                     int64_t best_intra_cost = ois_mb_results_ptr->intra_cost;
-#else
-
-                    PredictionMode best_intra_mode = DC_PRED;
-                    int64_t        best_intra_cost = INT64_MAX;
-                    if (scs_ptr->in_loop_ois == 0) {
-                        OisMbResults *ois_mb_results_ptr = pcs_ptr->ois_mb_results[(mb_origin_y >> 4) * picture_width_in_mb + (mb_origin_x >> 4)];
-                        best_intra_mode       = ois_mb_results_ptr->intra_mode;
-                        best_intra_cost       = ois_mb_results_ptr->intra_cost;
-
-                    }
-                    else { // ois
-                        // always process as block16x16 even bsize or tx_size is 8x8
-                        TxSize tx_size = TX_16X16;
-                        bsize = 16;
-
-                        above0_row = above0_data + 16;
-                        left0_col = left0_data + 16;
-                        above_row = above_data + 16;
-                        left_col = left_data + 16;
-
-
-                        uint8_t *src = input_ptr->buffer_y + pcs_ptr->enhanced_picture_ptr->origin_x + mb_origin_x +
-                                       (pcs_ptr->enhanced_picture_ptr->origin_y + mb_origin_y) * input_ptr->stride_y;
-
-                        // Fill Neighbor Arrays
-                        update_neighbor_samples_array_open_loop_mb(above0_row - 1, left0_col - 1,
-                                                                   input_ptr, input_ptr->stride_y, mb_origin_x, mb_origin_y, bsize, bsize);
-                        uint8_t ois_intra_mode;
-                        uint8_t intra_mode_start = DC_PRED;
-                        EbBool   enable_paeth                = pcs_ptr->scs_ptr->static_config.enable_paeth == DEFAULT ? EB_TRUE : (EbBool) pcs_ptr->scs_ptr->static_config.enable_paeth;
-                        EbBool   enable_smooth               = pcs_ptr->scs_ptr->static_config.enable_smooth == DEFAULT ? EB_TRUE : (EbBool) pcs_ptr->scs_ptr->static_config.enable_smooth;
-                        uint8_t intra_mode_end =
-#if ENABLE_TPL_TRAILING
-                            pcs_ptr->tpl_data.tpl_opt_flag
-#else
-                            pcs_ptr->tpl_opt_flag
-#endif
-                                ? DC_PRED
-                                : enable_paeth ? PAETH_PRED : enable_smooth ? SMOOTH_H_PRED : D67_PRED;
-
-                        for (ois_intra_mode = intra_mode_start; ois_intra_mode <= intra_mode_end; ++ois_intra_mode) {
-                            int32_t p_angle = av1_is_directional_mode((PredictionMode)ois_intra_mode) ? mode_to_angle_map[(PredictionMode)ois_intra_mode] : 0;
-                            // Edge filter
-                            if(av1_is_directional_mode((PredictionMode)ois_intra_mode) && 1/*scs_ptr->seq_header.enable_intra_edge_filter*/) {
-                                EB_MEMCPY(left_data,  left0_data,  sizeof(uint8_t)*(MAX_TX_SIZE * 2 + 32));
-                                EB_MEMCPY(above_data, above0_data, sizeof(uint8_t)*(MAX_TX_SIZE * 2 + 32));
-                                above_row = above_data + 16;
-                                left_col  = left_data + 16;
-                                filter_intra_edge(NULL, ois_intra_mode, scs_ptr->seq_header.max_frame_width, scs_ptr->seq_header.max_frame_height, p_angle, (int32_t)mb_origin_x, (int32_t)mb_origin_y, above_row, left_col);
-                            } else {
-                                above_row = above0_row;
-                                left_col  = left0_col;
-                            }
-                            // PRED
-                            intra_prediction_open_loop_mb(p_angle, ois_intra_mode,mb_origin_x, mb_origin_y, tx_size, above_row, left_col, predictor, 16);
-
-                            // Distortion
-                            svt_aom_subtract_block(16, 16, src_diff, 16, src, input_ptr->stride_y, predictor, 16);
-                            svt_av1_wht_fwd_txfm(src_diff, 16, coeff, 2/*TX_16X16*/, 8, 0);
-                            int64_t intra_cost = svt_aom_satd(coeff, 16 * 16);
-
-                            if (intra_cost < best_intra_cost) {
-                                best_intra_cost = intra_cost;
-                                best_intra_mode = ois_intra_mode;
-                            }
-                        }
-                }
-#endif
 
                     uint8_t best_mode = DC_PRED;
                     uint8_t *src_mb = input_picture_ptr->buffer_y + input_picture_ptr->origin_x + mb_origin_x +
@@ -685,21 +594,12 @@ void tpl_mc_flow_dispenser(
                             16,
                             input_picture_ptr->width,
                             input_picture_ptr->height);
-#if TUNE_TPL_OIS
-                        uint8_t ois_intra_mode = best_intra_mode;// ois_mb_results_ptr->intra_mode;
-                        int32_t p_angle = av1_is_directional_mode((PredictionMode)ois_intra_mode) ? mode_to_angle_map[(PredictionMode)ois_intra_mode] : 0;
-                        // Edge filter
-                        if (av1_is_directional_mode((PredictionMode)ois_intra_mode) && 1/*scs_ptr->seq_header.enable_intra_edge_filter*/) {
-                            filter_intra_edge(NULL, ois_intra_mode, scs_ptr->seq_header.max_frame_width, scs_ptr->seq_header.max_frame_height, p_angle, mb_origin_x, mb_origin_y, above_row, left_col);
-                        }
-#else
                         uint8_t ois_intra_mode = ois_mb_results_ptr->intra_mode;
                         int32_t p_angle = av1_is_directional_mode((PredictionMode)ois_intra_mode) ? mode_to_angle_map[(PredictionMode)ois_intra_mode] : 0;
                         // Edge filter
                         if (av1_is_directional_mode((PredictionMode)ois_intra_mode) && 1/*scs_ptr->seq_header.enable_intra_edge_filter*/) {
                             filter_intra_edge(ois_mb_results_ptr, ois_intra_mode, scs_ptr->seq_header.max_frame_width, scs_ptr->seq_header.max_frame_height, p_angle, mb_origin_x, mb_origin_y, above_row, left_col);
                         }
-#endif
                         // PRED
                         intra_prediction_open_loop_mb(p_angle, ois_intra_mode, mb_origin_x, mb_origin_y, tx_size, above_row, left_col, dst_buffer, dst_buffer_stride);
                     }
@@ -856,15 +756,9 @@ static AOM_INLINE void tpl_model_update_b(PictureParentControlSet *ref_pcs_ptr, 
         ((double)(tpl_stats_ptr->recrf_dist - tpl_stats_ptr->srcrf_dist) /
             tpl_stats_ptr->recrf_dist));
     int64_t delta_rate = tpl_stats_ptr->recrf_rate - tpl_stats_ptr->srcrf_rate;
-#if TUNE_TPL_RATE
-    int64_t mc_dep_rate = pcs_ptr->tpl_data.tpl_opt_flag ? 0 :
-        delta_rate_cost(tpl_stats_ptr->mc_dep_rate, tpl_stats_ptr->recrf_dist,
-            tpl_stats_ptr->srcrf_dist, pix_num);
-#else
     int64_t mc_dep_rate =
         delta_rate_cost(tpl_stats_ptr->mc_dep_rate, tpl_stats_ptr->recrf_dist,
             tpl_stats_ptr->srcrf_dist, pix_num);
-#endif
 
     for (block = 0; block < 4; ++block) {
         int grid_pos_row = grid_pos_row_base + bh * (block >> 1);

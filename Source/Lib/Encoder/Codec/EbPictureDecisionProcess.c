@@ -1103,14 +1103,6 @@ EbErrorType signal_derivation_multi_processes_oq(
 
     pcs_ptr->tpl_trailing_frame_count = MIN(pcs_ptr->tpl_trailing_frame_count, SCD_LAD);
 #endif
-#if TUNE_TPL_TOWARD_CHROMA
-    // Tune TPL for better chroma.Only for 240P. 0 is OFF
-#if TUNE_CHROMA_SSIM
-    pcs_ptr->tune_tpl_for_chroma = 1;
-#else
-    pcs_ptr->tune_tpl_for_chroma = 0;
-#endif
-#endif
     return return_error;
 }
 
@@ -3844,44 +3836,12 @@ void mctf_frame(
             else
                 context_ptr->tf_level = 0;
         }
-#if FEATURE_OPT_TF
-#if TUNE_NEW_PRESETS
-        else if (pcs_ptr->enc_mode <= ENC_M6) {
-#else
-        else if (pcs_ptr->enc_mode <= ENC_M5) {
-#endif
-            if (pcs_ptr->temporal_layer_index == 0 || (pcs_ptr->temporal_layer_index == 1 && scs_ptr->static_config.hierarchical_levels >= 3))
-                context_ptr->tf_level = 2;
-            else
-                context_ptr->tf_level = 0;
-        }
-#if !TUNE_NEW_PRESETS
-        else if (pcs_ptr->enc_mode <= ENC_M7) {
-            if (pcs_ptr->temporal_layer_index == 0 || (pcs_ptr->temporal_layer_index == 1 && scs_ptr->static_config.hierarchical_levels >= 3))
-                context_ptr->tf_level = 3;
-            else
-                context_ptr->tf_level = 0;
-        }
-#endif
-        else {
-#if FEATURE_OPT_TF
-            if (pcs_ptr->temporal_layer_index == 0)
-#else
-            if (pcs_ptr->temporal_layer_index == 0 || (pcs_ptr->temporal_layer_index == 1 && scs_ptr->static_config.hierarchical_levels >= 3))
-#endif
-                context_ptr->tf_level = 4;
-            else
-                context_ptr->tf_level = 0;
-
-        }
-#else
         else {
             if (pcs_ptr->temporal_layer_index == 0 || (pcs_ptr->temporal_layer_index == 1 && scs_ptr->static_config.hierarchical_levels >= 3))
                 context_ptr->tf_level = 2;
             else
                 context_ptr->tf_level = 0;
         }
-#endif
         }
         else {
             if (pcs_ptr->temporal_layer_index == 0 || (pcs_ptr->temporal_layer_index == 1 && scs_ptr->static_config.hierarchical_levels >= 3))
@@ -3892,14 +3852,9 @@ void mctf_frame(
     }
     else
         context_ptr->tf_level = 0;
-#if FEATURE_OPT_TF
-    set_tf_controls(pcs_ptr, context_ptr->tf_level);
-    if (pcs_ptr->tf_ctrls.enabled) {
-#else
     set_tf_controls(context_ptr, context_ptr->tf_level);
 
     if (context_ptr->tf_ctrls.enabled) {
-#endif
         derive_tf_window_params(
             scs_ptr,
             scs_ptr->encode_context_ptr,
@@ -4239,11 +4194,7 @@ EbErrorType derive_tf_window_params(
         adjust_num = 2;
     }
     }
-#if FEATURE_OPT_TF
-    int altref_nframes = MIN(scs_ptr->static_config.altref_nframes, pcs_ptr->tf_ctrls.window_size + adjust_num);
-#else
     int altref_nframes = MIN(scs_ptr->static_config.altref_nframes, context_ptr->tf_ctrls.window_size + adjust_num);
-    #endif
 #if FEATURE_NEW_DELAY
     (void)out_stride_diff64;
     if (is_delayed_intra(pcs_ptr)) {

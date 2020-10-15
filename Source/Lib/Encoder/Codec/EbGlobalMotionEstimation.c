@@ -157,12 +157,8 @@ void global_motion_estimation(PictureParentControlSet *pcs_ptr, MeContext *conte
 
 #if FEATURE_INL_ME
 // inloop global motion estimation
-#if FEATURE_GM_OPT
-void global_motion_estimation_inl(PictureParentControlSet *pcs_ptr, EbPictureBufferDesc *input_picture_ptr) {
-#else
 void global_motion_estimation_inl(PictureParentControlSet *pcs_ptr, MeContext *context_ptr,
                               EbPictureBufferDesc *input_picture_ptr) {
-#endif
     EbDownScaledObject *ds_object =
         (EbDownScaledObject*)pcs_ptr->down_scaled_picture_wrapper_ptr->object_ptr;
     EbPictureBufferDesc *quarter_picture_ptr = ds_object->quarter_picture_ptr;
@@ -250,20 +246,12 @@ void global_motion_estimation_inl(PictureParentControlSet *pcs_ptr, MeContext *c
                 ref_picture_ptr = reference_object->input_picture;
 #endif
             }
-#if FEATURE_GM_OPT
-            compute_global_motion(pcs_ptr, input_picture_ptr,
-#else
             compute_global_motion(input_picture_ptr,
-#endif
                                   ref_picture_ptr,
                                   &pcs_ptr->global_motion_estimation[list_index][ref_pic_index],
                                   pcs_ptr->frm_hdr.allow_high_precision_mv);
         }
-#if FEATURE_GM_OPT
-        if (pcs_ptr->gm_ctrls.identiy_exit) {
-#else
         if (context_ptr->gm_identiy_exit) {
-#endif
             if (list_index == 0) {
                 if (pcs_ptr->global_motion_estimation[0][0].wmtype == IDENTITY) {
                     break;

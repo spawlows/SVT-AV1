@@ -1000,11 +1000,7 @@ void *motion_estimation_kernel(void *input_ptr) {
             }
             // Global motion estimation
             // TODO: create an other kernel ?
-#if FEATURE_GM_OPT
-            if (pcs_ptr->gm_ctrls.enabled &&
-#else
             if (context_ptr->me_context_ptr->compute_global_motion &&
-#endif
 #if FEATURE_IN_LOOP_TPL
                 segment_index == 0) {
 #else
@@ -1014,22 +1010,14 @@ void *motion_estimation_kernel(void *input_ptr) {
 
 #if FEATURE_INL_ME
                 if (!scs_ptr->in_loop_me)
-#if FEATURE_GM_OPT
-                    global_motion_estimation(
-                        pcs_ptr, input_picture_ptr);
-#else
                     global_motion_estimation(
                         pcs_ptr, context_ptr->me_context_ptr, input_picture_ptr);
-#endif
 #else
                 global_motion_estimation(
                     pcs_ptr, context_ptr->me_context_ptr, input_picture_ptr);
 #endif
             }
             if (
-#if TUNE_TPL_OIS
-                scs_ptr->in_loop_ois == 0 &&
-#endif
 #if !ENABLE_TPL_ZERO_LAD
                 scs_ptr->static_config.look_ahead_distance != 0 &&
 #endif
@@ -1647,11 +1635,7 @@ void *inloop_me_kernel(void *input_ptr) {
             if (task_type == 0) {
                 // Global motion estimation
                 // TODO: create an other kernel ?
-#if FEATURE_GM_OPT
-                if (ppcs_ptr->gm_ctrls.enabled &&
-#else
                 if (context_ptr->me_context_ptr->compute_global_motion &&
-#endif
                         ppcs_ptr->slice_type != I_SLICE &&
 #if FEATURE_IN_LOOP_TPL
                         segment_index== 0) {
@@ -1659,13 +1643,8 @@ void *inloop_me_kernel(void *input_ptr) {
                         // Compute only when ME of all 64x64 SBs is performed
                         ppcs_ptr->me_processed_sb_count == ppcs_ptr->sb_total_count) {
 #endif
-#if FEATURE_GM_OPT
-                    global_motion_estimation_inl(
-                        ppcs_ptr, input_picture_ptr);
-#else
                     global_motion_estimation_inl(
                             ppcs_ptr, context_ptr->me_context_ptr, input_picture_ptr);
-#endif
                 }
                 svt_get_empty_object(context_ptr->output_fifo_ptr,
                         &out_results_wrapper_ptr);
@@ -1684,9 +1663,6 @@ void *inloop_me_kernel(void *input_ptr) {
                 // TPL ME
 #if TUNE_INL_TPL_ENHANCEMENT
                 // Doing OIS search for TPL
-#if TUNE_TPL_OIS
-                if (scs_ptr->in_loop_ois == 0)
-#endif
                 if (scs_ptr->static_config.enable_tpl_la) {
                     for (uint32_t y_sb_index = y_sb_start_index; y_sb_index < y_sb_end_index;
                             ++y_sb_index) {
