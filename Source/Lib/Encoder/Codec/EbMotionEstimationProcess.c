@@ -990,7 +990,7 @@ void *motion_estimation_kernel(void *input_ptr) {
                                            sb_origin_y,
                                            context_ptr->me_context_ptr,
                                            input_picture_ptr);
-#if !FIX_GM_BUG
+#if !FEATURE_IN_LOOP_TPL
                         svt_block_on_mutex(pcs_ptr->me_processed_sb_mutex);
                         pcs_ptr->me_processed_sb_count++;
                         svt_release_mutex(pcs_ptr->me_processed_sb_mutex);
@@ -1005,7 +1005,7 @@ void *motion_estimation_kernel(void *input_ptr) {
 #else
             if (context_ptr->me_context_ptr->compute_global_motion &&
 #endif
-#if FIX_GM_BUG
+#if FEATURE_IN_LOOP_TPL
                 segment_index == 0) {
 #else
                 // Compute only when ME of all 64x64 SBs is performed
@@ -1630,7 +1630,7 @@ void *inloop_me_kernel(void *input_ptr) {
                                 sb_origin_y,
                                 context_ptr->me_context_ptr,
                                 input_picture_ptr);
-#if !FIX_GM_BUG
+#if !FEATURE_IN_LOOP_TPL
 #if TUNE_IME_REUSE_TPL_RESULT
                         {
 #else
@@ -1653,7 +1653,7 @@ void *inloop_me_kernel(void *input_ptr) {
                 if (context_ptr->me_context_ptr->compute_global_motion &&
 #endif
                         ppcs_ptr->slice_type != I_SLICE &&
-#if FIX_GM_BUG
+#if FEATURE_IN_LOOP_TPL
                         segment_index== 0) {
 #else
                         // Compute only when ME of all 64x64 SBs is performed

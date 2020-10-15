@@ -41,7 +41,6 @@ extern "C" {
 #define FIX_10BIT     1 // fix 1st pass for 10bit input
 #define FIX_RC_TOKEN     1 // fix RC token check to include double dash
 
-#define FIX_PAD_CHROMA_AFTER_MCTF     1 // Padding chroma after altref
 #define FEATURE_NEW_DELAY             1 // Change delay some sorts of I in PicDecision
 #define FEATURE_INL_ME                1 //Enable in-loop ME
 #if FEATURE_INL_ME
@@ -58,7 +57,6 @@ extern "C" {
 #define ENABLE_TPL_ZERO_LAD     1 // Enable TPL in loop to work with zero LAD
 #define TUNE_TPL                1   // Tuning TPL algorithm for QP assignment
 #define ENABLE_TPL_TRAILING     1 //enable trailing pictures for TPL
-#define FIX_GM_BUG              1 // FIX GM r2r difference
 #endif
 
 

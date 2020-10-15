@@ -2963,7 +2963,8 @@ void pad_and_decimate_filtered_pic(
                          input_picture_ptr->height,
                          input_picture_ptr->origin_x,
                          input_picture_ptr->origin_y);
-#if FIX_PAD_CHROMA_AFTER_MCTF
+#if FEATURE_INL_ME
+        // Padding chroma after altref
         generate_padding(input_picture_ptr->buffer_cb,
                          input_picture_ptr->stride_cb,
                          input_picture_ptr->width >> scs_ptr->subsampling_x,
