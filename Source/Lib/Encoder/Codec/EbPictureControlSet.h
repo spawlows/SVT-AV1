@@ -674,7 +674,7 @@ typedef struct PictureParentControlSet {
     uint16_t *ois_distortion_histogram;
     uint32_t *intra_sad_interval_index;
     uint32_t *inter_sad_interval_index;
-#if !FIX_GM_BUG
+#if !FEATURE_IN_LOOP_TPL
     uint16_t me_processed_sb_count;
     EbHandle me_processed_sb_mutex;
 #endif

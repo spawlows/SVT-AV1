@@ -1167,7 +1167,7 @@ static void picture_parent_control_set_dctor(EbPtr ptr) {
     EB_FREE_ARRAY(obj->rusi_picture[2]);
 
     EB_FREE_ARRAY(obj->av1x);
-#if !FIX_GM_BUG
+#if !FEATURE_IN_LOOP_TPL
     EB_DESTROY_MUTEX(obj->me_processed_sb_mutex);
 #endif
     EB_DESTROY_MUTEX(obj->rc_distortion_histogram_mutex);
@@ -1295,7 +1295,7 @@ EbErrorType picture_parent_control_set_ctor(PictureParentControlSet *object_ptr,
     EB_MALLOC_ARRAY(object_ptr->non_moving_index_array, object_ptr->sb_total_count);
     // SB noise variance array
     EB_MALLOC_ARRAY(object_ptr->sb_flat_noise_array, object_ptr->sb_total_count);
-#if !FIX_GM_BUG
+#if !FEATURE_IN_LOOP_TPL
     EB_CREATE_MUTEX(object_ptr->me_processed_sb_mutex);
 #endif
     EB_CREATE_MUTEX(object_ptr->rc_distortion_histogram_mutex);
