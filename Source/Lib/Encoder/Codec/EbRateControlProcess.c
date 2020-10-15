@@ -254,7 +254,7 @@ void eb_av1_build_quantizer(AomBitDepth bit_depth, int32_t y_dc_delta_q, int32_t
     int32_t u_ac_delta_q, int32_t v_dc_delta_q, int32_t v_ac_delta_q,
     Quants *const quants, Dequants *const deq);
 
-#define TPL_DEP_COST_SCALE_LOG2 4
+
 double eb_av1_convert_qindex_to_q(int32_t qindex, AomBitDepth bit_depth);
 
 int32_t eb_av1_compute_qdelta(double qstart, double qtarget, AomBitDepth bit_depth);
