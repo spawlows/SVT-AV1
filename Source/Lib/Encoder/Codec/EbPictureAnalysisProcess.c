@@ -3791,7 +3791,9 @@ void downsample_filtering_input_picture_ime(
                 sixteenth_picture_ptr->origin_y);
     }
 }
-
+/************************************************
+* 1/4 & 1/16 input picture decimation
+************************************************/
 void downsample_decimation_input_picture_ime(
                                          EbPictureBufferDesc *    input_padded_picture_ptr,
                                          EbPictureBufferDesc *    quarter_decimated_picture_ptr,
@@ -4181,7 +4183,6 @@ void *picture_analysis_kernel(void *input_ptr) {
                         scs_ptr, pcs_ptr,
                         pcs_ptr->chroma_downsampled_picture_ptr);
 
-#if 1
                 // Save pointer of raw input to PA
                 // TODO: This is just to make it work for current TPL in iRC
                 // When moving the TPL logic from iRC to RC, should use input picture directly and remove the codes here
@@ -4189,7 +4190,7 @@ void *picture_analysis_kernel(void *input_ptr) {
                 pa_ref_obj_->input_padded_picture_ptr = input_picture_ptr;
                 pa_ref_obj_->quarter_decimated_picture_ptr = pa_ref_obj_->quarter_filtered_picture_ptr = ds_obj->quarter_picture_ptr;
                 pa_ref_obj_->sixteenth_decimated_picture_ptr = pa_ref_obj_->sixteenth_filtered_picture_ptr = ds_obj->sixteenth_picture_ptr;
-#endif
+
             } else {
                 // Original path
                 // Get PA ref, copy 8bit luma to pa_ref->input_padded_picture_ptr

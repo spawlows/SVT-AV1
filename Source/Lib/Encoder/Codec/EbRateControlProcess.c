@@ -483,7 +483,7 @@ void tpl_mc_flow_dispenser(
                         EbBool   enable_paeth                = pcs_ptr->scs_ptr->static_config.enable_paeth == DEFAULT ? EB_TRUE : (EbBool) pcs_ptr->scs_ptr->static_config.enable_paeth;
                         EbBool   enable_smooth               = pcs_ptr->scs_ptr->static_config.enable_smooth == DEFAULT ? EB_TRUE : (EbBool) pcs_ptr->scs_ptr->static_config.enable_smooth;
                         uint8_t intra_mode_end =
-#if FIX_TPL_TRAILING_FRAME_BUG
+#if ENABLE_TPL_TRAILING
                             pcs_ptr->tpl_data.tpl_opt_flag
 #else
                             pcs_ptr->tpl_opt_flag
@@ -597,7 +597,7 @@ void tpl_mc_flow_dispenser(
                     if (best_inter_cost < INT64_MAX) {
                         uint16_t eob = 0;
                         get_quantize_error(&mb_plane, best_coeff, qcoeff, dqcoeff, tx_size, &eob, &recon_error, &sse);
-#if FIX_TPL_TRAILING_FRAME_BUG
+#if ENABLE_TPL_TRAILING
                         int rate_cost = pcs_ptr->tpl_data.tpl_opt_flag ? 0 : rate_estimator(qcoeff, eob, tx_size);
 #else
                         int rate_cost = pcs_ptr->tpl_opt_flag ? 0 : rate_estimator(qcoeff, eob, tx_size);
@@ -711,7 +711,7 @@ void tpl_mc_flow_dispenser(
 
                     get_quantize_error(&mb_plane, coeff, qcoeff, dqcoeff, tx_size, &eob, &recon_error, &sse);
 
-#if FIX_TPL_TRAILING_FRAME_BUG
+#if ENABLE_TPL_TRAILING
                     int rate_cost = pcs_ptr->tpl_data.tpl_opt_flag ? 0 : rate_estimator(qcoeff, eob, tx_size);
 #else
                     int rate_cost = pcs_ptr->tpl_opt_flag ? 0 : rate_estimator(qcoeff, eob, tx_size);

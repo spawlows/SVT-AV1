@@ -1088,7 +1088,7 @@ EbErrorType signal_derivation_multi_processes_oq(
         context_ptr->tf_level = 0;
     set_tf_controls(context_ptr, context_ptr->tf_level);
 #endif
-#if !FIX_TPL_TRAILING_FRAME_BUG
+#if !ENABLE_TPL_TRAILING
     if (pcs_ptr->enc_mode <= ENC_M4)
         pcs_ptr->tpl_opt_flag = 0;
     else
@@ -4782,7 +4782,7 @@ void* picture_decision_kernel(void *input_ptr)
                 }
 
 
-#if FIX_LAD_DEADLOCK
+#if FEATURE_NEW_DELAY
                 //TODO: scene change update
                 if (scs_ptr->intra_period_length == 0)
                     pcs_ptr->is_next_frame_intra = 1;
@@ -5612,7 +5612,7 @@ void* picture_decision_kernel(void *input_ptr)
 
                             mctf_frame(scs_ptr, pcs_ptr, context_ptr, out_stride_diff64);
 
-#if FIX_TPL_TRAILING_FRAME_BUG
+#if ENABLE_TPL_TRAILING
                             if (pcs_ptr->enc_mode <= ENC_M4)
                                 pcs_ptr->tpl_data.tpl_opt_flag = 0;
                             else
