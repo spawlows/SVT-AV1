@@ -1571,7 +1571,7 @@ void *inloop_me_kernel(void *input_ptr) {
                         context_ptr->me_context_ptr->me_ds_ref_array[i][j].picture_number =
                             ppcs_ptr->ref_pic_poc_array[i][j];
 
-#if TUNE_INL_ME_ON_INPUT
+#if TUNE_INL_ME_RECON_INPUT
                         context_ptr->me_context_ptr->me_ds_ref_array[i][j].picture_ptr =
                             inl_reference_object->input_picture;
                         context_ptr->me_context_ptr->me_ds_ref_array[i][j].sixteenth_picture_ptr =

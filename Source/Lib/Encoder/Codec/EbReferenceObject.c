@@ -234,7 +234,7 @@ EbErrorType svt_reference_object_ctor(EbReferenceObject *reference_object,
         hme_desc_init_data.top_padding = 68;
         hme_desc_init_data.bot_padding = 68;
         hme_desc_init_data.split_mode = EB_FALSE;
-#if TUNE_INL_ME_MEM_OPT
+#if TUNE_INL_ME_RECON_INPUT
         hme_desc_init_data.buffer_enable_mask = PICTURE_BUFFER_DESC_LUMA_MASK; //Only save 8bit luma
         hme_desc_init_data.bit_depth = EB_8BIT;
 #endif

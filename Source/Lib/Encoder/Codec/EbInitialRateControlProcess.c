@@ -1465,7 +1465,7 @@ void *initial_rate_control_kernel(void *input_ptr) {
                         ? queue_entry_index_temp - INITIAL_RATE_CONTROL_REORDER_QUEUE_MAX_DEPTH
                         : queue_entry_index_temp;
 
-#if FIX_LAD_DEADLOCK
+#if FEATURE_NEW_DELAY
                     if (encode_context_ptr->initial_rate_control_reorder_queue[queue_entry_index_temp2]->parent_pcs_wrapper_ptr != NULL) {
                         PictureParentControlSet* pcs =
                             (PictureParentControlSet*)(encode_context_ptr
@@ -1526,7 +1526,7 @@ void *initial_rate_control_kernel(void *input_ptr) {
                                 ? queue_entry_index_temp -
                                     INITIAL_RATE_CONTROL_REORDER_QUEUE_MAX_DEPTH
                                 : queue_entry_index_temp;
-#if FIX_LAD_DEADLOCK
+#if FEATURE_NEW_DELAY
                             //exit if we hit a non valid entry
                             if (encode_context_ptr
                                     ->initial_rate_control_reorder_queue[queue_entry_index_temp2]

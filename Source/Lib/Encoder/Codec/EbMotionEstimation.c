@@ -3487,7 +3487,7 @@ EbErrorType open_loop_intra_search_mb(
             EbBool   enable_paeth                = pcs_ptr->scs_ptr->static_config.enable_paeth == DEFAULT ? EB_TRUE : (EbBool) pcs_ptr->scs_ptr->static_config.enable_paeth;
             EbBool   enable_smooth               = pcs_ptr->scs_ptr->static_config.enable_smooth == DEFAULT ? EB_TRUE : (EbBool) pcs_ptr->scs_ptr->static_config.enable_smooth;
             uint8_t intra_mode_end =
-#if FIX_TPL_TRAILING_FRAME_BUG
+#if ENABLE_TPL_TRAILING
                 pcs_ptr->tpl_data.tpl_opt_flag
 #else
                 pcs_ptr->tpl_opt_flag

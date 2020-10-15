@@ -338,9 +338,6 @@ static uint8_t tpl_setup_me_refs(
 #endif
 #endif
                     *ref_count_ptr += 1;
-#if TUNE_INL_TPL_ME_DBG_MSG
-                    printf("\t L%d: %ld=>%ld, use input, ref_count %d\n", list_index, curr_poc, ref_poc, ref_list_count);
-#endif
                     break;
                 }
             }
@@ -369,11 +366,7 @@ static uint8_t tpl_setup_me_refs(
                     pcs_tpl_group_frame_ptr->tpl_ref_ds_ptr_array[list_index][*ref_count_ptr] =
 #endif
                         ((EbReferenceObject *)ref_entry_ptr->reference_object_ptr->object_ptr)->ds_pics;
-#if TUNE_INL_TPL_ME_DBG_MSG
-                    printf("\t L%d: %ld=>%ld, use recon, ref_count %d\n", list_index, curr_poc, ref_poc, ref_list_count);
-#endif
-#if TUNE_INL_TPL_ON_INPUT
-                   // printf("\t Debug purpose, use input pic\n");
+#if TUNE_INL_ME_RECON_INPUT
 #if TUNE_INL_TPL_ENHANCEMENT
                     pcs_tpl_group_frame_ptr->tpl_data.tpl_ref_ds_ptr_array[list_index][*ref_count_ptr].picture_ptr =
                         ((EbReferenceObject *)ref_entry_ptr->reference_object_ptr->object_ptr)->input_picture;
@@ -391,8 +384,6 @@ static uint8_t tpl_setup_me_refs(
 #endif
 #endif
                     *ref_count_ptr += 1;
-                } else {
-                    //printf("\t L%d: %ld=>%ld, doesn't exist, ref_count %d\n", list_index, curr_poc, ref_poc, ref_list_count);
                 }
             }
         }
@@ -419,27 +410,6 @@ static uint8_t tpl_setup_me_refs(
     pcs_tpl_group_frame_ptr->tpl_ref0_count = *ref0_count;
     pcs_tpl_group_frame_ptr->tpl_ref1_count = *ref1_count;
 #endif
-#endif
-#if TUNE_INL_TPL_ME_DBG_MSG
-#if ENABLE_TPL_ZERO_LAD
-    if (*trailing_frames)
-        pcs_tpl_group_frame_ptr->max_number_of_pus_per_sb = pcs_tpl_base_ptr->max_number_of_pus_per_sb;
-#endif
-    for (int i = REF_LIST_0; i <= REF_LIST_1; i++) {
-        int ref_count = (i == 0) ? *ref0_count: *ref1_count;
-        for (int j = 0; j < ref_count; j++) {
-            printf("\t\t Set ref on list: %d, total count %d: %lu => %lu, decode order %lu\n",
-                    i, ref_count,
-                    pcs_tpl_group_frame_ptr->picture_number,
-#if TUNE_INL_TPL_ENHANCEMENT
-                    pcs_tpl_group_frame_ptr->tpl_data.tpl_ref_ds_ptr_array[i][j].picture_number,
-                    pcs_tpl_group_frame_ptr->tpl_data.tpl_decode_order);
-#else
-                    pcs_tpl_group_frame_ptr->tpl_ref_ds_ptr_array[i][j].picture_number,
-                    pcs_tpl_group_frame_ptr->decode_order);
-#endif
-        }
-    }
 #endif
     return 0;
 }
@@ -481,7 +451,7 @@ static EbErrorType tpl_init_pcs_tpl_data(
         pcs_tpl_group_frame_ptr->tpl_data.tpl_decode_order = pcs_tpl_group_frame_ptr->decode_order;
     }
 
-#if FIX_TPL_TRAILING_FRAME_BUG
+#if ENABLE_TPL_TRAILING
     if (pcs_tpl_group_frame_ptr->enc_mode <= ENC_M4)
         pcs_tpl_group_frame_ptr->tpl_data.tpl_opt_flag = 0;
     else
@@ -529,11 +499,6 @@ static EbErrorType tpl_get_open_loop_me(
                     pcs_tpl_group_frame_ptr != pcs_tpl_base_ptr*/) {
 #endif
 #endif
-#if TUNE_INL_TPL_ME_DBG_MSG
-                printf("[%ld]: Setup TPL ME refs for frame %lu\n",
-                        pcs_tpl_base_ptr->picture_number,
-                        pcs_tpl_group_frame_ptr->picture_number);
-#endif
 
                 tpl_setup_me_refs(scs_ptr,
                         pcs_tpl_group_frame_ptr, pcs_tpl_base_ptr,
@@ -573,9 +538,6 @@ static EbErrorType tpl_get_open_loop_me(
                     // When TPL16, flag tpl_me_done of 17/18/19 will be set done during TPL32
                     if (!is_trailing_tpl_frame) {
                         pcs_tpl_group_frame_ptr->tpl_me_done = 1;
-#if TUNE_INL_TPL_ME_DBG_MSG
-                        printf("\t Picture %lu TPL ME done\n", pcs_tpl_group_frame_ptr->picture_number);
-#endif
                     }
                 }
             }
@@ -885,7 +847,7 @@ void *picture_manager_kernel(void *input_ptr) {
 
                     availability_flag = EB_TRUE;
                     if (entry_pcs_ptr->decode_order != decode_order &&
-#if TUNE_INL_ME_DECODE_ORDER
+#if TUNE_INL_ME_RECON_INPUT
                         ((scs_ptr->in_loop_me && scs_ptr->static_config.enable_tpl_la) || use_input_stat(scs_ptr)))
 #else
                         use_input_stat(scs_ptr))

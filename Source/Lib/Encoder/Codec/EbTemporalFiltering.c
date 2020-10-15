@@ -457,9 +457,6 @@ static void create_me_context_and_picture_control_inl(
     EbPictureBufferDesc *input_picture_ptr_central, int blk_row, int blk_col, uint32_t ss_x,
     uint32_t ss_y) {
     // set reference picture for alt-refs
-    //context_ptr->me_context_ptr->alt_ref_reference_ptr_inl =
-    //    (EbDownScaledObject*)picture_control_set_ptr_frame->down_scaled_picture_wrapper_ptr->object_ptr;
-    //context_ptr->me_context_ptr->mctf_ref_desc_ptr_array = picture_control_set_ptr_frame->ds_pics;
     context_ptr->me_context_ptr->me_ds_ref_array[0][0] = picture_control_set_ptr_frame->ds_pics;
     context_ptr->me_context_ptr->me_type = ME_MCTF;
 
@@ -2641,13 +2638,7 @@ static EbErrorType produce_temporally_filtered_pic(
                     context_ptr->temporal_layer_index = picture_control_set_ptr_central->temporal_layer_index;
                     context_ptr->is_used_as_reference_flag = picture_control_set_ptr_central->is_used_as_reference_flag;
 
-                    if (scs_ptr->in_loop_me) {
-                        //EbDownScaledObject* inl_downscaled_object = (EbDownScaledObject*)context_ptr->alt_ref_reference_ptr_inl;
-                        //context_ptr->me_ds_ref_array[0][0].picture_ptr = inl_downscaled_object->picture_ptr;
-                        //context_ptr->me_ds_ref_array[0][0].quarter_picture_ptr = inl_downscaled_object->quarter_picture_ptr;
-                        //context_ptr->me_ds_ref_array[0][0].sixteenth_picture_ptr = inl_downscaled_object->sixteenth_picture_ptr;
-                        //context_ptr->me_ds_ref_array[0][0] = context_ptr->mctf_ref_desc_ptr_array;
-                    } else {
+                    if (!scs_ptr->in_loop_me) {
                         EbPaReferenceObject *reference_object = (EbPaReferenceObject *)context_ptr->alt_ref_reference_ptr;
                         context_ptr->me_ds_ref_array[0][0].picture_ptr = reference_object->input_padded_picture_ptr;
                         context_ptr->me_ds_ref_array[0][0].sixteenth_picture_ptr = (scs_ptr->down_sampling_method_me_search == ME_FILTERED_DOWNSAMPLED) ?
