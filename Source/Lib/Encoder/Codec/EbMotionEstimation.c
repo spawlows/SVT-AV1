@@ -2824,9 +2824,6 @@ void set_final_seach_centre_sb(
     uint64_t best_cost = (uint64_t)~0;
     context_ptr->best_list_idx = 0;
     context_ptr->best_ref_idx = 0;
-
-
-
 #if !FEATURE_INL_ME
     num_of_list_to_search = (pcs_ptr->slice_type == P_SLICE)
         ? (uint32_t)REF_LIST_0
