@@ -2739,7 +2739,7 @@ void sub_sample_luma_generate_pixel_intensity_histogram_bins(
     return;
 }
 
-#ifdef FEATURE_INL_ME
+#if FEATURE_INL_ME
     // Histogram bins
     // Luma for Histogram generation
 void sub_sample_luma_generate_pixel_intensity_histogram_bins_ime(
