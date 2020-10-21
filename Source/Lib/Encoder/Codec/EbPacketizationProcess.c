@@ -700,6 +700,9 @@ void *packetization_kernel(void *input_ptr) {
         rate_control_tasks_ptr->task_type       = RC_PACKETIZATION_FEEDBACK_RESULT;
 
         if(use_input_stat(scs_ptr) ||
+#if TUNE_INL_ME_RECON_INPUT
+            (scs_ptr->in_loop_me && scs_ptr->static_config.enable_tpl_la) ||
+#endif
             (pcs_ptr->parent_pcs_ptr->is_used_as_reference_flag == EB_TRUE &&
             pcs_ptr->parent_pcs_ptr->reference_picture_wrapper_ptr)) {
             if (pcs_ptr->parent_pcs_ptr->is_used_as_reference_flag == EB_TRUE &&
@@ -801,7 +804,11 @@ void *packetization_kernel(void *input_ptr) {
 
         // Post Rate Control Taks
         svt_post_full_object(rate_control_tasks_wrapper_ptr);
-        if (use_input_stat(scs_ptr) || (pcs_ptr->parent_pcs_ptr->is_used_as_reference_flag == EB_TRUE &&
+        if (use_input_stat(scs_ptr) ||
+#if TUNE_INL_ME_RECON_INPUT
+            (scs_ptr->in_loop_me && scs_ptr->static_config.enable_tpl_la) ||
+#endif
+            (pcs_ptr->parent_pcs_ptr->is_used_as_reference_flag == EB_TRUE &&
             pcs_ptr->parent_pcs_ptr->reference_picture_wrapper_ptr))
             // Post the Full Results Object
             svt_post_full_object(picture_manager_results_wrapper_ptr);

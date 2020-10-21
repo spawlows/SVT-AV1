@@ -78,6 +78,11 @@ typedef struct SequenceControlSet {
     /*!< Down-sampling method @ ME and alt-ref temporal filtering
         (The signal changes per preset; 0: filtering, 1: decimation) Default is 0. */
     uint8_t down_sampling_method_me_search;
+#if FEATURE_INL_ME
+    /*!< Use in loop motion estimation
+         Default is 0. */
+    uint8_t in_loop_me;
+#endif
     /*!< Allow the usage of motion field motion vector in the stream
         (The signal changes per preset; 0: Enabled, 1: Disabled) Default is 1. */
     uint8_t mfmv_enabled;
@@ -169,6 +174,9 @@ typedef struct SequenceControlSet {
     uint32_t motion_estimation_fifo_init_count;
     uint32_t initial_rate_control_fifo_init_count;
     uint32_t picture_demux_fifo_init_count;
+#if FEATURE_INL_ME
+    uint32_t in_loop_me_fifo_init_count;
+#endif
     uint32_t rate_control_tasks_fifo_init_count;
     uint32_t rate_control_fifo_init_count;
     uint32_t mode_decision_configuration_fifo_init_count;
@@ -188,6 +196,9 @@ typedef struct SequenceControlSet {
     uint32_t dlf_process_init_count;
     uint32_t cdef_process_init_count;
     uint32_t rest_process_init_count;
+#if FEATURE_INL_ME
+    uint32_t inlme_process_init_count;
+#endif
     uint32_t total_process_init_count;
     int32_t  lap_enabled;
     TWO_PASS twopass;
