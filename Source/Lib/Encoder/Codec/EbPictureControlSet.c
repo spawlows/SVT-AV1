@@ -1167,12 +1167,18 @@ static void picture_parent_control_set_dctor(EbPtr ptr) {
     EB_FREE_ARRAY(obj->rusi_picture[2]);
 
     EB_FREE_ARRAY(obj->av1x);
+#if !FEATURE_IN_LOOP_TPL
     EB_DESTROY_MUTEX(obj->me_processed_sb_mutex);
+#endif
     EB_DESTROY_MUTEX(obj->rc_distortion_histogram_mutex);
     EB_DESTROY_SEMAPHORE(obj->temp_filt_done_semaphore);
     EB_DESTROY_MUTEX(obj->temp_filt_mutex);
     EB_DESTROY_MUTEX(obj->debug_mutex);
     EB_FREE_ARRAY(obj->tile_group_info);
+#if FEATURE_INL_ME
+    EB_DESTROY_SEMAPHORE(obj->tpl_me_done_semaphore);
+    EB_DESTROY_MUTEX(obj->tpl_me_mutex);
+#endif
     if(obj->frame_superres_enabled){
         svt_pcs_sb_structs_dctor(obj);
         EB_DELETE(obj->enhanced_picture_ptr);
@@ -1289,7 +1295,9 @@ EbErrorType picture_parent_control_set_ctor(PictureParentControlSet *object_ptr,
     EB_MALLOC_ARRAY(object_ptr->non_moving_index_array, object_ptr->sb_total_count);
     // SB noise variance array
     EB_MALLOC_ARRAY(object_ptr->sb_flat_noise_array, object_ptr->sb_total_count);
+#if !FEATURE_IN_LOOP_TPL
     EB_CREATE_MUTEX(object_ptr->me_processed_sb_mutex);
+#endif
     EB_CREATE_MUTEX(object_ptr->rc_distortion_histogram_mutex);
     EB_MALLOC_ARRAY(object_ptr->sb_depth_mode_array, object_ptr->sb_total_count);
     EB_CREATE_SEMAPHORE(object_ptr->temp_filt_done_semaphore, 0, 1);
@@ -1297,6 +1305,10 @@ EbErrorType picture_parent_control_set_ctor(PictureParentControlSet *object_ptr,
     EB_CREATE_MUTEX(object_ptr->debug_mutex);
     EB_MALLOC_ARRAY(object_ptr->av1_cm, 1);
 
+#if FEATURE_INL_ME
+    EB_CREATE_SEMAPHORE(object_ptr->tpl_me_done_semaphore, 0, 1);
+    EB_CREATE_MUTEX(object_ptr->tpl_me_mutex);
+#endif
     object_ptr->av1_cm->interp_filter = SWITCHABLE;
 
     object_ptr->av1_cm->mi_stride = picture_sb_width * (BLOCK_SIZE_64 / 4);

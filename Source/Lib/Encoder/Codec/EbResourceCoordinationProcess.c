@@ -467,6 +467,17 @@ void reset_pcs_av1(PictureParentControlSet *pcs_ptr) {
     frm_hdr->frame_refs_short_signaling = 0;
     pcs_ptr->allow_comp_inter_inter     = 0;
     //  int32_t all_one_sided_refs;
+#if FEATURE_INL_ME
+    pcs_ptr->tpl_me_done = 0;
+    pcs_ptr->me_data_wrapper_ptr = NULL;
+    pcs_ptr->down_scaled_picture_wrapper_ptr = NULL;
+    pcs_ptr->ds_pics.picture_ptr = NULL;
+    pcs_ptr->ds_pics.quarter_picture_ptr = NULL;
+    pcs_ptr->ds_pics.sixteenth_picture_ptr = NULL;
+#if TUNE_INL_TPL_ENHANCEMENT
+    pcs_ptr->max_number_of_pus_per_sb = SQUARE_PU_COUNT;
+#endif
+#endif
 }
 /***********************************************
 **** Copy the input buffer from the
@@ -1012,6 +1023,14 @@ void *resource_coordination_kernel(void *input_ptr) {
                 svt_object_inc_live_count(pcs_ptr->pa_reference_picture_wrapper_ptr, 1);
             else
                 svt_object_inc_live_count(pcs_ptr->pa_reference_picture_wrapper_ptr, 2);
+#if FEATURE_INL_ME
+            if (scs_ptr->in_loop_me) {
+                EbObjectWrapper *ds_wrapper;
+                svt_get_empty_object(scs_ptr->encode_context_ptr->down_scaled_picture_pool_fifo_ptr,
+                        &ds_wrapper);
+                pcs_ptr->down_scaled_picture_wrapper_ptr = ds_wrapper;
+            }
+#endif
             if (scs_ptr->static_config.unrestricted_motion_vector == 0) {
                 struct PictureParentControlSet *ppcs_ptr = pcs_ptr;
                 Av1Common *const                cm       = ppcs_ptr->av1_cm;
