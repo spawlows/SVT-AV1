@@ -45,14 +45,13 @@ jobs:
           - sanitizer: thread-known-warnings
             sanitizer-type: thread
             allows-failure: false
-            TASAN_OPTIONS: suppressions=./.github/workflows/sanitizers-known-warnings.txt
+            run-prefix:  TSAN_OPTIONS="suppressions=./.github/workflows/sanitizers-known-warnings.txt"
 
     env:
       CFLAGS: -fsanitize=${{ matrix.sanitizer-type }} ${{ matrix.CFLAGS }}
       CXXFLAGS: -fsanitize=${{ matrix.sanitizer-type }} ${{ matrix.CXXFLAGS }}
       LDFLAGS: -fsanitize=${{ matrix.sanitizer-type }} ${{ matrix.LDFLAGS }}
       ASAN_OPTIONS: ${{ matrix.ASAN_OPTIONS }}
-      TASAN_OPTIONS: ${{ matrix.TASAN_OPTIONS }}
 
     steps:
       - name: Install dependencies
@@ -83,5 +82,5 @@ jobs:
           tar xzf video.tar.gz
 
       - name: Run Encoder
-        run: ./Bin/Debug/SvtAv1EncApp -i Chimera-Aerial_480x264_2997fps_10bit_420_150frames.y4m ${{ matrix.svt-args }} -n 120 --preset 8 -b output.ivf
+        run: ${{ matrix.run-prefix }} ./Bin/Debug/SvtAv1EncApp -i Chimera-Aerial_480x264_2997fps_10bit_420_150frames.y4m ${{ matrix.svt-args }} -n 120 --preset 8 -b output.ivf
         continue-on-error: ${{ matrix.allows-failure }}
