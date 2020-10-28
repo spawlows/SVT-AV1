@@ -42,7 +42,7 @@ jobs:
             sanitizer-type: thread
             allows-failure: true
 
-          - sanitizer-type: thread-ignore-know-warnings
+          - sanitizer: thread-ignore-know-warnings
             sanitizer-type: thread
             allows-failure: false
             check-know-warnings: >-
