@@ -37,7 +37,8 @@ jobs:
             svt-args: --asm 0
 
           - sanitizer: thread
-            allows-failure: true
+            allows-failure: false
+            check-know-errors: && echo 1
     env:
       CFLAGS: -fsanitize=${{ matrix.sanitizer }} ${{ matrix.CFLAGS }}
       CXXFLAGS: -fsanitize=${{ matrix.sanitizer }} ${{ matrix.CXXFLAGS }}
@@ -73,5 +74,5 @@ jobs:
           tar xzf video.tar.gz
 
       - name: Run Encoder
-        run: ./Bin/Debug/SvtAv1EncApp -i Chimera-Aerial_480x264_2997fps_10bit_420_150frames.y4m ${{ matrix.svt-args }} -n 120 --preset 8 -b output.ivf
+        run: ./Bin/Debug/SvtAv1EncApp -i Chimera-Aerial_480x264_2997fps_10bit_420_150frames.y4m ${{ matrix.svt-args }} -n 120 --preset 8 -b output.ivf ${{ matrix.check-know-errors }}
         continue-on-error: ${{ matrix.allows-failure }}
