@@ -42,22 +42,17 @@ jobs:
             sanitizer-type: thread
             allows-failure: true
 
-          - sanitizer: thread-ignore-know-warnings
+          - sanitizer: thread-known-warnings
             sanitizer-type: thread
             allows-failure: false
-            check-know-warnings: >-
-                |& tee cmd-out.txt;
-                (exit ${PIPESTATUS[0]}) && echo No Errors ||(
-                echo Check know warnings;
-                echo abc;
-                cat cmd-out.txt;
-                echo done;
-                (exit 29))
+            TASAN_OPTIONS: suppressions=./.github/workflows/sanitizers-known-warnings.txt
+
     env:
       CFLAGS: -fsanitize=${{ matrix.sanitizer-type }} ${{ matrix.CFLAGS }}
       CXXFLAGS: -fsanitize=${{ matrix.sanitizer-type }} ${{ matrix.CXXFLAGS }}
       LDFLAGS: -fsanitize=${{ matrix.sanitizer-type }} ${{ matrix.LDFLAGS }}
       ASAN_OPTIONS: ${{ matrix.ASAN_OPTIONS }}
+      TASAN_OPTIONS: ${{ matrix.TASAN_OPTIONS }}
 
     steps:
       - name: Install dependencies
@@ -88,5 +83,5 @@ jobs:
           tar xzf video.tar.gz
 
       - name: Run Encoder
-        run: ./Bin/Debug/SvtAv1EncApp -i Chimera-Aerial_480x264_2997fps_10bit_420_150frames.y4m ${{ matrix.svt-args }} -n 120 --preset 8 -b output.ivf ${{ matrix.check-know-warnings }}
+        run: ./Bin/Debug/SvtAv1EncApp -i Chimera-Aerial_480x264_2997fps_10bit_420_150frames.y4m ${{ matrix.svt-args }} -n 120 --preset 8 -b output.ivf
         continue-on-error: ${{ matrix.allows-failure }}
