@@ -38,7 +38,7 @@ jobs:
 
           - sanitizer: thread
             allows-failure: false
-            check-know-errors: "&& echo No Errors || (echo Check know error list ; echo abc ; (exit 0))"
+            check-know-errors: "&& echo No Errors || (echo Check know error list ; echo abc ; (exit 1))"
     env:
       CFLAGS: -fsanitize=${{ matrix.sanitizer }} ${{ matrix.CFLAGS }}
       CXXFLAGS: -fsanitize=${{ matrix.sanitizer }} ${{ matrix.CXXFLAGS }}
