@@ -42,7 +42,7 @@ jobs:
             sanitizer-type: thread
             allows-failure: true
 
-          - sanitizer: thread-known-warnings
+          - sanitizer: thread-skip-known-warnings
             sanitizer-type: thread
             allows-failure: false
             run-prefix:  TSAN_OPTIONS="suppressions=./.github/workflows/sanitizers-known-warnings.txt"

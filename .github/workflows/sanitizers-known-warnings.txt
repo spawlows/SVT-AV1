@@ -1,5 +1,5 @@
 #List of known warnings in sanitizer thread test.
-#CI Runs sanitizer thread with suppresses known warnings to detect regression of new potential issues.
+#CI Runs sanitizer thread and skip known warnings to detect regression of new potential issues.
 #Known warnings tracked in issue: ????
 
 #Race warnings (data races and use-after-free reports):
@@ -9,5 +9,9 @@ race:mode_decision_kernel
 race:picture_decision_kernel
 race:calculate_input_average_intensity
 race:compute_luma_sad_between_center_and_target_frame
+race:compute_block_mean_compute_variance
+race:picture_manager_kernel
+race:packetization_kernel
+race:signal_derivation_pre_analysis_oq
 
 #End of file
