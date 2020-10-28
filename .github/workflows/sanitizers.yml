@@ -38,7 +38,13 @@ jobs:
 
           - sanitizer: thread
             allows-failure: false
-            check-know-errors: "|& tee out.txt; (exit ${PIPESTATUS[0]}) && echo No Errors || (echo Check know error list ; echo abc ; cat out.txt; cat done; (exit 1))"
+            check-know-warnings: >-
+                |& tee cmd-out.txt; (exit ${PIPESTATUS[0]}) && echo No Errors ||(
+                echo Check know warnings;
+                echo abc;
+                cat cmd-out.txt;
+                cat done;
+                (exit 1))
     env:
       CFLAGS: -fsanitize=${{ matrix.sanitizer }} ${{ matrix.CFLAGS }}
       CXXFLAGS: -fsanitize=${{ matrix.sanitizer }} ${{ matrix.CXXFLAGS }}
@@ -74,5 +80,5 @@ jobs:
           tar xzf video.tar.gz
 
       - name: Run Encoder
-        run: ./Bin/Debug/SvtAv1EncApp -i Chimera-Aerial_480x264_2997fps_10bit_420_150frames.y4m ${{ matrix.svt-args }} -n 120 --preset 8 -b output.ivf ${{ matrix.check-know-errors }}
+        run: ./Bin/Debug/SvtAv1EncApp -i Chimera-Aerial_480x264_2997fps_10bit_420_150frames.y4m ${{ matrix.svt-args }} -n 120 --preset 8 -b output.ivf ${{ matrix.check-know-warnings }}
         continue-on-error: ${{ matrix.allows-failure }}
