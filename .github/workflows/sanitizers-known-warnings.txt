@@ -1,1 +1,16 @@
-asdd
+#List of known warnings in test sanitizer thread.
+#CI Runs sanitizer thread with ignore known warnings to detect regression of new errors.
+#Known warnings tracked in issue: ????
+
+#race:             suppresses data races and use-after-free reports
+#thread:           suppresses reports related to threads (leaks)
+#mutex:            suppresses reports related to mutexes (destruction of a locked mutex)
+#signal:           suppresses reports related to signal handlers (handler calls malloc())
+#deadlock:         suppresses lock inversion reports
+#called_from_lib:  suppresses all interceptors in a particular library
+
+#Race warnings:
+race:eb_memcpy_small
+race:eb_memcpy_sse
+
+#End of file
