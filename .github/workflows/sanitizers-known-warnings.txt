@@ -13,5 +13,6 @@ race:compute_block_mean_compute_variance
 race:picture_manager_kernel
 race:packetization_kernel
 race:signal_derivation_pre_analysis_oq
+race:compute_chroma_block_mean
 
 #End of file
