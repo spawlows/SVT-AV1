@@ -28,14 +28,13 @@
 
 #ifndef NON_AVX512_SUPPORT
 #define SET_FUNCTIONS_AVX512(ptr, c, mmx, sse, sse2, sse3, ssse3, sse4_1, sse4_2, avx, avx2, avx512) \
-    if (((uintptr_t)NULL != (uintptr_t)avx512) && (flags & HAS_AVX512F)) ptr = avx512; \
-    assert(avx512 == 0 || (avx512 != c && avx512 != mmx && avx512 != sse && avx512 != sse2 && avx512 != sse3 && avx512 != ssse3 && avx512 != sse4_1 && avx512 != sse4_2 && avx512 != avx && avx512 != avx2));
+    if (((uintptr_t)NULL != (uintptr_t)avx512) && (flags & HAS_AVX512F)) ptr = avx512;
 #else
 #define SET_FUNCTIONS_AVX512(ptr, c, mmx, sse, sse2, sse3, ssse3, sse4_1, sse4_2, avx, avx2, avx512)
 #endif
 
 #ifdef ARCH_X86_64
-#define SET_FUNCTIONS_X86_AVX(ptr, c, mmx, sse, sse2, sse3, ssse3, sse4_1, sse4_2, avx, avx2, avx512)   \
+#define SET_FUNCTIONS_X86_AVX(ptr, c, mmx, sse, sse2, sse3, ssse3, sse4_1, sse4_2, avx, avx2, avx512) \
     if (((uintptr_t)NULL != (uintptr_t)mmx) && (flags & HAS_MMX)) ptr = mmx;              \
     if (((uintptr_t)NULL != (uintptr_t)sse) && (flags & HAS_SSE)) ptr = sse;              \
     if (((uintptr_t)NULL != (uintptr_t)sse2) && (flags & HAS_SSE2)) ptr = sse2;           \
@@ -45,16 +44,7 @@
     if (((uintptr_t)NULL != (uintptr_t)sse4_2) && (flags & HAS_SSE4_2)) ptr = sse4_2;     \
     if (((uintptr_t)NULL != (uintptr_t)avx) && (flags & HAS_AVX)) ptr = avx;              \
     if (((uintptr_t)NULL != (uintptr_t)avx2) && (flags & HAS_AVX2)) ptr = avx2;           \
-    assert(mmx == 0 || (mmx != c));                                                         \
-    assert(sse == 0 || (sse != c    && (sse)    != (mmx)));                                                         \
-    assert(sse2 == 0 || (sse2 != c && ((sse2) != (mmx)) && ((sse2) != (sse))));                                                       \
-  /*  assert(sse3 == 0 || (sse3 != c && sse3 != mmx && sse3 != sse && sse3 != sse2));                                                       \
-    assert(ssse3 == 0 || (ssse3 != c && ssse3 != mmx && ssse3 != sse && ssse3 != sse2 && ssse3 != sse3));                            \
-    assert(sse4_1 == 0 || (sse4_1 != c && sse4_1 != mmx && sse4_1 != sse && sse4_1 != sse2 &&  sse4_1 != sse3 && sse4_1 != ssse3));        \
-    assert(sse4_2 == 0 || (sse4_2 != c && sse4_2 != mmx && sse4_2 != sse && sse4_2 != sse2 && sse4_2 != sse3 && sse4_2 != ssse3 && sse4_2 != sse4_1));                                                  \
-    assert(avx == 0 || (avx != c && avx != mmx && avx != sse && avx != sse2 && avx != sse3 && avx != ssse3 && avx != sse4_1 && avx != sse4_2));                                                         \
-    assert(avx2 == 0 || (avx2 != c && avx2 != mmx && avx2 != sse && avx2 != sse2 && avx2 != sse3 && avx2 != ssse3 && avx2 != sse4_1 && avx2 != sse4_2 && avx2 != avx));                                                       \
-    SET_FUNCTIONS_AVX512(ptr, c, mmx, sse, sse2, sse3, ssse3, sse4_1, sse4_2, avx, avx2, avx512)*
+    SET_FUNCTIONS_AVX512(ptr, c, mmx, sse, sse2, sse3, ssse3, sse4_1, sse4_2, avx, avx2, avx512)
 #else
 #define SET_FUNCTIONS_X86_AVX(ptr, c, mmx, sse, sse2, sse3, ssse3, sse4_1, sse4_2, avx, avx2, avx512)
 #endif
@@ -68,11 +58,19 @@
 
 
 void setup_rtcd_internal(CPU_FLAGS flags) {
+
+#ifdef ARCH_X86_64
     /** Should be done during library initialization,
         but for safe limiting cpu flags again. */
-    (void)flags;
+    flags &= get_cpu_flags_to_use();
     //to use C: flags=0
-    svt_aom_sse = svt_aom_sse_c;
+#else
+    (void)flags;
+#endif
+
+    SET_AVX2(svt_aom_sse, svt_aom_sse_c, svt_aom_sse_avx2);
+
+
 
     svt_aom_highbd_sse = svt_aom_highbd_sse_c;
 
@@ -351,7 +349,7 @@ void setup_rtcd_internal(CPU_FLAGS flags) {
 
 #ifdef ARCH_X86_64
     flags &= get_cpu_flags_to_use();
-    if (flags & HAS_AVX2) svt_aom_sse = svt_aom_sse_avx2;
+
     if (flags & HAS_AVX2) svt_aom_highbd_sse = svt_aom_highbd_sse_avx2;
     if (flags & HAS_AVX2) svt_av1_wedge_compute_delta_squares = svt_av1_wedge_compute_delta_squares_avx2;
     if (flags & HAS_AVX2) svt_av1_wedge_sign_from_residuals = svt_av1_wedge_sign_from_residuals_avx2;
