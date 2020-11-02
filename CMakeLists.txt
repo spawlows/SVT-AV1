@@ -186,7 +186,7 @@ endif()
 include(CheckSymbolExists)
 check_symbol_exists("_mm512_extracti64x4_epi64" "immintrin.h" HAS_AVX512)
 if(NOT HAS_AVX512)
-    add_definitions(-DNON_AVX512_SUPPORT)
+#    add_definitions(-DNON_AVX512_SUPPORT)
 endif()
 
 # ASM compiler macro

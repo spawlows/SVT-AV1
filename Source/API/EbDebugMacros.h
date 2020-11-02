@@ -33,7 +33,7 @@ extern "C" {
 
 // undefining this macro would allow the AVX512 optimization to be enabled by default
 #ifndef NON_AVX512_SUPPORT
-#define NON_AVX512_SUPPORT
+//#define NON_AVX512_SUPPORT
 #endif
 
 #define FIX_RC_BUG 1 // Fix the one pass QP assignment using frames_to_be_encoded
