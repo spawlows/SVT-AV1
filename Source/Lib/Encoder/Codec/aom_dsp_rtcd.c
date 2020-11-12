@@ -51,7 +51,7 @@
 
 #define SET_FUNCTIONS(ptr, c, mmx, sse, sse2, sse3, ssse3, sse4_1, sse4_2, avx, avx2, avx512)     \
     do {                                                                                          \
-        /*assert(ptr == 0);*/ /* Check pointer not set before set */                              \
+        assert(ptr == 0); /* Check pointer not set before set */                              \
         assert(c != 0);                                                                           \
         ptr = c;                                                                                  \
         SET_FUNCTIONS_X86(ptr, c, mmx, sse, sse2, sse3, ssse3, sse4_1, sse4_2, avx, avx2, avx512) \
@@ -111,7 +111,6 @@ void setup_rtcd_internal(CPU_FLAGS flags) {
     SET_AVX2(svt_av1_calc_frame_error, svt_av1_calc_frame_error_c, svt_av1_calc_frame_error_avx2);
     SET_AVX2(svt_subtract_average, svt_subtract_average_c, svt_subtract_average_avx2);
     SET_AVX2(svt_get_proj_subspace, svt_get_proj_subspace_c, svt_get_proj_subspace_avx2);
-    SET_AVX2(svt_aom_mse16x16, svt_aom_mse16x16_c, svt_aom_mse16x16_avx2);
     SET_AVX2(svt_aom_quantize_b, svt_aom_quantize_b_c_ii, svt_aom_quantize_b_avx2);
     SET_AVX2(
         svt_aom_highbd_quantize_b, svt_aom_highbd_quantize_b_c, svt_aom_highbd_quantize_b_avx2);
@@ -404,223 +403,148 @@ void setup_rtcd_internal(CPU_FLAGS flags) {
     SET_AVX2(svt_aom_highbd_10_variance128x128,
              svt_aom_highbd_10_variance128x128_c,
              svt_aom_highbd_10_variance128x128_avx2);
-    //SET_AVX2(pppppp, cccccc, avx2avx2);
-    //SET_AVX2(pppppp, cccccc, avx2avx2);
-    //SET_AVX2(pppppp, cccccc, avx2avx2);
-    //SET_AVX2_AVX512(XXXX, CCCC, AAAA, 55555);
-    //SET_AVX2(pppppp, cccccc, avx2avx2);
-    //SET_ONLY_C(pppppp, cccccc);
-    //SET_AVX2(pppppp, cccccc, avx2avx2);
-    //SET_AVX2(pppppp, cccccc, avx2avx2);
-    //SET_AVX2(pppppp, cccccc, avx2avx2);
-    //SET_AVX2(pppppp, cccccc, avx2avx2);
-    //SET_AVX2(pppppp, cccccc, avx2avx2);
-
-
-
-
 
     //QIQ
     // transform
-    svt_av1_fwd_txfm2d_16x8 = svt_av1_fwd_txfm2d_16x8_c;
-    svt_av1_fwd_txfm2d_8x16 = svt_av1_fwd_txfm2d_8x16_c;
+    SET_AVX2(svt_av1_fwd_txfm2d_16x8, svt_av1_fwd_txfm2d_16x8_c, svt_av1_fwd_txfm2d_16x8_avx2);
+    SET_AVX2(svt_av1_fwd_txfm2d_8x16, svt_av1_fwd_txfm2d_8x16_c, svt_av1_fwd_txfm2d_8x16_avx2);
+    SET_AVX2(svt_av1_fwd_txfm2d_16x4, svt_av1_fwd_txfm2d_16x4_c, svt_av1_fwd_txfm2d_16x4_avx2);
+    SET_AVX2(svt_av1_fwd_txfm2d_4x16, svt_av1_fwd_txfm2d_4x16_c, svt_av1_fwd_txfm2d_4x16_avx2);
+    SET_AVX2(svt_av1_fwd_txfm2d_8x4, svt_av1_fwd_txfm2d_8x4_c, svt_av1_fwd_txfm2d_8x4_avx2);
+    SET_AVX2(svt_av1_fwd_txfm2d_4x8, svt_av1_fwd_txfm2d_4x8_c, svt_av1_fwd_txfm2d_4x8_avx2);
+    SET_AVX2_AVX512(svt_av1_fwd_txfm2d_32x16,
+                    svt_av1_fwd_txfm2d_32x16_c,
+                    svt_av1_fwd_txfm2d_32x16_avx2,
+                    av1_fwd_txfm2d_32x16_avx512);
+    SET_AVX2(svt_av1_fwd_txfm2d_32x8, svt_av1_fwd_txfm2d_32x8_c, svt_av1_fwd_txfm2d_32x8_avx2);
+    SET_AVX2(svt_av1_fwd_txfm2d_8x32, svt_av1_fwd_txfm2d_8x32_c, svt_av1_fwd_txfm2d_8x32_avx2);
+    SET_AVX2_AVX512(svt_av1_fwd_txfm2d_16x32,
+                    svt_av1_fwd_txfm2d_16x32_c,
+                    svt_av1_fwd_txfm2d_16x32_avx2,
+                    av1_fwd_txfm2d_16x32_avx512);
+    SET_AVX2_AVX512(svt_av1_fwd_txfm2d_32x64,
+                    svt_av1_fwd_txfm2d_32x64_c,
+                    svt_av1_fwd_txfm2d_32x64_avx2,
+                    av1_fwd_txfm2d_32x64_avx512);
+    SET_AVX2_AVX512(svt_av1_fwd_txfm2d_64x32,
+                    svt_av1_fwd_txfm2d_64x32_c,
+                    svt_av1_fwd_txfm2d_64x32_avx2,
+                    av1_fwd_txfm2d_64x32_avx512);
+    SET_AVX2_AVX512(svt_av1_fwd_txfm2d_16x64,
+                    svt_av1_fwd_txfm2d_16x64_c,
+                    svt_av1_fwd_txfm2d_16x64_avx2,
+                    av1_fwd_txfm2d_16x64_avx512);
+    SET_AVX2_AVX512(svt_av1_fwd_txfm2d_64x16,
+                    svt_av1_fwd_txfm2d_64x16_c,
+                    svt_av1_fwd_txfm2d_64x16_avx2,
+                    av1_fwd_txfm2d_64x16_avx512);
+    SET_AVX2_AVX512(svt_av1_fwd_txfm2d_64x64,
+                    svt_av1_transform_two_d_64x64_c,
+                    svt_av1_fwd_txfm2d_64x64_avx2,
+                    av1_fwd_txfm2d_64x64_avx512);
+    SET_AVX2_AVX512(svt_av1_fwd_txfm2d_32x32,
+                    svt_av1_transform_two_d_32x32_c,
+                    svt_av1_fwd_txfm2d_32x32_avx2,
+                    av1_fwd_txfm2d_32x32_avx512);
+    SET_AVX2_AVX512(svt_av1_fwd_txfm2d_16x16,
+                    svt_av1_transform_two_d_16x16_c,
+                    svt_av1_fwd_txfm2d_16x16_avx2,
+                    av1_fwd_txfm2d_16x16_avx512);
+    SET_AVX2(svt_av1_fwd_txfm2d_8x8, svt_av1_transform_two_d_8x8_c, svt_av1_fwd_txfm2d_8x8_avx2);
+    SET_SSE41(svt_av1_fwd_txfm2d_4x4, svt_av1_transform_two_d_4x4_c, svt_av1_fwd_txfm2d_4x4_sse4_1);
+    SET_AVX2(
+        svt_handle_transform16x64, svt_handle_transform16x64_c, svt_handle_transform16x64_avx2);
+    SET_AVX2(
+        svt_handle_transform32x64, svt_handle_transform32x64_c, svt_handle_transform32x64_avx2);
+    SET_AVX2(
+        svt_handle_transform64x16, svt_handle_transform64x16_c, svt_handle_transform64x16_avx2);
+    SET_AVX2(
+        svt_handle_transform64x32, svt_handle_transform64x32_c, svt_handle_transform64x32_avx2);
+    SET_AVX2(
+        svt_handle_transform64x64, svt_handle_transform64x64_c, svt_handle_transform64x64_avx2);
+    SET_ONLY_C(svt_aom_fft2x2_float, svt_aom_fft2x2_float_c);
+    SET_SSE2(svt_aom_fft4x4_float, svt_aom_fft4x4_float_c, svt_aom_fft4x4_float_sse2);
+    SET_AVX2(svt_aom_fft16x16_float, svt_aom_fft16x16_float_c, svt_aom_fft16x16_float_avx2);
+    SET_AVX2(svt_aom_fft32x32_float, svt_aom_fft32x32_float_c, svt_aom_fft32x32_float_avx2);
+    SET_AVX2(svt_aom_fft8x8_float, svt_aom_fft8x8_float_c, svt_aom_fft8x8_float_avx2);
+    SET_AVX2(svt_aom_ifft16x16_float, svt_aom_ifft16x16_float_c, svt_aom_ifft16x16_float_avx2);
+    SET_AVX2(svt_aom_ifft32x32_float, svt_aom_ifft32x32_float_c, svt_aom_ifft32x32_float_avx2);
+    SET_AVX2(svt_aom_ifft8x8_float, svt_aom_ifft8x8_float_c, svt_aom_ifft8x8_float_avx2);
+    SET_ONLY_C(svt_aom_ifft2x2_float, svt_aom_ifft2x2_float_c);
+    SET_SSE2(svt_aom_ifft4x4_float, svt_aom_ifft4x4_float_c, svt_aom_ifft4x4_float_sse2);
+    SET_AVX2(
+        svt_av1_get_gradient_hist, svt_av1_get_gradient_hist_c, svt_av1_get_gradient_hist_avx2);
+    SET_SSE2(svt_av1_get_nz_map_contexts,
+             svt_av1_get_nz_map_contexts_c,
+             svt_av1_get_nz_map_contexts_sse2);
+    SET_AVX2_AVX512(svt_search_one_dual,
+                    svt_search_one_dual_c,
+                    svt_search_one_dual_avx2,
+                    svt_search_one_dual_avx512);
+    SET_SSE41_AVX2_AVX512(svt_sad_loop_kernel,
+                            svt_sad_loop_kernel_c,
+                            svt_sad_loop_kernel_sse4_1_intrin,
+                            svt_sad_loop_kernel_avx2_intrin,
+                            svt_sad_loop_kernel_avx512_intrin);
+    SET_SSE41(
+        svt_av1_apply_filtering, svt_av1_apply_filtering_c, svt_av1_apply_temporal_filter_sse4_1);
+    SET_AVX2(svt_av1_apply_temporal_filter_planewise,
+        svt_av1_apply_temporal_filter_planewise_c,
+        svt_av1_apply_temporal_filter_planewise_avx2);
+    SET_AVX2(svt_av1_apply_temporal_filter_planewise_hbd,
+        svt_av1_apply_temporal_filter_planewise_hbd_c,
+        svt_av1_apply_temporal_filter_planewise_hbd_avx2);
+    SET_SSE41(svt_av1_apply_filtering_highbd,
+        svt_av1_apply_filtering_highbd_c,
+        svt_av1_highbd_apply_temporal_filter_sse4_1);
+    SET_AVX2(svt_ext_sad_calculation_8x8_16x16,
+                svt_ext_sad_calculation_8x8_16x16_c,
+                svt_ext_sad_calculation_8x8_16x16_avx2_intrin);
+    SET_SSE41(svt_ext_sad_calculation_32x32_64x64,
+                svt_ext_sad_calculation_32x32_64x64_c,
+                svt_ext_sad_calculation_32x32_64x64_sse4_intrin);
+    SET_AVX2(svt_ext_all_sad_calculation_8x8_16x16,
+                svt_ext_all_sad_calculation_8x8_16x16_c,
+                svt_ext_all_sad_calculation_8x8_16x16_avx2);
+    SET_AVX2(svt_ext_eight_sad_calculation_32x32_64x64,
+                svt_ext_eight_sad_calculation_32x32_64x64_c,
+                svt_ext_eight_sad_calculation_32x32_64x64_avx2);
+    SET_SSE2(svt_initialize_buffer_32bits,
+                svt_initialize_buffer_32bits_c,
+                svt_initialize_buffer_32bits_sse2_intrin);
+    SET_AVX2(svt_nxm_sad_kernel_sub_sampled,
+                svt_nxm_sad_kernel_helper_c,
+                svt_nxm_sad_kernel_sub_sampled_helper_avx2);
 
-    svt_av1_fwd_txfm2d_16x4 = svt_av1_fwd_txfm2d_16x4_c;
-    svt_av1_fwd_txfm2d_4x16 = svt_av1_fwd_txfm2d_4x16_c;
+    SET_AVX2(svt_nxm_sad_kernel, svt_nxm_sad_kernel_helper_c, svt_nxm_sad_kernel_helper_avx2);
+    SET_SSE2(svt_compute_mean_square_values_8x8,
+                svt_compute_mean_squared_values_c,
+                svt_compute_mean_of_squared_values8x8_sse2_intrin);
+    SET_SSE2(svt_compute_sub_mean_8x8,
+                svt_compute_sub_mean_8x8_c,
+                svt_compute_sub_mean8x8_sse2_intrin);
 
-    svt_av1_fwd_txfm2d_8x4 = svt_av1_fwd_txfm2d_8x4_c;
-    svt_av1_fwd_txfm2d_4x8 = svt_av1_fwd_txfm2d_4x8_c;
+    SET_SSE2_AVX2(svt_compute_interm_var_four8x8,
+                    svt_compute_interm_var_four8x8_c,
+                    svt_compute_interm_var_four8x8_helper_sse2,
+                    svt_compute_interm_var_four8x8_avx2_intrin);
+    SET_AVX2(sad_16b_kernel, sad_16b_kernel_c, sad_16bit_kernel_avx2);
+    SET_AVX2(svt_av1_compute_cross_correlation,
+        svt_av1_compute_cross_correlation_c,
+        svt_av1_compute_cross_correlation_avx2);
+    SET_AVX2(svt_av1_k_means_dim1, av1_k_means_dim1_c, av1_k_means_dim1_avx2);
+    SET_AVX2(svt_av1_k_means_dim2, av1_k_means_dim2_c, av1_k_means_dim2_avx2);
+    SET_AVX2(svt_av1_calc_indices_dim1, av1_calc_indices_dim1_c, av1_calc_indices_dim1_avx2);
+    SET_AVX2(svt_av1_calc_indices_dim2, av1_calc_indices_dim2_c, av1_calc_indices_dim2_avx2);
+    SET_AVX2(variance_highbd, variance_highbd_c, variance_highbd_avx2);
+    SET_AVX2(svt_av1_haar_ac_sad_8x8_uint8_input,
+                svt_av1_haar_ac_sad_8x8_uint8_input_c,
+                svt_av1_haar_ac_sad_8x8_uint8_input_avx2);
 
-    svt_av1_fwd_txfm2d_32x16 = svt_av1_fwd_txfm2d_32x16_c;
-    svt_av1_fwd_txfm2d_32x8 = svt_av1_fwd_txfm2d_32x8_c;
-    svt_av1_fwd_txfm2d_8x32 = svt_av1_fwd_txfm2d_8x32_c;
-    svt_av1_fwd_txfm2d_16x32 = svt_av1_fwd_txfm2d_16x32_c;
-    svt_av1_fwd_txfm2d_32x64 = svt_av1_fwd_txfm2d_32x64_c;
-    svt_av1_fwd_txfm2d_64x32 = svt_av1_fwd_txfm2d_64x32_c;
-    svt_av1_fwd_txfm2d_16x64 = svt_av1_fwd_txfm2d_16x64_c;
-    svt_av1_fwd_txfm2d_64x16 = svt_av1_fwd_txfm2d_64x16_c;
-    svt_av1_fwd_txfm2d_64x64 = svt_av1_transform_two_d_64x64_c;
-    svt_av1_fwd_txfm2d_32x32 = svt_av1_transform_two_d_32x32_c;
-    svt_av1_fwd_txfm2d_16x16 = svt_av1_transform_two_d_16x16_c;
-
-    svt_av1_fwd_txfm2d_8x8 = svt_av1_transform_two_d_8x8_c;
-    svt_av1_fwd_txfm2d_4x4 = svt_av1_transform_two_d_4x4_c;
-
-    svt_handle_transform16x64 = svt_handle_transform16x64_c;
-    svt_handle_transform32x64 = svt_handle_transform32x64_c;
-    svt_handle_transform64x16 = svt_handle_transform64x16_c;
-    svt_handle_transform64x32 = svt_handle_transform64x32_c;
-    svt_handle_transform64x64 = svt_handle_transform64x64_c;
-
-    svt_aom_fft2x2_float = svt_aom_fft2x2_float_c;
-    svt_aom_fft4x4_float = svt_aom_fft4x4_float_c;
-    svt_aom_fft16x16_float = svt_aom_fft16x16_float_c;
-    svt_aom_fft32x32_float = svt_aom_fft32x32_float_c;
-    svt_aom_fft8x8_float = svt_aom_fft8x8_float_c;
-
-    svt_aom_ifft16x16_float = svt_aom_ifft16x16_float_c;
-    svt_aom_ifft32x32_float = svt_aom_ifft32x32_float_c;
-    svt_aom_ifft8x8_float = svt_aom_ifft8x8_float_c;
-    svt_aom_ifft2x2_float = svt_aom_ifft2x2_float_c;
-    svt_aom_ifft4x4_float = svt_aom_ifft4x4_float_c;
-    svt_av1_get_gradient_hist = svt_av1_get_gradient_hist_c;
-
-    svt_search_one_dual = svt_search_one_dual_c;
-    svt_sad_loop_kernel = svt_sad_loop_kernel_c;
-    svt_av1_apply_filtering = svt_av1_apply_filtering_c;
-    svt_av1_apply_temporal_filter_planewise = svt_av1_apply_temporal_filter_planewise_c;
-    svt_av1_apply_temporal_filter_planewise_hbd = svt_av1_apply_temporal_filter_planewise_hbd_c;
-    svt_av1_apply_filtering_highbd = svt_av1_apply_filtering_highbd_c;
-    svt_ext_sad_calculation_8x8_16x16 = svt_ext_sad_calculation_8x8_16x16_c;
-    svt_ext_sad_calculation_32x32_64x64 = svt_ext_sad_calculation_32x32_64x64_c;
-    svt_ext_all_sad_calculation_8x8_16x16 = svt_ext_all_sad_calculation_8x8_16x16_c;
-    svt_ext_eight_sad_calculation_32x32_64x64 = svt_ext_eight_sad_calculation_32x32_64x64_c;
-    svt_initialize_buffer_32bits = svt_initialize_buffer_32bits_c;
-    svt_nxm_sad_kernel_sub_sampled = svt_nxm_sad_kernel_helper_c;
-    svt_nxm_sad_kernel = svt_nxm_sad_kernel_helper_c;
-    svt_compute_mean_square_values_8x8 = svt_compute_mean_squared_values_c;
-    svt_compute_sub_mean_8x8 = svt_compute_sub_mean_8x8_c;
-    svt_compute_interm_var_four8x8 = svt_compute_interm_var_four8x8_c;
-    sad_16b_kernel = sad_16b_kernel_c;
-    svt_av1_compute_cross_correlation = svt_av1_compute_cross_correlation_c;
-    svt_av1_k_means_dim1 = av1_k_means_dim1_c;
-    svt_av1_k_means_dim2 = av1_k_means_dim2_c;
-    svt_av1_calc_indices_dim1 = av1_calc_indices_dim1_c;
-    svt_av1_calc_indices_dim2 = av1_calc_indices_dim2_c;
-
-    svt_av1_get_nz_map_contexts = svt_av1_get_nz_map_contexts_c;
-
-    variance_highbd = variance_highbd_c;
-    svt_av1_haar_ac_sad_8x8_uint8_input = svt_av1_haar_ac_sad_8x8_uint8_input_c;
-
-#ifdef ARCH_X86_64
-
-        
-        
-        
-        
-        if (flags & HAS_AVX2) svt_search_one_dual = svt_search_one_dual_avx2;
-        
-        
-     
-
-
-
-
-            
-
-
-                if (flags & HAS_AVX2) svt_av1_fwd_txfm2d_16x8 = svt_av1_fwd_txfm2d_16x8_avx2;
-                if (flags & HAS_AVX2) svt_av1_fwd_txfm2d_8x16 = svt_av1_fwd_txfm2d_8x16_avx2;
-                if (flags & HAS_AVX2) svt_av1_fwd_txfm2d_16x4 = svt_av1_fwd_txfm2d_16x4_avx2;
-                if (flags & HAS_AVX2) svt_av1_fwd_txfm2d_4x16 = svt_av1_fwd_txfm2d_4x16_avx2;
-                if (flags & HAS_AVX2) svt_av1_fwd_txfm2d_8x4 = svt_av1_fwd_txfm2d_8x4_avx2;
-                if (flags & HAS_AVX2) svt_av1_fwd_txfm2d_4x8 = svt_av1_fwd_txfm2d_4x8_avx2;
-                if (flags & HAS_AVX2) svt_av1_fwd_txfm2d_32x8 = svt_av1_fwd_txfm2d_32x8_avx2;
-                if (flags & HAS_AVX2) svt_av1_fwd_txfm2d_8x32 = svt_av1_fwd_txfm2d_8x32_avx2;
-                if (flags & HAS_AVX2) svt_av1_fwd_txfm2d_64x64 = svt_av1_fwd_txfm2d_64x64_avx2;
-                if (flags & HAS_AVX2) svt_av1_fwd_txfm2d_32x32 = svt_av1_fwd_txfm2d_32x32_avx2;
-                if (flags & HAS_AVX2) svt_av1_fwd_txfm2d_16x16 = svt_av1_fwd_txfm2d_16x16_avx2;
-                if (flags & HAS_AVX2) svt_av1_fwd_txfm2d_32x64 = svt_av1_fwd_txfm2d_32x64_avx2;
-                if (flags & HAS_AVX2) svt_av1_fwd_txfm2d_64x32 = svt_av1_fwd_txfm2d_64x32_avx2;
-                if (flags & HAS_AVX2) svt_av1_fwd_txfm2d_16x64 = svt_av1_fwd_txfm2d_16x64_avx2;
-                if (flags & HAS_AVX2) svt_av1_fwd_txfm2d_64x16 = svt_av1_fwd_txfm2d_64x16_avx2;
-                if (flags & HAS_AVX2) svt_av1_fwd_txfm2d_32x16 = svt_av1_fwd_txfm2d_32x16_avx2;
-                if (flags & HAS_AVX2) svt_av1_fwd_txfm2d_16x32 = svt_av1_fwd_txfm2d_16x32_avx2;
-#ifndef NON_AVX512_SUPPORT
-                if (flags & HAS_AVX512F) {
-                    svt_av1_fwd_txfm2d_64x64 = av1_fwd_txfm2d_64x64_avx512;
-                    svt_av1_fwd_txfm2d_32x32 = av1_fwd_txfm2d_32x32_avx512;
-                    svt_av1_fwd_txfm2d_16x16 = av1_fwd_txfm2d_16x16_avx512;
-                    svt_av1_fwd_txfm2d_32x64 = av1_fwd_txfm2d_32x64_avx512;
-                    svt_av1_fwd_txfm2d_64x32 = av1_fwd_txfm2d_64x32_avx512;
-                    svt_av1_fwd_txfm2d_16x64 = av1_fwd_txfm2d_16x64_avx512;
-                    svt_av1_fwd_txfm2d_64x16 = av1_fwd_txfm2d_64x16_avx512;
-                    svt_av1_fwd_txfm2d_32x16 = av1_fwd_txfm2d_32x16_avx512;
-                    svt_av1_fwd_txfm2d_16x32 = av1_fwd_txfm2d_16x32_avx512;
-                }
-#endif
-                    if (flags & HAS_AVX2) svt_av1_fwd_txfm2d_8x8 = svt_av1_fwd_txfm2d_8x8_avx2;
-                    if (flags & HAS_SSE4_1) svt_av1_fwd_txfm2d_4x4 = svt_av1_fwd_txfm2d_4x4_sse4_1;
-                    if (flags & HAS_AVX2) svt_handle_transform16x64 = svt_handle_transform16x64_avx2;
-                    if (flags & HAS_AVX2) svt_handle_transform32x64 = svt_handle_transform32x64_avx2;
-                    if (flags & HAS_AVX2) svt_handle_transform64x16 = svt_handle_transform64x16_avx2;
-                    if (flags & HAS_AVX2) svt_handle_transform64x32 = svt_handle_transform64x32_avx2;
-                    if (flags & HAS_AVX2) svt_handle_transform64x64 = svt_handle_transform64x64_avx2;
-                    if (flags & HAS_SSE2) svt_aom_fft4x4_float = svt_aom_fft4x4_float_sse2;
-                    if (flags & HAS_AVX2) svt_aom_fft16x16_float = svt_aom_fft16x16_float_avx2;
-                    if (flags & HAS_AVX2) svt_aom_fft32x32_float = svt_aom_fft32x32_float_avx2;
-                    if (flags & HAS_AVX2) svt_aom_fft8x8_float = svt_aom_fft8x8_float_avx2;
-                    if (flags & HAS_AVX2) svt_aom_ifft16x16_float = svt_aom_ifft16x16_float_avx2;
-                    if (flags & HAS_AVX2) svt_aom_ifft32x32_float = svt_aom_ifft32x32_float_avx2;
-                    if (flags & HAS_AVX2) svt_aom_ifft8x8_float = svt_aom_ifft8x8_float_avx2;
-                    if (flags & HAS_SSE2) svt_aom_ifft4x4_float = svt_aom_ifft4x4_float_sse2;
-                    if (flags & HAS_AVX2) svt_av1_get_gradient_hist = svt_av1_get_gradient_hist_avx2;
-                    SET_AVX2_AVX512(svt_search_one_dual,
-                                    svt_search_one_dual_c,
-                                    svt_search_one_dual_avx2,
-                                    svt_search_one_dual_avx512);
-                    SET_SSE41_AVX2_AVX512(svt_sad_loop_kernel,
-                                          svt_sad_loop_kernel_c,
-                                          svt_sad_loop_kernel_sse4_1_intrin,
-                                          svt_sad_loop_kernel_avx2_intrin,
-                                          svt_sad_loop_kernel_avx512_intrin);
-                    SET_SSE41(
-                        svt_av1_apply_filtering, svt_av1_apply_filtering_c, svt_av1_apply_temporal_filter_sse4_1);
-                    SET_AVX2(svt_av1_apply_temporal_filter_planewise,
-                        svt_av1_apply_temporal_filter_planewise_c,
-                        svt_av1_apply_temporal_filter_planewise_avx2);
-                    SET_AVX2(svt_av1_apply_temporal_filter_planewise_hbd,
-                        svt_av1_apply_temporal_filter_planewise_hbd_c,
-                        svt_av1_apply_temporal_filter_planewise_hbd_avx2);
-                    SET_SSE41(svt_av1_apply_filtering_highbd,
-                        svt_av1_apply_filtering_highbd_c,
-                        svt_av1_highbd_apply_temporal_filter_sse4_1);
-                    SET_AVX2(svt_ext_sad_calculation_8x8_16x16,
-                             svt_ext_sad_calculation_8x8_16x16_c,
-                             svt_ext_sad_calculation_8x8_16x16_avx2_intrin);
-                    SET_SSE41(svt_ext_sad_calculation_32x32_64x64,
-                              svt_ext_sad_calculation_32x32_64x64_c,
-                              svt_ext_sad_calculation_32x32_64x64_sse4_intrin);
-                    SET_AVX2(svt_ext_all_sad_calculation_8x8_16x16,
-                             svt_ext_all_sad_calculation_8x8_16x16_c,
-                             svt_ext_all_sad_calculation_8x8_16x16_avx2);
-                    SET_AVX2(svt_ext_eight_sad_calculation_32x32_64x64,
-                             svt_ext_eight_sad_calculation_32x32_64x64_c,
-                             svt_ext_eight_sad_calculation_32x32_64x64_avx2);
-                    SET_SSE2(svt_initialize_buffer_32bits,
-                             svt_initialize_buffer_32bits_c,
-                             svt_initialize_buffer_32bits_sse2_intrin);
-                    SET_AVX2(svt_nxm_sad_kernel_sub_sampled,
-                             svt_nxm_sad_kernel_helper_c,
-                             svt_nxm_sad_kernel_sub_sampled_helper_avx2);
-
-                    SET_AVX2(svt_nxm_sad_kernel, svt_nxm_sad_kernel_helper_c, svt_nxm_sad_kernel_helper_avx2);
-                    SET_SSE2(svt_compute_mean_square_values_8x8,
-                             svt_compute_mean_squared_values_c,
-                             svt_compute_mean_of_squared_values8x8_sse2_intrin);
-                    SET_SSE2(svt_compute_sub_mean_8x8,
-                             svt_compute_sub_mean_8x8_c,
-                             svt_compute_sub_mean8x8_sse2_intrin);
-
-                    SET_SSE2_AVX2(svt_compute_interm_var_four8x8,
-                                  svt_compute_interm_var_four8x8_c,
-                                  svt_compute_interm_var_four8x8_helper_sse2,
-                                  svt_compute_interm_var_four8x8_avx2_intrin);
-                    SET_AVX2(sad_16b_kernel, sad_16b_kernel_c, sad_16bit_kernel_avx2);
-                    SET_AVX2(svt_av1_compute_cross_correlation,
-                        svt_av1_compute_cross_correlation_c,
-                        svt_av1_compute_cross_correlation_avx2);
-                    SET_AVX2(svt_av1_k_means_dim1, av1_k_means_dim1_c, av1_k_means_dim1_avx2);
-                    SET_AVX2(svt_av1_k_means_dim2, av1_k_means_dim2_c, av1_k_means_dim2_avx2);
-                    SET_AVX2(svt_av1_calc_indices_dim1, av1_calc_indices_dim1_c, av1_calc_indices_dim1_avx2);
-                    SET_AVX2(svt_av1_calc_indices_dim2, av1_calc_indices_dim2_c, av1_calc_indices_dim2_avx2);
-                    if (flags & HAS_SSE2) svt_av1_get_nz_map_contexts = svt_av1_get_nz_map_contexts_sse2;
-
-                    SET_AVX2(variance_highbd, variance_highbd_c, variance_highbd_avx2);
-                    SET_AVX2(svt_av1_haar_ac_sad_8x8_uint8_input,
-                             svt_av1_haar_ac_sad_8x8_uint8_input_c,
-                             svt_av1_haar_ac_sad_8x8_uint8_input_avx2);
-#endif
+    //SET_ONLY_C(pppp, ccccc);
+    //SET_SSE2(pppppp, cccccc, sse2sse2);
+    //SET_AVX2(pppppp, cccccc, avx2avx2);
+    //SET_AVX2_AVX512(pppppp, cccccc, avx2avx2, 512512);
+    //#ifdef ARCH_X86_64
 
 }
