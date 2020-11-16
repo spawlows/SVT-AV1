@@ -51,26 +51,27 @@
 
 #define SET_FUNCTIONS(ptr, c, mmx, sse, sse2, sse3, ssse3, sse4_1, sse4_2, avx, avx2, avx512)     \
     do {                                                                                          \
-        assert(ptr == 0); /* Check pointer not set before set */                              \
+        assert(ptr == 0 && "Kernel " #ptr##" set before!"); /* Check pointer not set before set */\
         assert(c != 0);                                                                           \
         ptr = c;                                                                                  \
         SET_FUNCTIONS_X86(ptr, c, mmx, sse, sse2, sse3, ssse3, sse4_1, sse4_2, avx, avx2, avx512) \
     } while (0)
 
 
-#define SET_ONLY_C(ptr, c) SET_FUNCTIONS(ptr, c, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
-#define SET_SSE2(ptr, c, sse2) SET_FUNCTIONS(ptr, c, 0, 0, sse2, 0, 0, 0, 0, 0, 0, 0)
-#define SET_SSE2_AVX2(ptr, c, sse2, avx2) SET_FUNCTIONS(ptr, c, 0, 0, sse2, 0, 0, 0, 0, 0, avx2, 0)
-#define SET_SSSE3(ptr, c, ssse3) SET_FUNCTIONS(ptr, c, 0, 0, 0, 0, ssse3, 0, 0, 0, 0, 0)
-#define SET_SSE41(ptr, c, sse4_1) SET_FUNCTIONS(ptr, c, 0, 0, 0, 0, 0, sse4_1, 0, 0, 0, 0)
-#define SET_SSE41(ptr, c, sse4_1) SET_FUNCTIONS(ptr, c, 0, 0, 0, 0, 0, sse4_1, 0, 0, 0, 0)
-#define SET_SSE41_AVX2(ptr, c, sse4_1, avx2) \
-    SET_FUNCTIONS(ptr, c, 0, 0, 0, 0, 0, sse4_1, 0, 0, avx2, 0)
-#define SET_SSE41_AVX2_AVX512(ptr, c, sse4_1, avx2, avx512) \
-    SET_FUNCTIONS(ptr, c, 0, 0, 0, 0, 0, sse4_1, 0, 0, avx2, avx512)
-#define SET_AVX2(ptr, c, avx2) SET_FUNCTIONS(ptr, c, 0, 0, 0, 0, 0, 0, 0, 0, avx2, 0)
-#define SET_AVX2_AVX512(ptr, c, avx2, avx512) \
-    SET_FUNCTIONS(ptr, c, 0, 0, 0, 0, 0, 0, 0, 0, avx2, avx512)
+#define SET_ONLY_C(ptr, c)          SET_FUNCTIONS(ptr, c, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+#define SET_SSE2(ptr, c, sse2)      SET_FUNCTIONS(ptr, c, 0, 0, sse2, 0, 0, 0, 0, 0, 0, 0)
+#define SET_SSE2_AVX2(ptr, c, sse2, avx2)                                                         \
+                                    SET_FUNCTIONS(ptr, c, 0, 0, sse2, 0, 0, 0, 0, 0, avx2, 0)
+#define SET_SSSE3(ptr, c, ssse3)    SET_FUNCTIONS(ptr, c, 0, 0, 0, 0, ssse3, 0, 0, 0, 0, 0)
+#define SET_SSE41(ptr, c, sse4_1)   SET_FUNCTIONS(ptr, c, 0, 0, 0, 0, 0, sse4_1, 0, 0, 0, 0)
+#define SET_SSE41_AVX2(ptr, c, sse4_1, avx2)                                                      \
+                                    SET_FUNCTIONS(ptr, c, 0, 0, 0, 0, 0, sse4_1, 0, 0, avx2, 0)
+#define SET_SSE41_AVX2_AVX512(ptr, c, sse4_1, avx2, avx512)                                       \
+                                    SET_FUNCTIONS(ptr, c, 0, 0, 0, 0, 0, sse4_1, 0, 0, avx2, avx512)
+#define SET_AVX2(ptr, c, avx2)      SET_FUNCTIONS(ptr, c, 0, 0, 0, 0, 0, 0, 0, 0, avx2, 0)
+#define SET_AVX2_AVX512(ptr, c, avx2, avx512)                                                     \
+                                    SET_FUNCTIONS(ptr, c, 0, 0, 0, 0, 0, 0, 0, 0, avx2, avx512)
+
 
 void setup_rtcd_internal(CPU_FLAGS flags) {
 
@@ -403,7 +404,6 @@ void setup_rtcd_internal(CPU_FLAGS flags) {
     SET_AVX2(svt_aom_highbd_10_variance128x128,
              svt_aom_highbd_10_variance128x128_c,
              svt_aom_highbd_10_variance128x128_avx2);
-
     //QIQ
     // transform
     SET_AVX2(svt_av1_fwd_txfm2d_16x8, svt_av1_fwd_txfm2d_16x8_c, svt_av1_fwd_txfm2d_16x8_avx2);
@@ -515,7 +515,6 @@ void setup_rtcd_internal(CPU_FLAGS flags) {
     SET_AVX2(svt_nxm_sad_kernel_sub_sampled,
                 svt_nxm_sad_kernel_helper_c,
                 svt_nxm_sad_kernel_sub_sampled_helper_avx2);
-
     SET_AVX2(svt_nxm_sad_kernel, svt_nxm_sad_kernel_helper_c, svt_nxm_sad_kernel_helper_avx2);
     SET_SSE2(svt_compute_mean_square_values_8x8,
                 svt_compute_mean_squared_values_c,
@@ -523,7 +522,6 @@ void setup_rtcd_internal(CPU_FLAGS flags) {
     SET_SSE2(svt_compute_sub_mean_8x8,
                 svt_compute_sub_mean_8x8_c,
                 svt_compute_sub_mean8x8_sse2_intrin);
-
     SET_SSE2_AVX2(svt_compute_interm_var_four8x8,
                     svt_compute_interm_var_four8x8_c,
                     svt_compute_interm_var_four8x8_helper_sse2,
@@ -540,11 +538,5 @@ void setup_rtcd_internal(CPU_FLAGS flags) {
     SET_AVX2(svt_av1_haar_ac_sad_8x8_uint8_input,
                 svt_av1_haar_ac_sad_8x8_uint8_input_c,
                 svt_av1_haar_ac_sad_8x8_uint8_input_avx2);
-
-    //SET_ONLY_C(pppp, ccccc);
-    //SET_SSE2(pppppp, cccccc, sse2sse2);
-    //SET_AVX2(pppppp, cccccc, avx2avx2);
-    //SET_AVX2_AVX512(pppppp, cccccc, avx2avx2, 512512);
-    //#ifdef ARCH_X86_64
 
 }
