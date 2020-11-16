@@ -43,6 +43,8 @@ try_compile(X86 ${CMAKE_BINARY_DIR} ${CMAKE_BINARY_DIR}/conftest.c)
 
 message(STATUS "x86 detected: ${X86}")
 
+#set(COMPILE_C_ONLY ON)
+
 if(NOT COMPILE_C_ONLY AND X86)
     find_program(YASM_EXE yasm)
     option(ENABLE_NASM "Use nasm if available (Uses yasm by default if found)" OFF)
