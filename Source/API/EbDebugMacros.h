@@ -38,7 +38,7 @@ extern "C" {
 
 #define DEADLOCK_DEBUG                   1
 #if DEADLOCK_DEBUG
-//#include <limits.h>
+#include <limits.h>
 // The recommended steps to debug encoding dead lock (hang) issue:
 // 1. Track the POCs in the entrance and exit of the encoding pipeline,
 //    by forcibly printing the 1st DEADLOCK_DEBUG log in RC, and the
