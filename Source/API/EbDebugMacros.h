@@ -34,6 +34,7 @@ extern "C" {
 // undefining this macro would allow the AVX512 optimization to be enabled by default
 #ifndef NON_AVX512_SUPPORT
 #define NON_AVX512_SUPPORT
+#endif
 
 #define DEADLOCK_DEBUG                   1
 #if DEADLOCK_DEBUG
