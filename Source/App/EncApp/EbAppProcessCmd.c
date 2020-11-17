@@ -1159,6 +1159,12 @@ void process_output_stream_buffer(EncChannel* channel, EncApp* enc_app,
             channel->exit_cond_output = APP_ExitConditionError;
             return;
         } else if (stream_status != EB_NoErrorEmptyQueue) {
+#if DEADLOCK_DEBUG
+        if ((config->performance_context.frame_count >= MIN_POC) &&
+            (config->performance_context.frame_count <= MAX_POC)) {
+                printf("\nPOC %04llu [01]APP OUT \n", config->performance_context.frame_count);
+        }
+#endif
             is_alt_ref        = (header_ptr->flags & EB_BUFFERFLAG_IS_ALT_REF);
             if (!(header_ptr->flags & EB_BUFFERFLAG_IS_ALT_REF))
                 ++(config->performance_context.frame_count);

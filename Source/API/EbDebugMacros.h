@@ -34,6 +34,21 @@ extern "C" {
 // undefining this macro would allow the AVX512 optimization to be enabled by default
 #ifndef NON_AVX512_SUPPORT
 #define NON_AVX512_SUPPORT
+
+#define DEADLOCK_DEBUG                   1
+#if DEADLOCK_DEBUG
+//#include <limits.h>
+// The recommended steps to debug encoding dead lock (hang) issue:
+// 1. Track the POCs in the entrance and exit of the encoding pipeline,
+//    by forcibly printing the 1st DEADLOCK_DEBUG log in RC, and the
+//    last DEADLOCK_DEBUG log in PK;
+// 2. Reorder the POC numbers of RC and PK separately, to check the
+//    1st POC which couldn't be outputted from PK;
+// 3. Open the DEADLOCK_DEBUG switch, and change the MIN_POC & MAX_POC
+//    values clamping the range where that POC locates;
+// 4. Check the specific stage where that POC can't go through.
+#define MIN_POC 0
+#define MAX_POC UINT_MAX
 #endif
 
 #define FIX_RC_BUG 1 // Fix the one pass QP assignment using frames_to_be_encoded

@@ -1016,6 +1016,12 @@ void *resource_coordination_kernel(void *input_ptr) {
             else
                 pcs_ptr->picture_number = context_ptr->picture_number_array[instance_index];
 
+#if DEADLOCK_DEBUG
+            if ((pcs_ptr->picture_number >= MIN_POC) && (pcs_ptr->picture_number <= MAX_POC)) {
+                SVT_LOG("\nPOC %04llu [02]RCP IN\n", pcs_ptr->picture_number);
+            }
+#endif
+
             reset_pcs_av1(pcs_ptr);
 
             if (pcs_ptr->picture_number == 0) {
@@ -1106,6 +1112,11 @@ void *resource_coordination_kernel(void *input_ptr) {
                         ->alt_ref_ppcs_ptr->end_of_sequence_flag = EB_TRUE;
                 // Post the finished Results Object
                 svt_post_full_object(output_wrapper_ptr);
+#if DEADLOCK_DEBUG
+                if ((pcs_ptr->picture_number >= MIN_POC) && (pcs_ptr->picture_number <= MAX_POC)) {
+                    SVT_LOG("\nPOC %04llu [02]RCP OUT\n", pcs_ptr->picture_number);
+                }
+#endif
             }
             prev_pcs_wrapper_ptr = pcs_wrapper_ptr;
         }
