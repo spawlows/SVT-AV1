@@ -4028,9 +4028,6 @@ void *picture_analysis_kernel(void *input_ptr) {
                                sizeof(uint8_t) * input_picture_ptr->width);
             }
 
-            // Set picture parameters to account for subpicture, picture scantype, and set regions by resolutions
-            //set_picture_parameters_for_statistics_gathering(scs_ptr);
-
             // Pre processing operations performed on the input picture
             picture_pre_processing_operations(pcs_ptr, scs_ptr, sb_total_count);
             if (input_picture_ptr->color_format >= EB_YUV422) {
@@ -4134,9 +4131,6 @@ void *picture_analysis_kernel(void *input_ptr) {
 
             // Padding for input pictures
             pad_input_pictures(scs_ptr, input_picture_ptr);
-
-            //// Set picture parameters to account for subpicture, picture scantype, and set regions by resolutions
-            //set_picture_parameters_for_statistics_gathering(scs_ptr);
 
             // Pre processing operations performed on the input picture
             picture_pre_processing_operations(pcs_ptr, scs_ptr);
