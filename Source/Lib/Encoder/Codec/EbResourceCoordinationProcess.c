@@ -63,8 +63,6 @@ typedef struct ResourceCoordinationContext {
     EbBool   start_flag;
 } ResourceCoordinationContext;
 
-void set_picture_parameters_for_statistics_gathering(SequenceControlSet *scs_ptr);
-
 static void resource_coordination_context_dctor(EbPtr p) {
     EbThreadContext *thread_contxt_ptr = (EbThreadContext *)p;
     if (thread_contxt_ptr->priv) {
@@ -800,9 +798,6 @@ void *resource_coordination_kernel(void *input_ptr) {
             // Set the SCD Mode
             scs_ptr->scd_mode =
                 scs_ptr->static_config.scene_change_detection == 0 ? SCD_MODE_0 : SCD_MODE_1;
-
-            // Set picture parameters to account for subpicture, picture scantype, and set regions by resolutions
-            set_picture_parameters_for_statistics_gathering(scs_ptr);
 
             // Disable releaseFlag of new SequenceControlSet
             svt_object_release_disable(

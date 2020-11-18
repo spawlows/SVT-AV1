@@ -2602,20 +2602,6 @@ EbErrorType denoise_estimate_film_grain(SequenceControlSet *     scs_ptr,
 }
 
 /************************************************
- * Set Picture Parameters based on input configuration
- ** Setting Number of regions per resolution
- ** Setting width and height for subpicture and when picture scan type is 1
- ************************************************/
-void set_picture_parameters_for_statistics_gathering(SequenceControlSet *scs_ptr) {
-    scs_ptr->picture_analysis_number_of_regions_per_width =
-        HIGHER_THAN_CLASS_1_REGION_SPLIT_PER_WIDTH;
-    scs_ptr->picture_analysis_number_of_regions_per_height =
-        HIGHER_THAN_CLASS_1_REGION_SPLIT_PER_HEIGHT;
-
-    return;
-}
-
-/************************************************
  * Picture Pre Processing Operations *
  *** A function that groups all of the Pre proceesing
  * operations performed on the input picture
