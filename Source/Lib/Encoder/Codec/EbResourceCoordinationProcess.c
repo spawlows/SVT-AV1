@@ -815,6 +815,10 @@ void *resource_coordination_kernel(void *input_ptr) {
             (SequenceControlSet *)context_ptr->sequence_control_set_active_array[instance_index]
                 ->object_ptr;
 
+        // Set the SCD Mode
+        scs_ptr->scd_mode =
+            scs_ptr->static_config.scene_change_detection == 0 ? SCD_MODE_0 : SCD_MODE_1;
+
         // Init SB Params
         if (context_ptr->scs_instance_array[instance_index]->encode_context_ptr->initial_picture) {
             derive_input_resolution(&scs_ptr->input_resolution, input_size);
@@ -971,10 +975,6 @@ void *resource_coordination_kernel(void *input_ptr) {
             } else
                 pcs_ptr->enc_mode = (EbEncMode)scs_ptr->static_config.enc_mode;
             //  If the mode of the second pass is not set from CLI, it is set to enc_mode
-
-            // Set the SCD Mode
-            scs_ptr->scd_mode =
-                scs_ptr->static_config.scene_change_detection == 0 ? SCD_MODE_0 : SCD_MODE_1;
 
             // Pre-Analysis Signal(s) derivation
             if(use_output_stat(scs_ptr))
