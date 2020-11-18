@@ -4324,9 +4324,9 @@ void *mode_decision_kernel(void *input_ptr) {
                     // Encode Pass
                     if (!use_output_stat(scs_ptr)) {
 
-                   //     printf("\n ENCDEC   %2i: pcs_ptr: %p scs_ptr: %p tile_group_index: %u dctor: %p  input_type: %u input_type2: %i enc_dec_segment_row: %i\n", mytask, 
+                     /*   printf("\n ENCDEC   %2i: pcs_ptr: %p scs_ptr: %p tile_group_index: %u dctor: %p  input_type: %u input_type2: %i enc_dec_segment_row: %i\n", mytask, 
                         pcs_ptr, scs_ptr, enc_dec_tasks_ptr->tile_group_index, enc_dec_tasks_ptr->dctor, enc_dec_tasks_ptr->input_type,input_type, 
-              enc_dec_tasks_ptr->enc_dec_segment_row);
+              enc_dec_tasks_ptr->enc_dec_segment_row);*/
                          if (! (ENCDEC_TASKS_ENCDEC_INPUT == input_type && enc_dec_tasks_ptr->enc_dec_segment_row == 0)) {
                             av1_encode_decode(scs_ptr,
                                               pcs_ptr,
