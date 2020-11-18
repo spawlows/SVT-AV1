@@ -3959,7 +3959,7 @@ void *mode_decision_kernel(void *input_ptr) {
 
     int mytask = taskID;
 
-   // printf("TASK ID: %i\n", mytask);
+    printf("TASK ID: %i\n", mytask);
     for (;;) {
         // Get Mode Decision Results
         EB_GET_FULL_OBJECT(context_ptr->mode_decision_input_fifo_ptr, &enc_dec_tasks_wrapper_ptr);
@@ -3967,10 +3967,12 @@ void *mode_decision_kernel(void *input_ptr) {
         EncDecTasks *    enc_dec_tasks_ptr    = (EncDecTasks *)enc_dec_tasks_wrapper_ptr->object_ptr;
         PictureControlSet * pcs_ptr           = (PictureControlSet *)enc_dec_tasks_ptr->pcs_wrapper_ptr->object_ptr;
         SequenceControlSet *scs_ptr           = (SequenceControlSet *)pcs_ptr->scs_wrapper_ptr->object_ptr;
+        uint32_t         input_type           = enc_dec_tasks_ptr->input_type;
 
-          //printf("\n BEGIN %2i: pcs_ptr: %p scs_ptr: %p tile_group_index: %u dctor: %p  input_type: %u enc_dec_segment_row: %i\n", mytask, 
-          //              pcs_ptr, scs_ptr, enc_dec_tasks_ptr->tile_group_index, enc_dec_tasks_ptr->dctor, enc_dec_tasks_ptr->input_type, 
-          //    enc_dec_tasks_ptr->enc_dec_segment_row);
+     /*   if (enc_dec_tasks_ptr->input_type == 2)
+          printf("\n BEGIN %2i: pcs_ptr: %p scs_ptr: %p tile_group_index: %u dctor: %p  input_type: %u enc_dec_segment_row: %i\n", mytask, 
+                        pcs_ptr, scs_ptr, enc_dec_tasks_ptr->tile_group_index, enc_dec_tasks_ptr->dctor, enc_dec_tasks_ptr->input_type, 
+              enc_dec_tasks_ptr->enc_dec_segment_row);*/
 
 
         context_ptr->tile_group_index = enc_dec_tasks_ptr->tile_group_index;
@@ -4067,7 +4069,7 @@ void *mode_decision_kernel(void *input_ptr) {
                 //        pcs_ptr);
                 //}
 
-                if (ENCDEC_TASKS_MDC_INPUT == enc_dec_tasks_ptr->input_type) {
+                if (ENCDEC_TASKS_MDC_INPUT == input_type) {
 
 
                     ((EbReferenceObject *)
@@ -4322,8 +4324,10 @@ void *mode_decision_kernel(void *input_ptr) {
                     // Encode Pass
                     if (!use_output_stat(scs_ptr)) {
 
-
-                         if (ENCDEC_TASKS_CONTINUE == enc_dec_tasks_ptr->input_type) {
+                        printf("\n ENCDEC   %2i: pcs_ptr: %p scs_ptr: %p tile_group_index: %u dctor: %p  input_type: %u input_type2: %i enc_dec_segment_row: %i\n", mytask, 
+                        pcs_ptr, scs_ptr, enc_dec_tasks_ptr->tile_group_index, enc_dec_tasks_ptr->dctor, enc_dec_tasks_ptr->input_type,input_type, 
+              enc_dec_tasks_ptr->enc_dec_segment_row);
+                         //if (ENCDEC_TASKS_MDC_INPUT == input_type) {
                             av1_encode_decode(scs_ptr,
                                               pcs_ptr,
                                               sb_ptr,
@@ -4331,7 +4335,7 @@ void *mode_decision_kernel(void *input_ptr) {
                                               sb_origin_x,
                                               sb_origin_y,
                                               context_ptr);
-                        }
+                        //}
                     }
 #endif
 
