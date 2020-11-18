@@ -4029,7 +4029,7 @@ void *picture_analysis_kernel(void *input_ptr) {
             }
 
             // Set picture parameters to account for subpicture, picture scantype, and set regions by resolutions
-            set_picture_parameters_for_statistics_gathering(scs_ptr);
+            //set_picture_parameters_for_statistics_gathering(scs_ptr);
 
             // Pre processing operations performed on the input picture
             picture_pre_processing_operations(pcs_ptr, scs_ptr, sb_total_count);
@@ -4135,8 +4135,8 @@ void *picture_analysis_kernel(void *input_ptr) {
             // Padding for input pictures
             pad_input_pictures(scs_ptr, input_picture_ptr);
 
-            // Set picture parameters to account for subpicture, picture scantype, and set regions by resolutions
-            set_picture_parameters_for_statistics_gathering(scs_ptr);
+            //// Set picture parameters to account for subpicture, picture scantype, and set regions by resolutions
+            //set_picture_parameters_for_statistics_gathering(scs_ptr);
 
             // Pre processing operations performed on the input picture
             picture_pre_processing_operations(pcs_ptr, scs_ptr);
