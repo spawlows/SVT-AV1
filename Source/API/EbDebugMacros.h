@@ -52,7 +52,7 @@ extern "C" {
 #endif
 #endif
 
-#define FEATURE_PA_ME                1 // The ability to do ME inloop or in PAME
+#define FEATURE_PA_ME                0 // The ability to do ME inloop or in PAME
 
 #define FEATURE_TPL_SOP              1  // Move TPL to source based operation for ime == 0
 

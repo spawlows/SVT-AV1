@@ -160,10 +160,10 @@ void *source_based_operations_kernel(void *input_ptr) {
                 tpl_mc_flow(scs_ptr->encode_context_ptr, scs_ptr, pcs_ptr);
             }
 #endif
-            //any picture not belonging to any TPL group should release its PA references
-            if (pcs_ptr->num_tpl_grps == 0) {
-                release_pa_reference_objects(scs_ptr, pcs_ptr);
-            }
+            ////any picture not belonging to any TPL group should release its PA references
+            //if (pcs_ptr->num_tpl_grps == 0) {
+            //    release_pa_reference_objects(scs_ptr, pcs_ptr);
+            //}
         }
 #endif
 
