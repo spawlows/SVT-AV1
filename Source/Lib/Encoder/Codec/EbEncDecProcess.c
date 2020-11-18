@@ -3959,7 +3959,7 @@ void *mode_decision_kernel(void *input_ptr) {
 
     int mytask = taskID;
 
-    printf("TASK ID: %i\n", mytask);
+   // printf("TASK ID: %i\n", mytask);
     for (;;) {
         // Get Mode Decision Results
         EB_GET_FULL_OBJECT(context_ptr->mode_decision_input_fifo_ptr, &enc_dec_tasks_wrapper_ptr);
@@ -4320,9 +4320,19 @@ void *mode_decision_kernel(void *input_ptr) {
                                     context_ptr);
 #else
                     // Encode Pass
-                    if(!use_output_stat(scs_ptr))
-                    av1_encode_decode(
-                        scs_ptr, pcs_ptr, sb_ptr, sb_index, sb_origin_x, sb_origin_y, context_ptr);
+                    if (!use_output_stat(scs_ptr)) {
+
+
+                         if (ENCDEC_TASKS_CONTINUE == enc_dec_tasks_ptr->input_type) {
+                            av1_encode_decode(scs_ptr,
+                                              pcs_ptr,
+                                              sb_ptr,
+                                              sb_index,
+                                              sb_origin_x,
+                                              sb_origin_y,
+                                              context_ptr);
+                        }
+                    }
 #endif
 
                     context_ptr->coded_sb_count++;
