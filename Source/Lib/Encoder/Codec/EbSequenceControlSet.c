@@ -186,6 +186,10 @@ EbErrorType svt_sequence_control_set_ctor(SequenceControlSet *scs_ptr, EbPtr obj
     scs_ptr->reference_count        = 4;
 
     scs_ptr->lap_enabled = 0;
+
+    // Set the block mean calculation prec
+    scs_ptr->block_mean_calc_prec = BLOCK_MEAN_PREC_SUB;
+
     return EB_ErrorNone;
 }
 

@@ -976,9 +976,6 @@ void *resource_coordination_kernel(void *input_ptr) {
             scs_ptr->scd_mode =
                 scs_ptr->static_config.scene_change_detection == 0 ? SCD_MODE_0 : SCD_MODE_1;
 
-            // Set the block mean calculation prec
-            scs_ptr->block_mean_calc_prec = BLOCK_MEAN_PREC_SUB;
-
             // Pre-Analysis Signal(s) derivation
             if(use_output_stat(scs_ptr))
                 first_pass_signal_derivation_pre_analysis(scs_ptr, pcs_ptr);
