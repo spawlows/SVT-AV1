@@ -3952,6 +3952,14 @@ void *mode_decision_kernel(void *input_ptr) {
 
     segment_index = 0;
 
+
+    static int taskID = 0;
+    taskID++;
+    taskID++;
+
+    int mytask = taskID;
+
+    printf("TASK ID: %i\n", mytask);
     for (;;) {
         // Get Mode Decision Results
         EB_GET_FULL_OBJECT(context_ptr->mode_decision_input_fifo_ptr, &enc_dec_tasks_wrapper_ptr);
@@ -3959,6 +3967,12 @@ void *mode_decision_kernel(void *input_ptr) {
         EncDecTasks *    enc_dec_tasks_ptr    = (EncDecTasks *)enc_dec_tasks_wrapper_ptr->object_ptr;
         PictureControlSet * pcs_ptr           = (PictureControlSet *)enc_dec_tasks_ptr->pcs_wrapper_ptr->object_ptr;
         SequenceControlSet *scs_ptr           = (SequenceControlSet *)pcs_ptr->scs_wrapper_ptr->object_ptr;
+
+          //printf("\n BEGIN %2i: pcs_ptr: %p scs_ptr: %p tile_group_index: %u dctor: %p  input_type: %u enc_dec_segment_row: %i\n", mytask, 
+          //              pcs_ptr, scs_ptr, enc_dec_tasks_ptr->tile_group_index, enc_dec_tasks_ptr->dctor, enc_dec_tasks_ptr->input_type, 
+          //    enc_dec_tasks_ptr->enc_dec_segment_row);
+
+
         context_ptr->tile_group_index = enc_dec_tasks_ptr->tile_group_index;
         context_ptr->coded_sb_count   = 0;
         segments_ptr = pcs_ptr->enc_dec_segment_ctrl[context_ptr->tile_group_index];
@@ -4013,10 +4027,56 @@ void *mode_decision_kernel(void *input_ptr) {
                 scs_ptr,
                 segment_index);
 
-            if (pcs_ptr->parent_pcs_ptr->reference_picture_wrapper_ptr != NULL)
-                ((EbReferenceObject *)
-                     pcs_ptr->parent_pcs_ptr->reference_picture_wrapper_ptr->object_ptr)
-                    ->average_intensity = pcs_ptr->parent_pcs_ptr->average_intensity[0];
+            if (pcs_ptr->parent_pcs_ptr->reference_picture_wrapper_ptr != NULL) {
+
+
+                  /*    printf("\n %2i: %p <- %p\n", mytask, 
+                    
+
+                         pcs_ptr->parent_pcs_ptr->reference_picture_wrapper_ptr->object_ptr,
+                        pcs_ptr
+                        );*/
+
+                //if ( ((EbReferenceObject *)
+                //     pcs_ptr->parent_pcs_ptr->reference_picture_wrapper_ptr->object_ptr)
+                //        ->average_intensity !=
+                //    pcs_ptr->parent_pcs_ptr->average_intensity[0]) {
+                //  /*  printf("\n %4u <- %4u %p <- %p\n", 
+                //    
+                //        ((EbReferenceObject *)
+                //         pcs_ptr->parent_pcs_ptr->reference_picture_wrapper_ptr->object_ptr)
+                //        ->average_intensityXXX,
+                //    
+                //        pcs_ptr->parent_pcs_ptr->average_intensityZZZ[0],
+                //        pcs_ptr->parent_pcs_ptr,
+                //        pcs_ptr);*/
+
+
+                //      printf("\n %4u <- %4u\n", 
+                //    
+                //        ((EbReferenceObject *)
+                //         pcs_ptr->parent_pcs_ptr->reference_picture_wrapper_ptr->object_ptr)
+                //        ->average_intensity,
+                //    
+                //        pcs_ptr->parent_pcs_ptr->average_intensity[0]);
+
+                //} else {
+                //         printf("\n %4u == ==== %p <- %p\n", 
+                //        pcs_ptr->parent_pcs_ptr->average_intensity[0],
+                //        pcs_ptr->parent_pcs_ptr,
+                //        pcs_ptr);
+                //}
+
+                if (ENCDEC_TASKS_MDC_INPUT == enc_dec_tasks_ptr->input_type) {
+
+
+                    ((EbReferenceObject *)
+                         pcs_ptr->parent_pcs_ptr->reference_picture_wrapper_ptr->object_ptr)
+                        ->average_intensity = pcs_ptr->parent_pcs_ptr->average_intensity[0];
+                
+                    }
+                }
+
             for (y_sb_index = y_sb_start_index, sb_segment_index = sb_start_index;
                  sb_segment_index < sb_start_index + sb_segment_count;
                  ++y_sb_index) {
@@ -4344,6 +4404,12 @@ void *mode_decision_kernel(void *input_ptr) {
             // Post EncDec Results
             svt_post_full_object(enc_dec_results_wrapper_ptr);
         }
+
+
+          //printf("\n END   %2i: pcs_ptr: %p scs_ptr: %p tile_group_index: %u dctor: %p  input_type: %u enc_dec_segment_row: %i\n", mytask, 
+          //              pcs_ptr, scs_ptr, enc_dec_tasks_ptr->tile_group_index, enc_dec_tasks_ptr->dctor, enc_dec_tasks_ptr->input_type, 
+          //    enc_dec_tasks_ptr->enc_dec_segment_row);
+
         // Release Mode Decision Results
         svt_release_object(enc_dec_tasks_wrapper_ptr);
     }
