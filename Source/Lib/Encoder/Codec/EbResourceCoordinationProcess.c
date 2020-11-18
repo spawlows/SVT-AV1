@@ -791,6 +791,17 @@ void *resource_coordination_kernel(void *input_ptr) {
                     ->object_ptr,
                 context_ptr->scs_instance_array[instance_index]->scs_ptr);
 
+
+                    // Set the current SequenceControlSet
+        scs_ptr =
+            (SequenceControlSet *)context_ptr->sequence_control_set_active_array[instance_index]
+                ->object_ptr;
+
+        // Set the SCD Mode
+        scs_ptr->scd_mode =
+            scs_ptr->static_config.scene_change_detection == 0 ? SCD_MODE_0 : SCD_MODE_1;
+
+
             // Disable releaseFlag of new SequenceControlSet
             svt_object_release_disable(
                 context_ptr->sequence_control_set_active_array[instance_index]);
@@ -810,14 +821,7 @@ void *resource_coordination_kernel(void *input_ptr) {
         // in the PictureManager after receiving the reference and in PictureManager after receiving the feedback
         svt_object_inc_live_count(context_ptr->sequence_control_set_active_array[instance_index], 3);
 
-        // Set the current SequenceControlSet
-        scs_ptr =
-            (SequenceControlSet *)context_ptr->sequence_control_set_active_array[instance_index]
-                ->object_ptr;
 
-        // Set the SCD Mode
-        scs_ptr->scd_mode =
-            scs_ptr->static_config.scene_change_detection == 0 ? SCD_MODE_0 : SCD_MODE_1;
 
         // Init SB Params
         if (context_ptr->scs_instance_array[instance_index]->encode_context_ptr->initial_picture) {
