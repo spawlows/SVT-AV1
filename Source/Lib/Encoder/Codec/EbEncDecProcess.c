@@ -3953,13 +3953,13 @@ void *mode_decision_kernel(void *input_ptr) {
     segment_index = 0;
 
 
-    static int taskID = 0;
-    taskID++;
-    taskID++;
+    //static int taskID = 0;
+    //taskID++;
+    //taskID++;
 
-    int mytask = taskID;
+    //int mytask = taskID;
 
-    printf("TASK ID: %i\n", mytask);
+    //printf("TASK ID: %i\n", mytask);
     for (;;) {
         // Get Mode Decision Results
         EB_GET_FULL_OBJECT(context_ptr->mode_decision_input_fifo_ptr, &enc_dec_tasks_wrapper_ptr);
@@ -4327,7 +4327,7 @@ void *mode_decision_kernel(void *input_ptr) {
                      /*   printf("\n ENCDEC   %2i: pcs_ptr: %p scs_ptr: %p tile_group_index: %u dctor: %p  input_type: %u input_type2: %i enc_dec_segment_row: %i\n", mytask, 
                         pcs_ptr, scs_ptr, enc_dec_tasks_ptr->tile_group_index, enc_dec_tasks_ptr->dctor, enc_dec_tasks_ptr->input_type,input_type, 
               enc_dec_tasks_ptr->enc_dec_segment_row);*/
-                         if (! (ENCDEC_TASKS_ENCDEC_INPUT == input_type && enc_dec_tasks_ptr->enc_dec_segment_row == 0)) {
+                     //    if (! (ENCDEC_TASKS_ENCDEC_INPUT == input_type && enc_dec_tasks_ptr->enc_dec_segment_row == 0)) {
                             av1_encode_decode(scs_ptr,
                                               pcs_ptr,
                                               sb_ptr,
@@ -4335,9 +4335,9 @@ void *mode_decision_kernel(void *input_ptr) {
                                               sb_origin_x,
                                               sb_origin_y,
                                               context_ptr);
-                         } else {
+                        /* } else {
                              printf("REDUCE AAAAAAAAAAAAAAAAAAAAAAA\n");
-                         }
+                         }*/
                     }
 #endif
 
