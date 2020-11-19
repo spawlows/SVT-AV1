@@ -1141,7 +1141,6 @@ void process_output_stream_buffer(EncChannel* channel, EncApp* enc_app,
     uint64_t finish_s_time = 0;
     uint64_t finish_u_time = 0;
     uint8_t  is_alt_ref    = 1;
-    uint32_t flags;
 
     if (channel->exit_cond_output != APP_ExitConditionNone)
         return;
@@ -1157,11 +1156,11 @@ void process_output_stream_buffer(EncChannel* channel, EncApp* enc_app,
 
         if (stream_status == EB_ErrorMax) {
             fprintf(stderr, "\n");
-            log_error_output(config->error_log_file, flags);
+            log_error_output(config->error_log_file, header_ptr->flags);
             channel->exit_cond_output = APP_ExitConditionError;
             return;
         } else if (stream_status != EB_NoErrorEmptyQueue) {
-            flags = header_ptr->flags;
+            uint32_t flags = header_ptr->flags;
             is_alt_ref        = (flags & EB_BUFFERFLAG_IS_ALT_REF);
             if (!(flags & EB_BUFFERFLAG_IS_ALT_REF))
                 ++(config->performance_context.frame_count);
