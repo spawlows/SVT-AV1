@@ -1154,7 +1154,6 @@ void process_output_stream_buffer(EncChannel* channel, EncApp* enc_app,
         // non-blocking call until all input frames are sent
         EbErrorType stream_status = svt_av1_enc_get_packet(
             component_handle, &header_ptr, pic_send_done);
-        flags = header_ptr->flags;
 
         if (stream_status == EB_ErrorMax) {
             fprintf(stderr, "\n");
@@ -1162,6 +1161,7 @@ void process_output_stream_buffer(EncChannel* channel, EncApp* enc_app,
             channel->exit_cond_output = APP_ExitConditionError;
             return;
         } else if (stream_status != EB_NoErrorEmptyQueue) {
+            flags = header_ptr->flags;
             is_alt_ref        = (flags & EB_BUFFERFLAG_IS_ALT_REF);
             if (!(flags & EB_BUFFERFLAG_IS_ALT_REF))
                 ++(config->performance_context.frame_count);
