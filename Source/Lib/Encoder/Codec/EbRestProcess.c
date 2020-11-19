@@ -596,22 +596,6 @@ void *rest_kernel(void *input_ptr) {
                 pad_ref_and_set_flags(pcs_ptr, scs_ptr);
             if (scs_ptr->static_config.recon_enabled) { recon_output(pcs_ptr, scs_ptr); }
 
-            if (pcs_ptr->parent_pcs_ptr->is_used_as_reference_flag) {
-                // Get Empty PicMgr Results
-                svt_get_empty_object(context_ptr->picture_demux_fifo_ptr,
-                                     &picture_demux_results_wrapper_ptr);
-
-                picture_demux_results_rtr =
-                    (PictureDemuxResults *)picture_demux_results_wrapper_ptr->object_ptr;
-                picture_demux_results_rtr->reference_picture_wrapper_ptr =
-                    pcs_ptr->parent_pcs_ptr->reference_picture_wrapper_ptr;
-                picture_demux_results_rtr->scs_wrapper_ptr = pcs_ptr->scs_wrapper_ptr;
-                picture_demux_results_rtr->picture_number  = pcs_ptr->picture_number;
-                picture_demux_results_rtr->picture_type    = EB_PIC_REFERENCE;
-
-                // Post Reference Picture
-                svt_post_full_object(picture_demux_results_wrapper_ptr);
-            }
             //Jing: TODO
             //Consider to add parallelism here, sending line by line, not waiting for a full frame
             int sb_size_log2 = scs_ptr->seq_header.sb_size_log2;
@@ -642,6 +626,23 @@ void *rest_kernel(void *input_ptr) {
             }
         }
         svt_release_mutex(pcs_ptr->rest_search_mutex);
+
+        if (pcs_ptr->parent_pcs_ptr->is_used_as_reference_flag) {
+            // Get Empty PicMgr Results
+            svt_get_empty_object(context_ptr->picture_demux_fifo_ptr,
+                                    &picture_demux_results_wrapper_ptr);
+
+            picture_demux_results_rtr =
+                (PictureDemuxResults *)picture_demux_results_wrapper_ptr->object_ptr;
+            picture_demux_results_rtr->reference_picture_wrapper_ptr =
+                pcs_ptr->parent_pcs_ptr->reference_picture_wrapper_ptr;
+            picture_demux_results_rtr->scs_wrapper_ptr = pcs_ptr->scs_wrapper_ptr;
+            picture_demux_results_rtr->picture_number  = pcs_ptr->picture_number;
+            picture_demux_results_rtr->picture_type    = EB_PIC_REFERENCE;
+
+            // Post Reference Picture
+            svt_post_full_object(picture_demux_results_wrapper_ptr);
+        }
 
         // Release input Results
         svt_release_object(cdef_results_wrapper_ptr);
