@@ -784,6 +784,8 @@ void lib_svt_encoder_send_error_exit(
 static void svt_enc_handle_stop_threads(EbEncHandle *enc_handle_ptr)
 {
     SequenceControlSet*  control_set_ptr = enc_handle_ptr->scs_instance_array[0]->scs_ptr;
+
+return ;
     // Resource Coordination
     EB_DESTROY_THREAD(enc_handle_ptr->resource_coordination_thread_handle);
     EB_DESTROY_THREAD_ARRAY(enc_handle_ptr->picture_analysis_thread_handle_array,control_set_ptr->picture_analysis_process_init_count);

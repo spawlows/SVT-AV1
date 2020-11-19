@@ -6,13 +6,11 @@
 race:svt_memcpy_small
 race:svt_memcpy_sse
 race:mode_decision_kernel
+
+
 race:picture_decision_kernel
-race:calculate_input_average_intensity
-race:compute_luma_sad_between_center_and_target_frame
-race:compute_block_mean_compute_variance
 race:picture_manager_kernel
 race:packetization_kernel
 race:signal_derivation_pre_analysis_oq
-race:compute_chroma_block_mean
 
 #End of file
