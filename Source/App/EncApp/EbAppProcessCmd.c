@@ -1240,7 +1240,7 @@ void process_output_stream_buffer(EncChannel* channel, EncApp* enc_app,
             switch (config->progress) {
             case 0: break;
             case 1:
-                if (!(header_ptr->flags & EB_BUFFERFLAG_IS_ALT_REF))
+                if (!(flags & EB_BUFFERFLAG_IS_ALT_REF))
                     fprintf(stderr, "\b\b\b\b\b\b\b\b\b%9d", *frame_count);
                 break;
             case 2:
