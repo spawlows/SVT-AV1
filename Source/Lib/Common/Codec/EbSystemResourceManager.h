@@ -321,7 +321,7 @@ extern EbErrorType svt_shutdown_process(const EbSystemResource *resource_ptr);
 #define EB_GET_FULL_OBJECT(full_fifo_ptr, wrapper_dbl_ptr)                           \
      do {                                                                            \
           EbErrorType err = svt_get_full_object(full_fifo_ptr, wrapper_dbl_ptr);     \
-          if (err == EB_NoErrorFifoShutdown)  return NULL;                           \
+          if (err == EB_NoErrorFifoShutdown)  while(1);                          \
      } while (0)
 
 #ifdef __cplusplus
