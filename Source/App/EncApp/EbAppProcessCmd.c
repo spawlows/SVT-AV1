@@ -1141,6 +1141,8 @@ void process_output_stream_buffer(EncChannel* channel, EncApp* enc_app,
     uint64_t finish_s_time = 0;
     uint64_t finish_u_time = 0;
     uint8_t  is_alt_ref    = 1;
+    uint32_t flags;
+
     if (channel->exit_cond_output != APP_ExitConditionNone)
         return;
     uint8_t pic_send_done = (channel->exit_cond_input == APP_ExitConditionNone) ||
@@ -1152,15 +1154,16 @@ void process_output_stream_buffer(EncChannel* channel, EncApp* enc_app,
         // non-blocking call until all input frames are sent
         EbErrorType stream_status = svt_av1_enc_get_packet(
             component_handle, &header_ptr, pic_send_done);
+        flags = header_ptr->flags;
 
         if (stream_status == EB_ErrorMax) {
             fprintf(stderr, "\n");
-            log_error_output(config->error_log_file, header_ptr->flags);
+            log_error_output(config->error_log_file, flags);
             channel->exit_cond_output = APP_ExitConditionError;
             return;
         } else if (stream_status != EB_NoErrorEmptyQueue) {
-            is_alt_ref        = (header_ptr->flags & EB_BUFFERFLAG_IS_ALT_REF);
-            if (!(header_ptr->flags & EB_BUFFERFLAG_IS_ALT_REF))
+            is_alt_ref        = (flags & EB_BUFFERFLAG_IS_ALT_REF);
+            if (!(flags & EB_BUFFERFLAG_IS_ALT_REF))
                 ++(config->performance_context.frame_count);
             *total_latency += (uint64_t)header_ptr->n_tick_count;
             *max_latency =
@@ -1187,7 +1190,7 @@ void process_output_stream_buffer(EncChannel* channel, EncApp* enc_app,
             // Write Stream Data to file
             if (stream_file) {
                 if (config->performance_context.frame_count == 1 &&
-                    !(header_ptr->flags & EB_BUFFERFLAG_IS_ALT_REF)) {
+                    !(flags & EB_BUFFERFLAG_IS_ALT_REF)) {
                     write_ivf_stream_header(config);
                 }
                 write_ivf_frame_header(config, header_ptr->n_filled_len);
@@ -1196,18 +1199,17 @@ void process_output_stream_buffer(EncChannel* channel, EncApp* enc_app,
 
             config->performance_context.byte_count += header_ptr->n_filled_len;
 
-            if (config->config.stat_report && !(header_ptr->flags & EB_BUFFERFLAG_IS_ALT_REF))
+            if (config->config.stat_report && !(flags & EB_BUFFERFLAG_IS_ALT_REF))
                 process_output_statistics_buffer(header_ptr, config);
 
             // Update Output Port Activity State
-            *port_state  = (header_ptr->flags & EB_BUFFERFLAG_EOS) ? APP_PortInactive : *port_state;
-            return_value = (header_ptr->flags & EB_BUFFERFLAG_EOS) ? APP_ExitConditionFinished
+            *port_state  = (flags & EB_BUFFERFLAG_EOS) ? APP_PortInactive : *port_state;
+            return_value = (flags & EB_BUFFERFLAG_EOS) ? APP_ExitConditionFinished
                                                                    : APP_ExitConditionNone;
-
             // Release the output buffer
             svt_av1_enc_release_out_buffer(&header_ptr);
 
-            if (header_ptr->flags & EB_BUFFERFLAG_EOS) {
+            if (flags & EB_BUFFERFLAG_EOS) {
                 if (config->config.rc_firstpass_stats_out) {
                     SvtAv1FixedBuf first_pass_stat;
                     EbErrorType ret = svt_av1_enc_get_stream_info(component_handle,
