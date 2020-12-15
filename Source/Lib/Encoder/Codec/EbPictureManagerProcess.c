@@ -617,7 +617,7 @@ void *picture_manager_kernel(void *input_ptr) {
     PredictionStructureEntry *pred_position_ptr;
     InputQueueEntry *         input_entry_ptr;
     uint32_t                  input_queue_index;
-    uint64_t                  current_input_poc;
+    //uint64_t                  current_input_poc;
     ReferenceQueueEntry *     reference_entry_ptr;
     uint32_t                  reference_queue_index;
     uint64_t                  ref_poc;
@@ -884,7 +884,7 @@ void *picture_manager_kernel(void *input_ptr) {
                             reference_entry_ptr = search_ref_in_ref_queue(encode_context_ptr, ref_poc);
 
                             // Increment the current_input_poc is the case of POC rollover
-                            current_input_poc = encode_context_ptr->current_input_poc;
+                        //    current_input_poc = encode_context_ptr->current_input_poc;
                             //current_input_poc += ((current_input_poc < ref_poc) && (input_entry_ptr->list0_ptr->reference_list[ref_idx] > 0)) ?
                             //    (1 << entry_scs_ptr->bits_for_picture_order_count) :
                             //    0;
@@ -892,7 +892,7 @@ void *picture_manager_kernel(void *input_ptr) {
                             availability_flag =
                                 (availability_flag == EB_FALSE) ? EB_FALSE
                                                                 : // Don't update if already False
-                                    (ref_poc > current_input_poc)
+                                    (ref_poc > encode_context_ptr->current_input_poc)
                                         ? EB_FALSE
                                         : // The Reference has not been received as an Input Picture yet, then its availability is false
 /*AAA READ2*/                                        ( 
@@ -932,7 +932,7 @@ void *picture_manager_kernel(void *input_ptr) {
 
 
                                     // Increment the current_input_poc is the case of POC rollover
-                                    current_input_poc = encode_context_ptr->current_input_poc;
+                               //     current_input_poc = encode_context_ptr->current_input_poc;
                                     //current_input_poc += ((current_input_poc < ref_poc && input_entry_ptr->list1_ptr->reference_list[ref_idx] > 0)) ?
                                     //    (1 << entry_scs_ptr->bits_for_picture_order_count) :
                                     //    0;
@@ -942,7 +942,7 @@ void *picture_manager_kernel(void *input_ptr) {
                                         (availability_flag == EB_FALSE)
                                             ? EB_FALSE
                                             : // Don't update if already False
-                                            (ref_poc > current_input_poc)
+                                            (ref_poc > encode_context_ptr->current_input_poc)
                                                 ? EB_FALSE
                                                 : // The Reference has not been received as an Input Picture yet, then its availability is false
                                                 (
