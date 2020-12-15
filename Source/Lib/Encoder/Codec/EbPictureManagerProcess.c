@@ -889,53 +889,26 @@ void *picture_manager_kernel(void *input_ptr) {
                             //    (1 << entry_scs_ptr->bits_for_picture_order_count) :
                             //    0;
                             if (reference_entry_ptr != NULL) {
-                                if (availability_flag) {
-                                    if (ref_poc > current_input_poc) {
-                                        availability_flag = EB_FALSE;
-                                    } else {
-                                        if (
-                                            (scs_ptr->static_config.rate_control_mode &&
-                                             entry_pcs_ptr->slice_type != I_SLICE &&
-                                             entry_pcs_ptr->temporal_layer_index == 0 &&
-                                             !reference_entry_ptr->feedback_arrived) &&
-                                            !encode_context_ptr->terminating_sequence_flag_received
-                                            ) {
-                                            availability_flag = EB_FALSE;
-                                        } else {
-                                            availability_flag =
-                                                (entry_pcs_ptr->frame_end_cdf_update_mode &&
-                                                 !reference_entry_ptr->frame_context_updated)
-                                                ? EB_FALSE
-                                                : (reference_entry_ptr->reference_available)
-                                                    ? EB_TRUE
-                                                    : // The Reference has been completed
-                                                    EB_FALSE; // The Reference has not been completed
-                                        }
-                                    }
-                                }
-
-
-
-
-//                            availability_flag =
-//                                (availability_flag == EB_FALSE) ? EB_FALSE
-//                                                                : // Don't update if already False
-//                                    (ref_poc > current_input_poc)
-//                                        ? EB_FALSE
-//                                        : // The Reference has not been received as an Input Picture yet, then its availability is false
-///*AAA READ2*/                                        (!encode_context_ptr->terminating_sequence_flag_received && 
-//                                         (scs_ptr->static_config.rate_control_mode &&
-//                                          entry_pcs_ptr->slice_type != I_SLICE &&
-//                                          entry_pcs_ptr->temporal_layer_index == 0 &&
-//                                          !reference_entry_ptr->feedback_arrived))
-//                                            ? EB_FALSE
-//                                            : (entry_pcs_ptr->frame_end_cdf_update_mode &&
-//                                               !reference_entry_ptr->frame_context_updated)
-//                                                  ? EB_FALSE
-//                                                  : (reference_entry_ptr->reference_available)
-//                                                        ? EB_TRUE
-//                                                        : // The Reference has been completed
-//                                                        EB_FALSE; // The Reference has not been completed
+                            availability_flag =
+                                (availability_flag == EB_FALSE) ? EB_FALSE
+                                                                : // Don't update if already False
+                                    (ref_poc > current_input_poc)
+                                        ? EB_FALSE
+                                        : // The Reference has not been received as an Input Picture yet, then its availability is false
+/*AAA READ2*/                                        ( 
+                                         (scs_ptr->static_config.rate_control_mode &&
+                                          entry_pcs_ptr->slice_type != I_SLICE &&
+                                          entry_pcs_ptr->temporal_layer_index == 0 &&
+                                          !reference_entry_ptr->feedback_arrived) &&
+    !encode_context_ptr->terminating_sequence_flag_received)
+                                            ? EB_FALSE
+                                            : (entry_pcs_ptr->frame_end_cdf_update_mode &&
+                                               !reference_entry_ptr->frame_context_updated)
+                                                  ? EB_FALSE
+                                                  : (reference_entry_ptr->reference_available)
+                                                        ? EB_TRUE
+                                                        : // The Reference has been completed
+                                                        EB_FALSE; // The Reference has not been completed
                             }else{
                                 availability_flag = EB_FALSE;
                             }
