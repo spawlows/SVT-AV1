@@ -517,8 +517,8 @@ void SvtAv1E2ETestFramework::run_death_test() {
         std::string fn = std::get<0>(test_vector);
         std::cout << "Start test case " << enc_setting.to_string(fn)
                   << std::endl;
-        EXPECT_EXIT(
-            {
+        //EXPECT_EXIT(
+        //    {
                 init_test(test_vector);
                 run_encode_process();
                 post_process();
@@ -527,11 +527,11 @@ void SvtAv1E2ETestFramework::run_death_test() {
                     exit(-1);
                 else
                     exit(0);
-            },
+          /*  },
             ::testing::ExitedWithCode(0),
             ".*")
             << "Fatal Error on running test case " << enc_setting.to_string(fn)
-            << "\ncli command: " << enc_setting.to_cli(test_vector);
+            << "\ncli command: " << enc_setting.to_cli(test_vector);*/
     }
 }
 
