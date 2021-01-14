@@ -98,7 +98,7 @@ option(BUILD_SHARED_LIBS "Build shared libraries (DLLs)." ON)
 message(STATUS "BUILD_SHARED_LIBS: ${BUILD_SHARED_LIBS}")
 
 option(BUILD_TESTING "Build SvtAv1UnitTests, SvtAv1ApiTests, and SvtAv1E2ETests unit tests")
-option(COVERAGE "Generate coverage report")
+option(COVERAGE "Generate coverage report" ON)
 option(BUILD_APPS "Build Enc and Dec Apps" ON)
 option(BUILD_ENC "Build Encoder lib and app" ON)
 option(BUILD_DEC "Build Decoder lib and app" ON)
