@@ -127,9 +127,18 @@ static AOM_FORCE_INLINE int32_t xx_mask_and_hadd(__m256i vsum, int i) {
     return _mm_extract_epi32(v128a, 0);
 }
 
-static AOM_FORCE_INLINE __m256 exp_256_ps(__m256 _x) {
+static AOM_FORCE_INLINE __m256 exp_256_ps_old(__m256 _x) {
     float buff[8];
     _mm256_storeu_ps(buff, _x);
+
+    //static float min = 10;
+    //static float max = -10;
+    //if (buff[0] < min)
+    //    min = buff[0];
+    //if (buff[0] > max)
+    //    max = buff[0];
+
+  //  printf("%f - %f exp: %f:%f\n", min, max, buff[0], expf(buff[0]));
 
     buff[0] = expf(buff[0]);
     buff[1] = expf(buff[1]);
@@ -142,6 +151,56 @@ static AOM_FORCE_INLINE __m256 exp_256_ps(__m256 _x) {
 
     __m256 res = _mm256_loadu_ps(buff);
     return res;
+}
+
+static AOM_FORCE_INLINE __m256 exp_256_ps(__m256 _x) {
+
+    __m256 t, f, p, r;
+    __m256i i, j;
+
+    const __m256 l2e = _mm256_set1_ps (1.442695041f); /* log2(e) */
+    const __m256 l2h = _mm256_set1_ps (-6.93145752e-1f); /* -log(2)_hi */
+    const __m256 l2l = _mm256_set1_ps (-1.42860677e-6f); /* -log(2)_lo */
+    /* coefficients for core approximation to exp() in [-log(2)/2, log(2)/2] */
+                const __m256 c0 =  _mm256_set1_ps (0.008301110f);
+                const __m256 c1 =  _mm256_set1_ps (0.041906696f);
+                const __m256 c2 =  _mm256_set1_ps (0.166674897f);
+                const __m256 c3 =  _mm256_set1_ps (0.499990642f);
+                const __m256 c4 =  _mm256_set1_ps (0.999999762f);
+                const __m256 c5 =  _mm256_set1_ps (1.000000000f);
+
+    /* exp(x) = 2^i * e^f; i = rint (log2(e) * x), f = x - log(2) * i */
+    t = _mm256_mul_ps (_x, l2e);      /* t = log2(e) * x */
+    r = _mm256_round_ps (t, _MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC); /* r = rint (t) */
+
+    p = _mm256_mul_ps (r, l2h);      /* log(2)_hi * r */
+    f = _mm256_add_ps (_x, p);        /* x - log(2)_hi * r */
+    p = _mm256_mul_ps (r, l2l);      /* log(2)_lo * r */
+    f = _mm256_add_ps (f, p);        /* f = x - log(2)_hi * r - log(2)_lo * r */
+
+    i = _mm256_cvtps_epi32(t);       /* i = (int)rint(t) */
+
+    /* p ~= exp (f), -log(2)/2 <= f <= log(2)/2 */
+    p = c0;                          /* c0 */
+
+    p = _mm256_mul_ps (p, f);        /* c0*f */
+    p = _mm256_add_ps (p, c1);       /* c0*f+c1 */
+    p = _mm256_mul_ps (p, f);        /* (c0*f+c1)*f */
+    p = _mm256_add_ps (p, c2);       /* (c0*f+c1)*f+c2 */
+    p = _mm256_mul_ps (p, f);        /* ((c0*f+c1)*f+c2)*f */
+    p = _mm256_add_ps (p, c3);       /* ((c0*f+c1)*f+c2)*f+c3 */
+    p = _mm256_mul_ps (p, f);        /* (((c0*f+c1)*f+c2)*f+c3)*f */
+   p = _mm256_add_ps (p, c4);       /* (((c0*f+c1)*f+c2)*f+c3)*f+c4 ~= exp(f) */
+    p = _mm256_mul_ps (p, f);        /* (((c0*f+c1)*f+c2)*f+c3)*f */
+    p = _mm256_add_ps (p, c5);       /* (((c0*f+c1)*f+c2)*f+c3)*f+c4 ~= exp(f) */
+
+    /* exp(x) = 2^i * p */
+    j = _mm256_slli_epi32 (i, 23); /* i << 23 */
+    r = _mm256_castsi256_ps (_mm256_add_epi32 (j, _mm256_castps_si256 (p))); /* r = p * 2^i */
+
+    return r;
+
+
 }
 
 static void apply_temporal_filter_planewise(struct MeContext *context_ptr, const uint8_t *frame1,
@@ -322,6 +381,26 @@ static void apply_temporal_filter_planewise(struct MeContext *context_ptr, const
             ** Semi-lossless optimization:
             **     Write SIMD friendly approximating algorithm for exp, this will require changes in "C" kernel too
             */
+
+            //static int first=1;
+            //if (first) {
+            //    first = 0;
+            //    
+            //    for (int i = 0; i < 100; ++i) {
+            //        float  val = -1.0f + ((float)i)*1.0f/100.0f;
+            //        __m256 xx = _mm256_set_ps(val,val,val,val,val,val,val,val);
+            //        xx = exp_256_ps(xx);
+            //            float buff[8];
+            //        _mm256_storeu_ps(buff, xx);
+
+            //        printf("%i;%f;%f", i, val, buff[0]);
+
+            //    }
+            //   // printf("%i;%f;%f", i, val, buff[0]);
+
+            //}
+
+
             scaled_diff_ps = exp_256_ps(scaled_diff_ps);
             scaled_diff_ps = _mm256_mul_ps(scaled_diff_ps, tf_weight_scale);
 
@@ -682,6 +761,39 @@ static void apply_temporal_filter_planewise_hbd(
             **     Write SIMD friendly approximating algorithm for exp, this will require changes in "C" kernel too
             */
             scaled_diff_ps = exp_256_ps(scaled_diff_ps);
+
+
+            //static int first=1;
+            //if (first) {
+            //    first = 0;
+            //    
+            //    for (int i = 0; i < 200; ++i) {
+            //        float  val = -7.0f + ((float)i)*7.0f/100.0f;
+            //        float  old;
+
+
+            //        {
+            //            
+            //        __m256 xx = _mm256_set_ps(val,val,val,val,val,val,val,val);
+            //        xx = exp_256_ps_old(xx);
+            //            float buff[8];
+            //        _mm256_storeu_ps(buff, xx);
+            //            old = buff[0];
+
+            //        }
+
+            //        __m256 xx = _mm256_set_ps(val,val,val,val,val,val,val,val);
+            //        xx = exp_256_ps(xx);
+            //            float buff[8];
+            //        _mm256_storeu_ps(buff, xx);
+
+            //        printf("%i;%f;%f;%f\n", i, val, old, buff[0]);
+
+            //    }
+            //   // printf("%i;%f;%f", i, val, buff[0]);
+
+            //}
+
             scaled_diff_ps = _mm256_mul_ps(scaled_diff_ps, tf_weight_scale);
 
             __m256i adjusted_weight1      = _mm256_cvttps_epi32(scaled_diff_ps);
